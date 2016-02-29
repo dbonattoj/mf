@@ -1,0 +1,20 @@
+#ifndef MF_UTIL_H_
+#define MF_UTIL_H_
+
+#include <cstddef>
+#include <cassert>
+#include <cstdint>
+
+namespace mf {
+
+template<typename T>
+T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept {
+	assert(diff % alignof(T) == 0);
+	std::uintptr_t raw_ptr = reinterpret_cast<std::uintptr_t>(ptr);
+	raw_ptr += diff;
+	return reinterpret_cast<T*>(raw_ptr);
+}
+
+}
+
+#endif
