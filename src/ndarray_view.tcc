@@ -31,9 +31,8 @@ namespace detail {
 template<std::size_t Dim, typename T>
 constexpr std::size_t ndarray_view<Dim, T>::dimension;
 
-
 template<std::size_t Dim, typename T>
-auto ndarray_view<Dim, T>::row_major_strides(const shape_type& shape) -> strides_type {
+auto ndarray_view<Dim, T>::default_strides(const shape_type& shape) -> strides_type {
 	strides_type strides;
 	strides[Dim - 1] = sizeof(T);
 	for(std::ptrdiff_t i = Dim - 1; i > 0; --i)
@@ -43,46 +42,20 @@ auto ndarray_view<Dim, T>::row_major_strides(const shape_type& shape) -> strides
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_view<Dim, T>::column_major_strides(const shape_type& shape) -> strides_type {
-	strides_type strides;
-	strides[0] = sizeof(T);
-	for(std::ptrdiff_t i = 0; i < Dim - 1; ++i)
-		strides[i + 1] = strides[i] * shape[i];
-	return strides;
-}
-
-
-template<std::size_t Dim, typename T>
-ndarray_view<Dim, T>::ndarray_view(pointer start, const shape_type& shape, ndarray_order order) :
-	ndarray_view(
-		start,
-		shape,
-		order,
-		(order == ndarray_order::row_major) ? row_major_strides(shape) : column_major_strides(shape)
-	) { }
+ndarray_view<Dim, T>::ndarray_view(pointer start, const shape_type& shape) :
+	ndarray_view(start, shape, default_strides(shape)) { }
 
 
 
 template<std::size_t Dim, typename T>
-ndarray_view<Dim, T>::ndarray_view(pointer start, const shape_type& shape, ndarray_order order, const strides_type& strides) :
-	start_(start), shape_(shape), strides_(strides), order_(order)
+ndarray_view<Dim, T>::ndarray_view(pointer start, const shape_type& shape, const strides_type& strides) :
+	start_(start), shape_(shape), strides_(strides)
 {
 	std::ptrdiff_t i;
-	
-	if(order_ == ndarray_order::row_major) {
-		contiguous_length_ = shape_.back();	
-		for(i = Dim - 1; i > 0; i--) {
-			if(strides_[i - 1] == shape_[i] * strides_[i]) contiguous_length_ *= shape_[i - 1];
-			else break;
-		}
-	
-	} else {
-		contiguous_length_ = shape_.front();	
-		for(i = 0; i < Dim - 1; i++) {
-			if(strides_[i + 1] == shape_[i] * strides_[i]) contiguous_length_ *= shape_[i + 1];
-			else break;
-		}
-	
+	contiguous_length_ = shape_.back();	
+	for(i = Dim - 1; i > 0; i--) {
+		if(strides_[i - 1] == shape_[i] * strides_[i]) contiguous_length_ *= shape_[i - 1];
+		else break;
 	}
 }
 
@@ -100,39 +73,26 @@ template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::index_to_coordinates(const index_type& index) const -> coordinates_type {
 	coordinates_type coord;
 	index_type remainder = index;
-	std::size_t factor = shape_.product();
-	
-	auto iteration = [&](std::ptrdiff_t i) {
-		factor /= shape_[i];
+	std::size_t factor = shape_.tail().product();
+	for(std::ptrdiff_t i = 0; i < Dim - 1; ++i) {
 		auto div = std::div(remainder, factor);
 		coord[i] = div.quot;
 		remainder = div.rem;
-	};
-	
-	if(order_ == ndarray_order::row_major)
-		for(std::ptrdiff_t i = 0; i < Dim; ++i) iteration(i);
-	else
-		for(std::ptrdiff_t i = Dim - 1; i >= 0; --i) iteration(i);
-	
+		factor /= shape_[i + 1];
+	}
+	coord.back() = remainder;
 	return coord;
 }
 
 
 template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::coordinates_to_index(const coordinates_type& coord) const -> index_type {
-	std::ptrdiff_t index = 0;
-	std::ptrdiff_t factor = 1;
-	
-	auto iteration = [&](std::ptrdiff_t i) {
+	std::ptrdiff_t index = coord.back();
+	std::ptrdiff_t factor = shape_[Dim - 1];
+	for(std::ptrdiff_t i = Dim - 2; i >= 0; --i) {
 		index += factor * coord[i];
 		factor *= shape_[i];
-	};
-	
-	if(order_ == ndarray_order::row_major)
-		for(std::ptrdiff_t i = Dim - 1; i >= 0; --i) iteration(i);
-	else
-		for(std::ptrdiff_t i = 0; i < Dim; ++i) iteration(i);
-
+	}
 	return index;
 }
 
@@ -162,10 +122,9 @@ inline auto ndarray_view<Dim, T>::begin() const -> iterator {
 
 template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::end() const -> iterator {
-	std::ptrdiff_t first_coord = (order_ == ndarray_order::row_major) ? 0 : (Dim - 1);
-	index_type end_index = shape_.product();
-	pointer end_pointer = advance_raw_ptr(start_, shape_[first_coord] * strides_[first_coord]);
-	return iterator(*this, end_index, end_pointer);
+	index_type end_index = shape().product();
+	coordinates_type end_coord = index_to_coordinates(end_index);
+	return iterator(*this, end_index, coordinates_to_pointer(end_coord));
 }
 
 
@@ -195,7 +154,7 @@ auto ndarray_view<Dim, T>::section_(std::ptrdiff_t i, std::ptrdiff_t start, std:
 		new_start = advance_raw_ptr(new_start, -new_strides[i] * (new_shape[i] - 1));
 	}
 
-	return ndarray_view(new_start, new_shape, order_, new_strides);
+	return ndarray_view(new_start, new_shape, new_strides);
 }
 
 
@@ -213,7 +172,6 @@ auto ndarray_view<Dim, T>::slice(std::ptrdiff_t c, std::ptrdiff_t dimension) con
 	return ndarray_view<Dim - 1, T>(
 		advance_raw_ptr(start_, strides_[dimension] * fix_coordinate_(c, dimension)),
 		shape_.erase(dimension),
-		order_,
 		strides_.erase(dimension)
 	);
 }

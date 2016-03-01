@@ -27,13 +27,6 @@ namespace detail {
 	class ndarray_view_fcall;
 }
 
-
-enum class ndarray_order {
-	row_major,
-	column_major
-};
-
-
 template<std::size_t Dim, typename T>
 class ndarray_view {
 	static_assert(Dim >= 1, "ndarray_view dimension must be >= 1");
@@ -55,7 +48,6 @@ protected:
 	pointer start_;
 	shape_type shape_;
 	strides_type strides_;
-	ndarray_order order_;
 	
 	std::ptrdiff_t contiguous_length_;
 	
@@ -63,12 +55,13 @@ protected:
 	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dimension) const;
 			
 public:
-	static strides_type row_major_strides(const shape_type&);
-	static strides_type column_major_strides(const shape_type&);
+	static strides_type default_strides(const shape_type&);
 
-	ndarray_view(pointer start, const shape_type& shape, ndarray_order order, const strides_type& strides);
-	ndarray_view(pointer start, const shape_type& shape, ndarray_order order = ndarray_order::row_major);
-	ndarray_view(const ndarray_view&) = default;
+	ndarray_view(pointer start, const shape_type& shape, const strides_type& strides);
+	ndarray_view(pointer start, const shape_type& shape);
+	
+	ndarray_view(const ndarray_view<Dim, std::remove_const_t<T>>& arr) :
+		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
 	
 	ndarray_view& operator=(const ndarray_view&) = default;
 	
@@ -99,10 +92,10 @@ public:
 	iterator end() const;
 	
 	friend bool operator==(const ndarray_view& a, const ndarray_view& b) noexcept {
-		return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_) && (a.order_ == b.order_);
+		return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
 	}
 	friend bool operator!=(const ndarray_view& a, const ndarray_view& b) noexcept {
-		return (a.start_ != b.start_) || (a.shape_ != b.shape_) || (a.strides_ != b.strides_) || (a.order_ != b.order_);
+		return (a.start_ != b.start_) || (a.shape_ != b.shape_) || (a.strides_ != b.strides_);
 	}
 	
 	std::size_t size() const { return shape().product(); }

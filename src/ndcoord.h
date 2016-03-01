@@ -147,6 +147,16 @@ std::ostream& operator<<(std::ostream& str, const ndcoord<Dim, T>& coord) {
 }
 
 
+template<std::size_t Dim1, std::size_t Dim2, typename T>
+ndcoord<Dim1 + Dim2, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, const ndcoord<Dim2, T>& coord2) {
+	ndcoord<Dim1 + Dim2, T> coord;
+	auto it = coord.components.begin();
+	for(auto&& c : coord1.components) *(++it) = c;
+	for(auto&& c : coord2.components) *(++it) = c;
+	return coord;
+}
+
+
 template<std::size_t Dim>
 using ndsize = ndcoord<Dim, std::size_t>;
 
