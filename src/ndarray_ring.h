@@ -10,7 +10,6 @@ template<std::size_t Dim, typename T>
 class ndarray_ring {
 private:
 	ndarray<Dim + 1, T> array_;
-	
 
 public:
 	using write_function = void(const ndarray<Dim, T>&);

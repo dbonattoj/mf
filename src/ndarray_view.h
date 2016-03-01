@@ -72,7 +72,7 @@ public:
 	ndarray_view section(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const;
 	ndarray_view<Dim - 1, T> slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const;
 	
-	auto operator[](std::ptrdiff_t c) const {
+	decltype(auto) operator[](std::ptrdiff_t c) const {
 		return detail::get_subscript(*this, c);
 	}
 	

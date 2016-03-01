@@ -77,7 +77,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		ndarray_view<3, int> a2(raw.data(), shp, str);
 		REQUIRE(a2.strides() == str);
 		REQUIRE(a2.size() == 4*3*4);
-
+		
 		// comparison and assignment
 		ndarray_view<3, int> a3(raw.data() + 13, shp, str);
 		REQUIRE(a1 == a1);
@@ -94,6 +94,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		REQUIRE(a1 == a3);
 		REQUIRE_FALSE(a1 != a3);
 		REQUIRE_FALSE(a3 != a1);
+		
+		// copy construction
+		ndarray_view<3, int> a1copy = a1;
+		REQUIRE(a1copy == a1);
 		
 		// const and non-const
 		ndarray_view<3, const int> a1c = a1;
@@ -121,7 +125,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		//         24 25 26 27
 		//         28 29 2A 2B
 		//         2C 2D 2E 2F
-	
+			
 		SECTION("subscript") {
 			// subscript using [][][] and using at()
 			REQUIRE(arr3[0][0][0] == 0x00);
@@ -140,6 +144,12 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3.at({ -2, -3, -4 }) == 0x14);
 			REQUIRE(arr3[-1][1][0] == 0x24);		
 			REQUIRE(arr3.at({ -1, 1, 0 }) == 0x24);
+			
+			// modification
+			arr3[0][0][0] = 123;
+			REQUIRE(arr3[0][0][0] == 123);
+			arr3[-1][-1][-1] = 456;
+			REQUIRE(arr3[-1][-1][-1] == 456);
 		}
 		
 		SECTION("iterator") {
