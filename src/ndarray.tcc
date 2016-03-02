@@ -12,7 +12,12 @@ auto ndarray<Dim, T, Allocator>::strides_with_padding_(const shape_type& shape, 
 
 template<std::size_t Dim, typename T, typename Allocator>
 void ndarray<Dim, T, Allocator>::allocate_() {
-	std::size_t n = (this->shape_ + padding_).product();
+	std::size_t n = 1;
+	for(std::ptrdiff_t i = Dim - 1; i >= 0; --i) {
+		n += padding_[i];
+		n *= base::shape_[i];
+	}
+	
 	T* ptr = std::allocator_traits<Allocator>::allocate(allocator_, n);
 	this->start_ = ptr;
 	allocated_size_ = n;
@@ -21,7 +26,7 @@ void ndarray<Dim, T, Allocator>::allocate_() {
 
 template<std::size_t Dim, typename T, typename Allocator>
 void ndarray<Dim, T, Allocator>::deallocate_() {
-	std::allocator_traits<Allocator>::deallocate(allocator_, this->start_, allocated_size_);
+	std::allocator_traits<Allocator>::deallocate(allocator_, base::start_, allocated_size_);
 	this->start_ = nullptr;
 	allocated_size_ = 0;
 }
@@ -55,8 +60,8 @@ template<std::size_t Dim, typename T, typename Allocator>
 auto ndarray<Dim, T, Allocator>::operator=(const const_view_type& in) -> ndarray& {
 	if(in.shape().product() != base::shape().product()) {
 		deallocate_();
-		this->shape_ = in.shape();
-		this->strides_ = strides_with_padding_(this->shape_, padding_);
+		base::shape_ = in.shape();
+		base::strides_ = strides_with_padding_(base::shape_, padding_);
 		allocate_();
 	}
 	std::copy(in.begin(), in.end(), begin());

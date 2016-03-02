@@ -1,7 +1,6 @@
 #include <stdexcept>
 #include <cmath>
-
-#include <iostream>
+#include "util.h"
 
 namespace mf {
 
@@ -21,42 +20,38 @@ auto ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::
 	
 	std::size_t frame_padding = 0;
 	while( (duration * (frame_size + frame_padding)) % page_size != 0 ) ++frame_padding;
-	
+		
 	padding_type new_padding(0);
 	new_padding.front() = frame_padding;	
-	
-	std::cout << new_padding << std::endl;
-	
+		
 	return new_padding;
 }
 
 
 template<std::size_t Dim, typename T>
 auto ndarray_ring<Dim, T>::section_(std::ptrdiff_t start, std::size_t duration) -> section_view_type {
-	if(duration > this->shape_.front()) throw std::invalid_argument("ring section duration too large");
+	if(duration > base::shape_.front()) throw std::invalid_argument("ring section duration too large");
 	
-	auto new_start = this->strides_.front() * start;
-	auto new_shape = this->shape_;
+	auto new_start = advance_raw_ptr(base::start_, base::strides_.front() * start);
+	auto new_shape = base::shape_;
 	new_shape[0] = duration;
-	auto new_strides = this->strides_;
+	auto new_strides = base::strides_;
 	
 	return section_view_type(new_start, new_shape, new_strides);
 }
 
 
 template<std::size_t Dim, typename T>
-std::size_t ndarray_ring<Dim, T>::writable_duration() const noexcept {
-	if(full_) return 0;
-
-	if(read_position_ < write_position_) return write_position_ - read_position_;
-	else if(read_position_ > write_position_) return total_duration() - read_position_ + write_position_;
-	else return total_duration(); 
+std::size_t ndarray_ring<Dim, T>::readable_duration() const noexcept {
+	if(full_) return total_duration();
+	else if(read_position_ <= write_position_) return write_position_ - read_position_;
+	else return total_duration() - read_position_ + write_position_;
 }
 
 
 template<std::size_t Dim, typename T>
-std::size_t ndarray_ring<Dim, T>::readable_duration() const noexcept {
-	return total_duration() - writable_duration();
+std::size_t ndarray_ring<Dim, T>::writable_duration() const noexcept {
+	return total_duration() - readable_duration();
 }
 
 

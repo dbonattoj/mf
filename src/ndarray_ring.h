@@ -32,8 +32,8 @@ public:
 
 	ndarray_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
 	
-	std::size_t writable_duration() const noexcept;
 	std::size_t readable_duration() const noexcept;
+	std::size_t writable_duration() const noexcept;
 	
 	void write(std::size_t duration, const std::function<write_function>&);
 	void read(std::size_t duration, const std::function<read_function>&);

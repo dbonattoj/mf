@@ -1,6 +1,5 @@
 #include <stdexcept>
 #include <cstdlib>
-#include <iostream>
 
 namespace mf {
 

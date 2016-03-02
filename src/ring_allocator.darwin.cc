@@ -10,8 +10,6 @@
 #include <sys/mman.h>
 #include <stdio.h>
 
-#include <iostream>
-
 namespace mf {
 
 void* detail::ring_allocator_base::raw_allocate(std::size_t size) {
