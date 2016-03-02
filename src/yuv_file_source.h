@@ -13,9 +13,6 @@ class yuv_file_source : public node<2, ycbcr_color> {
 
 private:
 	std::ifstream file_;
-	std::size_t height_;
-	std::size_t width_;
-	int sampling;
 
 protected:
 	void process_frame_(const ndarray_view<2, ycbcr_color>&) override;

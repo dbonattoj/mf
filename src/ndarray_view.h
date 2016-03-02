@@ -27,6 +27,7 @@ namespace detail {
 	class ndarray_view_fcall;
 }
 
+
 template<std::size_t Dim, typename T>
 class ndarray_view {
 	static_assert(Dim >= 1, "ndarray_view dimension must be >= 1");

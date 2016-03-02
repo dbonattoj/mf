@@ -14,10 +14,11 @@
 		return cview().func(std::forward<Args>(args)...); \
 	}
 
+
 namespace mf {
 
 template<std::size_t Dim, typename T, typename Allocator = std::allocator<T>>
-class ndarray : private ndarray_view<Dim, T> {
+class ndarray : protected ndarray_view<Dim, T> {
 	using base = ndarray_view<Dim, T>;
 
 public:
@@ -28,6 +29,8 @@ public:
 	using coordinates_type = typename view_type::coordinates_type;
 	using shape_type = typename view_type::shape_type;
 	using strides_type = typename view_type::strides_type;
+
+	using padding_type = ndsize<Dim>;
 
 	using value_type = T;
 	using pointer = T*;
@@ -43,12 +46,21 @@ public:
 
 	constexpr static std::size_t dimension = Dim;
 
-private:
+protected:
 	Allocator allocator_;
-	std::size_t length_;
+	padding_type padding_;
+	std::size_t allocated_size_ = 0;
+
+	void allocate_();
+	void deallocate_();
+	
+	ndarray(const shape_type& shape, const padding_type& padding, const Allocator& alloc);
+
+	static strides_type strides_with_padding_(const shape_type& shape, const padding_type&);
 
 public:
-	explicit ndarray(const shape_type& shape, const Allocator& alloc = Allocator());
+	explicit ndarray(const shape_type& shape, const Allocator& allocator = Allocator()) :
+		ndarray(shape, padding_type(0), allocator) { }
 	explicit ndarray(const const_view_type&);
 	ndarray(const ndarray& arr) : ndarray(arr.cview()) { }
 	~ndarray();
@@ -68,6 +80,7 @@ public:
 	using base::size;
 	using base::shape;
 	using base::contiguous_length;
+	const padding_type& padding() const noexcept { return padding_; }
 	
 	MF_NDARRAY_FUNC_(start);
 	MF_NDARRAY_FUNC_(section);
@@ -82,13 +95,6 @@ public:
 	iterator end() { return base::begin(); }
 	const_iterator end() const { return base::begin(); }
 	const_iterator cend() const { return base::begin(); }
-	
-	raw_iterator raw_begin() noexcept { return start(); }
-	raw_const_iterator raw_begin() const noexcept { return start(); }
-	raw_const_iterator raw_cbegin() const noexcept { return start(); }
-	raw_iterator raw_end() noexcept { return start() + length_; }
-	raw_const_iterator raw_end() const noexcept { return start() + length_; }
-	raw_const_iterator raw_cend() const noexcept { return start() + length_; }
 };
 
 

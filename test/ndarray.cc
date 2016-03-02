@@ -72,7 +72,11 @@ TEST_CASE("ndarray", "[ndarray]") {
 		REQUIRE_FALSE(arr_vw[1][2][3] == 7890);
 	
 		// make from slice of arr_vw (--> different dimension)
-		auto arr2 = make_ndarray(arr_vw[2]);
-		
+		auto arr2 = make_ndarray(arr_vw[1]);
+		REQUIRE(arr2[2][3] == arr_vw[1][2][3]);
+		REQUIRE(arr2.shape() == arr_vw[1].shape());
+		arr2[2][3] = 1230;
+		REQUIRE(arr2[2][3] == 1230);
+		REQUIRE_FALSE(arr_vw[1][2][3] == 1230);
 	}
 }

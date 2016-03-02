@@ -7,11 +7,14 @@
 #include <initializer_list>
 #include <functional>
 #include <ostream>
+#include <type_traits>
 
 namespace mf {
 
-template<std::size_t Dim, typename T = std::ptrdiff_t>
+template<std::size_t Dim, typename T>
 struct ndcoord {
+	static_assert(std::is_arithmetic<T>::value, "ndcoord component type must be arithmetic");
+
 	std::array<T, Dim> components;
 	
 	template<typename It>
@@ -76,6 +79,12 @@ struct ndcoord {
 	friend ndcoord operator*(const ndcoord& a, const ndcoord& b) noexcept { return transform(a, b, std::multiplies<T>()); }
 	friend ndcoord operator/(const ndcoord& a, const ndcoord& b) noexcept { return transform(a, b, std::divides<T>()); }
 	
+	friend bool operator==(const ndcoord& a, const ndcoord& b) noexcept {
+		return a.components == b.components;
+	}
+	friend bool operator!=(const ndcoord& a, const ndcoord& b) noexcept {
+		return a.components != b.components;
+	}
 	
 	T product() const noexcept {
 		T prod = 1;
@@ -125,19 +134,6 @@ ndcoord<Dim, T> transform(const ndcoord<Dim, T>& a, const ndcoord<Dim, T>& b, Bi
 }
 
 
-
-template<std::size_t Dim, typename T>
-bool operator==(const ndcoord<Dim, T>& a, const ndcoord<Dim, T>& b) noexcept {
-	return a.components == b.components;
-}
-
-
-template<std::size_t Dim, typename T>
-bool operator!=(const ndcoord<Dim, T>& a, const ndcoord<Dim, T>& b) noexcept {
-	return a.components != b.components;
-}
-
-
 template<std::size_t Dim, typename T>
 std::ostream& operator<<(std::ostream& str, const ndcoord<Dim, T>& coord) {
 	str << '(';
@@ -147,12 +143,19 @@ std::ostream& operator<<(std::ostream& str, const ndcoord<Dim, T>& coord) {
 }
 
 
+template<typename T>
+std::ostream& operator<<(std::ostream& str, const ndcoord<0, T>& coord) {
+	return str << "()";
+}
+
+
 template<std::size_t Dim1, std::size_t Dim2, typename T>
 ndcoord<Dim1 + Dim2, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, const ndcoord<Dim2, T>& coord2) {
 	ndcoord<Dim1 + Dim2, T> coord;
+	if(Dim1 + Dim2 == 0) return coord;
 	auto it = coord.components.begin();
-	for(auto&& c : coord1.components) *(++it) = c;
-	for(auto&& c : coord2.components) *(++it) = c;
+	if(Dim1 > 0) for(auto&& c : coord1.components) *(it++) = c;
+	if(Dim2 > 0) for(auto&& c : coord2.components) *(it++) = c;
 	return coord;
 }
 
@@ -162,6 +165,24 @@ using ndsize = ndcoord<Dim, std::size_t>;
 
 template<std::size_t Dim>
 using ndptrdiff = ndcoord<Dim, std::ptrdiff_t>;
+
+
+template<typename T, typename... Components>
+auto make_ndcoord(Components... c) {
+	return ndcoord<sizeof...(Components), T>(c...);
+}
+
+template<typename... Components>
+auto make_ndsize(Components... c) {
+	return make_ndcoord<std::size_t>(c...);
+}
+
+template<typename... Components>
+auto make_ndptrdiff(Components... c) {
+	return make_ndcoord<std::ptrdiff_t>(c...);
+}
+
+
 
 }
 
