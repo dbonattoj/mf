@@ -101,6 +101,108 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		a1c.reset(a1);
 	}
 
+
+	SECTION("1dim") {
+		ndarray_view<1, int> arr1(raw.data(), ndsize<1>(len));
+
+		SECTION("section") {
+			// interval [2, 10[, with steps 1,2,3
+			// testing sequence and shape (== number of elements)
+			REQUIRE(arr1(2, 10).shape().front() == 8);
+			REQUIRE(compare_sequence_(arr1(2, 10), { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 }));
+			REQUIRE(compare_sequence_(arr1(2, 10, 1), { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 }));
+			REQUIRE(arr1(2, 10, 2).shape().front() == 4);
+			REQUIRE(compare_sequence_(arr1(2, 10, 2), { 0x02, 0x04, 0x06, 0x08 }));
+			REQUIRE(arr1(2, 10, 3).shape().front() == 3);
+			REQUIRE(compare_sequence_(arr1(2, 10, 3), { 0x02, 0x05, 0x08 }));
+
+			// interval [2, 10[, with negative steps -1,-2,-3
+			REQUIRE(arr1(2, 10, -1).shape().front() == 8);
+			REQUIRE(compare_sequence_(arr1(2, 10, -1), { 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02 }));
+			REQUIRE(arr1(2, 10, -2).shape().front() == 4);
+			REQUIRE(compare_sequence_(arr1(2, 10, -2), { 0x08, 0x06, 0x04, 0x02 }));
+			REQUIRE(arr1(2, 10, -3).shape().front() == 3);
+			REQUIRE(compare_sequence_(arr1(2, 10, -3), { 0x08, 0x05, 0x02 }));
+
+			// interval [2, 3[ = one element
+			REQUIRE(compare_sequence_(arr1(2, 3), { 0x02 }));
+			REQUIRE(arr1(2, 3).shape().front() == 1);
+			REQUIRE(compare_sequence_(arr1(2, 3, 5), { 0x02 }));
+			REQUIRE(arr1(2, 3, 5).shape().front() == 1);
+
+			// too long step = one element
+			ndarray_view<1, int> sec = arr1(0, 4);
+			REQUIRE(compare_sequence_(sec(0, 4, 100), { 0x00 }));
+
+			// negative start and end
+			REQUIRE(compare_sequence_(sec(0, 4, 1), { 0x00, 0x01, 0x02, 0x03 }));
+			REQUIRE(compare_sequence_(sec(0, -1, 1), { 0x00, 0x01, 0x02 }));
+			REQUIRE(compare_sequence_(sec(0, -2, 1), { 0x00, 0x01 }));
+			REQUIRE(compare_sequence_(sec(-3, 4, 1), { 0x01, 0x02, 0x03 }));
+			REQUIRE(compare_sequence_(sec(-3, -1, 1), { 0x01, 0x02 }));
+			REQUIRE(compare_sequence_(sec(-3, -2, 1), { 0x01 }));
+		
+			// start/end out of bounds
+			REQUIRE_THROWS(sec(10, 4, 1));
+			REQUIRE_THROWS(sec(-10, 4, 1));
+			REQUIRE_THROWS(sec(0, 10, 1));
+			REQUIRE_THROWS(sec(0, -10, 1));
+		
+			// start/end/step invalid
+			REQUIRE_THROWS(sec(2, 2, 1));
+			REQUIRE_THROWS(sec(3, 2, 1));
+			REQUIRE_THROWS(sec(0, 4, 0));
+		
+			// whole, and single value
+			REQUIRE(compare_sequence_(arr1(), raw));
+			REQUIRE(compare_sequence_(arr1(1), { 0x01 }));
+		}
+		
+		SECTION("deep assign, compare") {
+			// compare to self
+			REQUIRE(arr1 == arr1);
+			REQUIRE(arr1.compare(arr1));
+			REQUIRE_FALSE(arr1 != arr1);
+			
+			// different data with same values
+			std::vector<int> raw_(len);
+			for(int i = 0; i < len; ++i) raw_[i] = i;
+			REQUIRE(raw_ == raw);
+			ndarray_view<1, int> arr1_(raw_.data(), ndsize<1>(len));
+			REQUIRE_FALSE(same(arr1, arr1_));
+			REQUIRE_FALSE(same(arr1_, arr1));
+			
+			// comparing values
+			REQUIRE(arr1 == arr1_);
+			REQUIRE(arr1_ == arr1);
+			REQUIRE(arr1.compare(arr1_));
+			REQUIRE(arr1_.compare(arr1));
+			REQUIRE_FALSE(arr1 != arr1_);
+			REQUIRE_FALSE(arr1_ != arr1);
+			
+			// altering data
+			raw[5] = 123;
+			REQUIRE_FALSE(arr1 == arr1_);
+			REQUIRE_FALSE(arr1_ == arr1);
+			REQUIRE_FALSE(arr1.compare(arr1_));
+			REQUIRE_FALSE(arr1_.compare(arr1));
+			REQUIRE(arr1 != arr1_);
+			REQUIRE(arr1_ != arr1);
+			
+			// assign values
+			arr1_ = arr1;
+			REQUIRE(raw_ == raw);
+			REQUIRE(arr1 == arr1_);
+			
+			// assign section
+			arr1(1, 4) = arr1(11, 14);
+			REQUIRE(arr1(1, 4) == arr1(11, 14));
+			REQUIRE(compare_sequence_(arr1(0, 15),
+			{ 0, 11, 12, 13, 4, 123, 6, 7, 8, 9, 10, 11, 12, 13, 14 })); 
+		}
+	}
+
+
 	SECTION("3dim") {
 		ndarray_view<3, int> arr3(raw.data(), ndsize<3>(3, 4, 4));
 		ndarray_view<1, int> row = arr3[0][0];	
@@ -119,8 +221,8 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		//         20 21 22 23
 		//         24 25 26 27
 		//         28 29 2A 2B
-		//         2C 2D 2E 2F
-			
+		//         2C 2D 2E 2F	
+
 		SECTION("subscript") {
 			// subscript using [][][] and using at()
 			REQUIRE(arr3[0][0][0] == 0x00);
@@ -145,6 +247,21 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3[0][0][0] == 123);
 			arr3[-1][-1][-1] = 456;
 			REQUIRE(arr3[-1][-1][-1] == 456);
+		}
+		
+		SECTION("deep assign, compare") {
+			REQUIRE(arr3[0] != arr3[1]);
+			arr3[0] = arr3[1];
+			REQUIRE(arr3[0] == arr3[1]);
+			REQUIRE(arr3[0] != arr3[2]);
+			arr3[0][1] = arr3[2][2];
+			REQUIRE(arr3[0][1] == arr3[2][2]);
+			REQUIRE(arr3[0] != arr3[1]);
+			arr3[0][1] = arr3[1][1];
+			REQUIRE(arr3[0] == arr3[1]);
+			arr3[0][1][2] = 123;
+			REQUIRE(arr3[0][0] == arr3[1][0]);
+			REQUIRE(arr3[0] != arr3[1]);
 		}
 		
 		SECTION("iterator") {
@@ -522,65 +639,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3.slice(2, 2)[1][2] == 0x1A);
 		}
 	}
-	
-	
-	SECTION("1dim") {
-		ndarray_view<1, int> arr1(raw.data(), ndsize<1>(len));
-
-		SECTION("section") {
-			// interval [2, 10[, with steps 1,2,3
-			// testing sequence and shape (== number of elements)
-			REQUIRE(arr1(2, 10).shape().front() == 8);
-			REQUIRE(compare_sequence_(arr1(2, 10), { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 }));
-			REQUIRE(compare_sequence_(arr1(2, 10, 1), { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 }));
-			REQUIRE(arr1(2, 10, 2).shape().front() == 4);
-			REQUIRE(compare_sequence_(arr1(2, 10, 2), { 0x02, 0x04, 0x06, 0x08 }));
-			REQUIRE(arr1(2, 10, 3).shape().front() == 3);
-			REQUIRE(compare_sequence_(arr1(2, 10, 3), { 0x02, 0x05, 0x08 }));
-
-			// interval [2, 10[, with negative steps -1,-2,-3
-			REQUIRE(arr1(2, 10, -1).shape().front() == 8);
-			REQUIRE(compare_sequence_(arr1(2, 10, -1), { 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02 }));
-			REQUIRE(arr1(2, 10, -2).shape().front() == 4);
-			REQUIRE(compare_sequence_(arr1(2, 10, -2), { 0x08, 0x06, 0x04, 0x02 }));
-			REQUIRE(arr1(2, 10, -3).shape().front() == 3);
-			REQUIRE(compare_sequence_(arr1(2, 10, -3), { 0x08, 0x05, 0x02 }));
-
-			// interval [2, 3[ = one element
-			REQUIRE(compare_sequence_(arr1(2, 3), { 0x02 }));
-			REQUIRE(arr1(2, 3).shape().front() == 1);
-			REQUIRE(compare_sequence_(arr1(2, 3, 5), { 0x02 }));
-			REQUIRE(arr1(2, 3, 5).shape().front() == 1);
-
-			// too long step = one element
-			ndarray_view<1, int> sec = arr1(0, 4);
-			REQUIRE(compare_sequence_(sec(0, 4, 100), { 0x00 }));
-
-			// negative start and end
-			REQUIRE(compare_sequence_(sec(0, 4, 1), { 0x00, 0x01, 0x02, 0x03 }));
-			REQUIRE(compare_sequence_(sec(0, -1, 1), { 0x00, 0x01, 0x02 }));
-			REQUIRE(compare_sequence_(sec(0, -2, 1), { 0x00, 0x01 }));
-			REQUIRE(compare_sequence_(sec(-3, 4, 1), { 0x01, 0x02, 0x03 }));
-			REQUIRE(compare_sequence_(sec(-3, -1, 1), { 0x01, 0x02 }));
-			REQUIRE(compare_sequence_(sec(-3, -2, 1), { 0x01 }));
-		
-			// start/end out of bounds
-			REQUIRE_THROWS(sec(10, 4, 1));
-			REQUIRE_THROWS(sec(-10, 4, 1));
-			REQUIRE_THROWS(sec(0, 10, 1));
-			REQUIRE_THROWS(sec(0, -10, 1));
-		
-			// start/end/step invalid
-			REQUIRE_THROWS(sec(2, 2, 1));
-			REQUIRE_THROWS(sec(3, 2, 1));
-			REQUIRE_THROWS(sec(0, 4, 0));
-		
-			// whole, and single value
-			REQUIRE(compare_sequence_(arr1(), raw));
-			REQUIRE(compare_sequence_(arr1(1), { 0x01 }));
-		}
-	}
-		
+			
 	
 	SECTION("objects") {
 		struct base {

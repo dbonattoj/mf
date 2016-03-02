@@ -7,7 +7,7 @@ namespace mf {
 
 template<typename Array>
 class ndarray_iterator :
-std::iterator<std::random_access_iterator_tag, typename Array::value_type> {
+public std::iterator<std::random_access_iterator_tag, typename Array::value_type> {
 	using base = std::iterator<std::random_access_iterator_tag, typename Array::value_type>;
 
 public:

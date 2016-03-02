@@ -67,7 +67,6 @@ public:
 	ndarray_view& operator=(const ndarray_view& other) { assign(other); return *this; }
 
 	void reset(const ndarray_view&) noexcept;
-	void assign(const ndarray_view&) const;
 	
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
@@ -95,10 +94,11 @@ public:
 	iterator begin() const;
 	iterator end() const;
 	
+	void assign(const ndarray_view&) const;
 	bool compare(const ndarray_view&) const;
 	
 	friend bool operator==(const ndarray_view& a, const ndarray_view& b) { return a.compare(b); }
-	friend bool operator!=(const ndarray_view& a, const ndarray_view& b) { return !(a == b); }
+	friend bool operator!=(const ndarray_view& a, const ndarray_view& b) { return ! a.compare(b); }
 	
 	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
 		return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
