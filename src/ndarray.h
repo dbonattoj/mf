@@ -73,6 +73,9 @@ public:
 	const_view_type cview() const { return const_view_type(*this);  }
 	const_view_type view() const { return cview(); }
 	
+	operator view_type () { return view(); }
+	operator const_view_type() const { return cview(); }
+	
 	using base::index_to_coordinates;
 	using base::coordinates_to_index;
 	using base::coordinates_to_pointer;
