@@ -190,12 +190,12 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr1_ != arr1);
 			
 			// assign values
-			arr1_ = arr1;
+			arr1_.assign(arr1);
 			REQUIRE(raw_ == raw);
 			REQUIRE(arr1 == arr1_);
 			
 			// assign section
-			arr1(1, 4) = arr1(11, 14);
+			arr1(1, 4).assign(arr1(11, 14));
 			REQUIRE(arr1(1, 4) == arr1(11, 14));
 			REQUIRE(compare_sequence_(arr1(0, 15),
 			{ 0, 11, 12, 13, 4, 123, 6, 7, 8, 9, 10, 11, 12, 13, 14 })); 
@@ -251,13 +251,13 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		
 		SECTION("deep assign, compare") {
 			REQUIRE(arr3[0] != arr3[1]);
-			arr3[0] = arr3[1];
+			arr3[0].assign(arr3[1]);
 			REQUIRE(arr3[0] == arr3[1]);
 			REQUIRE(arr3[0] != arr3[2]);
-			arr3[0][1] = arr3[2][2];
+			arr3[0][1].assign(arr3[2][2]);
 			REQUIRE(arr3[0][1] == arr3[2][2]);
 			REQUIRE(arr3[0] != arr3[1]);
-			arr3[0][1] = arr3[1][1];
+			arr3[0][1].assign(arr3[1][1]);
 			REQUIRE(arr3[0] == arr3[1]);
 			arr3[0][1][2] = 123;
 			REQUIRE(arr3[0][0] == arr3[1][0]);

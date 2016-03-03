@@ -38,7 +38,7 @@ public:
 	void write(std::size_t duration, const std::function<write_function>&);
 	void read(std::size_t duration, const std::function<read_function>&);
 	
-	std::size_t total_duration() const noexcept { return base::shape_.front(); }
+	std::size_t total_duration() const noexcept { return base::shape().front(); }
 };
 
 }

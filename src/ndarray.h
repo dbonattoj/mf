@@ -18,18 +18,15 @@
 namespace mf {
 
 template<std::size_t Dim, typename T, typename Allocator = std::allocator<T>>
-class ndarray : protected ndarray_view<Dim, T> {
-	using base = ndarray_view<Dim, T>;
-
+class ndarray {
 public:
-	using view_type = base;
+	using view_type = ndarray_view<Dim, T>;
 	using const_view_type = ndarray_view<Dim, const T>;
 
 	using index_type = typename view_type::index_type;
 	using coordinates_type = typename view_type::coordinates_type;
 	using shape_type = typename view_type::shape_type;
 	using strides_type = typename view_type::strides_type;
-
 	using padding_type = ndsize<Dim>;
 
 	using value_type = T;
@@ -41,15 +38,13 @@ public:
 	using iterator = typename view_type::iterator;
 	using const_iterator = typename const_view_type::iterator;
 
-	using raw_iterator = T*;
-	using raw_const_iterator = const T*;
-
 	constexpr static std::size_t dimension = Dim;
 
 protected:
 	Allocator allocator_;
 	padding_type padding_;
 	std::size_t allocated_size_ = 0;
+	view_type view_;
 
 	void allocate_();
 	void deallocate_();
@@ -59,45 +54,50 @@ protected:
 	static strides_type strides_with_padding_(const shape_type& shape, const padding_type&);
 
 public:
-	explicit ndarray(const shape_type& shape, const Allocator& allocator = Allocator()) :
-		ndarray(shape, padding_type(0), allocator) { }
+	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator()) :
+		ndarray(shp, padding_type(0), allocator) { }
+
 	explicit ndarray(const const_view_type&);
 	ndarray(const ndarray& arr) : ndarray(arr.cview()) { }
+
 	~ndarray();
 	
-	ndarray& operator=(const const_view_type&);
+	ndarray& operator=(const const_view_type& arr);
 	ndarray& operator=(const ndarray& arr) { return operator=(arr.cview()); }
 	
-	
-	view_type view() { return *this; }
-	const_view_type cview() const { return const_view_type(*this);  }
+	view_type view() { return view_; }
 	const_view_type view() const { return cview(); }
+	const_view_type cview() const { return const_view_type(view_);  }
 	
-	operator view_type () { return view(); }
-	operator const_view_type() const { return cview(); }
+	operator view_type () noexcept { return view(); }
+	operator const_view_type () const noexcept { return cview(); }
 	
-	using base::index_to_coordinates;
-	using base::coordinates_to_index;
-	using base::coordinates_to_pointer;
+	coordinates_type index_to_coordinates(const index_type& index) const { return view_.index_to_coordinates(index); }
+	index_type coordinates_to_index(const coordinates_type& coord) const { return view_.coordinates_to_index(coord); }
+	pointer coordinates_to_pointer(const coordinates_type& coord) { return view_.coordinates_to_pointer(coord); }
+	const_pointer coordinates_to_pointer(const coordinates_type& coord) const { return view_.coordinates_to_pointer(coord); }
 	
-	using base::size;
-	using base::shape;
-	using base::contiguous_length;
+	std::size_t size() const noexcept { return view_.size(); }
+	
+	pointer start() noexcept { return view_.start(); }
+	const_pointer start() const noexcept { return view_.start(); }
+	const shape_type& shape() const noexcept { return view_.shape(); }
+	const strides_type& strides() const noexcept { return view_.strides(); }
+	std::size_t contiguous_length() const noexcept { return view_.contiguous_length(); }
 	const padding_type& padding() const noexcept { return padding_; }
-	
-	MF_NDARRAY_FUNC_(start);
+
 	MF_NDARRAY_FUNC_(section);
 	MF_NDARRAY_FUNC_(slice)
 	MF_NDARRAY_FUNC_(operator());
 	MF_NDARRAY_FUNC_(operator[]);
 	MF_NDARRAY_FUNC_(at);
 		
-	iterator begin() { return base::begin(); }
-	const_iterator begin() const { return base::begin(); }
-	const_iterator cbegin() const { return base::begin(); }
-	iterator end() { return base::begin(); }
-	const_iterator end() const { return base::begin(); }
-	const_iterator cend() const { return base::begin(); }
+	iterator begin() { return view().begin(); }
+	const_iterator begin() const { return cview().begin(); }
+	const_iterator cbegin() const { return cview().begin(); }
+	iterator end() { return view().begin(); }
+	const_iterator end() const { return cview().begin(); }
+	const_iterator cend() const { return cview().begin(); }
 };
 
 

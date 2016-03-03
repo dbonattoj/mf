@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include <iostream>
+
 namespace mf {
 
 namespace detail {
@@ -106,15 +108,15 @@ void ndarray_view<Dim, T>::reset(const ndarray_view& other) noexcept {
 }
 
 
-template<std::size_t Dim, typename T>
-void ndarray_view<Dim, T>::assign(const ndarray_view& other) const {
+template<std::size_t Dim, typename T> template<typename T2>
+void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {
 	if(shape() != other.shape()) throw std::invalid_argument("ndarray views must have same shape for assignment");
 	std::copy(other.begin(), other.end(), begin());
 }
 
 
-template<std::size_t Dim, typename T>
-bool ndarray_view<Dim, T>::compare(const ndarray_view& other) const {
+template<std::size_t Dim, typename T> template<typename T2>
+bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, T2>& other) const {
 	if(shape() != other.shape()) return false;
 	else if(same(*this, other)) return true;
 	else return std::equal(other.begin(), other.end(), begin());
@@ -185,8 +187,10 @@ auto ndarray_view<Dim, T>::section_(std::ptrdiff_t i, std::ptrdiff_t start, std:
 template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::section(const coordinates_type& start, const coordinates_type& end, const strides_type& steps) const -> ndarray_view {
 	ndarray_view new_view = *this;
-	for(std::ptrdiff_t i = 0; i < Dim; ++i)
-		new_view.reset( new_view.section_(i, start[i], end[i], steps[i]) );
+	for(std::ptrdiff_t i = 0; i < Dim; ++i) {
+		auto sec = new_view.section_(i, start[i], end[i], steps[i]);
+		new_view.reset(sec);
+	}
 	return new_view;
 }
 

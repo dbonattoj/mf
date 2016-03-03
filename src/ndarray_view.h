@@ -63,10 +63,13 @@ public:
 	
 	ndarray_view(const ndarray_view<Dim, std::remove_const_t<T>>& arr) :
 		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
+		
+	void reset(const ndarray_view& other) noexcept;
+	void reset(pointer start, const shape_type& shape, const strides_type& strides) { reset(ndarray_view(start, shape, strides)); }
+	void reset(pointer start, const shape_type& shape) { reset(ndarray_view(start, shape)); }
 	
+	template<typename Arg> ndarray_view& operator=(Arg&& arg) { assign(std::forward<Arg>(arg)); return *this; }
 	ndarray_view& operator=(const ndarray_view& other) { assign(other); return *this; }
-
-	void reset(const ndarray_view&) noexcept;
 	
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
@@ -94,12 +97,15 @@ public:
 	iterator begin() const;
 	iterator end() const;
 	
-	void assign(const ndarray_view&) const;
-	bool compare(const ndarray_view&) const;
+	template<typename T2> void assign(const ndarray_view<Dim, T2>&) const;
+	void assign(const ndarray_view<Dim, const T>& other) const { assign<const T>(other); }
 	
-	friend bool operator==(const ndarray_view& a, const ndarray_view& b) { return a.compare(b); }
-	friend bool operator!=(const ndarray_view& a, const ndarray_view& b) { return ! a.compare(b); }
-	
+	template<typename T2> bool compare(const ndarray_view<Dim, T2>&) const;
+	bool compare(const ndarray_view<Dim, const T>& other) const { return compare<const T>(other); }
+		
+	template<typename Arg> bool operator==(Arg&& arg) const { return compare(std::forward<Arg>(arg)); }
+	template<typename Arg> bool operator!=(Arg&& arg) const { return ! compare(std::forward<Arg>(arg)); }
+		
 	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
 		return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
 	}

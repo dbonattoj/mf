@@ -30,12 +30,12 @@ auto ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::
 
 template<std::size_t Dim, typename T>
 auto ndarray_ring<Dim, T>::section_(std::ptrdiff_t start, std::size_t duration) -> section_view_type {
-	if(duration > base::shape_.front()) throw std::invalid_argument("ring section duration too large");
+	if(duration > base::shape().front()) throw std::invalid_argument("ring section duration too large");
 	
-	auto new_start = advance_raw_ptr(base::start_, base::strides_.front() * start);
-	auto new_shape = base::shape_;
+	auto new_start = advance_raw_ptr(base::start(), base::strides().front() * start);
+	auto new_shape = base::shape();
 	new_shape[0] = duration;
-	auto new_strides = base::strides_;
+	auto new_strides = base::strides();
 	
 	return section_view_type(new_start, new_shape, new_strides);
 }

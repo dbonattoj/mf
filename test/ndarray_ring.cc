@@ -8,7 +8,7 @@ using namespace mf;
 
 ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
 	ndarray<2, int> frame(shape);
-	for(int& v : frame) v = i++;
+	for(int& v : frame) v = i;
 	return frame;
 }
 
@@ -28,18 +28,24 @@ TEST_CASE("ndarray_ring", "[ndarray_ring]") {
 	REQUIRE(ring.writable_duration() == duration);
 	REQUIRE(ring.readable_duration() == 0);
 	
-	SECTION("FILO read/write") {
+	SECTION("FILO single read/write") {
 		ring.write(1, [&](const auto& section) {
 			REQUIRE(section.shape().front() == 1);
-
-			auto frame = make_frame(shape, 1);
-			std::copy(frame.begin(), frame.end(), section[0].begin());			
+			section[0] = make_frame(shape, 1);
 		});
 		
 		REQUIRE(ring.total_duration() == duration);
 		REQUIRE(ring.writable_duration() == duration - 1);
 		REQUIRE(ring.readable_duration() == 1);
 		
+		ring.read(1, [&](const auto& section) {
+			REQUIRE(section.shape().front() == 1);
+			REQUIRE(section[0] == make_frame(shape, 1));
+			REQUIRE(section[0] == make_frame(shape, 2));
+		});
 		
+		REQUIRE(ring.total_duration() == duration);
+		REQUIRE(ring.writable_duration() == duration);
+		REQUIRE(ring.readable_duration() == 0);
 	}
 }

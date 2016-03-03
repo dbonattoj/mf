@@ -40,5 +40,7 @@ build/%.o : %.cc
 clean :
 	rm -rf ./build/
 
+.PHONY: clean test
+	
 
 -include $(DEP)
