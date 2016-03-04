@@ -27,8 +27,8 @@ private:
 	section_view_type section_(std::ptrdiff_t start, std::size_t duration);
 
 public:
-	using write_function = void(const section_view_type&);
-	using read_function = void(const const_section_view_type&);
+	using write_function = std::size_t(const section_view_type&);
+	using read_function = std::size_t(const const_section_view_type&);
 
 	ndarray_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
 	
@@ -37,6 +37,7 @@ public:
 	
 	void write(std::size_t duration, const std::function<write_function>&);
 	void read(std::size_t duration, const std::function<read_function>&);
+	void skip(std::size_t duration);
 	
 	std::size_t total_duration() const noexcept { return base::shape().front(); }
 };

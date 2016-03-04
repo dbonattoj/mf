@@ -60,9 +60,10 @@ void ndarray_ring<Dim, T>::write(std::size_t duration, const std::function<write
 	if(duration > writable_duration()) throw std::invalid_argument("write duration too large");
 	
 	auto sec = section_(write_position_, duration);
-	fct(sec);
+	std::size_t written_duration = fct(sec);
+	if(written_duration > duration) throw std::logic_error("reported more written frames than requested");
 	
-	write_position_ = (write_position_ + duration) % total_duration();
+	write_position_ = (write_position_ + written_duration) % total_duration();
 	if(write_position_ == read_position_) full_ = true;
 }
 
@@ -72,8 +73,17 @@ void ndarray_ring<Dim, T>::read(std::size_t duration, const std::function<read_f
 	if(duration > readable_duration()) throw std::invalid_argument("read duration too large");
 
 	auto sec = section_(read_position_, duration);
-	fct(sec);
+	std::size_t read_duration = fct(sec);
+	if(read_duration > duration) throw std::logic_error("reported more read frames than requested");
 
+	read_position_ = (read_position_ + read_duration) % total_duration();
+	full_ = false;
+}
+
+
+template<std::size_t Dim, typename T>
+void ndarray_ring<Dim, T>::skip(std::size_t duration) {
+	if(duration > readable_duration()) throw std::invalid_argument("skip duration too large");
 	read_position_ = (read_position_ + duration) % total_duration();
 	full_ = false;
 }

@@ -4,6 +4,7 @@ TEST_TARGET := ./test/mf
 
 CXX := clang++
 CXXFLAGS := -std=c++14 -Wall -I./external/include
+LDFLAGS := 
 
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -g
@@ -28,7 +29,7 @@ test : $(TEST_TARGET)
 	$(TEST_TARGET)
 
 $(TARGET) : $(LIB_OBJ)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(LIB_OBJ) $(LDLIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -fPIC -shared -o $@ $(LIB_OBJ) $(LDLIBS)
 
 $(TEST_TARGET) : $(TEST_OBJ) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
@@ -40,7 +41,7 @@ build/%.o : %.cc
 clean :
 	rm -rf ./build/
 
-.PHONY: clean test
-	
+
+.PHONY: clean test	
 
 -include $(DEP)

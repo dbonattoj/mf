@@ -1,7 +1,7 @@
 #ifndef MF_NODE_H_
 #define MF_NODE_H_
 
-#include "ndarray.h"
+#include "ndarray_ring.h"
 #include <vector>
 
 namespace mf {
@@ -17,7 +17,8 @@ namespace detail {
 template<std::size_t Dim, typename T>
 class node : public detail::node_base {
 protected:
-	//ndarray<Dim + 1, T> output_;
+	int time_;
+	ndarray_ring<Dim, T> output_;
 	std::vector<node_base*> input_nodes_;
 	std::size_t time_window_;
 	
