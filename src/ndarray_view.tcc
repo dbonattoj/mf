@@ -43,6 +43,7 @@ auto ndarray_view<Dim, T>::default_strides(const shape_type& shape) -> strides_t
 }
 
 
+
 template<std::size_t Dim, typename T>
 ndarray_view<Dim, T>::ndarray_view(pointer start, const shape_type& shape) :
 	ndarray_view(start, shape, default_strides(shape)) { }

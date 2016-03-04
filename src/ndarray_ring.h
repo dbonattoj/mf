@@ -27,16 +27,17 @@ private:
 	section_view_type section_(std::ptrdiff_t start, std::size_t duration);
 
 public:
-	using write_function = std::size_t(const section_view_type&);
-	using read_function = std::size_t(const const_section_view_type&);
-
 	ndarray_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
 	
 	std::size_t readable_duration() const noexcept;
 	std::size_t writable_duration() const noexcept;
 	
-	void write(std::size_t duration, const std::function<write_function>&);
-	void read(std::size_t duration, const std::function<read_function>&);
+	section_view_type write(std::size_t duration);
+	void did_write(std::size_t written_duration);
+	
+	const_section_view_type read(std::size_t duration);
+	void did_read(std::size_t read_duration);
+	
 	void skip(std::size_t duration);
 	
 	std::size_t total_duration() const noexcept { return base::shape().front(); }

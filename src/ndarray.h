@@ -95,9 +95,9 @@ public:
 	iterator begin() { return view().begin(); }
 	const_iterator begin() const { return cview().begin(); }
 	const_iterator cbegin() const { return cview().begin(); }
-	iterator end() { return view().begin(); }
-	const_iterator end() const { return cview().begin(); }
-	const_iterator cend() const { return cview().begin(); }
+	iterator end() { return view().end(); }
+	const_iterator end() const { return cview().end(); }
+	const_iterator cend() const { return cview().end(); }
 };
 
 

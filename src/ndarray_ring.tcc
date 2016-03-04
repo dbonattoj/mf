@@ -56,26 +56,30 @@ std::size_t ndarray_ring<Dim, T>::writable_duration() const noexcept {
 
 
 template<std::size_t Dim, typename T>
-void ndarray_ring<Dim, T>::write(std::size_t duration, const std::function<write_function>& fct) {
+auto ndarray_ring<Dim, T>::write(std::size_t duration) -> section_view_type {
 	if(duration > writable_duration()) throw std::invalid_argument("write duration too large");
-	
-	auto sec = section_(write_position_, duration);
-	std::size_t written_duration = fct(sec);
-	if(written_duration > duration) throw std::logic_error("reported more written frames than requested");
-	
-	write_position_ = (write_position_ + written_duration) % total_duration();
-	if(write_position_ == read_position_) full_ = true;
+	else return section_(write_position_, duration);
 }
 
 
 template<std::size_t Dim, typename T>
-void ndarray_ring<Dim, T>::read(std::size_t duration, const std::function<read_function>& fct) {
+void ndarray_ring<Dim, T>::did_write(std::size_t written_duration) {
+	if(written_duration > writable_duration()) throw std::invalid_argument("reported written duration too large");
+	write_position_ = (write_position_ + written_duration) % total_duration();
+	if(write_position_ == read_position_) full_ = true;
+}
+	
+
+template<std::size_t Dim, typename T>
+auto ndarray_ring<Dim, T>::read(std::size_t duration) -> const_section_view_type {
 	if(duration > readable_duration()) throw std::invalid_argument("read duration too large");
+	else return section_(read_position_, duration);
+}
 
-	auto sec = section_(read_position_, duration);
-	std::size_t read_duration = fct(sec);
-	if(read_duration > duration) throw std::logic_error("reported more read frames than requested");
 
+template<std::size_t Dim, typename T>
+void ndarray_ring<Dim, T>::did_read(std::size_t read_duration) {
+	if(read_duration > readable_duration()) throw std::invalid_argument("reported read duration too large");
 	read_position_ = (read_position_ + read_duration) % total_duration();
 	full_ = false;
 }

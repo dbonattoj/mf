@@ -58,6 +58,8 @@ protected:
 public:
 	static strides_type default_strides(const shape_type&);
 
+	ndarray_view() :
+		ndarray_view(nullptr, shape_type()) { }
 	ndarray_view(pointer start, const shape_type& shape, const strides_type& strides);
 	ndarray_view(pointer start, const shape_type& shape);
 	
