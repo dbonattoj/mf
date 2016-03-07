@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 
-#define MF_NDARRAY_FUNC_(func) \
+#define MF_NDARRAY_VIEW_FUNC_(func) \
 	template<typename... Args> decltype(auto) func(Args&&... args) { \
 		return view().func(std::forward<Args>(args)...); \
 	} \
@@ -86,11 +86,11 @@ public:
 	std::size_t contiguous_length() const noexcept { return view_.contiguous_length(); }
 	const padding_type& padding() const noexcept { return padding_; }
 
-	MF_NDARRAY_FUNC_(section);
-	MF_NDARRAY_FUNC_(slice)
-	MF_NDARRAY_FUNC_(operator());
-	MF_NDARRAY_FUNC_(operator[]);
-	MF_NDARRAY_FUNC_(at);
+	MF_NDARRAY_VIEW_FUNC_(section);
+	MF_NDARRAY_VIEW_FUNC_(slice)
+	MF_NDARRAY_VIEW_FUNC_(operator());
+	MF_NDARRAY_VIEW_FUNC_(operator[]);
+	MF_NDARRAY_VIEW_FUNC_(at);
 		
 	iterator begin() { return view().begin(); }
 	const_iterator begin() const { return cview().begin(); }

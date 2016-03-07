@@ -16,7 +16,7 @@ struct ndcoord {
 	static_assert(std::is_arithmetic<T>::value, "ndcoord component type must be arithmetic");
 
 	std::array<T, Dim> components;
-	
+		
 	template<typename It>
 	void from_iterators(It begin, It end) {
 		auto out = components.begin();

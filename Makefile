@@ -5,6 +5,16 @@ TEST_TARGET := ./test/mf
 CXX := clang++
 CXXFLAGS := -std=c++14 -Wall -I./external/include
 LDFLAGS := 
+LDLIBS := 
+
+
+# OpenCV 3
+PACKAGES := opencv
+PKG_CONFIG_PATH=/usr/local/opt/opencv3/lib/pkgconfig
+CXXFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags $(PACKAGES))
+LDFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs-only-L $(PACKAGES))
+LDLIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs-only-l --libs-only-other $(PACKAGES))
+LDFLAGS += -L/usr/local/Cellar/opencv3/3.1.0_1/share/OpenCV/3rdparty/lib
 
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -g

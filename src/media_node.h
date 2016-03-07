@@ -7,80 +7,101 @@
 #include "ndcoord.h"
 #include "ndarray_ring.h"
 
+#include <iostream>
+
 namespace mf {
 
-
-class media_node_input_base {
-public:
-	virtual void pull() = 0;
-};
-
-
-class media_node_base {
-protected:
-	int time_;
-	std::vector<std::unique_ptr<media_node_input_base>> inputs_;
+namespace detail {
+	class media_node_input_base {
+	public:
+		virtual void pull() = 0;
+		virtual void did_pull() = 0;
+	};
 	
-	virtual void process_frame_() = 0;
-};
+	class media_node_base {
+	protected:		
+		std::vector<media_node_input_base*> inputs_;
 
+		virtual void process_frame_() = 0;
+		
+		void pull_input_and_process_() {
+			for(auto& input : inputs_) input->pull();
+			this->process_frame_();
+			for(auto& input : inputs_) input->did_pull();
+		}
+	};
+}
+
+
+template<std::size_t Dim, typename T> class media_node;
 
 template<std::size_t Dim, typename T>
-class media_node_input : public media_node_input_base {
+class media_node_input : public detail::media_node_input_base {
 public:
 	using connected_node_type = media_node<Dim, T>;
 
 private:
-	connected_node_type& connected_node_;
+	connected_node_type* connected_node_ = nullptr;
 
 public:
 	using input_view_type = typename connected_node_type::output_view_type;
 	
 	input_view_type input_view;
-	
-	explicit media_node_input(connected_node_type& nd) :
-		connected_node_(nd) { }
-		
+			
 	void pull() override {
-		connected_node_.pull([&](const input_view_type& vw) {
-			input_view.reset(vw);
-		});
+		input_view.reset(connected_node_->pull());
+	}
+	
+	void did_pull() override {
+		connected_node_->did_pull();
+	}
+	
+	void connect(connected_node_type& nd) {
+		connected_node_ = &nd;
 	}
 };
 
 
 template<std::size_t Dim, typename T>
-class media_node : public media_node_base {
+class media_node : public detail::media_node_base {
 protected:
-	ndarray_ring<Dim, T> output_buffer_;
-	
+	ndarray_ring<Dim, T> output_;
+
 public:
 	using output_view_type = ndarray_view<Dim + 1, const T>;
-	using read_function_ = void(const output_view_type& view, std::ptrdiff_t current_time_index);
 
-	explicit media_node(const ndshape<Dim>& frame_shape) :
-		output_buffer_(frame_shape, 1) { }
+	explicit media_node(const ndsize<Dim>& frame_shape) :
+		output_(frame_shape, 1) { }
 
-	template<std::size_t Dim2, typename T2>
-	media_node_input<Dim2, T2>& add_input_(media_node<Dim2, T2>& connected_node) {
-		auto ptr = std::make_unique<media_node_input<Dim2, T2>>(connected_node);
-		inputs_.push_back(*ptr);
-		return *ptr;
+	void add_input_(detail::media_node_input_base& input) {
+		inputs_.push_back(&input);
+	}
+		
+	output_view_type pull() {
+		std::cout << "pulling "<< this << std::endl;
+		pull_input_and_process_();
+		return output_.read(1);
 	}
 	
-	void initialize(std::size_t buffer_size);
-	
-	output_view_type pull(const std::function<read_function_type>& callback) {
-		for(auto&& input : inputs_) input->pull();
-		this->process_frame_();
-		output_view_type out;
+	void did_pull() {
+		std::cout << "did pull "<< this << std::endl;
+
+		output_.did_read(1);
 	}
 };
 
 
+class media_sink : public detail::media_node_base {
+public:
+	void add_input_(detail::media_node_input_base& input) {
+		inputs_.push_back(&input);
+	}
+	void pull() {
+		pull_input_and_process_();
+	}
+};
 
 }
 
-#include "media_node.tcc"
 
 #endif
