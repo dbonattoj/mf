@@ -21,9 +21,14 @@ class ndarray_shared_ring : public ndarray_timed_ring<Dim, T> {
 	using base = ndarray_timed_ring<Dim, T>;
 
 private:
+	enum thread_state { idle, waiting, accessing };
+
 	mutable std::mutex positions_mutex_; ///< Mutex which gets locked while advancing pointers.
 	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.
 	std::condition_variable readable_cv_; ///< Condition variable, gets notified when readable frames become available.
+
+	std::atomic<thread_state> reader_state_{idle};
+	std::atomic<thread_state> writer_state_{idle};
 
 	void skip_available_(std::size_t duration);
 	
@@ -44,6 +49,8 @@ public:
 	void lock() { positions_mutex_.lock(); }
 	bool try_lock() { return positions_mutex_.try_lock(); }
 	void unlock() { positions_mutex_.unlock(); }
+	
+	
 };
 
 }

@@ -10,7 +10,7 @@ void ndarray_timed_ring<Dim, T>::end_write(std::size_t written_duration) {
 template<std::size_t Dim, typename T>
 time_span ndarray_timed_ring<Dim, T>::readable_time_span() const {
 	return time_span(
-		last_write_time_ + 1 - this->readable_duration(),
+		last_write_time_ + 1 - base::readable_duration(),
 		last_write_time_ + 1
 	);
 }
@@ -20,7 +20,7 @@ template<std::size_t Dim, typename T>
 time_span ndarray_timed_ring<Dim, T>::writable_time_span() const {
 	return time_span(
 		last_write_time_ + 1,
-		last_write_time_ + 1 + this->writable_duration()
+		last_write_time_ + 1 + base::writable_duration()
 	);
 }
 
