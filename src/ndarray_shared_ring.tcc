@@ -4,40 +4,22 @@
 
 namespace mf {
 
-template<std::size_t Dim, typename T>
-void ndarray_shared_ring<Dim, T>::wait_until_writable_(std::size_t duration) {
-	assert(duration <= base::total_duration());
-	// each time frame(s) are read/skipped writable_cv_ gets notified
-	// wait on it, until writable duration sufficient
-	std::unique_lock<std::mutex> lock(positions_mutex_);
-
-	// using base::writable_duration() because it doesn't lock the mutex, as it is already locked 
-	// robust against spurious wake-ups, does not start waiting if enough frames were already writable
-	while(base::writable_duration() < duration) writable_cv_.wait(lock);
-}
-
-
-template<std::size_t Dim, typename T>
-void ndarray_shared_ring<Dim, T>::wait_until_readable_(std::size_t duration) {
-	assert(duration <= base::total_duration());
-	std::unique_lock<std::mutex> lock(positions_mutex_);
-
-	while(base::readable_duration() < duration)
-		readable_cv_.wait(lock);
-}
-
 
 template<std::size_t Dim, typename T>
 auto ndarray_shared_ring<Dim, T>::begin_write(std::size_t duration) -> section_view_type {
-	// test duration, before waiting
+	// duration test, before waiting
 	if(duration > base::total_duration()) throw std::invalid_argument("write duration larger than ring capacity");
 
-	// if needed, wait until enough frames become writable
-	// the other thread will only read/skip, so writable_duration increases
-	// deadlock may occur if other thread is also waiting in begin_read
-	wait_until_writable_(duration);
+	// locking positions mutex
+	std::unique_lock<std::mutex> lock(positions_mutex_);
+
+	// wait on it, until writable duration is sufficient
+	// each time frame(s) are read/skipped writable_cv_ gets notified
+	// robust against spurious wake-ups, does not start waiting if enough frames were already writable
+	while(base::writable_duration() < duration) writable_cv_.wait(lock);
 
 	// now return view to writable frames
+	// base::begin_write() not thread-safe, but positions_mutex_ is still locked until return 
 	return base::begin_write(duration);
 }
 
@@ -56,8 +38,9 @@ void ndarray_shared_ring<Dim, T>::end_write(std::size_t written_duration) {
 
 template<std::size_t Dim, typename T>
 auto ndarray_shared_ring<Dim, T>::begin_read(std::size_t duration) -> section_view_type {
-	if(duration > base::total_duration()) throw std::invalid_argument("read duration too large");
-	wait_until_readable_(duration);
+	if(duration > base::total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
+	std::unique_lock<std::mutex> lock(positions_mutex_);
+	while(base::readable_duration() < duration) readable_cv_.wait(lock);
 	return base::begin_read(duration);
 }
 
@@ -82,6 +65,7 @@ void ndarray_shared_ring<Dim, T>::skip_available_(std::size_t duration) {
 		std::lock_guard<std::mutex> lock(positions_mutex_);
 		base::skip(duration);
 	}
+	
 	// notify condition variable: more writable frames have become available
 	writable_cv_.notify_one();
 }
@@ -104,13 +88,13 @@ void ndarray_shared_ring<Dim, T>::skip(std::size_t skip_duration) {
 		// wait for whole buffer to fill up and then skip all frames
 		// until less than buffer size remains to be skipped
 		while(remaining_skip_duration >= total_duration) {
-			wait_until_readable_(total_duration);
-			skip_available_(total_duration);
+			begin_read(total_duration); // ...wait for buffer to fill up entirely
+			skip_available_(total_duration); // ...skip all and notify writable_cv_
 			remaining_skip_duration -= total_duration;
 		}
 		
 		// now skip remaining frames, waiting for them if necessary
-		wait_until_readable_(remaining_skip_duration);
+		begin_read(remaining_skip_duration);
 		skip_available_(remaining_skip_duration);
 		
 		// there may be new readable frames already available (after skipped frames),
