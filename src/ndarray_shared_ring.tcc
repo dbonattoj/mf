@@ -7,14 +7,13 @@ namespace mf {
 template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::wait_until_writable_(std::size_t duration) {
 	assert(duration <= base::total_duration());
-
-	// each time frame(s) are read/skipped readable_cv_ gets notified
+	// each time frame(s) are read/skipped writable_cv_ gets notified
 	// wait on it, until writable duration sufficient
 	std::unique_lock<std::mutex> lock(positions_mutex_);
 
 	// using base::writable_duration() because it doesn't lock the mutex, as it is already locked 
 	// robust against spurious wake-ups, does not start waiting if enough frames were already writable
-	while(base::writable_duration() >= duration) readable_cv_.wait(lock);
+	while(base::writable_duration() < duration) writable_cv_.wait(lock);
 }
 
 
@@ -23,25 +22,8 @@ void ndarray_shared_ring<Dim, T>::wait_until_readable_(std::size_t duration) {
 	assert(duration <= base::total_duration());
 	std::unique_lock<std::mutex> lock(positions_mutex_);
 
-	while(base::readable_duration() >= duration) {
-		std::cout << "w..." << std::endl;
-		writable_cv_.wait(lock);
-	}
-}
-
-
-template<std::size_t Dim, typename T>
-std::size_t ndarray_shared_ring<Dim, T>::writable_duration() const {
-	// lock state mutex while calling base::writable_duration(), because it is not atomic
-	std::lock_guard<std::mutex> lock(positions_mutex_);
-	return base::writable_duration();
-}
-
-
-template<std::size_t Dim, typename T>
-std::size_t ndarray_shared_ring<Dim, T>::readable_duration() const {
-	std::lock_guard<std::mutex> lock(positions_mutex_);
-	return base::readable_duration();
+	while(base::readable_duration() < duration)
+		readable_cv_.wait(lock);
 }
 
 
@@ -54,7 +36,7 @@ auto ndarray_shared_ring<Dim, T>::begin_write(std::size_t duration) -> section_v
 	// the other thread will only read/skip, so writable_duration increases
 	// deadlock may occur if other thread is also waiting in begin_read
 	wait_until_writable_(duration);
-	
+
 	// now return view to writable frames
 	return base::begin_write(duration);
 }

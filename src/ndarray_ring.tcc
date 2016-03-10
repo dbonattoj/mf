@@ -75,6 +75,7 @@ void ndarray_ring<Dim, T>::end_write(std::size_t written_duration) {
 
 template<std::size_t Dim, typename T>
 auto ndarray_ring<Dim, T>::begin_read(std::size_t duration) -> section_view_type {
+	section_view_type res;
 	if(duration > total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
 	else if(duration > readable_duration()) throw sequencing_error("read duration larger than readable frames");
 	else return section_(read_position_, duration);

@@ -52,8 +52,8 @@ protected:
 	
 	std::ptrdiff_t contiguous_length_;
 	
-	ndarray_view section_(std::ptrdiff_t dimension, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const;
-	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dimension) const;
+	ndarray_view section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const;
+	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dim) const;
 			
 public:
 	static strides_type default_strides(const shape_type&);

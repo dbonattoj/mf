@@ -25,20 +25,19 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		std::thread writer([&]() {
 			using namespace std::literals;
 			while(running) {
-				std::cout << "o" << std::flush;
 				std::this_thread::sleep_for(200ms);
-				//auto w_section = ring.begin_write(1);
-				//w_section[0] = make_frame(shape, ring.current_time());
-				//ring.end_write(1);
+				auto w_section = ring.begin_write(1);
+				w_section[0] = make_frame(shape, ring.current_time()+1);
+				ring.end_write(1);
 			}
 		});
 		
 		// read frames 0, 1, 2: waits until they become available
 		auto r_section = ring.begin_read(3);
-		/*REQUIRE(r_section[0] == make_frame(shape, 0));
+		REQUIRE(r_section[0] == make_frame(shape, 0));
 		REQUIRE(r_section[1] == make_frame(shape, 1));
 		REQUIRE(r_section[2] == make_frame(shape, 2));
-		ring.end_read(3);*/
+		ring.end_read(3);
 		
 		// end secondary thread
 		running = false;

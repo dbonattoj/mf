@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <ostream>
 
+#include "debug.h"
 #include "exceptions.h"
 
 namespace mf {

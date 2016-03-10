@@ -33,9 +33,6 @@ public:
 
 	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration, time_unit time_offset = 0) :
 		base(frames_shape, duration, time_offset) { }
-
-	std::size_t writable_duration() const override;
-	std::size_t readable_duration() const override;
 	
 	section_view_type begin_write(std::size_t duration) override;
 	void end_write(std::size_t written_duration) override;

@@ -17,13 +17,16 @@ namespace detail {
 		ndarray_view_fcall(const super& arr) :
 			super(arr) { }
 		
-		ndarray_view_fcall<Dim, T, Target_dim + 1> operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {
+		ndarray_view_fcall<Dim, T, Target_dim + 1>
+		operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {
 			return this->section_(Target_dim, start, end, step);
 		}
-		ndarray_view_fcall<Dim, T, Target_dim + 1> operator()(std::ptrdiff_t c) const {
+		ndarray_view_fcall<Dim, T, Target_dim + 1>
+		operator()(std::ptrdiff_t c) const {
 			return this->section_(Target_dim, c, c + 1, 1);
 		}
-		ndarray_view_fcall<Dim, T, Target_dim + 1> operator()() const {
+		ndarray_view_fcall<Dim, T, Target_dim + 1>
+		operator()() const {
 			return *this;
 		}
 	};

@@ -32,8 +32,8 @@ public:
 	
 	std::size_t total_duration() const noexcept { return base::shape().front(); }
 	
-	virtual std::size_t writable_duration() const;
-	virtual std::size_t readable_duration() const;
+	std::size_t writable_duration() const;
+	std::size_t readable_duration() const;
 	
 	virtual section_view_type begin_write(std::size_t duration);
 	virtual void end_write(std::size_t written_duration);
