@@ -1,3 +1,4 @@
+/*
 #include "video_file_sink.h"
 #include "opencv.h"
 #include "opencv_ndarray.h"
@@ -22,3 +23,4 @@ void video_file_sink::process_frame_() {
 
 
 }
+*/

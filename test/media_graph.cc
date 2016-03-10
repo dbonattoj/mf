@@ -1,3 +1,4 @@
+/*
 #include <catch.hpp>
 #include "../src/media_node.h"
 #include "../src/yuv_file_source.h"
@@ -7,7 +8,7 @@
 using namespace mf;
 
 TEST_CASE("media_graph", "[media_graph]") {
-	yuv_file_source source("/Users/timlenertz/Desktop/data/BBB_Flowers_cam0005.yuv", 1280, 768, 420);
+	yuv_file_source source("/Users/timlenertz/Desktop/data/BBB_Flowers_cam0084.yuv", 1280, 768, 420);
 	color_converter<ycbcr_color, rgb_color> converter(make_ndsize(768, 1280));
 	video_file_sink sink("vid.mp4", make_ndsize(768, 1280));
 	
@@ -16,3 +17,4 @@ TEST_CASE("media_graph", "[media_graph]") {
 	
 	for(int i = 0; i < 100; ++i) sink.pull();
 }
+*/

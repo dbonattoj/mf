@@ -2,106 +2,129 @@
 #define MF_MEDIA_NODE_H_
 
 #include <vector>
-#include <memory>
-#include <functional>
-#include "ndcoord.h"
-#include "ndarray_ring.h"
-
-#include <iostream>
+#include <cstdint>
+#include "ndarray_shared_ring.h"
 
 namespace mf {
 
+
+using time_unit = std::int32_t;
+
+
+class media_node;
+
+
 namespace detail {
 	class media_node_input_base {
+	protected:
+		time_unit past_window_;
+		time_unit future_window_;	
 	public:
-		virtual void pull() = 0;
-		virtual void did_pull() = 0;
+		virtual void begin_read(time_unit) = 0;
+		virtual void end_read() = 0;
 	};
 	
-	class media_node_base {
-	protected:		
-		std::vector<media_node_input_base*> inputs_;
+	
+	class media_node_output_base {	
+	protected:
+		media_node& node_;
 
-		virtual void process_frame_() = 0;
-		
-		void pull_input_and_process_() {
-			for(auto& input : inputs_) input->pull();
-			this->process_frame_();
-			for(auto& input : inputs_) input->did_pull();
-		}
+	public:
+		explicit media_node_output_base(media_node& nd) : node_(nd) { }
 	};
 }
 
 
-template<std::size_t Dim, typename T> class media_node;
-
 template<std::size_t Dim, typename T>
-class media_node_input : public detail::media_node_input_base {
-public:
-	using connected_node_type = media_node<Dim, T>;
-
+class media_node_output : public media_node_output_base {
 private:
-	connected_node_type* connected_node_ = nullptr;
-
-public:
-	using input_view_type = typename connected_node_type::output_view_type;
-	
-	input_view_type input_view;
-			
-	void pull() override {
-		input_view.reset(connected_node_->pull());
-	}
-	
-	void did_pull() override {
-		connected_node_->did_pull();
-	}
-	
-	void connect(connected_node_type& nd) {
-		connected_node_ = &nd;
-	}
+	ndarray_shared_ring<Dim, T> buffer_;
 };
 
 
 template<std::size_t Dim, typename T>
-class media_node : public detail::media_node_base {
-protected:
-	ndarray_ring<Dim, T> output_;
+class media_node_input : public media_node_input_base {
+public:
+	using output_type = media_node_output<Dim, T>;
+	using read_view_type = ndarray_view<Dim, T>;
+	
+private:
+	output_type* connected_output_ = nullptr;
+	read_view_type view_;
 
 public:
-	using output_view_type = ndarray_view<Dim + 1, const T>;
-
-	explicit media_node(const ndsize<Dim>& frame_shape) :
-		output_(frame_shape, 1) { }
-
-	void add_input_(detail::media_node_input_base& input) {
-		inputs_.push_back(&input);
-	}
+	void begin_read(time_unit) override {
 		
-	output_view_type pull() {
-		std::cout << "pulling "<< this << std::endl;
-		pull_input_and_process_();
-		return output_.read(1);
 	}
 	
-	void did_pull() {
-		std::cout << "did pull "<< this << std::endl;
-
-		output_.did_read(1);
+	void end_read() override {
+		
 	}
+	
+	read_view_type& view();
 };
 
 
-class media_sink : public detail::media_node_base {
-public:
-	void add_input_(detail::media_node_input_base& input) {
+class media_node {
+private:
+	std::vector<media_node_input_base*> inputs_;
+	std::vector<media_node_output_base*> outputs_;
+	time_unit time_;
+	
+protected:
+	void register_input_(media_node_input_base& input) {
 		inputs_.push_back(&input);
 	}
-	void pull() {
-		pull_input_and_process_();
+	
+	void register_output_(media_node_output_base& output) {
+		outputs_.push_back(&output);
+	}
+	
+	// implemented in concrete subclass
+	virtual void process_() = 0;
+
+public:
+	virtual void pull_frame(time_unit t) = 0;
+};
+
+
+// processes frames only when outputs are pulled
+class media_node_sequential : public media_node {
+public:
+	void pull_frame(time_unit t) override {
+		for(media_node_input_base* input : inputs_) {
+			input_->pull(t);
+			input_->begin_read(t);
+		}
+		for(media_node_output_base* output : outputs_) {
+			output_->begin_write();
+		}
+		this->process_();
+		for(media_node_input_base* input : inputs_) {
+			input_->end_read(t);
+		}
+		for(media_node_output_base* output : outputs_) {
+			output_->end_write();
+		}
+	}	
+};
+
+
+class media_sink : public media_node_sequential {
+
+};
+
+
+// processes frames continuously in separate thread
+class media_node_parallel : public media_node {
+public:
+	void pull_frame(time_unit t) override {
+		
 	}
 };
 
-}
 
+
+}
 
 #endif
