@@ -28,8 +28,8 @@ LIB_OBJ := $(patsubst src/%.cc,build/src/%.o,$(LIB_SRC))
 TEST_SRC := $(shell find test/. -name '*.cc')
 TEST_OBJ := $(patsubst test/%.cc,build/test/%.o,$(TEST_SRC))
  
-DEP := $(patsubst %.cc,%.d,$(LIB_SRC))
-DEP += $(patsubst %.cc,%.d,$(TEST_SRC))
+DEP := $(patsubst %.cc,build/%.d,$(LIB_SRC))
+DEP += $(patsubst %.cc,build/%.d,$(TEST_SRC))
 
 
 all : $(TARGET)
@@ -53,5 +53,6 @@ clean :
 
 
 .PHONY: clean test	
+	
 
 -include $(DEP)

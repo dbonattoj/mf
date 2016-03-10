@@ -2,6 +2,8 @@
 #include <cmath>
 #include "util.h"
 
+#include <iostream>
+
 namespace mf {
 
 template<std::size_t Dim, typename T>

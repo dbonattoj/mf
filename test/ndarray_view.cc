@@ -363,7 +363,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3(1, 3, 1)()()[1][2][3] == 0x2B);
 			REQUIRE(same( arr3(1, 3, 1)()(), arr3(1, 3, 1)() ));
 			REQUIRE(same( arr3(1, 3, 1)()(), arr3(1, 3, 1) ));
-			REQUIRE(same( arr3(1, 3, 1)()(), arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 1)) ));
+			REQUIRE(same(
+				arr3(1, 3, 1)()(),
+				arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 1))
+			));
 		
 			REQUIRE(arr3()(1, 3, 1)().shape() == ndsize<3>(3, 2, 4));
 			REQUIRE(arr3()(1, 3, 1)().strides() == ndptrdiff<3>(0x10*l, 0x04*l, l));
@@ -379,7 +382,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			}));
 			REQUIRE(arr3()(1, 3, 1)()[1][0][2] == 0x16);
 			REQUIRE(same( arr3()(1, 3, 1)(), arr3()(1, 3, 1) ));
-			REQUIRE(same( arr3()(1, 3, 1)(), arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, 1, 1)) ));
+			REQUIRE(same(
+				arr3()(1, 3, 1)(),
+				arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, 1, 1))
+			));
 
 			REQUIRE(arr3()()(1, 3, 1).shape() == ndsize<3>(3, 4, 2));
 			REQUIRE(arr3()()(1, 3, 1).strides() == ndptrdiff<3>(0x10*l, 0x04*l, l));
@@ -400,7 +406,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x2D, 0x2E
 			}));
 			REQUIRE(arr3()()(1, 3, 1)[1][3][0] == 0x1D);
-			REQUIRE(same( arr3()()(1, 3, 1), arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 3), ndptrdiff<3>(1, 1, 1)) ));
+			REQUIRE(same(
+				arr3()()(1, 3, 1),
+				arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 3), ndptrdiff<3>(1, 1, 1))
+			));
 
 			// interval [1,n[ with strides in one dimension
 			REQUIRE(arr3.shape() == ndsize<3>(3, 4, 4));
@@ -412,7 +421,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x1C, 0x1D, 0x1E, 0x1F,
 			}));
 			REQUIRE(arr3(1, 3, 2)()()[0][1][2] == 0x16);
-			REQUIRE(same( arr3(1, 3, 2)()(), arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(2, 1, 1)) ));
+			REQUIRE(same(
+				arr3(1, 3, 2)()(),
+				arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(2, 1, 1))
+			));
 		
 			REQUIRE(arr3()(1, 4, 2)().shape() == ndsize<3>(3, 2, 4));
 			REQUIRE(arr3()(1, 4, 2)().strides() == ndptrdiff<3>(0x10*l, 2*0x04*l, l));
@@ -427,7 +439,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x2C, 0x2D, 0x2E, 0x2F
 			}));
 			REQUIRE(arr3()(1, 4, 2)()[1][0][3] == 0x17);
-			REQUIRE(same( arr3()(1, 4, 2)(), arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 2, 1)) ));
+			REQUIRE(same(
+				arr3()(1, 4, 2)(),
+				arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 2, 1))
+			));
 
 			REQUIRE(arr3()()(1, 4, 2).shape() == ndsize<3>(3, 4, 2));
 			REQUIRE(arr3()()(1, 4, 2).strides() == ndptrdiff<3>(0x10*l, 0x04*l, 2*l));
@@ -448,7 +463,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x2D, 0x2F
 			}));
 			REQUIRE(arr3()()(1, 4, 2)[2][0][1] == 0x23);
-			REQUIRE(same( arr3()()(1, 4, 2), arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 2)) ));
+			REQUIRE(same(
+				arr3()()(1, 4, 2),
+				arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 2))
+			));
 
 			// interval [1,3[ with reversal in one dimension
 			REQUIRE(arr3.shape() == ndsize<3>(3, 4, 4));
@@ -466,7 +484,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x1C, 0x1D, 0x1E, 0x1F
 			}));
 			REQUIRE(arr3(1, 3, -1)()()[1][2][3] == 0x1B);
-			REQUIRE(same( arr3(1, 3, -1)()(), arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(-1, 1, 1)) ));
+			REQUIRE(same(
+				arr3(1, 3, -1)()(),
+				arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(-1, 1, 1))
+			));
 		
 			REQUIRE(arr3()(1, 3, -1)().shape() == ndsize<3>(3, 2, 4));
 			REQUIRE(arr3()(1, 3, -1)().strides() == ndptrdiff<3>(0x10*l, -0x04*l, l));
@@ -481,7 +502,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x24, 0x25, 0x26, 0x27
 			}));
 			REQUIRE(arr3()(1, 3, -1)()[2][1][3] == 0x27);
-			REQUIRE(same( arr3()(1, 3, -1)(), arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, -1, 1)) ));
+			REQUIRE(same(
+				arr3()(1, 3, -1)(),
+				arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, -1, 1))
+			));
 
 			REQUIRE(arr3()()(1, 3, -1).shape() == ndsize<3>(3, 4, 2));
 			REQUIRE(arr3()()(1, 3, -1).strides() == ndptrdiff<3>(0x10*l, 0x04*l, -l));
@@ -502,7 +526,10 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x2E, 0x2D
 			}));
 			REQUIRE(arr3()()(1, 3, -1)[2][1][0] == 0x26);
-			REQUIRE(same( arr3()()(1, 3, -1), arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 3), ndptrdiff<3>(1, 1, -1)) ));
+			REQUIRE(same(
+				arr3()()(1, 3, -1),
+				arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 3), ndptrdiff<3>(1, 1, -1))
+			));
 
 
 			// multiple dimensions...

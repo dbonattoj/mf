@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include <iostream>
+
 namespace mf {
 
 template<std::size_t Dim, typename T>
@@ -20,7 +22,11 @@ template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::wait_until_readable_(std::size_t duration) {
 	assert(duration <= base::total_duration());
 	std::unique_lock<std::mutex> lock(positions_mutex_);
-	while(base::readable_duration() >= duration) writable_cv_.wait(lock);
+
+	while(base::readable_duration() >= duration) {
+		std::cout << "w..." << std::endl;
+		writable_cv_.wait(lock);
+	}
 }
 
 
@@ -50,7 +56,7 @@ auto ndarray_shared_ring<Dim, T>::begin_write(std::size_t duration) -> section_v
 	wait_until_writable_(duration);
 	
 	// now return view to writable frames
-	return base::write(duration);
+	return base::begin_write(duration);
 }
 
 
@@ -70,7 +76,7 @@ template<std::size_t Dim, typename T>
 auto ndarray_shared_ring<Dim, T>::begin_read(std::size_t duration) -> section_view_type {
 	if(duration > base::total_duration()) throw std::invalid_argument("read duration too large");
 	wait_until_readable_(duration);
-	return base::read(duration);
+	return base::begin_read(duration);
 }
 
 
@@ -105,7 +111,7 @@ void ndarray_shared_ring<Dim, T>::skip(std::size_t skip_duration) {
 	
 	const auto initial_readable_duration = this->readable_duration();
 	const auto total_duration = base::total_duration();
-		
+	
 	if(skip_duration <= initial_readable_duration) {
 		// simple case: only skip some of the already readable frames
 		skip_available_(skip_duration);

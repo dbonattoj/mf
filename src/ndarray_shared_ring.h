@@ -9,21 +9,17 @@
 
 namespace mf {
 
-class ndarray_shared_ring_sequencing_error;
-
 /// Ndarray timed ring for concurrent read/write access.
 /** For use with two threads: one which reads and one which writes. Does not support having multiple parallel reads
  ** or multiple parallel writes. Enhancements:
  ** - Mutex lock on buffer state (read and write positions)
  ** - Semantics of begin_write(), begin_read() and skip() changed to wait until frames become available **/
 template<std::size_t Dim, typename T>
-class ndarray_shared_ring : private ndarray_timed_ring<Dim, T> {
-	using base = ndarray_ring<Dim, T>;
+class ndarray_shared_ring : public ndarray_timed_ring<Dim, T> {
+	using base = ndarray_timed_ring<Dim, T>;
 
 private:
-	enum thread_state { idle, waiting, processing };
-
-	std::mutex positions_mutex_; ///< Mutex which gets locked while advancing pointers.
+	mutable std::mutex positions_mutex_; ///< Mutex which gets locked while advancing pointers.
 	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.
 	std::condition_variable readable_cv_; ///< Condition variable, gets notified when readable frames become available.
 
@@ -31,7 +27,7 @@ private:
 	void wait_until_readable_(std::size_t duration); ///< Wait until \p duration frames can be read.
 
 	void skip_available_(std::size_t duration);
-
+	
 public:
 	using typename base::section_view_type;
 
@@ -49,7 +45,6 @@ public:
 	
 	void skip(std::size_t duration) override;
 };
-
 
 }
 
