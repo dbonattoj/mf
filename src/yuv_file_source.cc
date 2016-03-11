@@ -1,4 +1,3 @@
-/*
 #include "yuv_file_source.h"
 #include "ndarray_view.h"
 #include <iostream>
@@ -43,19 +42,18 @@ void yuv_file_source::read_frame_(const ndarray_view<2, ycbcr_color>& out) {
 }
 
 
-void yuv_file_source::process_frame_() {
-	auto sec = output_.write(1);
-	read_frame_(sec[0]);
-	output_.did_write(1);
+void yuv_file_source::process_() {
+	read_frame_(output.view());
 }
 
 
 yuv_file_source::yuv_file_source(const std::string& filename, std::size_t width, std::size_t height, int sampling) :
-	base(make_ndsize(height, width)),
 	file_(filename, std::ios_base::in | std::ios_base::binary),
 	width_(width),
-	height_(height)
+	height_(height),
+	output(*this, make_ndsize(height, width))
 {
+	register_output_(output);
 	switch(sampling) {
 		case 444: chroma_scale_x_ = 1; chroma_scale_y_ = 1; break;
 		case 420: chroma_scale_x_ = 2; chroma_scale_y_ = 2; break;
@@ -63,4 +61,3 @@ yuv_file_source::yuv_file_source(const std::string& filename, std::size_t width,
 }
 
 }
-*/

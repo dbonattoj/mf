@@ -9,7 +9,14 @@
 
 namespace mf {
 
-/// Ndarray where first dimension is circular (ring buffer).
+/// Ring buffer ndarray where first dimension is circular.
+/** Adds additional first _time_ dimension, the underlying `ndarray` has `Dim+1` dimensions. A _frame_ is a time slice,
+ ** i.e. `ring[t]`. Array wraps around at the end in time dimension, i.e. `ring[t+total_duration()]` would be
+ ** equivalent to `ring[t]`. (But subscript operator is still limited to array bounds).
+ ** Provides first-in, last-out ring buffer interface to write and read frames in the array. It gives `ndarray_view`
+ ** views to write in / read from, which may internally wrap around.
+ ** Wrapping is implemented using virtual memory mapping: Address contiguity is preserved and no special view subclass
+ ** is needed. */
 template<std::size_t Dim, typename T>
 class ndarray_ring : public ndarray<Dim + 1, T, ring_allocator<T>> {
 	using base = ndarray<Dim + 1, T, ring_allocator<T>>;

@@ -49,17 +49,27 @@ public:
 	pointer operator->() const noexcept { return pointer_; }
 	reference operator[](std::ptrdiff_t n) const { return *(*this + n); }
 	
-	friend bool operator==(const ndarray_iterator& a, const ndarray_iterator& b) noexcept { return a.index() == b.index(); }
-	friend bool operator!=(const ndarray_iterator& a, const ndarray_iterator& b) noexcept { return a.index() != b.index(); }
-	friend bool operator<(const ndarray_iterator& a, const ndarray_iterator& b) noexcept { return a.index() < b.index(); }
-	friend bool operator<=(const ndarray_iterator& a, const ndarray_iterator& b) noexcept { return a.index() <= b.index(); }
-	friend bool operator>(const ndarray_iterator& a, const ndarray_iterator& b) noexcept { return a.index() > b.index(); }
-	friend bool operator>=(const ndarray_iterator& a, const ndarray_iterator& b) noexcept { return a.index() >= b.index(); }
+	friend bool operator==(const ndarray_iterator& a, const ndarray_iterator& b) noexcept
+		{ return a.index() == b.index(); }
+	friend bool operator!=(const ndarray_iterator& a, const ndarray_iterator& b) noexcept
+		{ return a.index() != b.index(); }
+	friend bool operator<(const ndarray_iterator& a, const ndarray_iterator& b) noexcept
+		{ return a.index() < b.index(); }
+	friend bool operator<=(const ndarray_iterator& a, const ndarray_iterator& b) noexcept
+		{ return a.index() <= b.index(); }
+	friend bool operator>(const ndarray_iterator& a, const ndarray_iterator& b) noexcept
+		{ return a.index() > b.index(); }
+	friend bool operator>=(const ndarray_iterator& a, const ndarray_iterator& b) noexcept
+		{ return a.index() >= b.index(); }
 	
-	friend ndarray_iterator operator+(const ndarray_iterator& it, std::ptrdiff_t n) { auto copy = it; copy += n; return copy; }
-	friend ndarray_iterator operator+(std::ptrdiff_t n, const ndarray_iterator& it) { auto copy = it; copy += n; return copy; }
-	friend ndarray_iterator operator-(const ndarray_iterator& it, std::ptrdiff_t n) { auto copy = it; copy -= n; return copy; }
-	friend std::ptrdiff_t operator-(const ndarray_iterator& a, const ndarray_iterator& b) { return a.index() - b.index(); }
+	friend ndarray_iterator operator+(const ndarray_iterator& it, std::ptrdiff_t n)
+		{ auto copy = it; copy += n; return copy; }
+	friend ndarray_iterator operator+(std::ptrdiff_t n, const ndarray_iterator& it)
+		{ auto copy = it; copy += n; return copy; }
+	friend ndarray_iterator operator-(const ndarray_iterator& it, std::ptrdiff_t n)
+		{ auto copy = it; copy -= n; return copy; }
+	friend std::ptrdiff_t operator-(const ndarray_iterator& a, const ndarray_iterator& b)
+		{ return a.index() - b.index(); }
 	
 	index_type index() const noexcept { return index_; }
 	coordinates_type coordinates() const noexcept { return array_->index_to_coordinates(index_); }

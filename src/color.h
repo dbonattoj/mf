@@ -14,7 +14,7 @@ struct alignas(4) rgb_color {
 
 
 struct alignas(4) ycbcr_color {
-	std::uint8_t y; // luma, Y'
+	std::uint8_t y;  // luma, Y'
 	std::uint8_t cr; // chroma-red, U
 	std::uint8_t cb; // chroma-blue, V
 };
@@ -24,7 +24,8 @@ template<typename Input, typename Output>
 Output color_convert(const Input& in);
 
 
-template<> rgb_color color_convert(const ycbcr_color& in);
+template<>
+rgb_color color_convert(const ycbcr_color& in);
 
 }
 

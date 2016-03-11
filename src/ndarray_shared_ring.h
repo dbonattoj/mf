@@ -15,7 +15,7 @@ namespace mf {
  ** - Mutex lock on buffer state (read and write positions)
  ** - Semantics of begin_write(), begin_read() and skip() changed to wait until frames become available 
  ** Base class functions which depend on the read/write positions (e.g. readable_duration(), writable_time_span(),
- ** etc) are not thread-safe. Class is \c Lockable for this. **/
+ ** etc) are not thread-safe. Class is `Lockable` for this. **/
 template<std::size_t Dim, typename T>
 class ndarray_shared_ring : public ndarray_timed_ring<Dim, T> {
 	using base = ndarray_timed_ring<Dim, T>;
