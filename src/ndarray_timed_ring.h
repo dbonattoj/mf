@@ -12,13 +12,15 @@ class ndarray_timed_ring : public ndarray_ring<Dim, T> {
 	using base = ndarray_ring<Dim, T>;
 
 private:
-	std::atomic<time_unit> last_write_time_; ///< Time of last written frame.
+	std::atomic<time_unit> last_write_time_{-1}; ///< Time of last written frame.
 
 public:
 	using typename base::section_view_type;
 
-	ndarray_timed_ring(const ndsize<Dim>& frames_shape, std::size_t duration, time_unit time_offset = 0) :
-		base(frames_shape, duration), last_write_time_(time_offset - 1) { }
+	ndarray_timed_ring(const ndsize<Dim>& frames_shape, std::size_t duration) :
+		base(frames_shape, duration) { }
+	
+	void initialize() override;
 	
 	time_unit current_time() const noexcept { return last_write_time_; }
 	

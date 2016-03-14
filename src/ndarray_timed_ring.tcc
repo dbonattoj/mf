@@ -1,6 +1,13 @@
 namespace mf {
 
 template<std::size_t Dim, typename T>
+void ndarray_timed_ring<Dim, T>::initialize() {
+	last_write_time_ = -1;
+	base::initialize();
+}
+
+
+template<std::size_t Dim, typename T>
 void ndarray_timed_ring<Dim, T>::end_write(std::size_t written_duration) {
 	base::end_write(written_duration);
 	last_write_time_ += written_duration;

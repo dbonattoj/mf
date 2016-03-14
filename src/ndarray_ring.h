@@ -37,6 +37,8 @@ private:
 public:
 	ndarray_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
 	
+	virtual void initialize();
+	
 	std::size_t total_duration() const noexcept { return base::shape().front(); }
 	
 	std::size_t writable_duration() const;

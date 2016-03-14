@@ -11,10 +11,10 @@ static ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
 }
 
 TEST_CASE("ndarray_timed_ring", "[ndarray_timed_ring]") {
-	ndsize<2> shape(320, 240);
+	ndsize<2> shape{320, 240};
 	std::size_t duration = 10;
 	
-	ndarray_timed_ring<2, int> ring(shape, duration, 0);
+	ndarray_timed_ring<2, int> ring(shape, duration);
 	
 	REQUIRE(ring.current_time() == -1);
 	REQUIRE(ring.readable_duration() == 0);
@@ -54,44 +54,7 @@ TEST_CASE("ndarray_timed_ring", "[ndarray_timed_ring]") {
 		REQUIRE(ring.writable_time_span() == time_span(3, 12));
 		REQUIRE(ring.writable_duration() == 9);		
 	}
-	
-	SECTION("single read/write, with time offset") {
-		ndarray_timed_ring<2, int> ring(shape, duration, 100);
-	
-		// write frames [0,3[
-		auto w_section(ring.begin_write_span(time_span(100, 103)));
-		REQUIRE(w_section.shape().front() == 3);
-		REQUIRE(ring.current_time() == 100 - 1);
-		REQUIRE(ring.readable_duration() == 0);
-		REQUIRE(ring.writable_time_span() == time_span(100, 110));
-		w_section[0] = make_frame(shape, 0);
-		w_section[1] = make_frame(shape, 1);
-		w_section[2] = make_frame(shape, 2);		
-		ring.end_write(3);
-		REQUIRE(ring.current_time() == 102);
-		REQUIRE(ring.readable_time_span() == time_span(100, 103));
-		REQUIRE(ring.readable_duration() == 3);
-		REQUIRE(ring.writable_time_span() == time_span(103, 110));
-		REQUIRE(ring.writable_duration() == 7);
 		
-		// read frames [0,2[
-		auto r_section(ring.begin_read_span(time_span(100, 102)));
-		REQUIRE(ring.current_time() == 102);
-		REQUIRE(ring.readable_time_span() == time_span(100, 103));
-		REQUIRE(ring.readable_duration() == 3);
-		REQUIRE(ring.writable_time_span() == time_span(103, 110));
-		REQUIRE(ring.writable_duration() == 7);
-		REQUIRE(r_section.shape().front() == 2);
-		REQUIRE(r_section[0] == make_frame(shape, 0));
-		REQUIRE(r_section[1] == make_frame(shape, 1));
-		ring.end_read(2);
-		REQUIRE(ring.current_time() == 102);
-		REQUIRE(ring.readable_time_span() == time_span(102, 103));
-		REQUIRE(ring.readable_duration() == 1);
-		REQUIRE(ring.writable_time_span() == time_span(103, 112));
-		REQUIRE(ring.writable_duration() == 9);		
-	}
-	
 	SECTION("multiple read/write") {	
 		// write frames [0,5[
 		auto w_section(ring.begin_write_span(time_span(0, 5)));

@@ -4,7 +4,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <stdexcept>
-#include <string>
+#include <atomic>
 #include "ndarray_timed_ring.h"
 
 namespace mf {
@@ -14,6 +14,7 @@ namespace mf {
  ** or multiple parallel writes. Enhancements:
  ** - Mutex lock on buffer state (read and write positions)
  ** - Semantics of begin_write(), begin_read() and skip() changed to wait until frames become available 
+ ** - Writer can mark end of file. begin_read(), begin_read_span() and skip() then to not wait for more frames
  ** Base class functions which depend on the read/write positions (e.g. readable_duration(), writable_time_span(),
  ** etc) are not thread-safe. Class is `Lockable` for this. **/
 template<std::size_t Dim, typename T>
@@ -30,27 +31,39 @@ private:
 	std::atomic<thread_state> reader_state_{idle};
 	std::atomic<thread_state> writer_state_{idle};
 
+	std::atomic<time_unit> end_time_{-1};
+	
 	void skip_available_(std::size_t duration);
 	
 public:
 	using typename base::section_view_type;
 
-	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration, time_unit time_offset = 0) :
-		base(frames_shape, duration, time_offset) { }
+	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration) :
+		base(frames_shape, duration) { }
+	
+	void initialize() override;
 	
 	section_view_type begin_write(std::size_t duration) override;
 	void end_write(std::size_t written_duration) override;
+	void end_write(std::size_t written_duration, bool eof);
 
-	section_view_type begin_read(std::size_t duration) override;
-	void end_read(std::size_t written_duration) override;	
+	section_view_type begin_read(std::size_t read_duration) override;
+	section_view_type begin_read(std::size_t read_duration, bool& reaches_eof);
+	void end_read(std::size_t read_duration) override;	
 	
-	void skip(std::size_t duration) override;
+	void skip(std::size_t skip_duration) override;
 	
 	void lock() { positions_mutex_.lock(); }
 	bool try_lock() { return positions_mutex_.try_lock(); }
 	void unlock() { positions_mutex_.unlock(); }
 	
+	time_unit shared_readable_duration() const;
+	time_span shared_readable_time_span() const;
+	time_unit shared_writable_duration() const;
+	time_span shared_writable_time_span() const;
 	
+	bool writer_eof() const;
+	bool reader_eof() const;
 };
 
 }

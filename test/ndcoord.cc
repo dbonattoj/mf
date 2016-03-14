@@ -11,16 +11,11 @@ TEST_CASE("ndcoord", "[ndcoord]") {
 		REQUIRE(zero[1] == 0);
 		REQUIRE(zero[2] == 0);
 		
-		ndcoord<3, int> constant(7);
+		ndcoord<3, int> constant = 7;
 		REQUIRE(constant[0] == 7);
 		REQUIRE(constant[1] == 7);
 		REQUIRE(constant[2] == 7);
-		
-		ndcoord<3, int> varadic(1, 2, 3);
-		REQUIRE(varadic[0] == 1);
-		REQUIRE(varadic[1] == 2);
-		REQUIRE(varadic[2] == 3);
-		
+				
 		ndcoord<3, int> list{4, 5, 6};
 		REQUIRE(list[0] == 4);
 		REQUIRE(list[1] == 5);
@@ -53,8 +48,8 @@ TEST_CASE("ndcoord", "[ndcoord]") {
 	}
 	
 	SECTION("basics") {
-		ndcoord<3, int> coord(1, 2, 3);
-		ndcoord<3, int> coord2(4, 5, 6);
+		ndcoord<3, int> coord{1, 2, 3};
+		ndcoord<3, int> coord2{4, 5, 6};
 
 		// subscript
 		REQUIRE(coord[1] == 2);
@@ -106,7 +101,7 @@ TEST_CASE("ndcoord", "[ndcoord]") {
 	}
 	
 	SECTION("transform") {
-		ndsize<3> c1(1, 2, 3), c2(4, 5, 6);
+		ndsize<3> c1{1, 2, 3}, c2{4, 5, 6};
 		
 		SECTION("transform_inplace") {
 			c1.transform_inplace([](int i) { return i + 1; });
@@ -144,5 +139,12 @@ TEST_CASE("ndcoord", "[ndcoord]") {
 			REQUIRE(+c1 == c1);
 			REQUIRE(-c1 == make_ndsize(-1, -2, -3));
 		}
+	}
+	
+	SECTION("1dim") {
+		ndcoord<1, int> c = 2;
+		c = 3;
+		REQUIRE(c == 3);
+		REQUIRE(3 == c);
 	}
 }

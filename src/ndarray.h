@@ -72,10 +72,14 @@ public:
 	operator view_type () noexcept { return view(); }
 	operator const_view_type () const noexcept { return cview(); }
 	
-	coordinates_type index_to_coordinates(const index_type& index) const { return view_.index_to_coordinates(index); }
-	index_type coordinates_to_index(const coordinates_type& coord) const { return view_.coordinates_to_index(coord); }
-	pointer coordinates_to_pointer(const coordinates_type& coord) { return view_.coordinates_to_pointer(coord); }
-	const_pointer coordinates_to_pointer(const coordinates_type& coord) const { return view_.coordinates_to_pointer(coord); }
+	coordinates_type index_to_coordinates(const index_type& index) const
+		{ return view_.index_to_coordinates(index); }
+	index_type coordinates_to_index(const coordinates_type& coord) const
+		{ return view_.coordinates_to_index(coord); }
+	pointer coordinates_to_pointer(const coordinates_type& coord)
+		{ return view_.coordinates_to_pointer(coord); }
+	const_pointer coordinates_to_pointer(const coordinates_type& coord) const
+		{ return view_.coordinates_to_pointer(coord); }
 	
 	std::size_t size() const noexcept { return view_.size(); }
 	

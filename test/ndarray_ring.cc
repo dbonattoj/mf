@@ -16,7 +16,7 @@ static ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
 
 TEST_CASE("ndarray_ring", "[ndarray_ring]") {
 	// choosing buffer duration&frame_sz such that is does not fit on page boundaries
-	ndsize<2> shape(321, 240);
+	ndsize<2> shape{321, 240};
 	std::size_t duration = 14;
 	REQUIRE((shape.product() * duration * sizeof(int)) % system_page_size() != 0);
 	

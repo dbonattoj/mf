@@ -2,3 +2,6 @@ build/
 doc/
 notes/
 test/mf
+output/
+mf_test
+libmf.dylib

@@ -31,6 +31,14 @@ auto ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::
 
 
 template<std::size_t Dim, typename T>
+void ndarray_ring<Dim, T>::initialize() {
+	read_position_ = 0;
+	write_position_ = 0;
+	full_ = false;
+}
+
+
+template<std::size_t Dim, typename T>
 auto ndarray_ring<Dim, T>::section_(std::ptrdiff_t start, std::size_t duration) -> section_view_type {
 	if(duration > base::shape().front()) throw std::invalid_argument("ring section duration too large");
 	

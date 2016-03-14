@@ -6,7 +6,7 @@ using namespace mf;
 
 TEST_CASE("ndarray", "[ndarray]") {
 	constexpr std::ptrdiff_t l = sizeof(int);
-	ndsize<3> shape(3, 4, 4);
+	ndsize<3> shape{3, 4, 4};
 	std::vector<int> raw(shape.product());
 	for(int i = 0; i < raw.size(); ++i) raw[i] = i;
 	ndarray_view<3, int> arr_vw(raw.data(), shape);
@@ -51,7 +51,7 @@ TEST_CASE("ndarray", "[ndarray]") {
 		REQUIRE_FALSE(arr_vw[1][2][3] == 7890);
 		
 		// assignment (ndarray, different shape)
-		ndsize<3> shape_(2, 2, 5);
+		ndsize<3> shape_{2, 2, 5};
 		array_type arr3(shape_);
 		arr3[1][1][1] = 23;
 		REQUIRE(arr.shape() == shape);

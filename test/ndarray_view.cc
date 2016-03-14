@@ -61,19 +61,19 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 
 	SECTION("basics") {
 		// row major strides
-		REQUIRE( (ndarray_view<1, int>::default_strides(ndsize<1>(10))) == (ndptrdiff<1>{l}) );
-		REQUIRE( (ndarray_view<2, int>::default_strides(ndsize<2>(10, 10))) == (ndptrdiff<2>{10*l, l}) );
-		REQUIRE( (ndarray_view<3, int>::default_strides(ndsize<3>(4, 3, 2))) == (ndptrdiff<3>{3*2*l, 2*l, l}) );
+		REQUIRE( (ndarray_view<1, int>::default_strides(make_ndsize(10))) == (ndptrdiff<1>{l}) );
+		REQUIRE( (ndarray_view<2, int>::default_strides(make_ndsize(10, 10))) == (ndptrdiff<2>{10*l, l}) );
+		REQUIRE( (ndarray_view<3, int>::default_strides(make_ndsize(4, 3, 2))) == (ndptrdiff<3>{3*2*l, 2*l, l}) );
 				
 		// default strides = row major
-		ndsize<3> shp(4, 3, 4);
+		ndsize<3> shp{4, 3, 4};
 		ndarray_view<3, int> a1(raw.data(), shp);
 		REQUIRE(a1.start() == raw.data());
 		REQUIRE(a1.shape() == shp);
 		REQUIRE(a1.strides() == a1.default_strides(shp));
 		
 		// non-default strides
-		ndptrdiff<3> str(4,2,1);
+		ndptrdiff<3> str{4,2,1};
 		ndarray_view<3, int> a2(raw.data(), shp, str);
 		REQUIRE(a2.strides() == str);
 		REQUIRE(a2.size() == 4*3*4);
@@ -204,7 +204,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 
 
 	SECTION("3dim") {
-		ndarray_view<3, int> arr3(raw.data(), ndsize<3>(3, 4, 4));
+		ndarray_view<3, int> arr3(raw.data(), make_ndsize(3, 4, 4));
 		ndarray_view<1, int> row = arr3[0][0];	
 		// arr3:
 		//
@@ -276,30 +276,30 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			// ++, --, +=, -= on iterator, test index, coordinates and value
 			auto it = arr3.begin();
 			REQUIRE(it.index() == 0);
-			REQUIRE(it.coordinates() == ndptrdiff<3>(0, 0, 0));
+			REQUIRE(it.coordinates() == make_ndptrdiff(0, 0, 0));
 			REQUIRE(*it == 0x00);
-			REQUIRE((++it).coordinates() == ndptrdiff<3>(0, 0, 1));
+			REQUIRE((++it).coordinates() == make_ndptrdiff(0, 0, 1));
 			REQUIRE(it.index() == 1);
 			REQUIRE(*it == 0x01);
-			REQUIRE((++it).coordinates() == ndptrdiff<3>(0, 0, 2));
+			REQUIRE((++it).coordinates() == make_ndptrdiff(0, 0, 2));
 			REQUIRE(it.index() == 2);
 			REQUIRE(*it == 0x02);
-			REQUIRE((it++).coordinates() == ndptrdiff<3>(0, 0, 2));
+			REQUIRE((it++).coordinates() == make_ndptrdiff(0, 0, 2));
 			REQUIRE(it.index() == 3);
 			REQUIRE(*it == 0x03);
-			REQUIRE(it.coordinates() == ndptrdiff<3>(0, 0, 3));
-			REQUIRE((++it).coordinates() == ndptrdiff<3>(0, 1, 0));
+			REQUIRE(it.coordinates() == make_ndptrdiff(0, 0, 3));
+			REQUIRE((++it).coordinates() == make_ndptrdiff(0, 1, 0));
 			REQUIRE(it.index() == 4);
 			REQUIRE(*it == 0x04);
 			it += 2;
-			REQUIRE(it.coordinates() == ndptrdiff<3>(0, 1, 2));
+			REQUIRE(it.coordinates() == make_ndptrdiff(0, 1, 2));
 			REQUIRE(it.index() == 6);
 			REQUIRE(*it == 0x06);
-			REQUIRE((--it).coordinates() == ndptrdiff<3>(0, 1, 1));
+			REQUIRE((--it).coordinates() == make_ndptrdiff(0, 1, 1));
 			REQUIRE(it.index() == 5);
 			REQUIRE(*it == 0x05);
 			it -= 3;
-			REQUIRE(it.coordinates() == ndptrdiff<3>(0, 0, 2));
+			REQUIRE(it.coordinates() == make_ndptrdiff(0, 0, 2));
 			REQUIRE(it.index() == 2);
 			REQUIRE(*it == 0x02);
 		
@@ -346,9 +346,9 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		
 		SECTION("section") {
 			// interval [1,3[, for one dimension
-			REQUIRE(arr3.shape() == ndsize<3>(3, 4, 4));
-			REQUIRE(arr3(1, 3, 1)()().shape() == ndsize<3>(2, 4, 4));
-			REQUIRE(arr3(1, 3, 1)()().strides() == ndptrdiff<3>(0x10*l, 0x04*l, l));
+			REQUIRE(arr3.shape() == make_ndsize(3, 4, 4));
+			REQUIRE(arr3(1, 3, 1)()().shape() == make_ndsize(2, 4, 4));
+			REQUIRE(arr3(1, 3, 1)()().strides() == make_ndptrdiff(0x10*l, 0x04*l, l));
 			REQUIRE(compare_sequence_(arr3(1, 3, 1)()(), {
 				0x10, 0x11, 0x12, 0x13,
 				0x14, 0x15, 0x16, 0x17,
@@ -365,11 +365,11 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(same( arr3(1, 3, 1)()(), arr3(1, 3, 1) ));
 			REQUIRE(same(
 				arr3(1, 3, 1)()(),
-				arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 1))
+				arr3.section(make_ndptrdiff(1, 0, 0), make_ndptrdiff(3, 4, 4), make_ndptrdiff(1, 1, 1))
 			));
 		
-			REQUIRE(arr3()(1, 3, 1)().shape() == ndsize<3>(3, 2, 4));
-			REQUIRE(arr3()(1, 3, 1)().strides() == ndptrdiff<3>(0x10*l, 0x04*l, l));
+			REQUIRE(arr3()(1, 3, 1)().shape() == make_ndsize(3, 2, 4));
+			REQUIRE(arr3()(1, 3, 1)().strides() == make_ndptrdiff(0x10*l, 0x04*l, l));
 			REQUIRE(compare_sequence_(arr3()(1, 3, 1)(), {
 				0x04, 0x05, 0x06, 0x07,
 				0x08, 0x09, 0x0A, 0x0B,
@@ -384,11 +384,11 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(same( arr3()(1, 3, 1)(), arr3()(1, 3, 1) ));
 			REQUIRE(same(
 				arr3()(1, 3, 1)(),
-				arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, 1, 1))
+				arr3.section(make_ndptrdiff(0, 1, 0), make_ndptrdiff(3, 3, 4), make_ndptrdiff(1, 1, 1))
 			));
 
-			REQUIRE(arr3()()(1, 3, 1).shape() == ndsize<3>(3, 4, 2));
-			REQUIRE(arr3()()(1, 3, 1).strides() == ndptrdiff<3>(0x10*l, 0x04*l, l));
+			REQUIRE(arr3()()(1, 3, 1).shape() == make_ndsize(3, 4, 2));
+			REQUIRE(arr3()()(1, 3, 1).strides() == make_ndptrdiff(0x10*l, 0x04*l, l));
 			REQUIRE(compare_sequence_(arr3()()(1, 3, 1), {
 				0x01, 0x02,
 				0x05, 0x06,
@@ -408,12 +408,12 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3()()(1, 3, 1)[1][3][0] == 0x1D);
 			REQUIRE(same(
 				arr3()()(1, 3, 1),
-				arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 3), ndptrdiff<3>(1, 1, 1))
+				arr3.section(make_ndptrdiff(0, 0, 1), make_ndptrdiff(3, 4, 3), make_ndptrdiff(1, 1, 1))
 			));
 
 			// interval [1,n[ with strides in one dimension
-			REQUIRE(arr3.shape() == ndsize<3>(3, 4, 4));
-			REQUIRE(arr3(1, 3, 2)()().shape() == ndsize<3>(1, 4, 4)); // shape[0] == 3, so only 1
+			REQUIRE(arr3.shape() == make_ndsize(3, 4, 4));
+			REQUIRE(arr3(1, 3, 2)()().shape() == make_ndsize(1, 4, 4)); // shape[0] == 3, so only 1
 			REQUIRE(compare_sequence_(arr3(1, 3, 2)()(), {
 				0x10, 0x11, 0x12, 0x13,
 				0x14, 0x15, 0x16, 0x17,
@@ -423,11 +423,11 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3(1, 3, 2)()()[0][1][2] == 0x16);
 			REQUIRE(same(
 				arr3(1, 3, 2)()(),
-				arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(2, 1, 1))
+				arr3.section(make_ndptrdiff(1, 0, 0), make_ndptrdiff(3, 4, 4), make_ndptrdiff(2, 1, 1))
 			));
 		
-			REQUIRE(arr3()(1, 4, 2)().shape() == ndsize<3>(3, 2, 4));
-			REQUIRE(arr3()(1, 4, 2)().strides() == ndptrdiff<3>(0x10*l, 2*0x04*l, l));
+			REQUIRE(arr3()(1, 4, 2)().shape() == make_ndsize(3, 2, 4));
+			REQUIRE(arr3()(1, 4, 2)().strides() == make_ndptrdiff(0x10*l, 2*0x04*l, l));
 			REQUIRE(compare_sequence_(arr3()(1, 4, 2)(), {
 				0x04, 0x05, 0x06, 0x07,
 				0x0C, 0x0D, 0x0E, 0x0F,
@@ -441,11 +441,11 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3()(1, 4, 2)()[1][0][3] == 0x17);
 			REQUIRE(same(
 				arr3()(1, 4, 2)(),
-				arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 2, 1))
+				arr3.section(make_ndptrdiff(0, 1, 0), make_ndptrdiff(3, 4, 4), make_ndptrdiff(1, 2, 1))
 			));
 
-			REQUIRE(arr3()()(1, 4, 2).shape() == ndsize<3>(3, 4, 2));
-			REQUIRE(arr3()()(1, 4, 2).strides() == ndptrdiff<3>(0x10*l, 0x04*l, 2*l));
+			REQUIRE(arr3()()(1, 4, 2).shape() == make_ndsize(3, 4, 2));
+			REQUIRE(arr3()()(1, 4, 2).strides() == make_ndptrdiff(0x10*l, 0x04*l, 2*l));
 			REQUIRE(compare_sequence_(arr3()()(1, 4, 2), {
 				0x01, 0x03,
 				0x05, 0x07,
@@ -465,13 +465,13 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3()()(1, 4, 2)[2][0][1] == 0x23);
 			REQUIRE(same(
 				arr3()()(1, 4, 2),
-				arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 2))
+				arr3.section(make_ndptrdiff(0, 0, 1), make_ndptrdiff(3, 4, 4), make_ndptrdiff(1, 1, 2))
 			));
 
 			// interval [1,3[ with reversal in one dimension
-			REQUIRE(arr3.shape() == ndsize<3>(3, 4, 4));
-			REQUIRE(arr3(1, 3, -1)()().shape() == ndsize<3>(2, 4, 4));
-			REQUIRE(arr3(1, 3, -1)()().strides() == ndptrdiff<3>(-0x10*l, 0x04*l, l));
+			REQUIRE(arr3.shape() == make_ndsize(3, 4, 4));
+			REQUIRE(arr3(1, 3, -1)()().shape() == make_ndsize(2, 4, 4));
+			REQUIRE(arr3(1, 3, -1)()().strides() == make_ndptrdiff(-0x10*l, 0x04*l, l));
 			REQUIRE(compare_sequence_(arr3(1, 3, -1)()(), {			
 				0x20, 0x21, 0x22, 0x23,
 				0x24, 0x25, 0x26, 0x27,
@@ -486,11 +486,11 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3(1, 3, -1)()()[1][2][3] == 0x1B);
 			REQUIRE(same(
 				arr3(1, 3, -1)()(),
-				arr3.section(ndptrdiff<3>(1, 0, 0), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(-1, 1, 1))
+				arr3.section(make_ndptrdiff(1, 0, 0), make_ndptrdiff(3, 4, 4), make_ndptrdiff(-1, 1, 1))
 			));
 		
-			REQUIRE(arr3()(1, 3, -1)().shape() == ndsize<3>(3, 2, 4));
-			REQUIRE(arr3()(1, 3, -1)().strides() == ndptrdiff<3>(0x10*l, -0x04*l, l));
+			REQUIRE(arr3()(1, 3, -1)().shape() == make_ndsize(3, 2, 4));
+			REQUIRE(arr3()(1, 3, -1)().strides() == make_ndptrdiff(0x10*l, -0x04*l, l));
 			REQUIRE(compare_sequence_(arr3()(1, 3, -1)(), {
 				0x08, 0x09, 0x0A, 0x0B,
 				0x04, 0x05, 0x06, 0x07,
@@ -504,11 +504,11 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3()(1, 3, -1)()[2][1][3] == 0x27);
 			REQUIRE(same(
 				arr3()(1, 3, -1)(),
-				arr3.section(ndptrdiff<3>(0, 1, 0), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, -1, 1))
+				arr3.section(make_ndptrdiff(0, 1, 0), make_ndptrdiff(3, 3, 4), make_ndptrdiff(1, -1, 1))
 			));
 
-			REQUIRE(arr3()()(1, 3, -1).shape() == ndsize<3>(3, 4, 2));
-			REQUIRE(arr3()()(1, 3, -1).strides() == ndptrdiff<3>(0x10*l, 0x04*l, -l));
+			REQUIRE(arr3()()(1, 3, -1).shape() == make_ndsize(3, 4, 2));
+			REQUIRE(arr3()()(1, 3, -1).strides() == make_ndptrdiff(0x10*l, 0x04*l, -l));
 			REQUIRE(compare_sequence_(arr3()()(1, 3, -1), {
 				0x02, 0x01,
 				0x06, 0x05,
@@ -528,14 +528,14 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3()()(1, 3, -1)[2][1][0] == 0x26);
 			REQUIRE(same(
 				arr3()()(1, 3, -1),
-				arr3.section(ndptrdiff<3>(0, 0, 1), ndptrdiff<3>(3, 4, 3), ndptrdiff<3>(1, 1, -1))
+				arr3.section(make_ndptrdiff(0, 0, 1), make_ndptrdiff(3, 4, 3), make_ndptrdiff(1, 1, -1))
 			));
 
 
 			// multiple dimensions...
 			auto sec1 = arr3(1, 3, 1)()(2, 4, 1);
-			REQUIRE(sec1.shape() == ndsize<3>(2, 4, 2));
-			REQUIRE(sec1.strides() == ndptrdiff<3>(0x10*l, 0x04*l, l));
+			REQUIRE(sec1.shape() == make_ndsize(2, 4, 2));
+			REQUIRE(sec1.strides() == make_ndptrdiff(0x10*l, 0x04*l, l));
 			REQUIRE(compare_sequence_(sec1, {
 				0x12, 0x13,
 				0x16, 0x17,
@@ -548,11 +548,12 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 				0x2E, 0x2F
 			}));
 			REQUIRE(sec1[1][3][0] == 0x2E);
-			REQUIRE(same( sec1, arr3.section(ndptrdiff<3>(1, 0, 2), ndptrdiff<3>(3, 4, 4), ndptrdiff<3>(1, 1, 1)) ));
+			REQUIRE(same( sec1,
+				arr3.section(make_ndptrdiff(1, 0, 2), make_ndptrdiff(3, 4, 4), make_ndptrdiff(1, 1, 1)) ));
 		
 			auto sec2 = arr3(1, 3, 1)(0, 3, 2)(2, 4, 1);
-			REQUIRE(sec2.shape() == ndsize<3>(2, 2, 2));
-			REQUIRE(sec2.strides() == ndptrdiff<3>(0x10*l, 2*0x04*l, l));
+			REQUIRE(sec2.shape() == make_ndsize(2, 2, 2));
+			REQUIRE(sec2.strides() == make_ndptrdiff(0x10*l, 2*0x04*l, l));
 			REQUIRE(compare_sequence_(sec2, {
 				0x12, 0x13,
 				0x1A, 0x1B,
@@ -562,11 +563,12 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			}));
 			REQUIRE(sec2[1][0][1] == 0x23);
 			REQUIRE(sec2[1][0][0] == 0x22);
-			REQUIRE(same( sec2, arr3.section(ndptrdiff<3>(1, 0, 2), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, 2, 1)) ));
+			REQUIRE(same( sec2,
+				arr3.section(make_ndptrdiff(1, 0, 2), make_ndptrdiff(3, 3, 4), make_ndptrdiff(1, 2, 1)) ));
 
 			auto sec3 = arr3(1, 3, 1)(0, 3, -2)(2, 4, 1);
-			REQUIRE(sec3.shape() == ndsize<3>(2, 2, 2));
-			REQUIRE(sec3.strides() == ndptrdiff<3>(0x10*l, -2*0x04*l, l));
+			REQUIRE(sec3.shape() == make_ndsize(2, 2, 2));
+			REQUIRE(sec3.strides() == make_ndptrdiff(0x10*l, -2*0x04*l, l));
 			REQUIRE(compare_sequence_(sec3, {
 				0x1A, 0x1B,
 				0x12, 0x13,
@@ -576,11 +578,12 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			}));
 			REQUIRE(sec3[1][0][1] == 0x2B);
 			REQUIRE(sec3[1][0][0] == 0x2A);
-			REQUIRE(same( sec3, arr3.section(ndptrdiff<3>(1, 0, 2), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(1, -2, 1)) ));
+			REQUIRE(same( sec3,
+				arr3.section(make_ndptrdiff(1, 0, 2), make_ndptrdiff(3, 3, 4), make_ndptrdiff(1, -2, 1)) ));
 
 			auto sec4 = arr3(1, 3, -1)(0, 3, -2)(2, 4, -1);
-			REQUIRE(sec4.shape() == ndsize<3>(2, 2, 2));
-			REQUIRE(sec4.strides() == ndptrdiff<3>(-0x10*l, -2*0x04*l, -l));
+			REQUIRE(sec4.shape() == make_ndsize(2, 2, 2));
+			REQUIRE(sec4.strides() == make_ndptrdiff(-0x10*l, -2*0x04*l, -l));
 			REQUIRE(compare_sequence_(sec4, {			
 				0x2B, 0x2A,
 				0x23, 0x22,
@@ -590,7 +593,8 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			}));
 			REQUIRE(sec4[1][0][1] == 0x1A);
 			REQUIRE(sec4[1][0][0] == 0x1B);
-			REQUIRE(same( sec4, arr3.section(ndptrdiff<3>(1, 0, 2), ndptrdiff<3>(3, 3, 4), ndptrdiff<3>(-1, -2, -1)) ));
+			REQUIRE(same( sec4,
+				arr3.section(make_ndptrdiff(1, 0, 2), make_ndptrdiff(3, 3, 4), make_ndptrdiff(-1, -2, -1)) ));
 		}
 		
 		SECTION("index") {
@@ -602,7 +606,9 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			// 22 23
 			
 			std::vector<int> values { 0x1A, 0x1B, 0x12, 0x13, 0x2A, 0x2B, 0x22, 0x23 };
-			std::vector<ndptrdiff<3>> coordss { {0,0,0}, {0,0,1}, {0,1,0}, {0,1,1}, {1,0,0}, {1,0,1}, {1,1,0}, {1,1,1} };
+			std::vector<ndptrdiff<3>> coordss {
+				{0,0,0}, {0,0,1}, {0,1,0}, {0,1,1}, {1,0,0}, {1,0,1}, {1,1,0}, {1,1,1}
+			};
 			for(std::ptrdiff_t index = 0; index < values.size(); ++index) {
 				auto&& value = values[index];
 				auto&& coords = coordss[index];
@@ -622,7 +628,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 
 			
 			REQUIRE(arr3.slice(1, 0).dimension == 2);
-			REQUIRE(arr3.slice(1, 0).shape() == ndsize<2>(4, 4));
+			REQUIRE(arr3.slice(1, 0).shape() == make_ndsize(4, 4));
 			
 			REQUIRE(compare_sequence_(arr3.slice(0, 0), {
 				0x00, 0x01, 0x02, 0x03,
@@ -676,7 +682,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			int d;
 		};
 		
-		ndsize<2> shp(10, 20);
+		ndsize<2> shp{10, 20};
 		std::vector<derived> raw(shp.product());
 		for(std::ptrdiff_t i = 0; i < raw.size(); ++i) {
 			raw[i].b = i;
@@ -685,7 +691,7 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		
 		ndarray_view<2, derived> arr(raw.data(), shp);
 		REQUIRE(arr.shape() == shp);
-		REQUIRE(arr.strides() == ndptrdiff<2>( 20*sizeof(derived) ,sizeof(derived)) );
+		REQUIRE(arr.strides() == make_ndptrdiff( 20*sizeof(derived) ,sizeof(derived)) );
 		
 		SECTION("downcast") {
 			ndarray_view<2, base> arr2 = ndarray_view_cast<base>(arr);

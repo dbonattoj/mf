@@ -28,6 +28,7 @@ namespace detail {
 }
 
 
+/// Mapping between coordinates, indices, and addresses of multi-dimensional data.
 template<std::size_t Dim, typename T>
 class ndarray_view {
 	static_assert(Dim >= 1, "ndarray_view dimension must be >= 1");
@@ -60,37 +61,46 @@ public:
 
 	ndarray_view() :
 		ndarray_view(nullptr, shape_type()) { }
-	ndarray_view(pointer start, const shape_type& shape, const strides_type& strides);
+	ndarray_view(pointer start, const shape_type&, const strides_type&);
 	ndarray_view(pointer start, const shape_type& shape);
 	
 	ndarray_view(const ndarray_view<Dim, std::remove_const_t<T>>& arr) :
 		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
 		
 	void reset(const ndarray_view& other) noexcept;
-	void reset(pointer start, const shape_type& shape, const strides_type& strides) { reset(ndarray_view(start, shape, strides)); }
-	void reset(pointer start, const shape_type& shape) { reset(ndarray_view(start, shape)); }
+	void reset(pointer start, const shape_type& shape, const strides_type& strides)
+		{ reset(ndarray_view(start, shape, strides)); }
+	void reset(pointer start, const shape_type& shape)
+		{ reset(ndarray_view(start, shape)); }
 	
-	template<typename Arg> ndarray_view& operator=(Arg&& arg) { assign(std::forward<Arg>(arg)); return *this; }
-	ndarray_view& operator=(const ndarray_view& other) { assign(other); return *this; }
+	template<typename Arg> ndarray_view& operator=(Arg&& arg)
+		{ assign(std::forward<Arg>(arg)); return *this; }
+	ndarray_view& operator=(const ndarray_view& other)
+		{ assign(other); return *this; }
 	
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
 	pointer coordinates_to_pointer(const coordinates_type&) const;
 		
-	ndarray_view section(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const;
+	ndarray_view section(
+		const coordinates_type& start,
+		const coordinates_type& end,
+		const strides_type& steps = strides_type(1)
+	) const;
 	ndarray_view<Dim - 1, T> slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const;
 	
 	decltype(auto) operator[](std::ptrdiff_t c) const {
 		return detail::get_subscript(*this, c);
 	}
 	
-	detail::ndarray_view_fcall<Dim, T, 1> operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
+	using fcall_result = detail::ndarray_view_fcall<Dim, T, 1>;
+	fcall_result operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
 		return section_(0, start, end, step);
 	}
-	detail::ndarray_view_fcall<Dim, T, 1> operator()(std::ptrdiff_t c) const {
+	fcall_result operator()(std::ptrdiff_t c) const {
 		return section_(0, c, c + 1, 1);
 	}
-	detail::ndarray_view_fcall<Dim, T, 1> operator()() const {
+	fcall_result operator()() const {
 		return *this;
 	}
 	
@@ -109,7 +119,8 @@ public:
 	template<typename Arg> bool operator!=(Arg&& arg) const { return ! compare(std::forward<Arg>(arg)); }
 		
 	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
-		return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
+		return (a.start_ == b.start_) && (a.shape_ == b.shape_)
+		    && (a.strides_ == b.strides_);
 	}
 	
 	std::size_t size() const { return shape().product(); }

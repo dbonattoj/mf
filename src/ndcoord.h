@@ -16,33 +16,24 @@ struct ndcoord {
 	static_assert(std::is_arithmetic<T>::value, "ndcoord component type must be arithmetic");
 
 	std::array<T, Dim> components;
-		
+	
+	ndcoord(T value = 0) noexcept { components.fill(value); }
+	
 	template<typename It>
-	void from_iterators(It begin, It end) {
+	ndcoord(It begin, It end) {
 		auto out = components.begin();
 		for(auto in = begin; in != end; ++in, ++out)
 			*out = static_cast<T>(*in);
 	}
-
-	ndcoord() noexcept { components.fill(0); }
-	explicit ndcoord(T value) noexcept { components.fill(value); }
 		
-	template<typename... Cs>
-	ndcoord(T first, T second, Cs... others) noexcept :
-	components{ {static_cast<T>(first), static_cast<T>(second), static_cast<T>(others)...} } {
-		static_assert(Dim >= 2 && sizeof...(Cs) == Dim - 2, "number of coordinates must equal Dim");
-	}
-		
-	ndcoord(std::initializer_list<T> l) noexcept {
-		from_iterators(l.begin(), l.end());
-	}
+	ndcoord(std::initializer_list<T> l) noexcept :
+		ndcoord(l.begin(), l.end()) { }
 			
 	ndcoord(const ndcoord&) = default;
 	
 	template<typename T2>
-	ndcoord(const ndcoord<Dim, T2>& coord) {
-		from_iterators(coord.components.begin(), coord.components.end());
-	}
+	ndcoord(const ndcoord<Dim, T2>& coord) :
+		ndcoord(coord.components.begin(), coord.components.end()) { }
 	
 	T& operator[](std::ptrdiff_t i) noexcept {
 		assert(i >= 0 && i < Dim);
@@ -74,17 +65,19 @@ struct ndcoord {
 	ndcoord operator+() noexcept { return *this; }
 	ndcoord operator-() noexcept { return transform_inplace(std::negate<T>()); }
 
-	friend ndcoord operator+(const ndcoord& a, const ndcoord& b) noexcept { return transform(a, b, std::plus<T>()); }
-	friend ndcoord operator-(const ndcoord& a, const ndcoord& b) noexcept { return transform(a, b, std::minus<T>()); }
-	friend ndcoord operator*(const ndcoord& a, const ndcoord& b) noexcept { return transform(a, b, std::multiplies<T>()); }
-	friend ndcoord operator/(const ndcoord& a, const ndcoord& b) noexcept { return transform(a, b, std::divides<T>()); }
+	friend ndcoord operator+(const ndcoord& a, const ndcoord& b) noexcept
+		{ return transform(a, b, std::plus<T>()); }
+	friend ndcoord operator-(const ndcoord& a, const ndcoord& b) noexcept
+		{ return transform(a, b, std::minus<T>()); }
+	friend ndcoord operator*(const ndcoord& a, const ndcoord& b) noexcept
+		{ return transform(a, b, std::multiplies<T>()); }
+	friend ndcoord operator/(const ndcoord& a, const ndcoord& b) noexcept
+		{ return transform(a, b, std::divides<T>()); }
 	
-	friend bool operator==(const ndcoord& a, const ndcoord& b) noexcept {
-		return a.components == b.components;
-	}
-	friend bool operator!=(const ndcoord& a, const ndcoord& b) noexcept {
-		return a.components != b.components;
-	}
+	friend bool operator==(const ndcoord& a, const ndcoord& b) noexcept
+		{ return a.components == b.components; }
+	friend bool operator!=(const ndcoord& a, const ndcoord& b) noexcept
+		{ return a.components != b.components; }
 	
 	T product() const noexcept {
 		T prod = 1;
@@ -98,14 +91,12 @@ struct ndcoord {
 	T& back() noexcept { return components.back(); }	
 	
 	ndcoord<Dim - 1, T> tail() const noexcept {
-		ndcoord<Dim - 1, T> c;
-		c.from_iterators(components.begin() + 1, components.end());
+		ndcoord<Dim - 1, T> c(components.begin() + 1, components.end());
 		return c;
 	}
 			
 	ndcoord<Dim - 1, T> head() const noexcept {
-		ndcoord<Dim - 1, T> c;
-		c.from_iterators(components.begin(), components.end() - 1);
+		ndcoord<Dim - 1, T> c(components.begin(), components.end() - 1);
 		return c;
 	}
 	
@@ -169,7 +160,7 @@ using ndptrdiff = ndcoord<Dim, std::ptrdiff_t>;
 
 template<typename T, typename... Components>
 auto make_ndcoord(Components... c) {
-	return ndcoord<sizeof...(Components), T>(c...);
+	return ndcoord<sizeof...(Components), T>({ static_cast<T>(c)... });
 }
 
 template<typename... Components>

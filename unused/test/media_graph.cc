@@ -1,3 +1,4 @@
+/*
 #include <catch.hpp>
 #include "../src/media_node.h"
 #include "../src/yuv_file_source.h"
@@ -54,3 +55,4 @@ TEST_CASE("media_graph", "[media_graph]") {
 	
 	for(int i = 0; i < 100; ++i) sink.pull_frame();
 }
+*/

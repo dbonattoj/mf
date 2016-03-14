@@ -15,7 +15,7 @@ static ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
 }
 
 TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
-	ndsize<2> shape(320, 240);
+	ndsize<2> shape{320, 240};
 	std::size_t duration = 5;
 	
 	ndarray_shared_ring<2, int> ring(shape, duration);
@@ -84,6 +84,9 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		w_section[1] = make_frame(shape, 1);
 		w_section[2] = make_frame(shape, 2);
 		ring.end_write(3);
+		
+		REQUIRE(ring.readable_duration() == 3);
+		REQUIRE(ring.writable_duration() == 2);
 
 		SECTION("concurrent reading") {
 			std::mutex wait_;
@@ -120,7 +123,7 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			other.join();
 		}
 		
-		SECTION("deadlock") {	
+		SECTION("deadlock on read") {	
 			std::mutex mut;
 			mut.lock();
 			std::thread writer([&](){
@@ -138,6 +141,125 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 
 			ring.skip(3);
 			writer.join();
+		}
+
+		SECTION("deadlock on read") {	
+			std::mutex mut;
+			mut.lock();
+			std::thread reader([&](){
+				// try to read 4 frames
+				// --> locks, because currently only 3 readable
+				mut.unlock();
+				auto r_section = ring.begin_read(4);
+			});
+	
+			// try to write 4 frames
+			// --> would also lock, because currently only 2 writable
+			mut.lock();
+			std::this_thread::sleep_for(5ms);
+			CHECK_THROWS_AS(ring.begin_write(4), sequencing_error);
+
+			ring.begin_write(1);
+			ring.end_write(1);
+			reader.join();
+		}
+	}
+
+
+	SECTION("mark end") {
+		auto w_section = ring.begin_write(2);
+		w_section[0] = make_frame(shape, 0);
+		w_section[1] = make_frame(shape, 1);
+		ring.end_write(2);
+		
+		REQUIRE(ring.shared_readable_duration() == 2);
+		REQUIRE_FALSE(ring.reader_eof());
+		REQUIRE(ring.shared_writable_duration() == 3);
+		REQUIRE(ring.writable_duration() == 3);
+		REQUIRE_FALSE(ring.writer_eof());
+
+		SECTION("writer end, read") {
+			// mark end at position 4 (frame 3 = last)
+			auto w_section = ring.begin_write(2);
+			w_section[0] = make_frame(shape, 3);
+			ring.end_write(1, true);
+			
+			REQUIRE(ring.shared_readable_duration() == 3);
+			REQUIRE_FALSE(ring.reader_eof());
+			REQUIRE(ring.shared_writable_duration() == 0);
+			REQUIRE(ring.writable_duration() == 2);
+			REQUIRE(ring.writer_eof());
+		
+			// read: will only read before end
+			auto r_section = ring.begin_read(5);
+			REQUIRE(r_section.shape()[0] == 3);
+			ring.end_read(3);
+			
+			REQUIRE(ring.shared_readable_duration() == 0);
+			REQUIRE(ring.reader_eof());
+			REQUIRE(ring.shared_writable_duration() == 0);
+			REQUIRE(ring.writable_duration() == 5);
+			REQUIRE(ring.writer_eof());
+		}
+		
+		SECTION("writer end, read reaches_eof overload") {
+			// mark end at position 4 (frame 3 = last)
+			auto w_section = ring.begin_write(2);
+			w_section[0] = make_frame(shape, 3);
+			ring.end_write(1, true);
+					
+			// read less than maximum
+			bool reaches_eof = true; // ...check that it is changed to false
+			auto r_section = ring.begin_read(1, reaches_eof);
+			REQUIRE_FALSE(reaches_eof);
+			REQUIRE(r_section.shape()[0] == 1);
+			ring.end_read(1);
+			
+			REQUIRE(ring.shared_readable_duration() == 2);
+			REQUIRE_FALSE(ring.reader_eof());
+			REQUIRE(ring.shared_writable_duration() == 0);
+			REQUIRE(ring.writable_duration() == 3);
+			REQUIRE(ring.writer_eof());
+			
+			SECTION("exact") {
+				// read maximum
+				r_section.reset(ring.begin_read(2, reaches_eof));
+				REQUIRE(reaches_eof);
+				ring.end_read(2);
+				
+				REQUIRE(ring.shared_readable_duration() == 0);
+				REQUIRE(ring.reader_eof());
+			}
+			
+			SECTION("more") {
+				// read beyond maximum
+				r_section.reset(ring.begin_read(3, reaches_eof));
+				REQUIRE(reaches_eof);
+				REQUIRE(r_section.shape()[0] == 2);
+				ring.end_read(2);
+				
+				REQUIRE(ring.shared_readable_duration() == 0);
+				REQUIRE(ring.reader_eof());
+			}
+		}
+		
+		SECTION("writer end, skip") {
+			// mark end at position 4 (frame 3 = last)
+			auto w_section = ring.begin_write(2);
+			w_section[0] = make_frame(shape, 3);
+			ring.end_write(1, true);
+			
+			// cannot write more after eof
+			REQUIRE_THROWS_AS(ring.begin_write(1), sequencing_error);
+			
+			// skip: will not wait for any more
+			ring.skip(10);
+			
+			REQUIRE(ring.shared_readable_duration() == 0);
+			REQUIRE(ring.reader_eof());
+			REQUIRE(ring.shared_writable_duration() == 0);
+			REQUIRE(ring.writable_duration() == 5);
+			REQUIRE(ring.writer_eof());
 		}
 	}
 }

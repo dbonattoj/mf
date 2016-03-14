@@ -3,45 +3,30 @@
 
 #include <cassert>
 #include <cstdint>
-#include <ostream>
 
+#include "ndspan.h"
 #include "debug.h"
 #include "exceptions.h"
 
 namespace mf {
 
-using time_unit = std::int32_t;
+using time_unit = std::ptrdiff_t;
 
-class time_span {
-private:
-	time_unit start_;
-	time_unit end_;
 
+class time_span : public ndspan<1, time_unit> {
+	using base = ndspan<1, time_unit>;
+	
 public:
+	time_span() = default;
+	time_span(const base& span) : base(span) { }
 	time_span(time_unit start, time_unit end) :
-	start_(start), end_(end) {
-		assert(end >= start);
-	}
+		base{start, end} { }
 	
-	time_unit duration() const noexcept { return end_ - start_; }
-	time_unit start_time() const noexcept { return start_; }
-	time_unit end_time() const noexcept { return end_; }
-	
-	bool includes(time_span span) const noexcept {
-		return (start_ <= span.start_) && (end_ >= span.end_);
-	};
-	
-	friend bool operator==(const time_span& a, const time_span& b) noexcept {
-		return (a.start_ == b.start_) && (a.end_ == b.end_);
-	}
-	friend bool operator!=(const time_span& a, const time_span& b) noexcept {
-		return !(a == b);
-	}
-	friend std::ostream& operator<<(std::ostream& str, const time_span& span) {
-		str << '[' << span.start_ << ", " << span.end_ << '[';
-		return str;
-	}
+	time_unit start_time() const { return base::start_pos().front(); }
+	time_unit end_time() const { return base::end_pos().front(); }
+	time_unit duration() const { return base::size(); }
 };
+
 
 }
 
