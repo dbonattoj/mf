@@ -2,7 +2,7 @@
 
 namespace mf {
 
-void media_sequential_node::pull_frame() {
+void media_sequential_node::pull_frame_() {
 	// current time = number of frame that is currently processed
 	time_++;
 	
@@ -25,7 +25,12 @@ void media_sequential_node::pull_frame() {
 	}
 	for(auto* output : outputs_) {
 		output->end_write(false);
-	}
+	}	
+}
+
+
+void media_sequential_node::pull_frames(time_unit target_time) {
+	while(time_ < target_time) pull_frame_();
 }
 
 }

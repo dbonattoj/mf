@@ -31,6 +31,7 @@ private:
 	std::atomic<thread_state> reader_state_{idle};
 	std::atomic<thread_state> writer_state_{idle};
 
+	bool read_reaches_eof_ = false;
 	std::atomic<time_unit> end_time_{-1};
 	
 	void skip_available_(std::size_t duration);
@@ -48,7 +49,7 @@ public:
 	void end_write(std::size_t written_duration, bool eof);
 
 	section_view_type begin_read(std::size_t read_duration) override;
-	section_view_type begin_read(std::size_t read_duration, bool& reaches_eof);
+	bool read_reaches_eof() const { return read_reaches_eof_; }
 	void end_read(std::size_t read_duration) override;	
 	
 	void skip(std::size_t skip_duration) override;

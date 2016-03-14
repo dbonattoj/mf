@@ -6,8 +6,11 @@
 namespace mf {
 
 class media_sequential_node : public media_node {
+private:
+	void pull_frame_();
+
 public:
-	void pull_frame() override;
+	void pull_frames(time_unit target_time) override;
 };
 
 

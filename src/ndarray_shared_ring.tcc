@@ -78,25 +78,18 @@ void ndarray_shared_ring<Dim, T>::end_write(std::size_t written_duration, bool e
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_shared_ring<Dim, T>::begin_read(std::size_t read_duration) -> section_view_type {
-	bool reaches_eof; // ignored
-	return begin_read(read_duration, reaches_eof);
-}
-
-
-template<std::size_t Dim, typename T>
-auto ndarray_shared_ring<Dim, T>::begin_read(std::size_t duration, bool& reaches_eof) -> section_view_type {
+auto ndarray_shared_ring<Dim, T>::begin_read(std::size_t duration) -> section_view_type {
 	if(duration > base::total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
 	if(reader_state_ != idle) throw sequencing_error("already reading");
 
-	reaches_eof = false;
+	read_reaches_eof_ = false;
 
 	std::unique_lock<std::mutex> lock(positions_mutex_);
 
 	time_unit requested_start_time = base::readable_time_span().start_time();
 	if(end_time_.load() <= requested_start_time + duration) {
 		duration = end_time_.load() - requested_start_time;
-		reaches_eof = true;
+		read_reaches_eof_ = true;
 	}
 
 	if(base::readable_duration() < duration && writer_state_ == waiting)
@@ -109,7 +102,7 @@ auto ndarray_shared_ring<Dim, T>::begin_read(std::size_t duration, bool& reaches
 		
 		if(end_time_.load() <= requested_start_time + duration) {
 			duration = end_time_.load() - requested_start_time;
-			reaches_eof = true;
+			read_reaches_eof_ = true;
 		}
 	}
 	

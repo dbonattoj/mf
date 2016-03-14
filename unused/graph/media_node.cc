@@ -12,5 +12,9 @@ void media_node::register_output_(detail::media_node_output_base& output) {
 	outputs_.push_back(&output);
 }
 
+bool media_node::reached_eof() const {
+	return false;
+}
+
 
 }

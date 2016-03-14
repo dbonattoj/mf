@@ -177,41 +177,22 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		REQUIRE(ring.shared_writable_duration() == 3);
 		REQUIRE(ring.writable_duration() == 3);
 		REQUIRE_FALSE(ring.writer_eof());
-
-		SECTION("writer end, read") {
+		
+		SECTION("writer end, read, reaches eof test") {
 			// mark end at position 4 (frame 3 = last)
 			auto w_section = ring.begin_write(2);
 			w_section[0] = make_frame(shape, 3);
 			ring.end_write(1, true);
-			
+
 			REQUIRE(ring.shared_readable_duration() == 3);
 			REQUIRE_FALSE(ring.reader_eof());
 			REQUIRE(ring.shared_writable_duration() == 0);
 			REQUIRE(ring.writable_duration() == 2);
 			REQUIRE(ring.writer_eof());
-		
-			// read: will only read before end
-			auto r_section = ring.begin_read(5);
-			REQUIRE(r_section.shape()[0] == 3);
-			ring.end_read(3);
-			
-			REQUIRE(ring.shared_readable_duration() == 0);
-			REQUIRE(ring.reader_eof());
-			REQUIRE(ring.shared_writable_duration() == 0);
-			REQUIRE(ring.writable_duration() == 5);
-			REQUIRE(ring.writer_eof());
-		}
-		
-		SECTION("writer end, read reaches_eof overload") {
-			// mark end at position 4 (frame 3 = last)
-			auto w_section = ring.begin_write(2);
-			w_section[0] = make_frame(shape, 3);
-			ring.end_write(1, true);
-					
+	
 			// read less than maximum
-			bool reaches_eof = true; // ...check that it is changed to false
-			auto r_section = ring.begin_read(1, reaches_eof);
-			REQUIRE_FALSE(reaches_eof);
+			auto r_section = ring.begin_read(1);
+			REQUIRE_FALSE(ring.read_reaches_eof());
 			REQUIRE(r_section.shape()[0] == 1);
 			ring.end_read(1);
 			
@@ -223,8 +204,8 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			
 			SECTION("exact") {
 				// read maximum
-				r_section.reset(ring.begin_read(2, reaches_eof));
-				REQUIRE(reaches_eof);
+				r_section.reset(ring.begin_read(2));
+				REQUIRE(ring.read_reaches_eof());
 				ring.end_read(2);
 				
 				REQUIRE(ring.shared_readable_duration() == 0);
@@ -233,8 +214,8 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			
 			SECTION("more") {
 				// read beyond maximum
-				r_section.reset(ring.begin_read(3, reaches_eof));
-				REQUIRE(reaches_eof);
+				r_section.reset(ring.begin_read(3));
+				REQUIRE(ring.read_reaches_eof());
 				REQUIRE(r_section.shape()[0] == 2);
 				ring.end_read(2);
 				

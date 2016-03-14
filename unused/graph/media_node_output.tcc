@@ -10,8 +10,7 @@ void media_node_output<Dim, T>::initialize(const ndsize<Dim>& frame_shape, time_
 
 template<std::size_t Dim, typename T>
 void media_node_output<Dim, T>::pull(time_unit target_time) {
-	// pull frames from node until arriving at target time
-	while(node_.current_time() < last_frame) node_.pull_frame();
+	node_.pull_frames(target_time);
 }
 
 

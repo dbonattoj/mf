@@ -27,7 +27,8 @@ protected:
 public:
 	virtual ~media_node() { }
 		
-	virtual void pull_frame() = 0;
+	virtual void pull_frames(time_unit target_time) = 0;
+	virtual bool reached_eof() const;
 	
 	time_unit current_time() const noexcept { return time_; }
 };
