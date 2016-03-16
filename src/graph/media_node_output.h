@@ -36,7 +36,7 @@ public:
 	bool frame_shape_is_defined() const override { return frame_shape_.product() != 0; }
 	const frame_shape_type& frame_shape() const;
 	
-	void initialize();
+	void setup() override;
 		
 	frame_view_type view() const { return view_; }
 				

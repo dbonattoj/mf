@@ -20,7 +20,7 @@ void media_sequential_node::pull_frame_() {
 	}
 	
 	// begin writing to outputs
-	for(auto* output : outputs_) output->begin_write();
+	for(media_node_output_base* output : outputs_) output->begin_write();
 	
 	// process in subclass
 	// views are now available (input.view(), output.view())

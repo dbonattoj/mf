@@ -22,6 +22,8 @@ public:
 
 	media_node& node() const { return node_; }
 
+	virtual void setup() = 0;
+
 	virtual void begin_write() = 0;
 	virtual void end_write(bool eof) = 0;
 	

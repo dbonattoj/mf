@@ -46,14 +46,25 @@ void media_node::propagate_output_buffer_durations_() {
 
 
 void media_node::propagate_setup_() {
+	// do nothing when did_setup_ is already set:
+	// during recursive propagation it may be called multiple times on same node
 	if(did_setup_) return;
 	
+	// first set up preceding nodes
 	for(media_node_input_base* input : inputs_) {
 		media_node& connected_node = input->connected_output().node();
 		connected_node.propagate_setup_();
 	}
 	
+	// set up this node in concrete subclass
 	this->setup_();
+	
+	// set up outputs
+	// their frame shape are now defined, and required durations were defined before
+	// (in propagate_output_buffer_durations_())
+	for(media_node_output_base* output : outputs_)
+		output->setup();
+	
 	did_setup_ = true;
 }
 

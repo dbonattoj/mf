@@ -10,6 +10,7 @@ void media_graph::setup() {
 	if(setup_) throw std::logic_error("media graph was already set up");
 	if(sink_ == nullptr) throw std::logic_error("no sink node was added to media graph");
 	sink_->setup_graph();
+	setup_ = true;
 }
 
 

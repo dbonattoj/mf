@@ -31,8 +31,8 @@ protected:
 	void propagate_output_buffer_durations_();
 	
 	/// Set up preceding nodes, and then this node.
-	/** Calls setup_() on concrete subclass, and sets initialized_. Does not re-initialize when did_setup_
-	 ** is already set. */
+	/** Calls setup_() on concrete subclass, calls setup_() on outputs, and sets did_setup_. Does not re-initialize
+	 ** when did_setup_ is already set. */
 	void propagate_setup_();
 	
 	/// Set up the node.

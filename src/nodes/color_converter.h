@@ -10,7 +10,7 @@
 namespace mf {
 
 template<typename Input_color, typename Output_color>
-class color_converter : public media_node_sequential {	
+class color_converter : public media_sequential_node {	
 public:
 	media_node_output<2, Output_color> output;
 	media_node_input<2, Input_color> input;

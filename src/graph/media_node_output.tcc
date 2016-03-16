@@ -16,7 +16,7 @@ auto media_node_output<Dim, T>::frame_shape() const -> const frame_shape_type& {
 
 
 template<std::size_t Dim, typename T>
-void media_node_output<Dim, T>::initialize() {
+void media_node_output<Dim, T>::setup() {
 	assert(required_buffer_duration_is_defined());
 	assert(frame_shape_is_defined());
 

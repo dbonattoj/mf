@@ -34,9 +34,9 @@ public:
 	template<typename Node, typename... Args>
 	Node& add_sink(Args&&... args) {
 		static_assert(std::is_base_of<media_sink_node, Node>::value, "sink node must be subclass of media_sink_node");
-		Node* sink = add_node(std::forward<Args>(args)...);
+		Node& sink = add_node<Node>(std::forward<Args>(args)...);
 		sink_ = &sink;
-		return *sink;
+		return sink;
 	}
 	
 	void setup();
