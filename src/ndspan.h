@@ -7,6 +7,7 @@
 
 namespace mf {
 
+
 template<std::size_t Dim, typename T>
 class ndspan {
 public:

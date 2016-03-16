@@ -1,0 +1,3 @@
+- initialize() = put object into initial state, as on construction
+
+- setup() = make object ready to use. needs to be called before use.

@@ -5,12 +5,13 @@
 #include <fstream>
 #include <memory>
 #include <cstdint>
-#include "media_node.h"
-#include "color.h"
+#include "../graph/media_sequential_node.h"
+#include "../graph/media_node_output.h"
+#include "../color.h"
 
 namespace mf {
 
-class yuv_file_source : public media_node_source {
+class yuv_file_source : public media_sequential_node {
 private:
 	std::ifstream file_;
 	std::size_t width_;
@@ -21,7 +22,9 @@ private:
 	void read_frame_(const ndarray_view<2, ycbcr_color>&);
 
 protected:
+	void setup_() override;
 	void process_() override;
+	bool process_reached_end_() const override;
 
 public:
 	media_node_output<2, ycbcr_color> output;

@@ -1,0 +1,67 @@
+#ifndef MF_MEDIA_NODE_INPUT_H_
+#define MF_MEDIA_NODE_INPUT_H_
+
+#include <stdexcept>
+#include "../common.h"
+#include "../ndarray_view.h"
+#include "media_node_io_base.h"
+#include "media_node_output.h"
+
+namespace mf {
+
+class media_node;
+
+/// Input of a media node.
+template<std::size_t Dim, typename T>
+class media_node_input : public media_node_input_base {
+public:
+	using output_type = media_node_output<Dim, T>;
+	
+	using frame_view_type = ndarray_view<Dim, T>;
+	using full_view_type = ndarray_view<Dim + 1, T>;
+	using frame_shape_type = typename frame_view_type::shape_type;	
+
+private:
+	output_type* connected_output_ = nullptr; ///< Output of other media node to which input is connected.
+	
+	full_view_type view_;
+	std::ptrdiff_t view_center_;
+
+public:
+	media_node_input(media_node& node, time_unit past_window = 0, time_unit future_window = 0) :
+		media_node_input_base(node, past_window, future_window) { }
+			
+	void connect(output_type& output);
+	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
+	output_type& connected_output() const override;
+	
+	const frame_shape_type& frame_shape() const { return connected_output().frame_shape(); }
+		
+	/// Begin reading next frame from input.
+	/** Recursively pulls frame from connected node. View to the frame becomes available via view(), and to whole
+	 ** window via full_view(). reached_end() becomes true if this is last frame. */
+	void begin_read(time_unit t) override;
+	
+	/// Must be called after frame has been processed.
+	/** Called after begin_read(). View is becomes longer available. */
+	void end_read(time_unit t) override;
+	
+	/// Returns true if last read frame is the last frame in stream.
+	bool reached_end() const override;
+
+	
+	/// Get readable view of current frame.
+	/** Only callable while in media_node::process_(). */
+	frame_view_type view() const { return view_[view_center_]; }
+	
+	const full_view_type& full_view() const { return view_; }	
+	std::ptrdiff_t full_view_center() const { return view_center_; }
+	full_view_type past_view() const { return view_(0, view_center_ + 1, -1); }
+	full_view_type future_view() const { return view_(view_center_, -1); }
+};	
+
+}
+
+#include "media_node_input.tcc"
+
+#endif

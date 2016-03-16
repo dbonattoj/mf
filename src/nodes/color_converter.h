@@ -2,10 +2,10 @@
 #define MF_COLOR_CONVERTER_H_
 
 #include <algorithm>
-#include "media_node.h"
-#include "color.h"
-
-#include <iostream>
+#include "../graph/media_sequential_node.h"
+#include "../graph/media_node_input.h"
+#include "../graph/media_node_output.h"
+#include "../color.h"
 
 namespace mf {
 
@@ -15,16 +15,17 @@ public:
 	media_node_output<2, Output_color> output;
 	media_node_input<2, Input_color> input;
 
-	color_converter(const ndsize<2>& shape) :
-	output(*this, shape), input(0) {
-		register_input_(input);
-		register_output_(output);
+	color_converter() :
+		output(*this), input(*this) { }
+	
+	void setup_() override {
+		output.define_frame_shape(input.frame_shape());
 	}
 	
 	void process_() override {
 		std::transform(
-			input.view()[0].begin(),
-			input.view()[0].end(),
+			input.view().begin(),
+			input.view().end(),
 			output.view().begin(),
 			color_convert<Input_color, Output_color>
 		);

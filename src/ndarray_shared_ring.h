@@ -42,6 +42,7 @@ public:
 	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration) :
 		base(frames_shape, duration) { }
 	
+	/// Reinitialize ring buffer to state on construction.
 	void initialize() override;
 	
 	section_view_type begin_write(std::size_t duration) override;

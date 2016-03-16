@@ -8,6 +8,7 @@ void ndarray_shared_ring<Dim, T>::initialize() {
 	reader_state_ = idle;
 	writer_state_ = idle;
 	end_time_ = -1;
+	read_reaches_eof_ = false;
 	base::initialize();
 }
 

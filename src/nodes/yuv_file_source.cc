@@ -1,6 +1,7 @@
 #include "yuv_file_source.h"
-#include "ndarray_view.h"
 #include <iostream>
+#include "../ndcoord.h"
+#include "../ndarray_view.h"
 
 namespace mf {
 
@@ -42,8 +43,18 @@ void yuv_file_source::read_frame_(const ndarray_view<2, ycbcr_color>& out) {
 }
 
 
+void yuv_file_source::setup_() {
+	output.define_frame_shape(make_ndsize(height_, width_));
+}
+
+
 void yuv_file_source::process_() {
 	read_frame_(output.view());
+}
+
+
+bool yuv_file_source::process_reached_end_() const {
+	return file_.eof();
 }
 
 
@@ -51,12 +62,12 @@ yuv_file_source::yuv_file_source(const std::string& filename, std::size_t width,
 	file_(filename, std::ios_base::in | std::ios_base::binary),
 	width_(width),
 	height_(height),
-	output(*this, make_ndsize(height, width))
+	output(*this)
 {
-	register_output_(output);
 	switch(sampling) {
 		case 444: chroma_scale_x_ = 1; chroma_scale_y_ = 1; break;
 		case 420: chroma_scale_x_ = 2; chroma_scale_y_ = 2; break;
+		default: throw std::invalid_argument("unknown YUV file chroma sampling format");
 	}
 }
 
