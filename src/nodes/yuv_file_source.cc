@@ -6,7 +6,12 @@
 namespace mf {
 
 
-void yuv_file_source::read_frame_(const ndarray_view<2, ycbcr_color>& out) {
+void yuv_file_source::setup_() {
+	output.define_frame_shape(make_ndsize(height_, width_));
+}
+
+
+void yuv_file_source::process_() {
 	// Get sizes of luma, 2 chroma parts, and whole frame
 	std::streamsize luma_size = width_ * height_;
 	std::streamsize chroma_size = (width_ / chroma_scale_x_) * (height_ / chroma_scale_y_);
@@ -31,9 +36,8 @@ void yuv_file_source::read_frame_(const ndarray_view<2, ycbcr_color>& out) {
 		make_ndsize(height_ / chroma_scale_y_, width_ / chroma_scale_x_)
 	);
 	
-	// Copy into out
-	std::cout << "h=" << height_ << " w=" << width_ << std::endl; 
-	
+	// Copy into output
+	auto out = output.view();
 	for(std::ptrdiff_t y = 0; y < height_; ++y) for(std::ptrdiff_t x = 0; x < width_; ++x) {
 		ycbcr_color& col = out[y][x];
 		col.y = y_view[y][x];
@@ -43,18 +47,8 @@ void yuv_file_source::read_frame_(const ndarray_view<2, ycbcr_color>& out) {
 }
 
 
-void yuv_file_source::setup_() {
-	output.define_frame_shape(make_ndsize(height_, width_));
-}
-
-
-void yuv_file_source::process_() {
-	read_frame_(output.view());
-}
-
-
-bool yuv_file_source::process_reached_end_() const {
-	return file_.eof();
+bool yuv_file_source::process_reached_end_() {
+	return file_.peek() == -1;
 }
 
 
@@ -64,6 +58,7 @@ yuv_file_source::yuv_file_source(const std::string& filename, std::size_t width,
 	height_(height),
 	output(*this)
 {
+	file_.exceptions(file_.failbit | file_.badbit);
 	switch(sampling) {
 		case 444: chroma_scale_x_ = 1; chroma_scale_y_ = 1; break;
 		case 420: chroma_scale_x_ = 2; chroma_scale_y_ = 2; break;

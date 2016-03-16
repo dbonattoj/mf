@@ -19,12 +19,10 @@ private:
 	std::size_t chroma_scale_x_;
 	std::size_t chroma_scale_y_;
 		
-	void read_frame_(const ndarray_view<2, ycbcr_color>&);
-
 protected:
 	void setup_() override;
 	void process_() override;
-	bool process_reached_end_() const override;
+	bool process_reached_end_() override;
 
 public:
 	media_node_output<2, ycbcr_color> output;

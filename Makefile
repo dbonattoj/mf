@@ -1,4 +1,4 @@
-DEBUG := 1
+DEBUG := 0
 TARGET := ./libmf.dylib
 TEST_TARGET := ./mf_test
 
@@ -21,15 +21,22 @@ else
 	CXXFLAGS += -O3 -DNDEBUG
 endif
 
-
+# library
 LIB_SRC := $(shell find src/. -name '*.cc')
 LIB_OBJ := $(patsubst src/%.cc,build/src/%.o,$(LIB_SRC))
+DEP += $(patsubst %.cc,build/%.d,$(LIB_SRC))
 
+# unit tests
 TEST_SRC := $(shell find test/. -name '*.cc')
 TEST_OBJ := $(patsubst test/%.cc,build/test/%.o,$(TEST_SRC))
- 
-DEP := $(patsubst %.cc,build/%.d,$(LIB_SRC))
 DEP += $(patsubst %.cc,build/%.d,$(TEST_SRC))
+
+# programs
+PROG_SRC := $(shell find programs/. -maxdepth 1 -name '*.cc')
+PROG := $(patsubst programs/%.cc,programs/dist/%,$(PROG_SRC))
+PROG_SUPPORT_SRC := $(shell find programs/support/. -name '*.cc')
+PROG_SUPPORT_OBJ := $(patsubst programs/support/%.cc,build/programs/support/%.o,$(PROG_SUPPORT_SRC))
+DEP += $(patsubst %.cc,build/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
 all : $(TARGET)
@@ -38,11 +45,16 @@ all : $(TARGET)
 test : $(TEST_TARGET)
 	$(TEST_TARGET)
 
+programs : $(PROG)
+
 $(TARGET) : $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -fPIC -shared -o $@ $(LIB_OBJ) $(LDLIBS)
 
 $(TEST_TARGET) : $(TEST_OBJ) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
+
+programs/dist/% : build/programs/%.o $(PROG_SUPPORT_OBJ) $(TARGET)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 build/%.o : %.cc
 	mkdir -p $(dir $@) && \
@@ -52,7 +64,7 @@ clean :
 	rm -rf ./build/
 
 
-.PHONY: clean test	
+.PHONY: clean test programs
 	
 
 -include $(DEP)

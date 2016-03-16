@@ -1,4 +1,5 @@
 #include "media_sink_node.h"
+#include <iostream>
 
 namespace mf {
 
@@ -10,7 +11,8 @@ void media_sink_node::setup_graph() {
 
 
 void media_sink_node::pull_next_frame() {
-	this->pull_frames(time_ + 1);
+	std::cout << "frame " << time_ + 1 << "..." << std::endl;
+	this->pull(time_ + 1);
 }
 
 

@@ -26,7 +26,7 @@ void media_node_output<Dim, T>::setup() {
 
 template<std::size_t Dim, typename T>
 void media_node_output<Dim, T>::pull(time_unit target_time) {
-	node_.pull_frames(target_time);
+	node_.pull(target_time);
 }
 
 
@@ -56,8 +56,8 @@ void media_node_output<Dim, T>::begin_write() {
 
 
 template<std::size_t Dim, typename T>
-void media_node_output<Dim, T>::end_write(bool eof) {
-	buffer_->end_write(1, eof);
+void media_node_output<Dim, T>::end_write(bool is_last_frame) {
+	buffer_->end_write(1, is_last_frame);
 }
 
 }

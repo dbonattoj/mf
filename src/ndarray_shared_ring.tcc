@@ -214,7 +214,7 @@ time_span ndarray_shared_ring<Dim, T>::shared_writable_time_span() const {
 
 template<std::size_t Dim, typename T>
 bool ndarray_shared_ring<Dim, T>::reader_eof() const {
-	return (shared_readable_duration() == 0);
+	return (end_time_ != -1) && (shared_readable_duration() == 0);
 }
 
 

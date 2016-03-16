@@ -39,14 +39,16 @@ public:
 		
 	/// Begin reading next frame from input.
 	/** Recursively pulls frame from connected node. View to the frame becomes available via view(), and to whole
-	 ** window via full_view(). reached_end() becomes true if this is last frame. */
+	 ** window via full_view(). */
 	void begin_read(time_unit t) override;
 	
 	/// Must be called after frame has been processed.
-	/** Called after begin_read(). View is becomes longer available. */
+	/** Called after begin_read(). View is becomes longer available. reached_end() becomes true if this
+	 ** was the last frame. */
 	void end_read(time_unit t) override;
 	
-	/// Returns true if last read frame is the last frame in stream.
+	/// Returns true when there is no more frame available.
+	/** begin_read() cannot be called after this has returned true. */
 	bool reached_end() const override;
 
 	

@@ -44,6 +44,7 @@ public:
 	std::size_t size() const { return shape().product(); }
 };
 
+
 template<std::size_t Dim, typename T>
 std::ostream& operator<<(std::ostream& str, const ndspan<Dim, T>& span) {
 	str << '[' << span.start_pos() << ", " << span.end_pos() << '[';

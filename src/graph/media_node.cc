@@ -16,7 +16,7 @@ void media_node::register_output_(media_node_output_base& output) {
 }
 
 
-bool media_node::process_reached_end_() const {
+bool media_node::process_reached_end_() {
 	return false;
 }
 

@@ -41,13 +41,14 @@ protected:
 	virtual void setup_() = 0;
 	
 	/// Process current frame.
-	/** Implemented in concrete subclass. Input and output views are made available while in this function. */
+	/** Implemented in concrete subclass. Input and output views are made available while in this function. Subclass
+	 ** must read frame(s) from input(s), process, and write one frame into output(s). */
 	virtual void process_() = 0;
 	
-	/// Returns true when last processed frame is last frame.
-	/** Optionally implemented in concrete subclass. Default implementation returns false. If this returns true, or
-	 ** if any input reached end, then reached_end() on this node becomes true. */
-	virtual bool process_reached_end_() const;
+	/// Check whether node reached its end.
+	/** Must return true when the last processed frame is the last frame. process_() will not be called after this
+	 ** returned true. */
+	virtual bool process_reached_end_();
 	
 	explicit media_node(time_unit prefetch) :
 		prefetch_duration_(prefetch) { }
@@ -67,15 +68,15 @@ public:
 	/** When currently processing a frame, time of that frame. */
 	time_unit current_time() const noexcept { return time_; }
 	
-	/// Returns true when last processed frame is last in stream.
-	/** Either because process_reached_end_() returned true for last frame, or because an input has reached end. */
+	/// Returns true when no more frame can be pulled.
+	/** Either because process_reached_end_() returns true, or because an input has reached end. */
 	bool reached_end() const { return reached_end_; }
 
 	/// Pull frames until \a target_time.
 	/** Pulls until \a target_time, or until end, whichever comes first. Implemented by subclass (media_sequential_node
 	 ** or media_parallel_node). Must ensure that after call, frame \a target_time will eventually be available in
-	 ** output buffer(s), and/or end time will be set in buffer(s). */
-	virtual void pull_frames(time_unit target_time) = 0;
+	 ** output buffer(s), and/or end time will be set in buffer(s). Cannot be called when reached_end() is true. */
+	virtual void pull(time_unit target_time) = 0;
 };
 
 }

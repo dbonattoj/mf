@@ -15,7 +15,7 @@ private:
 public:
 	media_sequential_node() : media_node(0) { }
 
-	void pull_frames(time_unit target_time) override;
+	void pull(time_unit target_time) override;
 };
 
 }

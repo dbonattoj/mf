@@ -3,5 +3,7 @@ doc/
 notes/
 test/mf
 output/
+programs/dist/
+data/
 mf_test
 libmf.dylib

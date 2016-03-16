@@ -1,3 +1,8 @@
-- initialize() = put object into initial state, as on construction
+initialize() = put object into initial state, as on construction
+setup() = make object ready to use. needs to be called before use.
 
-- setup() = make object ready to use. needs to be called before use.
+class names:
+***_node (converter / multiplexer) = media node
+***_source = media source
+***_sink = media sink
+

@@ -6,10 +6,15 @@
 
 namespace mf {
 
+struct alignas(4) mono_color {
+	std::uint8_t intensity;
+};
+
+
 struct alignas(4) rgb_color {
-	std::uint8_t r;
-	std::uint8_t g;
-	std::uint8_t b;
+	std::uint8_t r; // red
+	std::uint8_t g; // green
+	std::uint8_t b; // blue
 };
 
 
@@ -24,8 +29,9 @@ template<typename Input, typename Output>
 Output color_convert(const Input& in);
 
 
-template<>
-rgb_color color_convert(const ycbcr_color& in);
+template<> rgb_color color_convert(const ycbcr_color& in);
+template<> mono_color color_convert(const ycbcr_color& in);
+template<> rgb_color color_convert(const mono_color& in);
 
 }
 

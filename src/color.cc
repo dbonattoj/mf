@@ -2,8 +2,7 @@
 
 namespace mf {
 
-template<>
-rgb_color color_convert(const ycbcr_color& in) {
+template<> rgb_color color_convert(const ycbcr_color& in) {
 	float y  = static_cast<float>(in.y) + 0.5f;
 	float cr = static_cast<float>(in.cr) - 127.0f;
 	float cb = static_cast<float>(in.cb) - 127.0f;
@@ -14,5 +13,16 @@ rgb_color color_convert(const ycbcr_color& in) {
 	
 	return { static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(g), static_cast<std::uint8_t>(b) };
 }
+
+
+template<> mono_color color_convert(const ycbcr_color& in) {
+	return { in.y };
+}
+
+
+template<> rgb_color color_convert(const mono_color& in) {
+	return { in.intensity, in.intensity, in.intensity };
+}
+
 
 }

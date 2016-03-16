@@ -28,6 +28,12 @@ public:
 };
 
 
+inline std::ostream& operator<<(std::ostream& str, const time_span& span) {
+	str << '[' << span.start_time() << ", " << span.end_time() << '[';
+	return str;
+}
+
+
 }
 
 #endif
