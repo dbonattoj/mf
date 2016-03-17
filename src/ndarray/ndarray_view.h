@@ -3,7 +3,7 @@
 
 #include "ndcoord.h"
 #include "ndarray_iterator.h"
-#include "util.h"
+#include "../util.h"
 #include <type_traits>
 #include <utility>
 #include <memory>
