@@ -1,0 +1,62 @@
+[file_prefs]
+final_new_line=true
+ensure_convert_new_lines=true
+strip_trailing_spaces=false
+replace_tabs=false
+
+[indentation]
+indent_width=4
+indent_type=1
+indent_hard_tab_width=8
+detect_indent=false
+detect_indent_width=false
+indent_mode=2
+
+[project]
+name=mf
+base_path=/home/timlenertz/Desktop/mf
+description=
+file_patterns=
+
+[long line marker]
+long_line_behaviour=2
+long_line_column=120
+
+[files]
+current_page=3
+FILE_NAME_0=153;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Ftest%2Fmedia_graph.cc;0;4
+FILE_NAME_1=186;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Ftest%2Fsupport%2Fgraph.h;0;4
+FILE_NAME_2=217;Make;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2FMakefile;0;4
+FILE_NAME_3=240;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Ftest%2Fsupport%2Fgraph.cc;0;4
+FILE_NAME_4=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Ftest%2Fsupport%2Fndarray.cc;0;4
+FILE_NAME_5=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Ftest%2Fsupport%2Fndarray.h;0;4
+
+[VTE]
+last_dir=/home/timlenertz/Desktop/mf
+
+[build-menu]
+NF_00_LB=Clean
+NF_00_CM=make clean
+NF_00_WD=%p
+NF_01_LB=Make...
+NF_01_CM=make 
+NF_01_WD=%p
+NF_02_LB=Test
+NF_02_CM=make test
+NF_02_WD=%p
+NF_03_LB=Programs
+NF_03_CM=make progs
+NF_03_WD=%p
+EX_00_LB=Test
+EX_00_CM=./dist/mf_test
+EX_00_WD=%p
+C++FT_00_LB=Build test
+C++FT_00_CM=make dist/mf_test
+C++FT_00_WD=%p
+C++FT_01_LB=
+C++FT_01_CM=
+C++FT_01_WD=
+C++FT_02_LB=
+C++FT_02_CM=
+C++FT_02_WD=
+filetypes=C++;

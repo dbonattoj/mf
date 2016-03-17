@@ -3,7 +3,7 @@ TARGET := dist/libmf.so
 TEST_TARGET := dist/mf_test
 
 CXX := g++-5
-CXXFLAGS := -std=c++14 -Wall -I./external/include
+CXXFLAGS := -std=c++14 -fPIC -I./external/include
 LDFLAGS := 
 LDLIBS := -lpthread -lm
 
