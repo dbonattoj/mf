@@ -3,26 +3,26 @@
 
 namespace mf {
 
-void simple_frame_source::setup_() {
+void sequence_frame_source::setup_() {
 	output.define_frame_shape(frame_shape_);
 }
 
 
-void simple_frame_source::process_() {
+void sequence_frame_source::process_() {
 	output.view() = make_frame(frame_shape_, current_time());
 }
 
 
-bool simple_frame_source::process_reached_end_() {
+bool sequence_frame_source::process_reached_end_() {
 	return (current_time() == last_frame_);
 }
 
 
-void expected_sequence_sink::process_() {
-	if(counter_ < expected_sequence_.size()) {
-		got_mismatch_ = true
+void expected_frames_sink::process_() {
+	if(counter_ >= expected_frames_.size()) {
+		got_mismatch_ = true;
 	} else {
-		int expected = expected_sequence_.at(counter_);
+		int expected = expected_frames_.at(counter_);
 		auto expected_frame = make_frame(input.frame_shape(), expected);
 		if(input.view() != expected_frame) got_mismatch_ = true;
 	}
@@ -30,9 +30,26 @@ void expected_sequence_sink::process_() {
 }
 
 
-bool expected_sequence_sink::got_expected_sequence() {
-	if(counter_ == expected_sequence_.size()) return !got_mismatch_;
+bool expected_frames_sink::got_expected_frames() const {
+	if(counter_ == expected_frames_.size()) return !got_mismatch_;
 	else return false;
 }
+
+
+void callback_node::setup_() {
+	output.define_frame_shape(input.frame_shape());
+}
+
+
+callback_node::callback_node(time_unit past_window, time_unit future_window) :
+	input(*this, past_window, future_window),
+	output(*this) { }
+
+
+
+void callback_node::process_() {
+	callback_(*this, input, output);
+}
+
 
 }
