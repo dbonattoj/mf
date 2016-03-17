@@ -6,7 +6,7 @@
 #include "../graph/media_node_input.h"
 #include "../opencv.h"
 #include "../color.h"
-#include "../ndcoord.h"
+#include "../ndarray/ndcoord.h"
 
 namespace mf {
 

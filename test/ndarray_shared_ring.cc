@@ -2,17 +2,11 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include "../src/ndarray_shared_ring.h"
-#include <iostream>
+#include "../src/ndarray/ndarray_shared_ring.h"
+#include "support/ndarray.h"
 
 using namespace mf;
 using namespace std::literals;
-
-static ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
-	ndarray<2, int> frame(shape);
-	std::fill(frame.begin(), frame.end(), i);
-	return frame;
-}
 
 TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 	ndsize<2> shape{320, 240};

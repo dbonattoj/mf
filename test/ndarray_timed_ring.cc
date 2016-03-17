@@ -1,14 +1,10 @@
 #include <catch.hpp>
 #include <stdexcept>
-#include "../src/ndarray_timed_ring.h"
+#include "../src/ndarray/ndarray_timed_ring.h"
+#include "support/ndarray.h"
 
 using namespace mf;
 
-static ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
-	ndarray<2, int> frame(shape);
-	std::fill(frame.begin(), frame.end(), i);
-	return frame;
-}
 
 TEST_CASE("ndarray_timed_ring", "[ndarray_timed_ring]") {
 	ndsize<2> shape{320, 240};

@@ -1,6 +1,6 @@
-DEBUG := 0
-TARGET := ./libmf.dylib
-TEST_TARGET := ./mf_test
+DEBUG := 1
+TARGET := dist/libmf.dylib
+TEST_TARGET := dist/mf_test
 
 CXX := clang++
 CXXFLAGS := -std=c++14 -Wall -I./external/include
@@ -29,13 +29,15 @@ DEP += $(patsubst %.cc,build/%.d,$(LIB_SRC))
 # unit tests
 TEST_SRC := $(shell find test/. -name '*.cc')
 TEST_OBJ := $(patsubst test/%.cc,build/test/%.o,$(TEST_SRC))
-DEP += $(patsubst %.cc,build/%.d,$(TEST_SRC))
+TEST_SUPPORT_SRC := $(shell find test/support/. -name '*.cc')
+TEST_SUPPORT_OBJ := $(patsubst test/support/%.cc,build/test/support/%.o,$(TEST_SUPPORT_SRC))
+DEP += $(patsubst %.cc,build/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
 
 # programs
-PROG_SRC := $(shell find programs/. -maxdepth 1 -name '*.cc')
-PROG := $(patsubst programs/%.cc,programs/dist/%,$(PROG_SRC))
-PROG_SUPPORT_SRC := $(shell find programs/support/. -name '*.cc')
-PROG_SUPPORT_OBJ := $(patsubst programs/support/%.cc,build/programs/support/%.o,$(PROG_SUPPORT_SRC))
+PROG_SRC := $(shell find prog/. -maxdepth 1 -name '*.cc')
+PROG := $(patsubst prog/%.cc,dist/prog/%,$(PROG_SRC))
+PROG_SUPPORT_SRC := $(shell find prog/support/. -name '*.cc')
+PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,build/prog/support/%.o,$(PROG_SUPPORT_SRC))
 DEP += $(patsubst %.cc,build/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
@@ -45,15 +47,16 @@ all : $(TARGET)
 test : $(TEST_TARGET)
 	$(TEST_TARGET)
 
-programs : $(PROG)
+prog : $(PROG)
 
 $(TARGET) : $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -fPIC -shared -o $@ $(LIB_OBJ) $(LDLIBS)
 
-$(TEST_TARGET) : $(TEST_OBJ) $(LIB_OBJ)
+$(TEST_TARGET) : $(TEST_OBJ) $(TEST_SUPPORT_OBJ) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
 
-programs/dist/% : build/programs/%.o $(PROG_SUPPORT_OBJ) $(TARGET)
+dist/prog/% : build/prog/%.o $(PROG_SUPPORT_OBJ) $(TARGET)
+	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 build/%.o : %.cc
@@ -64,7 +67,7 @@ clean :
 	rm -rf ./build/
 
 
-.PHONY: clean test programs
+.PHONY: clean test prog
 	
 
 -include $(DEP)

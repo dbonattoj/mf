@@ -8,7 +8,6 @@
 	#include <mutex>
 
 	#define MF_DEBUG(...) ::mf::detail::debug_print(std::cerr, __FILE__, __LINE__, __func__, __VA_ARGS__)
-	#define DEBUG(...) MF_DEBUG(__VA_ARGS__)
 
 	namespace mf {
 
@@ -41,7 +40,6 @@
 #else
 	// debugging is disabled	
 	#define MF_DEBUG(...) ;
-	#define DEBUG(...) ;
 	
 #endif
 

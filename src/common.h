@@ -4,7 +4,7 @@
 #include <cassert>
 #include <cstdint>
 
-#include "ndspan.h"
+#include "ndarray/ndspan.h"
 #include "debug.h"
 #include "exceptions.h"
 

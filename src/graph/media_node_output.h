@@ -4,8 +4,8 @@
 #include <memory>
 #include <stdexcept>
 #include "../common.h"
-#include "../ndarray_view.h"
-#include "../ndarray_shared_ring.h"
+#include "../ndarray/ndarray_view.h"
+#include "../ndarray/ndarray_shared_ring.h"
 #include "media_node_io_base.h"
 
 namespace mf {

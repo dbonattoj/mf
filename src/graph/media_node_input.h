@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include "../common.h"
-#include "../ndarray_view.h"
+#include "../ndarray/ndarray_view.h"
 #include "media_node_io_base.h"
 #include "media_node_output.h"
 

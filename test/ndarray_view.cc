@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "../src/ndarray_view.h"
+#include "../src/ndarray/ndarray_view.h"
 
 using namespace mf;
 

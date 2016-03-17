@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include <iostream>
-#include "../src/ndcoord.h"
+#include "../src/ndarray/ndcoord.h"
 
 using namespace mf;
 

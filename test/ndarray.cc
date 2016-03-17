@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include "../src/ndarray.h"
+#include "../src/ndarray/ndarray.h"
 
 using namespace mf;
 

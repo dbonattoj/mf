@@ -1,7 +1,6 @@
 #include "yuv_file_source.h"
-#include <iostream>
-#include "../ndcoord.h"
-#include "../ndarray_view.h"
+#include "../ndarray/ndcoord.h"
+#include "../ndarray/ndarray_view.h"
 
 namespace mf {
 

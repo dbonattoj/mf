@@ -3,15 +3,10 @@
 #include <iostream>
 
 #include "../src/util/memory.h"
-#include "../src/ndarray_ring.h"
+#include "../src/ndarray/ndarray_ring.h"
+#include "support/ndarray.h"
 
 using namespace mf;
-
-static ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
-	ndarray<2, int> frame(shape);
-	std::fill(frame.begin(), frame.end(), i);
-	return frame;
-}
 
 
 TEST_CASE("ndarray_ring", "[ndarray_ring]") {
