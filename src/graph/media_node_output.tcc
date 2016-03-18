@@ -44,7 +44,14 @@ void media_node_output<Dim, T>::end_read(bool consume_frame) {
 
 template<std::size_t Dim, typename T>
 bool media_node_output<Dim, T>::reached_end() const {
-	return buffer_->reader_eof();
+	return buffer_->eof_was_marked();
+}
+
+
+template<std::size_t Dim, typename T>
+time_unit media_node_output<Dim, T>::readable_frames_till_end() const {	
+	assert(reached_end());
+	return buffer_->shared_readable_duration();
 }
 
 

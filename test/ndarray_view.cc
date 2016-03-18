@@ -1,54 +1,11 @@
 #include <catch.hpp>
 #include <vector>
-#include <iostream>
-#include <sstream>
 #include <algorithm>
 #include "../src/ndarray/ndarray_view.h"
+#include "support/ndarray.h"
 
 using namespace mf;
-
-template<typename Buffer>
-static bool compare_sequence_forwards_(const Buffer& buf, const std::vector<int>& seq) {
-	std::ostringstream str;
-
-	auto vec_it = seq.begin();
-	auto it = buf.begin();
-	for(; (it != buf.end()) && (vec_it != seq.end()); ++it, ++vec_it) {
-		str << std::hex << "got:" << *it << "  wanted:" << *vec_it << std::endl;
-		if(*vec_it != *it) break;
-	}
-	if( (it == buf.end()) && (vec_it == seq.end()) ) return true;
-	else if( (it == buf.end()) && (vec_it != seq.end()) ) str << "ended early" << std::endl;
-	else if( (it != buf.end()) && (vec_it == seq.end()) ) str << "ended late" << std::endl;
-	
-	std::cout << "sequence mismatch: " << std::endl << str.str() << std::endl;	
-	
-	return false;
-}
-
-
-template<typename Buffer>
-static bool compare_sequence_(const Buffer& buf, const std::vector<int>& seq) {
-	if(! compare_sequence_forwards_(buf, seq)) return false;
-	
-	std::ostringstream str;
-
-	auto vec_it = seq.end();
-	auto it = buf.end();
-	
-	do {
-		--it; --vec_it;
-		str << std::hex << "got:" << *it << "  wanted:" << *vec_it << std::endl;
-		if(*vec_it != *it) break;
-	} while( (it != buf.begin()) && (vec_it != seq.begin()) );
-	if( (it == buf.begin()) && (vec_it == seq.begin()) ) return true;
-	else if( (it == buf.begin()) && (vec_it != seq.begin()) ) str << "arrived back early" << std::endl;
-	else if( (it != buf.begin()) && (vec_it == seq.begin()) ) str << "arrived back late" << std::endl;
-	
-	std::cout << "sequence mismatch (backwards): " << std::endl << str.str() << std::endl;	
-	
-	return false;
-}
+using namespace mf::test;
 
 
 

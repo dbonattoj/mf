@@ -1,7 +1,8 @@
 #include "graph.h"
 #include "ndarray.h"
+#include <iostream>
 
-namespace mf {
+namespace mf { namespace test {
 
 void sequence_frame_source::setup_() {
 	output.define_frame_shape(frame_shape_);
@@ -36,20 +37,21 @@ bool expected_frames_sink::got_expected_frames() const {
 }
 
 
-void callback_node::setup_() {
+void passthrough_node::setup_() {
 	output.define_frame_shape(input.frame_shape());
 }
 
 
-callback_node::callback_node(time_unit past_window, time_unit future_window) :
+passthrough_node::passthrough_node(time_unit past_window, time_unit future_window) :
 	input(*this, past_window, future_window),
 	output(*this) { }
 
 
 
-void callback_node::process_() {
-	callback_(*this, input, output);
+void passthrough_node::process_() {
+	if(callback_) callback_(*this, input, output);
+	output.view() = input.view();
 }
 
 
-}
+}}

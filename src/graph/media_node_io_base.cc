@@ -1,5 +1,6 @@
 #include "media_node_io_base.h"
 #include "media_node.h"
+#include <stdexcept>
 
 namespace mf {
 
@@ -19,6 +20,12 @@ media_node_input_base::media_node_input_base(media_node& nd, time_unit past_wind
 
 void media_node_output_base::define_required_buffer_duration(time_unit dur) {
 	buffer_duration_ = dur;
+}
+
+
+time_unit media_node_output_base::required_buffer_duration() const {
+	if(! required_buffer_duration_is_defined()) throw std::logic_error("required buffer duration is not defined");
+	return buffer_duration_;
 }
 
 

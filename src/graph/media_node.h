@@ -43,12 +43,12 @@ protected:
 	/// Process current frame.
 	/** Implemented in concrete subclass. Input and output views are made available while in this function. Subclass
 	 ** must read frame(s) from input(s), process, and write one frame into output(s). */
-	virtual void process_() = 0;
+	virtual void process_() { }
 	
 	/// Check whether node reached its end.
 	/** Must return true when the last processed frame is the last frame. process_() will not be called after this
 	 ** returned true. */
-	virtual bool process_reached_end_();
+	virtual bool process_reached_end_() { return false; }
 	
 	explicit media_node(time_unit prefetch) :
 		prefetch_duration_(prefetch) { }
@@ -71,6 +71,11 @@ public:
 	/// Returns true when no more frame can be pulled.
 	/** Either because process_reached_end_() returns true, or because an input has reached end. */
 	bool reached_end() const { return reached_end_; }
+
+	/// Absolute offset, relative to graph sink node.
+	/** Maximal number of frames that this node can be in advance relative to graph sink node. -1 when not yet defined.
+	 ** Gets computed in propagate_offset_(), during graph setup. Used to determine output buffer durations in graph. */
+	time_unit offset() const noexcept { return offset_; }
 
 	/// Pull frames until \a target_time.
 	/** Pulls until \a target_time, or until end, whichever comes first. Implemented by subclass (media_sequential_node

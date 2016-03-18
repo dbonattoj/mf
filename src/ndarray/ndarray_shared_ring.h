@@ -64,8 +64,9 @@ public:
 	time_unit shared_writable_duration() const;
 	time_span shared_writable_time_span() const;
 	
-	bool writer_eof() const;
-	bool reader_eof() const;
+	/// Returns true if the EOF was marked by the writer.
+	/** EOF is marked by writer by an end_write() with \a eof argument set. */
+	bool eof_was_marked() const;
 };
 
 }

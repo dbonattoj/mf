@@ -58,7 +58,7 @@ public:
 	
 	const full_view_type& full_view() const { return view_; }	
 	std::ptrdiff_t full_view_center() const { return view_center_; }
-	full_view_type past_view() const { return view_(0, view_center_ + 1, -1); }
+	full_view_type past_view() const { return view_(0, view_center_ + 1); }
 	full_view_type future_view() const { return view_(view_center_, -1); }
 };	
 

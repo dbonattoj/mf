@@ -2,7 +2,7 @@ DEBUG := 1
 TARGET := dist/libmf.so
 TEST_TARGET := dist/mf_test
 
-CXX := g++-5
+CXX := clang++-3.8
 CXXFLAGS := -std=c++14 -fPIC -I./external/include
 LDFLAGS := 
 LDLIBS := -lpthread -lm

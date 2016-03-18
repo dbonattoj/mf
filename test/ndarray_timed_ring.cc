@@ -4,6 +4,7 @@
 #include "support/ndarray.h"
 
 using namespace mf;
+using namespace mf::test;
 
 
 TEST_CASE("ndarray_timed_ring", "[ndarray_timed_ring]") {

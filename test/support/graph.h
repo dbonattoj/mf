@@ -10,7 +10,7 @@
 #include "../../src/graph/media_node_output.h"
 #include "../../src/ndarray/ndcoord.h"
 
-namespace mf {
+namespace mf { namespace test {
 
 class sequence_frame_source : public media_sequential_node {
 private:
@@ -49,11 +49,11 @@ public:
 };
 
 
-class callback_node : public media_sequential_node {
+class passthrough_node : public media_sequential_node {
 public:
 	using input_type = media_node_input<2, int>;
 	using output_type = media_node_output<2, int>;
-	using callback_func = void(callback_node& self, input_type& in, output_type& out);
+	using callback_func = void(passthrough_node& self, input_type& in, output_type& out);
 	
 private:
 	std::function<callback_func> callback_;
@@ -65,7 +65,7 @@ public:
 	input_type input;
 	output_type output;
 
-	callback_node(time_unit past_window, time_unit future_window);
+	passthrough_node(time_unit past_window, time_unit future_window);
 		
 	template<typename Function>
 	void set_callback(Function func) {
@@ -74,6 +74,6 @@ public:
 };
 
 
-}
+}}
 
 #endif

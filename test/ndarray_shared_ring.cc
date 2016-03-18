@@ -6,6 +6,7 @@
 #include "support/ndarray.h"
 
 using namespace mf;
+using namespace mf::test;
 using namespace std::literals;
 
 TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
@@ -167,10 +168,9 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		ring.end_write(2);
 		
 		REQUIRE(ring.shared_readable_duration() == 2);
-		REQUIRE_FALSE(ring.reader_eof());
+		REQUIRE_FALSE(ring.eof_was_marked());
 		REQUIRE(ring.shared_writable_duration() == 3);
 		REQUIRE(ring.writable_duration() == 3);
-		REQUIRE_FALSE(ring.writer_eof());
 		
 		SECTION("writer end, read, reaches eof test") {
 			// mark end at position 4 (frame 3 = last)
@@ -179,10 +179,9 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			ring.end_write(1, true);
 
 			REQUIRE(ring.shared_readable_duration() == 3);
-			REQUIRE_FALSE(ring.reader_eof());
 			REQUIRE(ring.shared_writable_duration() == 0);
 			REQUIRE(ring.writable_duration() == 2);
-			REQUIRE(ring.writer_eof());
+			REQUIRE(ring.eof_was_marked());
 	
 			// read less than maximum
 			auto r_section = ring.begin_read(1);
@@ -191,10 +190,9 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			ring.end_read(1);
 			
 			REQUIRE(ring.shared_readable_duration() == 2);
-			REQUIRE_FALSE(ring.reader_eof());
 			REQUIRE(ring.shared_writable_duration() == 0);
 			REQUIRE(ring.writable_duration() == 3);
-			REQUIRE(ring.writer_eof());
+			REQUIRE(ring.eof_was_marked());
 			
 			SECTION("exact") {
 				// read maximum
@@ -203,7 +201,6 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 				ring.end_read(2);
 				
 				REQUIRE(ring.shared_readable_duration() == 0);
-				REQUIRE(ring.reader_eof());
 			}
 			
 			SECTION("more") {
@@ -214,7 +211,6 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 				ring.end_read(2);
 				
 				REQUIRE(ring.shared_readable_duration() == 0);
-				REQUIRE(ring.reader_eof());
 			}
 		}
 		
@@ -231,10 +227,8 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			ring.skip(10);
 			
 			REQUIRE(ring.shared_readable_duration() == 0);
-			REQUIRE(ring.reader_eof());
 			REQUIRE(ring.shared_writable_duration() == 0);
-			REQUIRE(ring.writable_duration() == 5);
-			REQUIRE(ring.writer_eof());
+			REQUIRE(ring.eof_was_marked());
 		}
 	}
 }

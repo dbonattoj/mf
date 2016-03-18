@@ -20,7 +20,7 @@ public:
 	using full_view_type = ndarray_view<Dim + 1, T>;
 	using frame_shape_type = typename frame_view_type::shape_type;
 
-private:
+public:
 	using buffer_type = ndarray_shared_ring<Dim, T>;
 
 	ndsize<Dim> frame_shape_;
@@ -60,8 +60,8 @@ public:
 	void pull(time_unit target_time);
 
 	/// Begin reading time span \a span from buffer.
-	/** Returns the view to the frames for this time span. Returned view duration may be smaller than requested when
-	 ** it reaches the end. */
+	/** Returns the view to the frames for this time span. Returnes view duration smaller than requested when
+	 ** near the end. */
 	full_view_type begin_read_span(time_span span);
 	
 	/// End reading the frames from time span.
@@ -69,9 +69,12 @@ public:
 	 ** it has for the previous call. Then the frame becomes writable in the buffer. */
 	void end_read(bool consume_frame);
 	
-	/// Returns true when no more frame can be read.
-	/** Must not call begin_read_span() after this returned true. */
+	/// Returns true when last frame was written.
+	/** There may still be readable frames available. */
 	bool reached_end() const;
+	
+	/// If end was marked, returns number of frames left from current read position until end.
+	time_unit readable_frames_till_end() const;
 };
 
 }

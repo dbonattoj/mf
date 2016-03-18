@@ -27,7 +27,8 @@ public:
 	virtual void begin_write() = 0;
 	virtual void end_write(bool eof) = 0;
 	
-	void define_required_buffer_duration(time_unit dur);	
+	void define_required_buffer_duration(time_unit dur);
+	time_unit required_buffer_duration() const;
 	bool required_buffer_duration_is_defined() const;
 	
 	virtual bool frame_shape_is_defined() const = 0;

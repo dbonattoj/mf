@@ -51,16 +51,20 @@ template<std::size_t Dim, typename T>
 void media_node_input<Dim, T>::end_read(time_unit t) {
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
 	
-	// normal operation: 1 frame consumed from output = first from past window
+	// normal operation: 1 frame consumed from output = first from window
 	// if near beginning and past window still reduced: consume no frame
-	connected_output_->end_read(t >= past_window_);
+	
+	bool consume_frame = (t >= past_window_);
+	connected_output_->end_read(consume_frame);
 }
 
 
 template<std::size_t Dim, typename T>
 bool media_node_input<Dim, T>::reached_end() const {
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
-	return connected_output_->reached_end();
+	// if input has past window: end is already reached when only frames from the past window remain
+	if(! connected_output_->reached_end()) return false;
+	return connected_output_->readable_frames_till_end() <= past_window_;
 }
 
 }

@@ -14,7 +14,7 @@ void media_sequential_node::pull_frame_() {
 		
 	// begin reading and writing
 	for(media_node_input_base* input : inputs_) {
-		/// input must not be at end already (then reached_end_ would already be true)
+		// input must not be at end already (then reached_end_ would already be true)
 		assert(! input->reached_end()); 
 		input->begin_read(time_);
 	}
@@ -29,7 +29,8 @@ void media_sequential_node::pull_frame_() {
 	// end reading and writing
 	for(media_node_input_base* input : inputs_) {
 		input->end_read(time_);
-		/// set reached_end_ when input now at end --> no more frames will be available from that input
+		
+		// set reached_end_ when input now at end --> no more frames will be available from that input
 		if(input->reached_end()) reached_end_ = true;
 	}
 	for(media_node_output_base* output : outputs_)

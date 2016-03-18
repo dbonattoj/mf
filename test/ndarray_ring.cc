@@ -1,13 +1,11 @@
 #include <catch.hpp>
 #include <algorithm>
-#include <iostream>
-
 #include "../src/util/memory.h"
 #include "../src/ndarray/ndarray_ring.h"
 #include "support/ndarray.h"
 
 using namespace mf;
-
+using namespace mf::test;
 
 TEST_CASE("ndarray_ring", "[ndarray_ring]") {
 	// choosing buffer duration&frame_sz such that is does not fit on page boundaries

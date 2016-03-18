@@ -16,11 +16,6 @@ void media_node::register_output_(media_node_output_base& output) {
 }
 
 
-bool media_node::process_reached_end_() {
-	return false;
-}
-
-
 void media_node::propagate_offset_(time_unit new_offset) {
 	if(new_offset <= offset_) return;
 	
@@ -62,8 +57,11 @@ void media_node::propagate_setup_() {
 	// set up outputs
 	// their frame shape are now defined, and required durations were defined before
 	// (in propagate_output_buffer_durations_())
-	for(media_node_output_base* output : outputs_)
+	for(media_node_output_base* output : outputs_) {
+		if(! output->frame_shape_is_defined())
+			throw std::logic_error("concrete subclass did not define output frame shapes");
 		output->setup();
+	}
 	
 	did_setup_ = true;
 }

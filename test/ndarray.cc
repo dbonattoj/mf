@@ -1,8 +1,9 @@
 #include <catch.hpp>
 #include "../src/ndarray/ndarray.h"
+#include "support/ndarray.h"
 
 using namespace mf;
-
+using namespace mf::test;
 
 TEST_CASE("ndarray", "[ndarray]") {
 	constexpr std::ptrdiff_t l = sizeof(int);

@@ -5,6 +5,7 @@
 
 using namespace mf;
 
+
 TEST_CASE("ring_allocator", "[ring_allocator]") {
 	ring_allocator<int> allocator;
 	std::size_t n = round_up_to_fit_system_page_size<int>(100);
