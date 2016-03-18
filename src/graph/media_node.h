@@ -38,12 +38,12 @@ protected:
 	/// Set up the node.
 	/** Implemented in concrete subclass. Must set frame shapes of outputs. Preceding nodes are already set up
 	 ** when this is called. */
-	virtual void setup_() = 0;
+	virtual void setup_() { }
 	
 	/// Process current frame.
 	/** Implemented in concrete subclass. Input and output views are made available while in this function. Subclass
 	 ** must read frame(s) from input(s), process, and write one frame into output(s). */
-	virtual void process_() { }
+	virtual void process_() = 0;
 	
 	/// Check whether node reached its end.
 	/** Must return true when the last processed frame is the last frame. process_() will not be called after this

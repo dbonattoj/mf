@@ -103,7 +103,9 @@ TEST_CASE("media graph", "[media_graph]") {
 				REQUIRE(in.full_view_center() == 3);
 				REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
 			});
-			graph.run_until(5);		
+			graph.run_until(5);	
+			
+			REQUIRE(sink.got_expected_frames());	
 		}
 		
 		SECTION("source [+3]--> sink") {
@@ -166,6 +168,8 @@ TEST_CASE("media graph", "[media_graph]") {
 				REQUIRE(compare_frames(shp, in.full_view(), { 5 }));
 			});
 			graph.run_until(5);	
+			
+			REQUIRE(sink.got_expected_frames());
 		}
 	
 		SECTION("source [-3,+3]--> sink") {
@@ -228,6 +232,8 @@ TEST_CASE("media graph", "[media_graph]") {
 				REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
 			});
 			graph.run_until(5);	
+			
+			REQUIRE(sink.got_expected_frames());
 		}
 	}
 	
@@ -253,6 +259,7 @@ TEST_CASE("media graph", "[media_graph]") {
 		graph.run();
 		
 		REQUIRE(graph.current_time() == 10);
+		REQUIRE(sink.got_expected_frames());
 	}
 	
 	
@@ -277,15 +284,40 @@ TEST_CASE("media graph", "[media_graph]") {
 		graph.run();
 				
 		REQUIRE(graph.current_time() == 10);
+		REQUIRE(sink.got_expected_frames());
+	}
+	
+	
+	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
+		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& passthrough1 = graph.add_node<passthrough_node>(3, 3);
+		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+
+		passthrough1.input.connect(source1.output);
+		sink.input.connect(passthrough1.output);
+		
+		graph.setup();
+
+		REQUIRE(sink.offset() == 0);
+		REQUIRE(passthrough1.offset() == 0);
+		REQUIRE(source1.offset() == 3);
+		
+		REQUIRE(passthrough1.output.required_buffer_duration() == 1);
+		REQUIRE(source1.output.required_buffer_duration() == 7);
+
+		graph.run();
+				
+		REQUIRE(graph.current_time() == 10);
+		REQUIRE(sink.got_expected_frames());
 	}
 
 
-/*
-	SECTION("source1 --> [+1]passthrough1 --> [+1]passthrough2 --> sink") {
+	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
-		auto& passthrough1 = graph.add_node<passthrough_node>(0, 1);
-		auto& passthrough2 = graph.add_node<passthrough_node>(0, 1);
+		auto& passthrough1 = graph.add_node<passthrough_node>(3, 1);
+		auto& passthrough2 = graph.add_node<passthrough_node>(2, 2);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
 		passthrough1.input.connect(source1.output);
@@ -296,70 +328,34 @@ TEST_CASE("media graph", "[media_graph]") {
 
 		REQUIRE(sink.offset() == 0);
 		REQUIRE(passthrough2.offset() == 0);
-		REQUIRE(passthrough1.offset() == 1);
-		REQUIRE(source1.offset() == 2);
+		REQUIRE(passthrough1.offset() == 2);
+		REQUIRE(source1.offset() == 3);
 		
 		REQUIRE(passthrough2.output.required_buffer_duration() == 1);
-		REQUIRE(passthrough1.output.required_buffer_duration() == 2);
-		REQUIRE(source1.output.required_buffer_duration() == 2);
+		REQUIRE(passthrough1.output.required_buffer_duration() == 5);
+		REQUIRE(source1.output.required_buffer_duration() == 5);
 
 		graph.run();
 		
 		REQUIRE(graph.current_time() == 10);
+		REQUIRE(sink.got_expected_frames());
 	}	
-	
-	
-	
-	*/
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-/*	
+
 	
 	SECTION("input synchronize") {
-		class test_node : public media_sequential_node {
-		public:
-			media_node_input<2, int> input1;
-			media_node_input<2, int> input2;
-			media_node_output<2, int> output;
+		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source2 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& merge = graph.add_node<input_synchronize_test_node>();
+		
+		SECTION("graph 1") {
+			/*
+			source1 --> [+5]passthrough --> merge --> sink
+			source2 ----------------------> /
+			*/
 			
-			test_node() :
-				input1(*this), input2(*this), output(*this) { }
-		
-			void setup_() override {
-				output.define_frame_shape(input1.frame_shape());
-			}
-			
-			void process_() override {
-				// test time synchronization:
-				// frames on both inputs must be same
-				
-				REQUIRE(input1.view() == input2.view());
-				output.view() = input1.view();
-			}
-		};
-		
-		
-		
-		SECTION("graph1") {
-			/ *
-			source1 -->[-3, +3] passthrough --> merge --> sink
-			source2 --------------------------> /
-			* /
-			
-			auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
-			auto& source2 = graph.add_node<sequence_frame_source>(10, shp);
-			auto& passthrough = graph.add_node<passthrough_node>(3, 3);
-			auto& merge = graph.add_node<test_node>();
-			auto& sink = graph.add_sink<expected_frames_sink>(seq);
+			auto& passthrough = graph.add_node<passthrough_node>(0, 5);
 		
 			passthrough.input.connect(source1.output);
 			merge.input1.connect(passthrough.output);
@@ -371,32 +367,29 @@ TEST_CASE("media graph", "[media_graph]") {
 			REQUIRE(sink.offset() == 0);
 			REQUIRE(merge.offset() == 0);
 			REQUIRE(passthrough.offset() == 0);
-			REQUIRE(source1.offset() == 3);
+			REQUIRE(source1.offset() == 5);
 			REQUIRE(source2.offset() == 0);
 			
 			REQUIRE(merge.output.required_buffer_duration() == 1);
 			REQUIRE(passthrough.output.required_buffer_duration() == 1);
-			REQUIRE(source1.output.required_buffer_duration() == 7); // current + 3 past + 3 future
+			REQUIRE(source1.output.required_buffer_duration() == 6); // current + 5 future
 			REQUIRE(source2.output.required_buffer_duration() == 1);
 			
 			graph.run();
 			
+			REQUIRE(! merge.failed());
 			REQUIRE(graph.current_time() == 10);
+			REQUIRE(sink.got_expected_frames());
 		}
-		
-		
 
-		
-		SECTION("graph2") {
-			/ *
-			source1 -->[-3, +1] passthrough1 --> merge --> sink
-			source2 -->[-1, +2] passthrough2 --> /
-			* /
+		SECTION("graph 2") {
+			/*
+			source1 --> [-3, +1]passthrough1 --> merge --> sink
+			source2 --> [-1, +2]passthrough2 --> /
+			*/
 			
 			auto& passthrough1 = graph.add_node<passthrough_node>(3, 1);
 			auto& passthrough2 = graph.add_node<passthrough_node>(1, 2);
-			auto& merge = graph.add_node<test_node>();
-			auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		
 			passthrough1.input.connect(source1.output);
 			passthrough2.input.connect(source2.output);
@@ -419,12 +412,115 @@ TEST_CASE("media graph", "[media_graph]") {
 			REQUIRE(source1.output.required_buffer_duration() == 5);
 			REQUIRE(source2.output.required_buffer_duration() == 4);
 			
-			// passthrough1 fails
 			graph.run();
-
+			
+			REQUIRE(! merge.failed());
 			REQUIRE(graph.current_time() == 10);
+			REQUIRE(sink.got_expected_frames());
 		}
 	}
 	
-*/
+	
+	SECTION("multiple outputs") {
+		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		auto& source = graph.add_node<sequence_frame_source>(10, shp);
+		auto& merge = graph.add_node<input_synchronize_test_node>();
+		auto& multiplex = graph.add_node<multiplexer_node>();
+		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+
+		SECTION("graph 1") {
+			/*
+			source --> multiplex --> merge --> sink
+			                   \ --> /
+			*/
+			
+			multiplex.input.connect(source.output);
+			merge.input1.connect(multiplex.output1);
+			merge.input2.connect(multiplex.output2);
+			sink.input.connect(merge.output);
+			
+			graph.setup();
+			
+			REQUIRE(sink.offset() == 0);
+			REQUIRE(merge.offset() == 0);
+			REQUIRE(multiplex.offset() == 0);
+			REQUIRE(source.offset() == 0);
+
+			REQUIRE(merge.output.required_buffer_duration() == 1);
+			REQUIRE(multiplex.output1.required_buffer_duration() == 1);
+			REQUIRE(multiplex.output2.required_buffer_duration() == 1);
+			REQUIRE(source.output.required_buffer_duration() == 1);
+			
+			graph.run();
+
+			REQUIRE(! merge.failed());
+			REQUIRE(graph.current_time() == 10);
+			REQUIRE(sink.got_expected_frames());		
+		}
+		
+		SECTION("graph 2") {
+			/*
+			source --> multiplex --------------------------------------------> merge --> sink
+			                   \ --> [+5]passthrough1 --> [+3]passthrough2 --> /
+			*/
+			
+			auto& passthrough1 = graph.add_node<passthrough_node>(0, 5);
+			auto& passthrough2 = graph.add_node<passthrough_node>(0, 3);
+
+			multiplex.input.connect(source.output);
+			merge.input1.connect(multiplex.output1);
+			passthrough1.input.connect(multiplex.output2);
+			passthrough2.input.connect(passthrough1.output);
+			merge.input2.connect(passthrough2.output);
+			sink.input.connect(merge.output);
+			
+			graph.setup();
+			
+			REQUIRE(sink.offset() == 0);
+			REQUIRE(merge.offset() == 0);
+			REQUIRE(passthrough2.offset() == 0);
+			REQUIRE(passthrough1.offset() == 3);
+			REQUIRE(multiplex.offset() == 3+5);
+			REQUIRE(source.offset() == 3+5);
+
+			REQUIRE(merge.output.required_buffer_duration() == 1);
+			REQUIRE(passthrough2.output.required_buffer_duration() == 1);
+			REQUIRE(passthrough1.output.required_buffer_duration() == 1+3);
+			REQUIRE(multiplex.output1.required_buffer_duration() == 1+3+5); // need to respect offset
+			REQUIRE(multiplex.output2.required_buffer_duration() == 1+5);
+			REQUIRE(source.output.required_buffer_duration() == 1);			
+			
+			graph.run();
+
+			REQUIRE(! merge.failed());
+			REQUIRE(graph.current_time() == 10);
+			REQUIRE(sink.got_expected_frames());
+		}
+		
+		SECTION("graph 3") {
+			/*
+			source --> [-1,+1]multiplex ----[-1,+1]passthrough3---------------------------> merge --> sink
+			                          \ --> [-2,+5]passthrough1 --> [-1,+3]passthrough2 --> /
+			*/
+			
+			auto& passthrough1 = graph.add_node<passthrough_node>(2, 5);
+			auto& passthrough2 = graph.add_node<passthrough_node>(1, 3);
+			auto& passthrough3 = graph.add_node<passthrough_node>(1, 1);
+
+			multiplex.input.connect(source.output);
+			passthrough3.input.connect(multiplex.output1);
+			merge.input1.connect(passthrough3.output);
+			passthrough1.input.connect(multiplex.output2);
+			passthrough2.input.connect(passthrough1.output);
+			merge.input2.connect(passthrough2.output);
+			sink.input.connect(merge.output);
+			
+			graph.setup();			
+			graph.run();
+
+			REQUIRE(! merge.failed());
+			REQUIRE(graph.current_time() == 10);
+			REQUIRE(sink.got_expected_frames());
+		}
+	}
 }
