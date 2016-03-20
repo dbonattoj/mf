@@ -4,6 +4,7 @@
 #include "../../src/ndarray/ndarray.h"
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 namespace mf { namespace test {
 

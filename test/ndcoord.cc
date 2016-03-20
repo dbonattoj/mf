@@ -77,6 +77,19 @@ TEST_CASE("ndcoord", "[ndcoord]") {
 		REQUIRE(zero.product() == 1);
 	}
 	
+	SECTION("iterator") {
+		auto c = make_ndsize(1, 2, 3, 4);
+		
+		std::vector<int> vec(c.begin(), c.end());
+		REQUIRE(vec.size() == 4);
+		REQUIRE(vec[0] == 1);
+		REQUIRE(vec[1] == 2);
+		REQUIRE(vec[2] == 3);
+		REQUIRE(vec[3] == 4);
+		
+		REQUIRE(c.size() == 4);
+	}
+	
 	SECTION("section, cat") {
 		auto c1 = make_ndsize(1, 2, 3, 4);
 		

@@ -499,8 +499,8 @@ TEST_CASE("media graph", "[media_graph]") {
 		
 		SECTION("graph 3") {
 			/*
-			source --> [-1,+1]multiplex ----[-1,+1]passthrough3---------------------------> merge --> sink
-			                          \ --> [-2,+5]passthrough1 --> [-1,+3]passthrough2 --> /
+			source --> multiplex ----[-1,+1]passthrough3---------------------------> merge --> sink
+			                   \ --> [-2,+5]passthrough1 --> [-1,+3]passthrough2 --> /
 			*/
 			
 			auto& passthrough1 = graph.add_node<passthrough_node>(2, 5);
