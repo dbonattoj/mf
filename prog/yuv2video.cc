@@ -1,6 +1,5 @@
 #include "../src/graph/media_graph.h"
 #include "../src/graph/media_node.h"
-#include "../src/graph/media_sequential_node.h"
 #include "../src/nodes/yuv_file_source.h"
 #include "../src/nodes/color_converter_node.h"
 #include "../src/nodes/video_file_sink.h"
@@ -8,18 +7,20 @@
 
 using namespace mf;
 
-char im[] = "data/BBB_Flowers_cam0005.yuv";
-char di[] = "data/BBB_Flowers_1280x768_Depth_8bps_cf420_cam0005.yuv";
+char im[] = "/data/test_sequences/bbb_flowers_noblur/BBB_Flowers_cam0010.yuv";
+char di[] = "/data/test_sequences/bbb_flowers_noblur/BBB_Flowers_1280x768_Depth_8bps_cf420_cam0010.yuv";
+int w = 1280;
+int h = 768;
 
 
-class d_effect_node : public media_sequential_node {	
+class d_effect_node : public media_node {	
 public:
 	media_node_output<2, rgb_color> output;
 	media_node_input<2, rgb_color> im_input;
 	media_node_input<2, mono_color> di_input;
 
 	d_effect_node() :
-		output(*this), im_input(*this), di_input(*this) { }
+		media_node(0), output(*this), im_input(*this), di_input(*this) { }
 	
 	void setup_() override {
 		output.define_frame_shape(im_input.frame_shape());
@@ -43,13 +44,13 @@ public:
 };
 
 
-class b_effect_node : public media_sequential_node {	
+class b_effect_node : public media_node {	
 public:
 	media_node_output<2, rgb_color> output;
 	media_node_input<2, rgb_color> input;
 
 	b_effect_node() :
-		output(*this), input(*this, 6, 6) { }
+		media_node(2), output(*this), input(*this, 6, 6) { }
 
 	void setup_() override {
 		output.define_frame_shape(input.frame_shape());
@@ -75,13 +76,13 @@ public:
 
 int main() {
 	media_graph graph;
-	auto& im_source = graph.add_node<yuv_file_source>(im, 1280, 768, 420);
-	auto& di_source = graph.add_node<yuv_file_source>(di, 1280, 768, 420);
+	auto& im_source = graph.add_node<yuv_file_source>(im, w, h, 420);
+	auto& di_source = graph.add_node<yuv_file_source>(di, w, h, 420);
 	auto& im_converter = graph.add_node<color_converter_node<ycbcr_color, rgb_color>>();
 	auto& di_converter = graph.add_node<color_converter_node<ycbcr_color, mono_color>>();
 	auto& b_effect = graph.add_node<b_effect_node>();
 	auto& d_effect = graph.add_node<d_effect_node>();
-	auto& sink = graph.add_sink<video_file_sink>("video.mp4");
+	auto& sink = graph.add_sink<video_file_sink>("output/video.avi");
 	im_converter.input.connect(im_source.output);
 	di_converter.input.connect(di_source.output);
 	b_effect.input.connect(im_converter.output);

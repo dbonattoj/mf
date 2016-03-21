@@ -5,22 +5,22 @@
 
 namespace mf {
 
-class media_node;
+class media_node_base;
 
 /// Abstract base class for media node output.
 class media_node_output_base {
 protected:
 	/// Media node that this output belongs to.
-	media_node& node_;
+	media_node_base& node_;
 		
 	/// Required buffer duration.
 	/** Minimal duration that the ring buffer must have. Needs to be defined prior to initialization. */
 	time_unit buffer_duration_ = -1;
 
 public:
-	media_node_output_base(media_node&);
+	media_node_output_base(media_node_base&);
 
-	media_node& node() const { return node_; }
+	media_node_base& node() const { return node_; }
 
 	virtual void setup() = 0;
 
@@ -46,7 +46,7 @@ protected:
 	time_unit future_window_ = 0;
 
 public:	
-	media_node_input_base(media_node&, time_unit past_window, time_unit future_window);
+	media_node_input_base(media_node_base&, time_unit past_window, time_unit future_window);
 
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }

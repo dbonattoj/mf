@@ -5,7 +5,7 @@
 #include <functional>
 #include "ndarray.h"
 #include "../../src/common.h"
-#include "../../src/graph/media_sequential_node.h"
+#include "../../src/graph/media_node.h"
 #include "../../src/graph/media_sink_node.h"
 #include "../../src/graph/media_node_input.h"
 #include "../../src/graph/media_node_output.h"
@@ -13,7 +13,7 @@
 
 namespace mf { namespace test {
 
-class sequence_frame_source : public media_sequential_node {
+class sequence_frame_source : public media_node {
 private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
@@ -69,7 +69,7 @@ public:
 };
 
 
-class passthrough_node : public media_sequential_node {
+class passthrough_node : public media_node {
 public:
 	using input_type = media_node_input<2, int>;
 	using output_type = media_node_output<2, int>;
@@ -102,7 +102,7 @@ public:
 };
 
 
-class input_synchronize_test_node : public media_sequential_node {
+class input_synchronize_test_node : public media_node {
 private:
 	bool failed_ = false;
 
@@ -127,7 +127,7 @@ public:
 };
 
 
-class multiplexer_node : public media_sequential_node {
+class multiplexer_node : public media_node {
 public:
 	media_node_input<2, int> input;
 	media_node_output<2, int> output1;

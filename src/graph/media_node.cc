@@ -1,70 +1,71 @@
 #include "media_node.h"
 
+#include <cassert>
+#include <typeinfo>
 #include <algorithm>
-#include "media_node_input.h"
-#include "media_node_output.h"
 
 namespace mf {
 
-void media_node::register_input_(media_node_input_base& input) {
-	inputs_.push_back(&input);
-}
+void media_node::pull_frame_() {
+	if(reached_end_) throw sequencing_error("already reached end");
 
-
-void media_node::register_output_(media_node_output_base& output) {
-	outputs_.push_back(&output);
-}
-
-
-void media_node::propagate_offset_(time_unit new_offset) {
-	if(new_offset <= offset_) return;
-	
-	offset_ = new_offset;
-	
+	// current time = number of frame that is currently processed
+	time_++;
+		
+	// begin reading and writing
 	for(media_node_input_base* input : inputs_) {
-		media_node& connected_node = input->connected_output().node();
-		time_unit off = offset_ + connected_node.prefetch_duration_ + input->future_window_duration();
-		connected_node.propagate_offset_(off);
-	}		
+		// input must not be at end already (then reached_end_ would already be true)
+		assert(! input->reached_end()); 
+		input->begin_read(time_);
+	}
+	for(media_node_output_base* output : outputs_)
+		output->begin_write();
+	
+	// process in subclass
+	// views are now available (input.view(), output.view())
+	this->process_();
+	if(this->process_reached_end_()) reached_end_ = true;
+	
+	// end reading and writing
+	for(media_node_input_base* input : inputs_) {
+		input->end_read(time_);
+		
+		// set reached_end_ when input now at end --> no more frames will be available from that input
+		if(input->reached_end()) reached_end_ = true;
+	}
+	for(media_node_output_base* output : outputs_)
+		output->end_write(reached_end_);
 }
 
 
-void media_node::propagate_output_buffer_durations_() {
-	for(media_node_input_base* input : inputs_) {
-		auto& output = input->connected_output();
-		media_node& connected_node = output.node();
-		time_unit dur = 1 + input->past_window_duration() + (connected_node.offset_ - offset_);
-		output.define_required_buffer_duration(dur);
-		connected_node.propagate_output_buffer_durations_();
+void media_node::thread_main_() {
+	while(! reached_end_)
+		pull_frame_();
+}
+
+
+void media_node::pull(time_unit target_time) {
+	if(sequential_) {
+		// sequential mode: process the required frame(s) now
+		while(time_ < target_time && !reached_end_) pull_frame_();
+	} else {
+		// parallel mode: background thread will process the frame(s)
+		// launch it if not done yet
+		if(! thread_.joinable())
+			thread_ = std::thread(std::bind(&media_node::thread_main_, this));
 	}
 }
 
 
-void media_node::propagate_setup_() {
-	// do nothing when did_setup_ is already set:
-	// during recursive propagation it may be called multiple times on same node
-	if(did_setup_) return;
-	
-	// first set up preceding nodes
-	for(media_node_input_base* input : inputs_) {
-		media_node& connected_node = input->connected_output().node();
-		connected_node.propagate_setup_();
-	}
-	
-	// set up this node in concrete subclass
-	this->setup_();
-	
-	// set up outputs
-	// their frame shape are now defined, and required durations were defined before
-	// (in propagate_output_buffer_durations_())
-	for(media_node_output_base* output : outputs_) {
-		if(! output->frame_shape_is_defined())
-			throw std::logic_error("concrete subclass did not define output frame shapes");
-		output->setup();
-	}
-	
-	did_setup_ = true;
-}
+media_node::media_node(time_unit prefetch) :
+	media_node_base(prefetch), sequential_(prefetch == 0) { }
 
+
+media_node::~media_node() {
+	if(! sequential_) {
+		// TODO handle early break
+		if(thread_.joinable()) thread_.join();
+	}
+}
 
 }

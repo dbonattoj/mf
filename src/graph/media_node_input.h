@@ -9,7 +9,7 @@
 
 namespace mf {
 
-class media_node;
+class media_node_base;
 
 /// Input of a media node.
 template<std::size_t Dim, typename T>
@@ -28,7 +28,7 @@ private:
 	std::ptrdiff_t view_center_;
 
 public:
-	media_node_input(media_node& node, time_unit past_window = 0, time_unit future_window = 0) :
+	media_node_input(media_node_base& node, time_unit past_window = 0, time_unit future_window = 0) :
 		media_node_input_base(node, past_window, future_window) { }
 			
 	void connect(output_type& output);

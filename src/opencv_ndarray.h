@@ -7,14 +7,18 @@
 
 namespace mf {
 
-template<std::size_t Dim>
-auto to_opencv_mat(const ndarray_view<Dim, rgb_color>& vw) {
-	std::vector<int> sizes(vw.shape().begin(), vw.shape().end());		
-	std::vector<std::size_t> steps(vw.strides().begin(), vw.strides().end());
-	//for(std::size_t& step : steps) step /= 4;
-	//for(int& size : sizes) size *= 4;
-	cv::Vec4b* data = reinterpret_cast<cv::Vec4b*>(vw.start());
-	return cv::Mat_<cv::Vec4b>(Dim, sizes.data(), data, steps.data());
+template<typename Array>
+auto to_opencv_mat(const Array& arr) {
+	// TODO not copy, need proper OpenCV support (constructor)
+	static_assert(Array::dimension == 2, "ndarray dimension must be 2");
+	using value_type = std::remove_const_t<typename Array::value_type>;
+	std::size_t rows = arr.shape()[0], cols = arr.shape()[1];
+	cv::Mat_<cv::Vec3b> mat(rows, cols);
+	for(std::ptrdiff_t y = 0; y < rows; ++y) for(std::ptrdiff_t x = 0; x < cols; ++x) {
+		rgb_color col = arr[y][x];
+		mat(y, x) = cv::Vec3b(col.r, col.g, col.b);
+	}
+	return mat;
 };
 
 }

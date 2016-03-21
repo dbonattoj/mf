@@ -10,7 +10,7 @@
 
 namespace mf {
 
-class media_node;
+class media_node_base;
 
 /// Output of a media node.
 template<std::size_t Dim, typename T>
@@ -29,7 +29,7 @@ public:
 	frame_view_type view_;
 
 public:
-	explicit media_node_output(media_node& node) :
+	explicit media_node_output(media_node_base& node) :
 		media_node_output_base(node) { }
 		
 	void define_frame_shape(const frame_shape_type& shp);

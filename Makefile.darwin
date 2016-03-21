@@ -1,4 +1,3 @@
-DEBUG := 1
 TARGET := dist/libmf.dylib
 TEST_TARGET := dist/mf_test
 

@@ -1,9 +1,8 @@
-DEBUG := 1
 TARGET := dist/libmf.so
 TEST_TARGET := dist/mf_test
 
 CXX := clang++-3.8
-CXXFLAGS := -std=c++14 -fPIC -I./external/include
+CXXFLAGS := -std=c++14 -fPIC -I./external/include -fcolor-diagnostics
 LDFLAGS := 
 LDLIBS := -lpthread -lm
 

@@ -5,13 +5,13 @@
 #include <fstream>
 #include <memory>
 #include <cstdint>
-#include "../graph/media_sequential_node.h"
+#include "../graph/media_node.h"
 #include "../graph/media_node_output.h"
 #include "../color.h"
 
 namespace mf {
 
-class yuv_file_source : public media_sequential_node {
+class yuv_file_source : public media_node {
 private:
 	std::ifstream file_;
 	std::size_t width_;
