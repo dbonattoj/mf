@@ -9,7 +9,7 @@
 
 namespace mf {
 
-/// Base class for nodes of media nodes.
+/// Base class for nodes of media graph.
 class media_node_base {
 protected:
 	std::vector<media_node_input_base*> inputs_; ///< Inputs of this node.

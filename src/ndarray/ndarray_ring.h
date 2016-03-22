@@ -2,6 +2,7 @@
 #define MF_NDARRAY_RING_H_
 
 #include <functional>
+#include <mutex>
 #include "../common.h"
 #include "ndcoord.h"
 #include "ndarray.h"

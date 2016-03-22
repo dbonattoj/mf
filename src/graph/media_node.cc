@@ -15,7 +15,7 @@ void media_node::pull_frame_() {
 	// begin reading and writing
 	for(media_node_input_base* input : inputs_) {
 		// input must not be at end already (then reached_end_ would already be true)
-		assert(! input->reached_end()); 
+		assert(! input->reached_end());
 		input->begin_read(time_);
 	}
 	for(media_node_output_base* output : outputs_)

@@ -15,54 +15,61 @@ namespace mf {
  ** - Mutex lock on buffer state (read and write positions)
  ** - Semantics of begin_write(), begin_read() and skip() changed to wait until frames become available 
  ** - Writer can mark end of file. begin_read(), begin_read_span() and skip() then to not wait for more frames
- ** Base class functions which depend on the read/write positions (e.g. readable_duration(), writable_time_span(),
- ** etc) are not thread-safe. Functions shared_readable_duration() are, and also consider the marked end. **/
+ ** Does not inherit from base class because thread safety is added. Provides same interface. **/
 template<std::size_t Dim, typename T>
-class ndarray_shared_ring : public ndarray_timed_ring<Dim, T> {
-	using base = ndarray_timed_ring<Dim, T>;
+class ndarray_shared_ring {
+public:
+	using ring_type = ndarray_timed_ring<Dim, T>;
+	using section_view_type = typename ring_type::section_view_type;
 
 private:
 	enum thread_state { idle, waiting, accessing };
 
-	mutable std::mutex positions_mutex_; ///< Mutex which gets locked while advancing pointers.
+	ring_type ring_; ///< Underlying, non thread-safe timed ring buffer.
+
+	mutable std::mutex mutex_; ///< Mutex used to protect read/write positions from concurrent access, and waiting for frames.
 	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.
 	std::condition_variable readable_cv_; ///< Condition variable, gets notified when readable frames become available.
 
-	std::atomic<thread_state> reader_state_{idle};
-	std::atomic<thread_state> writer_state_{idle};
+	std::atomic<thread_state> reader_state_{idle}; ///< Current state of reader thread. Used to prevent deadlocks.
+	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
 
-	bool read_reaches_eof_ = false;
-	std::atomic<time_unit> end_time_{-1};
+	std::atomic<time_unit> end_time_{-1}; ///< One after last frame in stream.
 	
-	void skip_available_(std::size_t duration);
+	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
+	// can also be computed as end_time_ + 1 - ring_.readable_duration().
+	// however this would require mutex lock, because both terms are altered by writer in end_write()
+		
+	void skip_available_(time_unit duration);
 	
 public:
-	using typename base::section_view_type;
+	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
+		
+	void initialize();
 
-	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration) :
-		base(frames_shape, duration) { }
-	
-	/// Reinitialize ring buffer to state on construction.
-	void initialize() override;
-	
-	section_view_type begin_write(std::size_t duration) override;
-	void end_write(std::size_t written_duration) override;
-	void end_write(std::size_t written_duration, bool eof);
+	time_unit total_duration() const noexcept { return ring_.shape().front(); }
 
-	section_view_type begin_read(std::size_t read_duration) override;
-	bool read_reaches_eof() const { return read_reaches_eof_; }
-	void end_read(std::size_t read_duration) override;	
+	section_view_type begin_write_span(time_span);
+	section_view_type begin_write(time_unit duration);
+	void end_write(time_unit written_duration, bool mark_eof = false);
+
+	section_view_type begin_read_span(time_span);
+	section_view_type begin_read_span(time_span, bool& reaches_eof);
+	section_view_type begin_read(time_unit read_duration);
+	section_view_type begin_read(time_unit read_duration, bool& reaches_eof);
+	void end_read(time_unit read_duration);	
 	
-	void skip(std::size_t skip_duration) override;
+	void skip(time_unit skip_duration);
+	void skip_span(time_span);	
 	
-	void lock() { positions_mutex_.lock(); }
-	bool try_lock() { return positions_mutex_.try_lock(); }
-	void unlock() { positions_mutex_.unlock(); }
-	
-	time_unit shared_readable_duration() const;
-	time_span shared_readable_time_span() const;
-	time_unit shared_writable_duration() const;
-	time_span shared_writable_time_span() const;
+	time_unit current_time() const noexcept;
+	time_unit write_start_time() const noexcept;
+	time_unit read_start_time() const noexcept;
+
+	time_unit writable_duration() const;
+	time_span writable_time_span() const;
+	time_unit readable_duration() const;	
+	time_span readable_time_span() const;
 	
 	/// Returns true if the EOF was marked by the writer.
 	/** EOF is marked by writer by an end_write() with \a eof argument set. */

@@ -33,44 +33,71 @@ time_span ndarray_timed_ring<Dim, T>::writable_time_span() const {
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_timed_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
-	// span must start immediately after the last written frame
-	if(span.start_time() != last_write_time_ + 1)
-		throw sequencing_error("time span to write must begin immediately after previous one");
+time_unit ndarray_timed_ring<Dim, T>::read_start_time() const noexcept {
+	return last_write_time_ + 1 - base::readable_duration();
+}
 
-	// return view to writable frames - may fail or wait, depending on subclass
-	return this->begin_write(span.duration());
+
+template<std::size_t Dim, typename T>
+time_unit ndarray_timed_ring<Dim, T>::write_start_time() const noexcept {
+	return last_write_time_ + 1;
+}
+
+
+template<std::size_t Dim, typename T>
+bool ndarray_timed_ring<Dim, T>::can_write_span(time_span span) const {
+	if(span.start_time() != last_write_time_ + 1) return false; // must start immediately after the last written frame 
+	else if(span.duration() > base::writable_duration()) return false;
+	else return true;
+}
+
+
+template<std::size_t Dim, typename T>
+bool ndarray_timed_ring<Dim, T>::can_read_span(time_span span) const {
+	time_unit skip_and_read_duration = span.start_time() - read_start_time() + span.duration();
+	if(span.start_time() < read_start_time()) return false; // time span to read already passed
+	else if(skip_and_read_duration > base::readable_duration()) return false;
+	else return true;
+}
+
+
+template<std::size_t Dim, typename T>
+bool ndarray_timed_ring<Dim, T>::can_skip_span(time_span span) const {
+	time_unit skip_duration = span.start_time() - read_start_time() + span.duration();
+	if(skip_duration > base::readable_duration()) return false;
+	else return true;
+}
+
+
+
+template<std::size_t Dim, typename T>
+auto ndarray_timed_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
+	if(span.duration() > base::total_duration()) throw std::invalid_argument("write duration larger than ring capacity");
+	if(! can_write_span(span)) throw sequencing_error("cannot write span");
+	return base::begin_write(span.duration());
 }
 
 
 template<std::size_t Dim, typename T>	
 auto ndarray_timed_ring<Dim, T>::begin_read_span(time_span span) -> section_view_type {
-	// test duration, before doing any modification
-	time_unit duration = span.duration();
-	if(duration > base::total_duration()) throw std::invalid_argument("read duration too large");
+	if(span.duration() > base::total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
+	if(! can_read_span(span)) throw sequencing_error("cannot read span");
+	time_unit read_start = read_start_time();
+	if(span.start_time() > read_start)
+		base::skip(span.start_time() - read_start);	
 
-	time_unit readable_start = readable_time_span().start_time();
-	if(span.start_time() < readable_start) {
-		// fail if span already (partially) read
-		throw sequencing_error("time span to read already passed");
-	} else if(span.start_time() > readable_start) {
-		// skip frames until start of span - may fail or wait, depending on subclass
-		this->skip(span.start_time() - readable_start);	
-	}
-	
-	// ensure buffer is now at requested read position
 	assert(readable_time_span().start_time() == span.start_time());
-
-	// return view to readable frames - may fail or wait, depending on subclass
-	return this->begin_read(duration);
+	return base::begin_read(span.duration());
 }
+
 
 template<std::size_t Dim, typename T>
 void ndarray_timed_ring<Dim, T>::skip_span(time_span span) {
-	time_unit readable_start = readable_time_span().start_time();
-	time_unit skip_duration = span.start_time() - readable_start + span.duration();
-	if(skip_duration > 0) this->skip(skip_duration);
-	// does nothing when the span already fully passed
+	if(span.duration() > base::total_duration()) throw std::invalid_argument("skip duration larger than ring capacity");
+	if(! can_skip_span(span)) throw sequencing_error("cannot skip span");
+	
+	time_unit skip_duration = span.start_time() - read_start_time() + span.duration();
+	if(skip_duration > 0) base::skip(skip_duration);
 }
 
 

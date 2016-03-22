@@ -1,4 +1,4 @@
-DEBUG := 0
+DEBUG := 1
 
 # detect operating system
 ifeq ($(OS), Windows_NT)

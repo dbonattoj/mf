@@ -10,12 +10,12 @@
 
 namespace mf {
 
-class media_node;
+class media_node_base;
 class media_sink_node;
 
 class media_graph {
 private:
-	std::vector<std::unique_ptr<media_node>> nodes_; ///< Nodes in the graph, including sink.
+	std::vector<std::unique_ptr<media_node_base>> nodes_; ///< Nodes in the graph, including sink.
 	media_sink_node* sink_ = nullptr; ///< Sink node.
 	bool setup_ = false; ///< True after setup() was called.
 
@@ -24,7 +24,7 @@ public:
 
 	template<typename Node, typename... Args>
 	Node& add_node(Args&&... args) {
-		static_assert(std::is_base_of<media_node, Node>::value, "sink node must be subclass of media_node");
+		static_assert(std::is_base_of<media_node_base, Node>::value, "sink node must be subclass of media_node");
 		if(setup_) throw std::logic_error("cannot add node after graph already set up");
 		Node* node = new Node(std::forward<Args>(args)...);
 		nodes_.emplace_back(node);

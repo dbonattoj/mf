@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include "../src/graph/media_graph.h"
-#include "../src/graph/media_sequential_node.h"
+#include "../src/graph/media_node.h"
 #include "support/graph.h"
 #include "support/ndarray.h"
 #include <iostream>
