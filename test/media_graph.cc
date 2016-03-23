@@ -29,9 +29,6 @@ TEST_CASE("media graph", "[media_graph]") {
 		auto& passthrough = graph.add_node<passthrough_node>(0, 0);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
-		passthrough.set_callback([](passthrough_node& self, auto& in, auto& out) {
-			out.view() = in.view();
-		});
 		sink.input.connect(passthrough.output);
 		graph.setup();
 		graph.run();

@@ -9,7 +9,7 @@ using namespace mf;
 using namespace mf::test;
 using namespace std::literals;
 
-TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
+TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 	ndsize<2> shape{320, 240};
 	std::size_t duration = 5;
 	bool reaches_eof;
@@ -40,7 +40,7 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		// read 3 frames (0, 1, 2)
 		auto r_section = ring.begin_read(3);
 		REQUIRE(ring.write_start_time() >= 3);
-		compare_frames(shape, r_section, {0, 1, 2});
+		REQUIRE(compare_frames(shape, r_section, {0, 1, 2}));
 		ring.end_read(3);
 		REQUIRE(ring.current_time() >= 2);
 		REQUIRE(ring.read_start_time() == 3);
@@ -59,14 +59,14 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		
 		// read frames (5, 6)
 		r_section.reset(ring.begin_read_span(time_span(5, 7)));
-		compare_frames(shape, r_section, {5, 6});
+		REQUIRE(compare_frames(shape, r_section, {5, 6}));
 		ring.end_read(2);
 		REQUIRE(ring.current_time() >= 6);
 		
 		// read frames (20, 21)
 		// skip previous
 		r_section.reset(ring.begin_read_span(time_span(20, 22)));
-		compare_frames(shape, r_section, {20, 21});
+		REQUIRE(compare_frames(shape, r_section, {20, 21}));
 		ring.end_read(2);
 		REQUIRE(ring.current_time() >= 21);
 		
@@ -79,6 +79,138 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 		running = false;
 		writer.join();
 	}
+	
+	
+	SECTION("wait for writer") {
+		// reader thread: waits until frames become available
+		std::atomic<bool> started{false};
+		std::thread reader([&]() {
+			auto r_section = ring.begin_read(3);
+			started = true;
+			REQUIRE(compare_frames(shape, r_section, {0, 1, 2}));
+			ring.end_read(3);
+		});
+
+		// make sure reader has not started
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// write 1 frame -> not enough
+		auto w_section = ring.begin_write(1);
+		w_section[0] = make_frame(shape, 0);
+		ring.end_write(1);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// write 2 frames -> now reader starts
+		w_section.reset(ring.begin_write(2));
+		w_section[0] = make_frame(shape, 1);
+		w_section[1] = make_frame(shape, 2);
+		ring.end_write(2);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE(started);
+		
+		reader.join();	
+	}
+	
+	
+	SECTION("wait for writer (span)") {
+		ndarray_shared_ring<2, int> ring(shape, 20); // use longer ring
+		
+		// reader thread: waits until frames [10, 14[
+		std::atomic<bool> started{false};
+		std::thread reader([&]() {
+			auto r_section = ring.begin_read_span(time_span(10, 14));
+			started = true;
+			REQUIRE(compare_frames(shape, r_section, {10, 11, 12, 13}));
+			ring.end_read(4);
+		});
+
+		// make sure reader has not started
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// write ]0, 8], not enough
+		auto w_section = ring.begin_write_span(time_span(0, 8));
+		for(int i = 0; i < 8; ++i) w_section[i] = make_frame(shape, i);
+		ring.end_write(8);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// write ]8, 12], still not enough
+		w_section.reset(ring.begin_write_span(time_span(8, 12)));
+		for(int i = 0; i < 4; ++i) w_section[i] = make_frame(shape, i + 8);
+		ring.end_write(4);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// write ]12, 13], still not enough
+		w_section.reset(ring.begin_write_span(time_span(12, 13)));
+		for(int i = 0; i < 1; ++i) w_section[i] = make_frame(shape, i + 12);
+		ring.end_write(1);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// write ]13, 15], now reading
+		w_section.reset(ring.begin_write_span(time_span(13, 15)));
+		for(int i = 0; i < 2; ++i) w_section[i] = make_frame(shape, i + 13);
+		ring.end_write(2);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE(started);
+
+		reader.join();	
+	}
+	
+	
+	SECTION("wait for reader") {
+		// fill up 4/5 of buffer
+		auto w_section = ring.begin_write(4);
+		for(int i = 0; i < 4; ++i) w_section[i] = make_frame(shape, i);
+		ring.end_write(4);
+		REQUIRE(ring.writable_duration() == 1);
+		
+		// writer thread: waits until 4 frames become available
+		std::atomic<bool> started{false};
+		std::thread writer([&]() {
+			auto w_section = ring.begin_write(4);
+			started = true;
+			for(int i = 0; i < 4; ++i) w_section[i] = make_frame(shape, i + 4);
+			ring.end_write(4);
+		});
+
+		// make sure writer has not started
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// read 1 frame -> not enough
+		auto r_section = ring.begin_read(1);
+		REQUIRE(compare_frames(shape, r_section, {0}));
+		ring.end_read(1);
+		REQUIRE(ring.writable_duration() == 2);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+
+		// skip 1 frame -> not enough
+		ring.skip(1);
+		REQUIRE(ring.writable_duration() == 3);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE_FALSE(started);
+		
+		// read 2 frames -> now writer starts
+		r_section.reset(ring.begin_read(2));
+		REQUIRE(compare_frames(shape, r_section, {2, 3}));
+		ring.end_read(2);
+		std::this_thread::sleep_for(10ms);
+		REQUIRE(started);
+		
+		// now (wait and) read 4 new frames
+		r_section.reset(ring.begin_read(4));
+		REQUIRE(compare_frames(shape, r_section, {4, 5, 6, 7}));
+		ring.end_read(4);
+		
+		writer.join();
+	}
+	
 
 	SECTION("invalid use") {
 		auto w_section = ring.begin_write(3);
@@ -145,7 +277,7 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 			writer.join();
 		}
 
-		SECTION("deadlock on read") {	
+		SECTION("deadlock on write") {	
 			std::mutex mut;
 			mut.lock();
 			std::thread reader([&](){
@@ -220,6 +352,7 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring]") {
 				REQUIRE(ring.readable_duration() == 0);
 			}
 		}
+		
 		
 		SECTION("writer end, skip") {
 			// mark end at position 4 (frame 3 = last)

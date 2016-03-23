@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <string>
+#include <ostream>
 #include "../common.h"
 #include "media_node_io_base.h"
 
@@ -36,6 +38,10 @@ protected:
 	 ** when did_setup_ is already set. */
 	void propagate_setup_();
 	
+	void propagate_stop_();
+	virtual void stop_() = 0;
+
+	
 	/// Set up the node.
 	/** Implemented in concrete subclass. Must set frame shapes of outputs. Preceding nodes are already set up
 	 ** when this is called. */
@@ -63,6 +69,8 @@ private:
 
 	
 public:
+	std::string name;
+
 	virtual ~media_node_base() { }
 		
 	/// Time last processed frame.
@@ -83,6 +91,8 @@ public:
 	 ** or media_parallel_node). Must ensure that after call, frame \a target_time will eventually be available in
 	 ** output buffer(s), and/or end time will be set in buffer(s). Cannot be called when reached_end() is true. */
 	virtual void pull(time_unit target_time) = 0;
+	
+	void print(std::ostream& str) const;
 };
 
 }

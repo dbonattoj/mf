@@ -15,6 +15,9 @@ private:
 	void thread_main_();
 	void pull_frame_();
 
+protected:
+	void stop_() override;
+
 public:
 	explicit media_node(time_unit prefetch = 0);
 	~media_node();

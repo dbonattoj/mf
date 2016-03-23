@@ -51,7 +51,10 @@ public:
 	/** If \a is_last_frame, this was the last frame. Then the end time is marked in the buffer. */
 	void end_write(bool is_last_frame) override;
 
-
+	#ifndef NDEBUG
+	void debug_print(std::ostream&) const override;
+	#endif
+	
 
 	// reading interface used by media_node_input only:
 

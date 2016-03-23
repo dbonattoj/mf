@@ -7,8 +7,8 @@
 
 using namespace mf;
 
-char im[] = "/data/test_sequences/bbb_flowers_noblur/BBB_Flowers_cam0010.yuv";
-char di[] = "/data/test_sequences/bbb_flowers_noblur/BBB_Flowers_1280x768_Depth_8bps_cf420_cam0010.yuv";
+char im[] = "/data/test_sequences/bbb_flowers_noblur/BBB_Flowers_cam0020.yuv";
+char di[] = "/data/test_sequences/bbb_flowers_noblur/BBB_Flowers_1280x768_Depth_8bps_cf420_cam0030.yuv";
 int w = 1280;
 int h = 768;
 

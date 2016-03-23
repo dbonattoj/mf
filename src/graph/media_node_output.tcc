@@ -1,3 +1,4 @@
+#include <sstream>
 #include "media_node_output.h"
 
 namespace mf {
@@ -66,5 +67,24 @@ template<std::size_t Dim, typename T>
 void media_node_output<Dim, T>::end_write(bool is_last_frame) {
 	buffer_->end_write(1, is_last_frame);
 }
+
+
+#ifndef NDEBUG
+template<std::size_t Dim, typename T>
+void media_node_output<Dim, T>::debug_print(std::ostream& str) const {
+	str << "[frame_shape=" << frame_shape_
+		<< ", required_duration=" << required_buffer_duration()
+		<< ", setup=" << (buffer_ != nullptr)
+		<< "]" << std::endl;
+
+	if(buffer_ != nullptr) {
+		str << "buffer: duration=" << buffer_->total_duration()
+			<< ", readable=" << buffer_->readable_time_span()
+			<< ", writable=" << buffer_->writable_time_span()
+			<< ", read_start_time=" << buffer_->read_start_time()
+			<< ", write_start_time=" << buffer_->write_start_time() << std::endl;
+	}
+}
+#endif
 
 }

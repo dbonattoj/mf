@@ -11,8 +11,9 @@ namespace mf {
 class media_sink_node : public media_node {
 public:
 	void setup_graph();
+	void stop_graph();
 
-	void pull_next_frame();
+	void pull_next_frame();	
 	
 	media_sink_node() : media_node(0) { }
 };

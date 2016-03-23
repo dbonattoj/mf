@@ -1,10 +1,14 @@
 #include "media_graph.h"
 #include "media_node.h"
 #include "media_sink_node.h"
+#include "../debug.h"
 
 namespace mf {
 
-media_graph::~media_graph() { }
+media_graph::~media_graph() {
+	sink_->stop_graph();
+}
+
 
 void media_graph::setup() {
 	if(setup_) throw std::logic_error("media graph was already set up");
@@ -22,8 +26,10 @@ time_unit media_graph::current_time() const {
 
 void media_graph::run_until(time_unit last_frame) {
 	if(! setup_) throw std::logic_error("media graph not set up");
-	while(sink_->current_time() < last_frame && !sink_->reached_end())
+	while(sink_->current_time() < last_frame && !sink_->reached_end()) {
+		MF_DEBUG("graph pulling ", sink_->current_time(), " < ", last_frame);
 		sink_->pull_next_frame();
+	}
 }
 
 

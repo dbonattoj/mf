@@ -9,6 +9,11 @@ void media_sink_node::setup_graph() {
 }
 
 
+void media_sink_node::stop_graph() {
+	propagate_stop_();
+}
+
+
 void media_sink_node::pull_next_frame() {
 	this->pull(time_ + 1);
 }

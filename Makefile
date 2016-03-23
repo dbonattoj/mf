@@ -1,4 +1,14 @@
-DEBUG := 1
+DEBUG := 0
+ifeq ($(MAKECMDGOALS), test)
+	DEBUG := 1
+endif
+
+DIST_DIR := dist
+ifeq ($(DEBUG), 1)
+	BUILD_DIR := build/debug
+else
+	BUILD_DIR := build/deploy
+endif
 
 # detect operating system
 ifeq ($(OS), Windows_NT)
@@ -8,8 +18,7 @@ else
 endif
 
 # include platform-specific Makefile
-export DEBUG
-
+export
 ifeq ($(UNAME), Darwin)
 	include Makefile.darwin
 endif

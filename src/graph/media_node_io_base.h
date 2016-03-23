@@ -1,6 +1,7 @@
 #ifndef MF_MEDIA_NODE_IO_BASE_H_
 #define MF_MEDIA_NODE_IO_BASE_H_
 
+#include <ostream>
 #include "../common.h"
 
 namespace mf {
@@ -32,6 +33,10 @@ public:
 	bool required_buffer_duration_is_defined() const;
 	
 	virtual bool frame_shape_is_defined() const = 0;
+
+	#ifndef NDEBUG
+	virtual void debug_print(std::ostream&) const = 0;
+	#endif
 };
 
 

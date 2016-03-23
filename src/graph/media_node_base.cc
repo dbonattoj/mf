@@ -67,4 +67,33 @@ void media_node_base::propagate_setup_() {
 }
 
 
+void media_node_base::propagate_stop_() {
+	this->stop_();
+	for(media_node_input_base* input : inputs_) {
+		media_node_base& connected_node = input->connected_output().node();
+		connected_node.propagate_stop_();
+	}
+}
+
+
+void media_node_base::print(std::ostream& str) const {
+	str << "node ";
+	if(! name.empty()) str << '"' << name << '"';
+
+	str << "[offset=" << offset_ << ", prefetch=" << prefetch_duration_ << ", setup=" << did_setup_ << "]" << std::endl;
+	
+	for(std::ptrdiff_t i = 0; i < inputs_.size(); ++i) {
+		const media_node_input_base& input = *inputs_[i];
+		str << "   input " << i
+			<< ": [-" << input.past_window_duration() << ", +" << input.future_window_duration() << "]" << std::endl;
+	}
+
+	for(std::ptrdiff_t i = 0; i < outputs_.size(); ++i) {
+		const media_node_output_base& output = *outputs_[i];
+		str << "   output " << i
+			<< ": required_duration=" << output.required_buffer_duration() << std::endl;
+	}
+}
+
+
 }

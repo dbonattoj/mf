@@ -77,7 +77,7 @@ public:
 	
 private:
 	std::function<callback_func> callback_;
-	
+		
 	void setup_() override {
 		output.define_frame_shape(input.frame_shape());	
 	}
@@ -91,7 +91,8 @@ public:
 	input_type input;
 	output_type output;
 
-	passthrough_node(time_unit past_window, time_unit future_window) :
+	passthrough_node(time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
+		media_node(prefetch),
 		input(*this, past_window, future_window),
 		output(*this) { }
 
@@ -111,7 +112,8 @@ public:
 	media_node_input<2, int> input2;
 	media_node_output<2, int> output;
 	
-	input_synchronize_test_node() :
+	input_synchronize_test_node(time_unit prefetch = 0) :
+		media_node(prefetch),
 		input1(*this), input2(*this), output(*this) { }
 
 	void setup_() override {
@@ -133,7 +135,8 @@ public:
 	media_node_output<2, int> output1;
 	media_node_output<2, int> output2;
 	
-	multiplexer_node():
+	multiplexer_node(time_unit prefetch = 0):
+		media_node(prefetch),
 		input(*this), output1(*this), output2(*this) { }
 	
 	void setup_() override {

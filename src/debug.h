@@ -3,11 +3,16 @@
 
 #ifndef NDEBUG
 	// debugging is enabled
-	#include <iostream>
+	#include <fstream>
 	#include <thread>
 	#include <mutex>
 
-	#define MF_DEBUG(...) ::mf::detail::debug_print(std::cerr, __FILE__, __LINE__, __func__, __VA_ARGS__)
+	#define MF_DEBUG(...) ::mf::detail::debug_print( \
+		::mf::detail::debug_ostream(), \
+		__FILE__, \
+		__LINE__, \
+		__func__, \
+		__VA_ARGS__)
 
 	namespace mf {
 
@@ -16,12 +21,31 @@
 			static std::mutex mut;
 			return mut;
 		}
+		
+		inline std::ostream& debug_ostream() {
+			static std::ofstream file("debug.txt");
+			return file;
+		}
 	
 		inline void debug_print_part(std::ostream& str) { }	
-
+		
 		template<typename First_arg, typename... Args>
-		void debug_print_part(std::ostream& str, const First_arg& first, const Args&... args) {
+		auto debug_print_part(std::ostream& str, const First_arg& first, const Args&... args)
+			-> decltype(first.debug_print(str), void());
+		
+		template<typename First_arg, typename... Args>
+		auto debug_print_part(std::ostream& str, const First_arg& first, const Args&... args)
+			-> decltype(str << first, void())
+		{
 			str << first;
+			debug_print_part(str, args...);
+		}
+		
+		template<typename First_arg, typename... Args>
+		auto debug_print_part(std::ostream& str, const First_arg& first, const Args&... args)
+			-> decltype(first.debug_print(str), void())
+		{
+			first.debug_print(str);
 			debug_print_part(str, args...);
 		}
 		
