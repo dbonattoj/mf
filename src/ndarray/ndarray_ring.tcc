@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <cmath>
 #include "../utility/misc.h"
+#include "../utility/memory.h"
 
 namespace mf {
 
@@ -16,8 +17,8 @@ ndarray_ring<Dim, T>::ndarray_ring(const ndsize<Dim>& frame_shape, std::size_t d
 template<std::size_t Dim, typename T>
 auto ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::size_t duration) -> padding_type {
 	std::size_t frame_size = frame_shape.product();
-	std::size_t page_size = ring_allocator<T>::page_size();
-	
+	std::size_t page_size = system_page_size();
+		
 	std::size_t frame_padding = 0;
 	while( (duration * (frame_size + frame_padding)) % page_size != 0 ) ++frame_padding;
 		

@@ -5,19 +5,19 @@
 
 namespace mf {
 
-struct alignas(4) mono_color {
+struct mono_color {
 	std::uint8_t intensity;
 };
 
 
-struct alignas(4) rgb_color {
+struct rgb_color {
 	std::uint8_t r; // red
 	std::uint8_t g; // green
 	std::uint8_t b; // blue
 };
 
 
-struct alignas(4) ycbcr_color {
+struct ycbcr_color {
 	std::uint8_t y;  // luma, Y'
 	std::uint8_t cr; // chroma-red, U
 	std::uint8_t cb; // chroma-blue, V

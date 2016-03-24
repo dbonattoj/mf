@@ -21,11 +21,6 @@ class ring_allocator : private detail::ring_allocator_base {
 public:
 	using value_type = T;
 	using pointer = T*;
-	
-	static std::size_t page_size() {
-		assert(system_page_size() % sizeof(T) == 0);
-		return system_page_size() / sizeof(T);
-	}
 
 	pointer allocate(std::size_t n) {
 		return reinterpret_cast<pointer>(raw_allocate(n * sizeof(T)));	

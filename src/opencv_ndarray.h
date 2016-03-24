@@ -3,22 +3,33 @@
 
 #include "opencv.h"
 #include "color.h"
-#include "ndarray/ndarray_view.h"
 
 namespace mf {
 
 template<typename Array>
 auto to_opencv_mat(const Array& arr) {
-	// TODO not copy, need proper OpenCV support (constructor)
-	static_assert(Array::dimension == 2, "ndarray dimension must be 2");
-	using value_type = std::remove_const_t<typename Array::value_type>;
-	std::size_t rows = arr.shape()[0], cols = arr.shape()[1];
-	cv::Mat_<cv::Vec3b> mat(rows, cols);
-	for(std::ptrdiff_t y = 0; y < rows; ++y) for(std::ptrdiff_t x = 0; x < cols; ++x) {
-		rgb_color col = arr[y][x];
-		mat(y, x) = cv::Vec3b(col.r, col.g, col.b);
+	using value_type = typename Array::value_type;
+
+	int sizes[Array::dimension];
+	std::size_t steps[Array::dimension];
+	
+	for(std::ptrdiff_t i = 0; i < Array::dimension; ++i) {
+		sizes[i] = arr.shape()[i];
+		steps[i] = arr.strides()[i];
 	}
-	return mat;
+
+	// need intermadiary Mat, because Mat_ constructor not properly implemented in OpenCV 2.4
+	// no data is copied
+	cv::Mat mat(
+		Array::dimension,
+		sizes,
+		cv::DataType<value_type>::type,
+		reinterpret_cast<void*>(arr.start()),
+		steps
+	);
+	cv::Mat_<value_type> mat_(mat);
+	
+	return mat_;	
 };
 
 }

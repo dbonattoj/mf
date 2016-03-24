@@ -20,6 +20,7 @@ void video_file_sink::setup_() {
 void video_file_sink::process_() {
 	std::cout << "video frame " << time_ << std::endl;
 	auto mat = to_opencv_mat(input.view());
+	for(rgb_color& col : input.view()) col.r = 0;
 	writer_ << mat;
 }
 

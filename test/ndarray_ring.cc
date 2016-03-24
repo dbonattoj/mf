@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include <algorithm>
-#include "../src/util/memory.h"
+#include "../src/utility/memory.h"
 #include "../src/ndarray/ndarray_ring.h"
 #include "support/ndarray.h"
 

@@ -6,6 +6,7 @@
 	#include <fstream>
 	#include <thread>
 	#include <mutex>
+	#include <iostream>
 
 	#define MF_DEBUG(...) ::mf::detail::debug_print( \
 		::mf::detail::debug_ostream(), \
@@ -23,8 +24,9 @@
 		}
 		
 		inline std::ostream& debug_ostream() {
-			static std::ofstream file("debug.txt");
-			return file;
+			//static std::ofstream file("debug.txt");
+			//return file;
+			return std::cerr;
 		}
 	
 		inline void debug_print_part(std::ostream& str) { }	

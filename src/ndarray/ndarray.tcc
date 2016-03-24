@@ -2,9 +2,7 @@ namespace mf {
 
 template<std::size_t Dim, typename T, typename Allocator>
 auto ndarray<Dim, T, Allocator>::strides_with_padding_(const shape_type& shp, const padding_type& padding) -> strides_type {
-	strides_type new_strides = view_type::default_strides(shp);
-	new_strides += strides_type(padding * padding_type(sizeof(T)));
-	return new_strides;
+	return view_type::default_strides(shp) + strides_type(padding);
 }
 
 
