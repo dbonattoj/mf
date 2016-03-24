@@ -1,5 +1,5 @@
-#ifndef MF_MEMORY_H_
-#define MF_MEMORY_H_
+#ifndef MF_UTILITY_MEMORY_H_
+#define MF_UTILITY_MEMORY_H_
 
 #include <cassert>
 #include <cstddef>

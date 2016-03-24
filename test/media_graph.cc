@@ -419,7 +419,7 @@ TEST_CASE("media graph", "[media_graph]") {
 	
 	
 	SECTION("multiple outputs") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		const std::vector<int> seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 		auto& source = graph.add_node<sequence_frame_source>(10, shp);
 		auto& merge = graph.add_node<input_synchronize_test_node>();
 		auto& multiplex = graph.add_node<multiplexer_node>();
@@ -496,7 +496,7 @@ TEST_CASE("media graph", "[media_graph]") {
 		
 		SECTION("graph 3") {
 			/*
-			source --> multiplex ----[-1,+1]passthrough3---------------------------> merge --> sink
+			source --> multiplex --> [-1,+1]passthrough3---------------------------> merge --> sink
 			                   \ --> [-2,+5]passthrough1 --> [-1,+3]passthrough2 --> /
 			*/
 			

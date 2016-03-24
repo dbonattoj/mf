@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <cassert>
-#include "util/memory.h"
+#include "utility/memory.h"
 
 namespace mf {
 

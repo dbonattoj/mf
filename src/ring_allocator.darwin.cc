@@ -1,9 +1,9 @@
-#include "util/os.h"
+#include "utility/os.h"
 #ifdef MF_OS_DARWIN
 
 #include "ring_allocator.h"
-#include "util/memory.h"
-#include "util.h"
+#include "utility/memory.h"
+#include "utility/misc.h"
 #include <cerrno>
 #include <system_error>
 #include <unistd.h>

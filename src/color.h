@@ -2,7 +2,6 @@
 #define MF_COLOR_H_
 
 #include <cstdint>
-#include "util.h"
 
 namespace mf {
 

@@ -63,7 +63,7 @@
 
 #else
 	// debugging is disabled	
-	#define MF_DEBUG(...) ;
+	#define MF_DEBUG(...) 
 	
 #endif
 

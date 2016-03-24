@@ -1,4 +1,5 @@
 #include "color.h"
+#include "utility/misc.h"
 
 namespace mf {
 

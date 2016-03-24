@@ -1,5 +1,5 @@
 #include <cassert>
-#include "../util.h"
+#include "../utility/misc.h"
 
 namespace mf {
 

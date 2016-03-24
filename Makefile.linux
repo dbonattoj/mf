@@ -9,7 +9,7 @@ LDLIBS := -lpthread -lm
 
 
 # OpenCV
-PACKAGES := opencv
+PACKAGES := opencv eigen3
 CXXFLAGS += $(shell pkg-config --cflags $(PACKAGES))
 LDFLAGS += $(shell pkg-config --libs-only-L $(PACKAGES))
 LDLIBS += $(shell pkg-config --libs-only-l --libs-only-other $(PACKAGES))

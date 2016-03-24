@@ -1,6 +1,6 @@
 #include <stdexcept>
 #include <cmath>
-#include "../util.h"
+#include "../utility/misc.h"
 
 namespace mf {
 

@@ -1,0 +1,82 @@
+#include "pose.h"
+#include "angle.h"
+#include "math_constants.h"
+#include "../utility/string.h"
+#include "spherical_coordinates.h"
+#include <stdexcept>
+
+namespace mf {
+
+pose::pose() :
+	position(Eigen::Vector3f::Zero()),
+	orientation(Eigen::Quaternionf::Identity()) { }
+
+
+
+pose::pose(const Eigen::Affine3f& t) :
+	position(t.translation()),
+	orientation(t.rotation()) {
+}
+
+
+Eigen::Affine3f pose::transformation_from_world() const {
+	return orientation.conjugate() * Eigen::Translation3f(-position);
+}
+
+Eigen::Affine3f pose::transformation_to_world() const {
+	return Eigen::Translation3f(position) * orientation;
+}
+
+Eigen::Vector3f pose::euler_angles(std::ptrdiff_t a0, std::ptrdiff_t a1, std::ptrdiff_t a2) const {
+	return orientation.toRotationMatrix().eulerAngles(a0, a1, a2);
+}
+
+
+std::ostream& operator<<(std::ostream& str, const pose& ps) {
+	Eigen::Vector3f euler = ps.euler_angles();
+	str << "position (" << ps.position[0] << ", " << ps.position[1] << ", " << ps.position[2] << "); "
+	<< " orientation (" << angle(euler[0]) << ", " << angle(euler[1]) << ", " << angle(euler[2]) << ")";
+	return str;
+}
+
+std::string pose::to_string() const {
+	return implode_to_string<float>(',', {
+		position[0],
+		position[1],
+		position[2],
+		orientation.w(),
+		orientation.x(),
+		orientation.y(),
+		orientation.z()
+	});
+}
+
+pose pose::from_string(const std::string& str) {
+	std::vector<float> p = explode_from_string<float>(',', str);
+	if(p.size() != 7)
+		throw std::invalid_argument("invalid string to convert to pose");
+	
+	Eigen::Vector3f position(p[0], p[1], p[2]);
+	Eigen::Quaternionf orientation(p[3], p[4], p[5], p[6]);
+	return pose(position, orientation);
+}
+
+
+void pose::look_at(const Eigen::Vector3f& target) {
+	Eigen::Vector3f at_target = target - position;
+	Eigen::Vector3f at_depth(0, 0, 1);
+	orientation.setFromTwoVectors(at_depth, at_target);
+	orientation.normalize();
+}
+
+void pose::flip(const Eigen::Vector3f& axis) {
+	orientation = Eigen::AngleAxisf(pi, axis) * orientation;
+}
+
+
+void pose::invert_orientation() {
+	orientation = orientation.inverse();
+}
+
+
+}
