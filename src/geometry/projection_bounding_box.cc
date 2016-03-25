@@ -49,7 +49,7 @@ bounding_box(
 ) {}
 
 
-Eigen::Matrix4f projection_bounding_box::orthogonal_projection_matrix() const {
+Eigen::Matrix4f projection_bounding_box::projection_matrix() const {
 	float l = origin[0], r = extremity[0];
 	float b = origin[1], t = extremity[1];
 	float n = origin[2], f = extremity[2];

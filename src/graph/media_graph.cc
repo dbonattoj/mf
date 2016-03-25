@@ -3,6 +3,8 @@
 #include "media_sink_node.h"
 #include "../debug.h"
 
+#include <iostream>
+
 namespace mf {
 
 media_graph::~media_graph() {
@@ -36,6 +38,7 @@ void media_graph::run() {
 	if(! setup_) throw std::logic_error("media graph not set up");
 	while(!sink_->reached_end()) {
 		sink_->pull_next_frame();
+		std::cout << "frame " << current_time() << std::endl;
 	}
 	sink_->stop_graph();
 }

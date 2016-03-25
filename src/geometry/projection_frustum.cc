@@ -145,5 +145,4 @@ void projection_frustum::adjust_fov_y_to_aspect_ratio(float aspect_ratio) {
 
 
 
-
 }

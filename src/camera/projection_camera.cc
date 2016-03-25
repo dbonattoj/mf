@@ -3,16 +3,16 @@
 
 namespace mf {
 
+projection_camera::projection_camera(const pose& ps, const Eigen::Matrix4f& intrinsic) :
+	camera(ps), projection_matrix_(intrinsic) { }
+
+
 projection_camera::projection_camera(const pose& ps, const projection_frustum& fr) :
-	camera(ps), projection_matrix_(fr.matrix) { }
+	camera(ps), projection_matrix_(fr.projection_matrix()) { }
 
 
 projection_camera::projection_camera(const pose& ps, const projection_bounding_box& bb) :
-	camera(ps), projection_matrix_(bb.orthogonal_projection_matrix()) { }
-
-
-projection_camera::projection_camera(const camera& cam) :
-	camera(cam), projection_matrix_(cam.relative_viewing_frustum().matrix) { } // Not working for orthogonal
+	camera(ps), projection_matrix_(bb.projection_matrix()) { }
 
 
 angle projection_camera::angle_between_(const Eigen::Vector3f& v, const Eigen::Vector3f& u) {
@@ -98,6 +98,10 @@ bool projection_camera::is_perspective() const {
 	return ! is_orthogonal();
 }
 
+
+Eigen::Projective3f projection_camera::view_projection_transformation() const {
+	return projection_transformation() * view_transformation();
+}
 
 
 Eigen::Projective3f projection_camera::projection_transformation() const {

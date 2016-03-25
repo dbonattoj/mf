@@ -15,10 +15,6 @@ range_camera::range_camera(const pose& ps, const angle_pair& x_limits, const ang
 	elevation_limits_(y_limits) { }
 
 
-range_camera::range_camera(const camera& cam) :
-	range_camera(cam.absolute_pose(), cam.field_of_view_limits_x(), cam.field_of_view_limits_y()) { }
-
-
 angle range_camera::field_of_view_width() const {
 	return azimuth_limits_.second - azimuth_limits_.first;
 }

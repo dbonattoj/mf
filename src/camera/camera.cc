@@ -26,10 +26,6 @@ Eigen::Affine3f camera::view_transformation() const {
 	return relative_pose().transformation_from_world();
 }
 
-Eigen::Projective3f camera::view_projection_transformation() const {
-	return this->projection_transformation() * view_transformation();
-}
-
 Eigen::Vector3f camera::view_ray_direction() const {
 	return relative_pose().orientation * Eigen::Vector3f(0, 0, -1);
 }

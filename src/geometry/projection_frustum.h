@@ -39,6 +39,8 @@ public:
 	/** The matrix must be a perspective projection matrix (without view or model transformation). */
 	explicit projection_frustum(const Eigen::Matrix4f&);
 	
+	Eigen::Matrix4f projection_matrix() const { return matrix; }
+	
 	float aspect_ratio() const;
 	bool is_symmetric_x() const;
 	bool is_symmetric_y() const;

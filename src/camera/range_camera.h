@@ -17,7 +17,6 @@ public:
 	range_camera() = default;
 	range_camera(const pose&, angle width, angle height);
 	range_camera(const pose&, const angle_pair& x_limits, const angle_pair& y_limits);
-	range_camera(const camera&);
 
 	angle field_of_view_width() const override;
 	angle field_of_view_height() const override;

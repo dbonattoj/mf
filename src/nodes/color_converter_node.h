@@ -16,7 +16,7 @@ public:
 	media_node_input<2, Input_color> input;
 
 	color_converter_node() :
-		media_node(0), output(*this), input(*this) { }
+		media_node(1), output(*this), input(*this) { }
 	
 	void setup_() override {
 		output.define_frame_shape(input.frame_shape());

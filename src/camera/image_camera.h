@@ -8,9 +8,9 @@
 
 namespace mf {
 
-/// Abstract base class for camera which handles mapping to image coordinates.
-/** Image pixels may be graduation of projection plane (projection camera),
- ** or or spherical coordinates (range camera). */
+/// Abstract (secondary) base class for camera which handles mapping to image coordinates.
+/** Image pixels may be graduation of projection plane (projection), or of spherical coordinates (range).
+ ** Handles mapping of 2D projected coordinates to integer pixel coordinates, and bounds checking.  */
 class image_camera {
 protected:
 	std::size_t image_width_;
@@ -20,7 +20,7 @@ protected:
 	image_camera(std::size_t imw, std::size_t imh);
 	
 public:
-	using coordinates_type = ndptrdiff<2>;
+	using pixel_coordinates_type = ndptrdiff<2>;
 
 	image_camera(const image_camera&) = default;
 	
@@ -40,8 +40,7 @@ public:
 	/// Check whether given coordinates are in image bounds.
 	bool in_bounds(coordinates_type) const;
 	
-	/// Map point in space to image coordinates.
-	/** Implemented by subclass. */
+	/// Map 3D point in space to image coordinates.
 	virtual coordinates_type to_image(const Eigen::Vector3f&) const = 0;
 	
 	/// Inverse mapping of image coordinates to point in space.

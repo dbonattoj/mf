@@ -14,11 +14,9 @@ namespace mf {
  ** A pose also defines an orthonormal coordinate system, aka the world as seen from a camera at that pose. */
 class pose {
 public:
-	/// Position vector.
-	Eigen::Vector3f position;
-	
-	/// Orientation quaternion. Must be kept normalized.
-	Eigen::Quaternionf orientation;
+	Eigen::Vector3f position; ///< Position vector.
+	Eigen::Quaternionf orientation; ///< Orientation quaternion. Must be kept normalized.
+	// TODO make private, enforce normalization
 
 	/// Create identity pose.
 	pose();
@@ -27,7 +25,8 @@ public:
 	pose(const pose&) = default;
 	
 	/// Construct pose from affine transformation.
-	/// Transformation is transformation to world. Assumes that the transformation consists only of translation and rotation.
+	/** Transformation is transformation to world.
+	 ** Assumes that the transformation consists only of translation and rotation. */
 	pose(const Eigen::Affine3f&);
 	
 	/// Construct pose with given translation and rotation.

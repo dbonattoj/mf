@@ -27,7 +27,7 @@ public:
 	
 	projection_bounding_box(distance_pair x, distance_pair y, float near_z, float far_z);
 
-	Eigen::Matrix4f orthogonal_projection_matrix() const;
+	Eigen::Matrix4f projection_matrix() const;
 	
 	float aspect_ratio() const;
 	bool is_symmetric_x() const;
