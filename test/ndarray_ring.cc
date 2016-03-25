@@ -15,9 +15,7 @@ TEST_CASE("ndarray_ring", "[ndarray_ring]") {
 	REQUIRE((shape.product() * duration * sizeof(int)) % system_page_size() != 0);
 	
 	ndarray_ring<2, int> ring(shape, duration);
-	REQUIRE(ring.padding().front() != 0);
-	REQUIRE(ring.padding()[1] == 0);
-	REQUIRE(ring.padding()[2] == 0);
+	REQUIRE(ring.padding() != 0);
 	
 	REQUIRE(ring.writable_duration() == duration);
 	REQUIRE(ring.readable_duration() == 0);
@@ -48,6 +46,8 @@ TEST_CASE("ndarray_ring", "[ndarray_ring]") {
 	
 	SECTION("multiple read/write, wrap") {
 		for(std::ptrdiff_t loop = 0; loop < 3; ++loop) {
+			INFO("loop " << loop);
+			
 			// write frames 0, 1, 2
 			auto w_section(ring.begin_write(3));
 			REQUIRE(w_section.shape().front() == 3);

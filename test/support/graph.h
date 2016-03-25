@@ -87,7 +87,6 @@ private:
 	
 	void process_() override {
 		if(callback_) callback_(*this, input, output);
-		MF_DEBUG("passthrough: got frame ", frame_index(input.view()));
 		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
 		output.view() = input.view();
 	}

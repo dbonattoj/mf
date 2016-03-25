@@ -20,20 +20,18 @@ namespace mf {
  ** Wrapping is implemented using virtual memory mapping: Address contiguity is preserved and no special view subclass
  ** is needed. */
 template<std::size_t Dim, typename T>
-class ndarray_ring : public ndarray<Dim + 1, T, ring_allocator<T>> {
-	using base = ndarray<Dim + 1, T, ring_allocator<T>>;
+class ndarray_ring : public ndarray<Dim + 1, T, raw_ring_allocator> {
+	using base = ndarray<Dim + 1, T, raw_ring_allocator>;
 
 public:
 	using section_view_type = ndarray_view<Dim + 1, T>;
-
-	using typename base::padding_type;
 
 private:
 	std::size_t read_position_ = 0;
 	std::size_t write_position_ = 0;
 	bool full_ = false;
 	
-	static padding_type adjust_padding_(const ndsize<Dim>& spatial_shape, std::size_t duration); 
+	static std::size_t adjust_padding_(const ndsize<Dim>& spatial_shape, std::size_t duration); 
 	section_view_type section_(std::ptrdiff_t start, std::size_t duration);
 
 public:

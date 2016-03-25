@@ -26,7 +26,7 @@ long_line_column=120
 current_page=-1
 
 [VTE]
-last_dir=/home/timlenertz/Desktop/mf
+last_dir=/home/timlenertz/Desktop/vsrs/trunk/linux
 
 [build-menu]
 NF_00_LB=Clean

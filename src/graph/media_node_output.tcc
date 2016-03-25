@@ -33,7 +33,6 @@ void media_node_output<Dim, T>::pull(time_unit target_time) {
 
 template<std::size_t Dim, typename T>
 auto media_node_output<Dim, T>::begin_read_span(time_span span) -> full_view_type {
-	//MF_DEBUG("output: begin read ", span, "  , buffer state: ", *buffer_);
 	return buffer_->begin_read_span(span);
 }
 

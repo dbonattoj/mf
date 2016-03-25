@@ -9,12 +9,16 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <stdio.h>
+#include <cstdint>
+#include <cassert>
 
 namespace mf {
 
-void* detail::ring_allocator_base::raw_allocate(std::size_t size) {
-	if(size % system_page_size() != 0)
-		throw std::runtime_error("size must be multiple of page size");
+void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
+	std::size_t page_size = system_page_size();
+	
+	if(size % page_size != 0) throw std::invalid_argument("size must be multiple of page size");
+	if(page_size % align != 0) throw std::invalid_argument("requested alignment must be divisor of page size"); 
 
 	int status;
 	void* ptr;
@@ -29,9 +33,11 @@ void* detail::ring_allocator_base::raw_allocate(std::size_t size) {
 	if(status != 0)
 		throw std::system_error(errno, std::system_category(), "ring allocator ftruncate failed");
 		
-	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0); // ...aligns to page size
 	if(base == MAP_FAILED)
 		throw std::system_error(errno, std::system_category(), "ring allocator mmap failed (whole region)");
+		
+	assert(reinterpret_cast<std::uintptr_t>(base) % align == 0);
 
 	ptr = ::mmap(base, size, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_SHARED, fd, 0);
 	if(ptr == MAP_FAILED)
@@ -49,7 +55,7 @@ void* detail::ring_allocator_base::raw_allocate(std::size_t size) {
 }
 
 
-void detail::ring_allocator_base::raw_deallocate(void* base, std::size_t size) {
+void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
 	::munmap(base, size * 2);
 }
 

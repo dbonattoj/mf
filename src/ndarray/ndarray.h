@@ -3,6 +3,7 @@
 
 #include "ndarray_view.h"
 #include "ndcoord.h"
+#include "../raw_allocator.h"
 #include <memory>
 #include <utility>
 
@@ -17,7 +18,11 @@
 
 namespace mf {
 
-template<std::size_t Dim, typename T, typename Allocator = std::allocator<T>>
+/// Multidimensional array container.
+/** Based on `ndarray_view`, but also owns items. Allocates and deallocates memory. Const-correct interface.
+ ** Uses default strides, except that padding (in bytes) can be added in _first_ dimension. (i.e. between entire
+ ** frames). */
+template<std::size_t Dim, typename T, typename Allocator = raw_allocator>
 class ndarray {
 public:
 	using view_type = ndarray_view<Dim, T>;
@@ -27,7 +32,6 @@ public:
 	using coordinates_type = typename view_type::coordinates_type;
 	using shape_type = typename view_type::shape_type;
 	using strides_type = typename view_type::strides_type;
-	using padding_type = ndsize<Dim>;
 
 	using value_type = T;
 	using pointer = T*;
@@ -41,21 +45,21 @@ public:
 	constexpr static std::size_t dimension = Dim;
 
 protected:
-	Allocator allocator_;
-	padding_type padding_;
-	std::size_t allocated_size_ = 0;
-	view_type view_;
+	Allocator allocator_; ///< Raw allocator used to allocate memory, in bytes.
+	std::size_t padding_; ///< Padding between frames, in bytes.
+	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
+	view_type view_; ///< View used to access items.
 
 	void allocate_();
 	void deallocate_();
 	
-	ndarray(const shape_type& shape, const padding_type& padding, const Allocator& alloc);
+	ndarray(const shape_type& shape, std::size_t padding, const Allocator& alloc);
 
-	static strides_type strides_with_padding_(const shape_type& shape, const padding_type&);
+	static strides_type strides_with_padding_(const shape_type& shape, std::size_t padding);
 
 public:
 	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator()) :
-		ndarray(shp, padding_type(0), allocator) { }
+		ndarray(shp, 0, allocator) { }
 
 	explicit ndarray(const const_view_type&);
 	ndarray(const ndarray& arr) : ndarray(arr.cview()) { }
@@ -88,7 +92,7 @@ public:
 	const shape_type& shape() const noexcept { return view_.shape(); }
 	const strides_type& strides() const noexcept { return view_.strides(); }
 	std::size_t contiguous_length() const noexcept { return view_.contiguous_length(); }
-	const padding_type& padding() const noexcept { return padding_; }
+	std::size_t padding() const noexcept { return padding_; }
 
 	MF_NDARRAY_VIEW_FUNC_(section);
 	MF_NDARRAY_VIEW_FUNC_(slice)

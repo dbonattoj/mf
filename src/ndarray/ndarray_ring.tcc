@@ -10,22 +10,21 @@ ndarray_ring<Dim, T>::ndarray_ring(const ndsize<Dim>& frame_shape, std::size_t d
 	base(	
 		ndcoord_cat(ndsize<1>(duration), frame_shape),
 		adjust_padding_(frame_shape, duration),
-		ring_allocator<T>()
+		raw_ring_allocator()
 	) { }
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::size_t duration) -> padding_type {
-	std::size_t frame_size = frame_shape.product();
+std::size_t ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::size_t duration) {
+	std::size_t frame_size = frame_shape.product() * sizeof(T);
 	std::size_t page_size = system_page_size();
 		
+	std::size_t frame_padding_unit = alignof(T);
 	std::size_t frame_padding = 0;
-	while( (duration * (frame_size + frame_padding)) % page_size != 0 ) ++frame_padding;
+	while( (duration * (frame_size + frame_padding)) % page_size != 0 )
+		frame_padding += frame_padding_unit;
 		
-	padding_type new_padding(0);
-	new_padding.front() = frame_padding;	
-		
-	return new_padding;
+	return frame_padding;
 }
 
 

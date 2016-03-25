@@ -300,9 +300,7 @@ TEST_CASE("media graph", "[media_graph]") {
 		REQUIRE(passthrough1.output.required_buffer_duration() == 1);
 		REQUIRE(source1.output.required_buffer_duration() == 7);
 
-		MF_DEBUG("running");
 		graph.run();
-		MF_DEBUG("ended");
 				
 		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
