@@ -13,10 +13,12 @@ using namespace std::literals;
 TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 	media_graph graph;
 	auto shp = make_ndsize(320, 240);
-	
+
+	std::vector<int> seq(20);
+	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
+		
 	SECTION("source --> passthrough(4) --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough = graph.add_node<passthrough_node>(0, 0, 4);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
@@ -27,8 +29,7 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 	}
 
 	SECTION("source --> passthrough(4) --> sink, stepwise") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough = graph.add_node<passthrough_node>(0, 0, 4);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
@@ -42,34 +43,32 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 		REQUIRE(sink.got_expected_frames());
 	}
 	
-	SECTION("source1 --> [+3]passthrough1(4) --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+	SECTION("source --> [+3]passthrough1(4) --> sink") {
+		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(0, 3, 4);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
-		passthrough1.input.connect(source1.output);
+		passthrough1.input.connect(source.output);
 		sink.input.connect(passthrough1.output);
 		
 		graph.setup();
 
 		REQUIRE(sink.offset() == 0);
 		REQUIRE(passthrough1.offset() == 4);
-		REQUIRE(source1.offset() == 3+4);
+		REQUIRE(source.offset() == 3+4);
 		
 		REQUIRE(passthrough1.output.required_buffer_duration() == 5);
-		REQUIRE(source1.output.required_buffer_duration() == 4);
+		REQUIRE(source.output.required_buffer_duration() == 4);
 
 		graph.run();
 		
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 	
 	
 	SECTION("source1 --> [-3]passthrough1(4) --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(3, 0, 4);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
@@ -87,14 +86,13 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 
 		graph.run();
 				
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 	
 	
 	SECTION("source1 --> [-3,+3]passthrough1(4) --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(3, 3, 4);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
@@ -112,14 +110,13 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 
 		graph.run();
 				
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 
 
 	SECTION("source1 --> [-3,+1]passthrough1(4) --> [-2,+2]passthrough2(5) --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(3, 1, 4);
 		auto& passthrough2 = graph.add_node<passthrough_node>(2, 2, 5);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
@@ -141,15 +138,14 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 
 		graph.run();
 		
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 	
 
 	SECTION("input synchronize") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
-		auto& source2 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
+		auto& source2 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		auto& merge = graph.add_node<input_synchronize_test_node>();
 		
@@ -182,7 +178,7 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 			graph.run();
 			
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());
 		}
 
@@ -219,15 +215,13 @@ TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
 			graph.run();
 			
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());
 		}
 	}
 
 
 	SECTION("multiple outputs") {
-		std::vector<int> seq(20);
-		for(int i = 0; i < seq.size(); ++i) seq[i] = i;
 		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 

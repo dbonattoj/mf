@@ -2,6 +2,7 @@
 #define MF_NDARRAY_TIMED_RING_H_
 
 #include <atomic>
+#include <ostream>
 #include "ndarray_ring.h"
 
 namespace mf {
@@ -40,6 +41,10 @@ public:
 	section_view_type begin_write_span(time_span);
 	section_view_type begin_read_span(time_span);
 	void skip_span(time_span);
+	
+	#ifndef NDEBUG
+	void debug_print(std::ostream&) const;
+	#endif
 };
 
 

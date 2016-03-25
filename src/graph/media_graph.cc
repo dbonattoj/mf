@@ -27,7 +27,6 @@ time_unit media_graph::current_time() const {
 void media_graph::run_until(time_unit last_frame) {
 	if(! setup_) throw std::logic_error("media graph not set up");
 	while(sink_->current_time() < last_frame && !sink_->reached_end()) {
-		MF_DEBUG("graph pulling ", sink_->current_time(), " < ", last_frame);
 		sink_->pull_next_frame();
 	}
 }
@@ -35,7 +34,9 @@ void media_graph::run_until(time_unit last_frame) {
 
 void media_graph::run() {
 	if(! setup_) throw std::logic_error("media graph not set up");
-	while(!sink_->reached_end()) sink_->pull_next_frame();
+	while(!sink_->reached_end()) {
+		sink_->pull_next_frame();
+	}
 	sink_->stop_graph();
 }
 

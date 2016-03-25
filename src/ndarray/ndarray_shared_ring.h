@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <stdexcept>
 #include <atomic>
+#include <ostream>
 #include "ndarray_timed_ring.h"
 
 namespace mf {
@@ -74,6 +75,10 @@ public:
 	/// Returns true if the EOF was marked by the writer.
 	/** EOF is marked by writer by an end_write() with \a eof argument set. */
 	bool eof_was_marked() const;
+	
+	#ifndef NDEBUG
+	void debug_print(std::ostream&) const;
+	#endif
 };
 
 }

@@ -8,7 +8,7 @@ LDLIBS :=
 
 
 # OpenCV 3
-PACKAGES := opencv
+PACKAGES := opencv eigen3
 PKG_CONFIG_PATH=/usr/local/opt/opencv3/lib/pkgconfig
 CXXFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags $(PACKAGES))
 LDFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs-only-L $(PACKAGES))
@@ -21,23 +21,23 @@ else
 endif
 
 # library
-LIB_SRC := $(shell find src/. -name '*.cc')
-LIB_OBJ := $(patsubst src/%.cc,build/src/%.o,$(LIB_SRC))
-DEP += $(patsubst %.cc,build/%.d,$(LIB_SRC))
+LIB_SRC := $(shell find src -name '*.cc')
+LIB_OBJ := $(patsubst src/%.cc,$(BUILD_DIR)/src/%.o,$(LIB_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(LIB_SRC))
 
 # unit tests
-TEST_SRC := $(shell find test/. -name '*.cc')
-TEST_OBJ := $(patsubst test/%.cc,build/test/%.o,$(TEST_SRC))
+TEST_SRC := $(shell find test -name '*.cc')
+TEST_OBJ := $(patsubst test/%.cc,$(BUILD_DIR)/test/%.o,$(TEST_SRC))
 TEST_SUPPORT_SRC := $(shell find test/support/. -name '*.cc')
-TEST_SUPPORT_OBJ := $(patsubst test/support/%.cc,build/test/support/%.o,$(TEST_SUPPORT_SRC))
-DEP += $(patsubst %.cc,build/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
+TEST_SUPPORT_OBJ := $(patsubst test/support/%.cc,$(BUILD_DIR)/test/support/%.o,$(TEST_SUPPORT_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
 
 # programs
-PROG_SRC := $(shell find prog/. -maxdepth 1 -name '*.cc')
-PROG := $(patsubst prog/%.cc,dist/prog/%,$(PROG_SRC))
-PROG_SUPPORT_SRC := $(shell find prog/support/. -name '*.cc')
-PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,build/prog/support/%.o,$(PROG_SUPPORT_SRC))
-DEP += $(patsubst %.cc,build/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
+PROG_SRC := $(shell find prog -maxdepth 1 -name '*.cc')
+PROG := $(patsubst prog/%.cc,$(DIST_DIR)/prog/%,$(PROG_SRC))
+PROG_SUPPORT_SRC := $(shell find prog/support -name '*.cc')
+PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,$(BUILD_DIR)/prog/support/%.o,$(PROG_SUPPORT_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
 all : $(TARGET)
@@ -54,11 +54,11 @@ $(TARGET) : $(LIB_OBJ)
 $(TEST_TARGET) : $(TEST_OBJ) $(TEST_SUPPORT_OBJ) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
 
-dist/prog/% : build/prog/%.o $(PROG_SUPPORT_OBJ) $(TARGET)
+$(DIST_DIR)/prog/% : $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(TARGET)
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-build/%.o : %.cc
+$(BUILD_DIR)/%.o : %.cc
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
 

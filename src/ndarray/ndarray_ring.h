@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <mutex>
+#include <ostream>
 #include "../common.h"
 #include "ndcoord.h"
 #include "ndarray.h"
@@ -52,6 +53,10 @@ public:
 	virtual void end_read(std::size_t read_duration);
 		
 	virtual void skip(std::size_t duration);
+	
+	#ifndef NDEBUG
+	void debug_print(std::ostream&) const;
+	#endif
 };
 
 }

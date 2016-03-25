@@ -11,10 +11,12 @@ using namespace mf::test;
 TEST_CASE("media graph", "[media_graph]") {
 	media_graph graph;
 	auto shp = make_ndsize(320, 240);
-	
+
+	std::vector<int> seq(20);
+	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
+
 	SECTION("source -> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
 		graph.setup();
@@ -24,8 +26,7 @@ TEST_CASE("media graph", "[media_graph]") {
 	
 	
 	SECTION("source --> passthrough --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough = graph.add_node<passthrough_node>(0, 0);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
@@ -236,8 +237,7 @@ TEST_CASE("media graph", "[media_graph]") {
 	
 	
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(0, 3);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
@@ -255,14 +255,13 @@ TEST_CASE("media graph", "[media_graph]") {
 
 		graph.run();
 		
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 	
 	
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(3, 0);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
@@ -280,14 +279,12 @@ TEST_CASE("media graph", "[media_graph]") {
 
 		graph.run();
 				
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 	
-	
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(3, 3);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
@@ -303,16 +300,16 @@ TEST_CASE("media graph", "[media_graph]") {
 		REQUIRE(passthrough1.output.required_buffer_duration() == 1);
 		REQUIRE(source1.output.required_buffer_duration() == 7);
 
+		MF_DEBUG("running");
 		graph.run();
+		MF_DEBUG("ended");
 				
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
 	}
 
-
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough1 = graph.add_node<passthrough_node>(3, 1);
 		auto& passthrough2 = graph.add_node<passthrough_node>(2, 2);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
@@ -334,15 +331,14 @@ TEST_CASE("media graph", "[media_graph]") {
 
 		graph.run();
 		
-		REQUIRE(graph.current_time() == 10);
+		REQUIRE(graph.current_time() == seq.size()-1);
 		REQUIRE(sink.got_expected_frames());
-	}	
+	}
 
 	
 	SECTION("input synchronize") {
-		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source1 = graph.add_node<sequence_frame_source>(10, shp);
-		auto& source2 = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
+		auto& source2 = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		auto& merge = graph.add_node<input_synchronize_test_node>();
 		
@@ -375,7 +371,7 @@ TEST_CASE("media graph", "[media_graph]") {
 			graph.run();
 			
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());
 		}
 
@@ -412,15 +408,14 @@ TEST_CASE("media graph", "[media_graph]") {
 			graph.run();
 			
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());
 		}
 	}
 	
 	
 	SECTION("multiple outputs") {
-		const std::vector<int> seq { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		auto& source = graph.add_node<sequence_frame_source>(10, shp);
+		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp);
 		auto& merge = graph.add_node<input_synchronize_test_node>();
 		auto& multiplex = graph.add_node<multiplexer_node>();
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
@@ -451,7 +446,7 @@ TEST_CASE("media graph", "[media_graph]") {
 			graph.run();
 
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());		
 		}
 		
@@ -490,7 +485,7 @@ TEST_CASE("media graph", "[media_graph]") {
 			graph.run();
 
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());
 		}
 		
@@ -516,7 +511,7 @@ TEST_CASE("media graph", "[media_graph]") {
 			graph.run();
 
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == 10);
+			REQUIRE(graph.current_time() == seq.size()-1);
 			REQUIRE(sink.got_expected_frames());
 		}
 	}

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <stdexcept>
 #include "ndarray.h"
 #include "../../src/common.h"
 #include "../../src/graph/media_node.h"
@@ -10,6 +11,7 @@
 #include "../../src/graph/media_node_input.h"
 #include "../../src/graph/media_node_output.h"
 #include "../../src/ndarray/ndcoord.h"
+#include "ndarray.h"
 
 namespace mf { namespace test {
 
@@ -52,12 +54,13 @@ public:
 		expected_frames_(seq), input(*this) { }
 	
 	void process_() override {
+		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in sink");
 		if(counter_ >= expected_frames_.size()) {
 			got_mismatch_ = true;
 		} else {
 			int expected = expected_frames_.at(counter_);
-			auto expected_frame = make_frame(input.frame_shape(), expected);
-			if(input.view() != expected_frame) got_mismatch_ = true;
+			int got = frame_index(input.view());
+			if(expected != got) got_mismatch_ = true;
 		}
 		counter_++;
 	}
@@ -84,6 +87,8 @@ private:
 	
 	void process_() override {
 		if(callback_) callback_(*this, input, output);
+		MF_DEBUG("passthrough: got frame ", frame_index(input.view()));
+		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
 		output.view() = input.view();
 	}
 	
@@ -121,6 +126,9 @@ public:
 	}
 	
 	void process_() override {		
+		if(frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
+		if(frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
+
 		if(input1.view() != input2.view()) failed_ = true;
 		output.view() = input1.view();
 	}
@@ -144,7 +152,8 @@ public:
 		output2.define_frame_shape(input.frame_shape());
 	}
 	
-	void process_() override {		
+	void process_() override {
+		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in multiplexer");	
 		output1.view() = input.view();
 		output2.view() = input.view();
 	}

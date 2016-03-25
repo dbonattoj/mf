@@ -107,4 +107,15 @@ void ndarray_ring<Dim, T>::skip(std::size_t duration) {
 }
 
 
+#ifndef NDEBUG
+template<std::size_t Dim, typename T>
+void ndarray_ring<Dim, T>::debug_print(std::ostream& str) const {
+	str << "ndarray_ring: "
+	    << "read_position=" << read_position_ << ", write_position=" << write_position_ << ", full=" << full_
+	    << "\ntotal_duration=" << total_duration() << std::endl;
+	 
+}
+#endif
+
+
 }

@@ -101,5 +101,16 @@ void ndarray_timed_ring<Dim, T>::skip_span(time_span span) {
 }
 
 
+#ifndef NDEBUG
+template<std::size_t Dim, typename T>
+void ndarray_timed_ring<Dim, T>::debug_print(std::ostream& str) const {
+	str << "ndarray_timed_ring: \n";
+	base::debug_print(str);
+	str << "last_write_time=" << last_write_time_ << ", readable_time_span=" << readable_time_span()
+	    << ", writable_time_span=" << writable_time_span() << std::endl;
+	
+}
+#endif
+
 
 }

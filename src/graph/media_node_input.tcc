@@ -27,7 +27,7 @@ void media_node_input<Dim, T>::begin_read(time_unit t) {
 		
 	// time span to request from connected output
 	// if t near beginning, size of past window is reduced
-	// remember view_center = position of current frame in window
+	// set view_center = position of current frame in window
 	time_span requested_span;
 	if(t < past_window_) {
 		requested_span = time_span(0, t + future_window_ + 1);

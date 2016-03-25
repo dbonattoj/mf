@@ -280,4 +280,23 @@ bool ndarray_shared_ring<Dim, T>::eof_was_marked() const {
 }
 
 
+#ifndef NDEBUG
+template<std::size_t Dim, typename T>
+void ndarray_shared_ring<Dim, T>::debug_print(std::ostream& str) const {
+	str << "ndarray_shared_ring: \n";
+	if(mutex_.try_lock()) {
+		ring_.debug_print(str);
+		str << "reader state="
+		    << (reader_state_ == idle ? "idle" : (reader_state_ == waiting ? "waiting" : "processing"))
+		    << ", writer state="
+		    << (writer_state_ == idle ? "idle" : (writer_state_ == writer_state_ ? "waiting" : "processing"))
+		    << ", end_time=" << end_time_ << ", read_start_time=" << read_start_time_;
+		mutex_.unlock();
+	} else {
+		str << "cannot lock mutex for debug_print" << std::endl;
+	}
+}
+#endif
+
+
 }

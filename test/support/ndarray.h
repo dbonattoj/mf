@@ -53,6 +53,8 @@ bool compare_sequence_(const Buffer& buf, const std::vector<int>& seq) {
 
 ndarray<2, int> make_frame(const ndsize<2>& shape, int i);
 
+int frame_index(const ndarray_view<2, int>&);
+
 bool compare_frames(const ndsize<2>& shape, const ndarray_view<3, int>& frames, const std::vector<int>& is);
 
 }}
