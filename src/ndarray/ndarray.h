@@ -3,7 +3,7 @@
 
 #include "ndarray_view.h"
 #include "ndcoord.h"
-#include "../raw_allocator.h"
+#include "../utility/memory.h"
 #include <memory>
 #include <utility>
 

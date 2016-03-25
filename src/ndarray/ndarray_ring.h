@@ -7,7 +7,7 @@
 #include "../common.h"
 #include "ndcoord.h"
 #include "ndarray.h"
-#include "../ring_allocator.h"
+#include "../utility/memory.h"
 
 namespace mf {
 

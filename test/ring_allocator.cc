@@ -1,6 +1,5 @@
 #include <catch.hpp>
 #include <algorithm>
-#include "../src/ring_allocator.h"
 #include "../src/utility/memory.h"
 
 using namespace mf;

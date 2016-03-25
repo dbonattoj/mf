@@ -16,11 +16,15 @@ ndarray<2, int> make_frame(const ndsize<2>& shape, int i) {
 }
 
 
-int frame_index(const ndarray_view<2, int>& vw) {
+int frame_index(const ndarray_view<2, int>& vw, bool verify) {
 	const auto& shp = vw.shape();
 	int i = vw[0][0];
-	if(vw == make_frame(shp, i)) return i;
-	else return -1;
+	if(verify) {
+		if(vw == make_frame(shp, i)) return i;
+		else return -1;
+	} else {
+		return i;
+	}
 }
 
 
