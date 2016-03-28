@@ -6,7 +6,6 @@
 
 namespace mf {
 
-struct plane;
 
 /// Projection camera which additionally handles mapping onto pixel grid.
 class projection_image_camera : public projection_camera, public image_camera {
@@ -37,18 +36,21 @@ public:
 	
 	projection_image_camera(const projection_image_camera&) = default;
 	
-	Eigen::Vector3f point_with_projected_depth(coordinates_type, float proj_depth) const;
+	
+	/// Map 2D image pixel coordinates to projected coordinates.
+	projected_coordinates_type to_projected(pixel_coordinates_type) const;
 	
 	/// Map 2D projected coordinates to image pixel coordinates.
-	Eigen::Vector2f to_projected(coordinates_type image_coord) const;
+	pixel_coordinates_type to_image(projected_coordinates_type) const;
 	
-	/// Map 2D projected coordinates to image pixel coordinates.
-	coordinates_type to_image(Eigen::Vector2f projected_coord) const;
+	// Project 3D point coordinates to 2D pixel coordinates.
+	pixel_coordinates_type to_image(const Eigen::Vector3f&) const override;
 	
-	coordinates_type to_image(const Eigen::Vector3f&) const override;
-	Eigen::Vector3f point(coordinates_type, float depth) const override;
-	
-	Eigen::ParametrizedLine<float, 3> ray(coordinates_type) const;
+	Eigen::Vector3f point(pixel_coordinates_type, float depth) const override;
+	Eigen::Vector3f point_with_projected_depth(pixel_coordinates_type, float proj_depth) const;
+
+
+	Eigen::ParametrizedLine<float, 3> ray(pixel_coordinates_type) const;
 
 	void adjust_field_of_view_x();
 	void adjust_field_of_view_y();

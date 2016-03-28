@@ -23,11 +23,6 @@ public:
 	angle_pair field_of_view_limits_x() const override;
 	angle_pair field_of_view_limits_y() const override;
 	bool in_field_of_view(const Eigen::Vector3f&) const override;
-
-	bool has_viewing_frustum() const override;
-	projection_frustum relative_viewing_frustum() const override;
-	
-	Eigen::Projective3f projection_transformation() const override;	
 };
 
 }

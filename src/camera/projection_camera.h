@@ -21,7 +21,7 @@ protected:
 	static angle angle_between_(const Eigen::Vector4f&, const Eigen::Vector4f&);
 
 public:
-	/// 2D coordinates on the planar image plane.
+	/// 2D projected coordinates on the planar image plane.
 	using projected_coordinates_type = Eigen::Vector2f;
 
 	projection_camera() = default;
@@ -54,13 +54,24 @@ public:
 	bool is_orthogonal() const;
 	bool is_perspective() const;
 
+	/// Get projected depth of a 3D point.
 	float projected_depth(const Eigen::Vector3f&) const;
+	
+	/// Project 3D point coordinates to 2D projected coordinates.
 	projected_coordinates_type to_projected(const Eigen::Vector3f&) const;
+	
+	/// Project 3D point coordinates to 2D projected coordinates and get projected depth.
 	projected_coordinates_type to_projected(const Eigen::Vector3f&, float& proj_depth) const;
-	Eigen::Vector3f point_with_projected_depth(projected_coordinates_type, float z) const;
+	
+	Eigen::Vector3f point(projected_coordinates_type im, float depth) const;
+	Eigen::Vector3f point_with_projected_depth(projected_coordinates_type, float proj_depth) const;
 
-	Eigen::ParametrizedLine<float, 3> ray(const Eigen::Vector2f&) const;
+	Eigen::ParametrizedLine<float, 3> ray(projected_coordinates_type) const;
 };
+
+
+Eigen::Projective3f homography_transformation(const projection_camera& from, const projection_camera& to);
+
 
 }
 

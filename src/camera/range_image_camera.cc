@@ -11,15 +11,18 @@ range_image_camera::range_image_camera(const pose& ps, angle width, angle height
 	range_camera(ps, width, height),
 	image_camera(imw, imh) { }	
 
+
 angle range_image_camera::angular_resolution_x() const {
 	return field_of_view_width() / image_width_;
 }
+
 
 angle range_image_camera::angular_resolution_y() const {
 	return field_of_view_height() / image_height_;
 }
 
-auto range_image_camera::to_image(const Eigen::Vector3f& p) const -> coordinates_type {
+
+auto range_image_camera::to_image(const Eigen::Vector3f& p) const -> pixel_coordinates_type {
 	spherical_coordinates s = to_spherical(p);
 	s.azimuth -= azimuth_limits_.first;
 	s.elevation -= elevation_limits_.first;
@@ -28,7 +31,8 @@ auto range_image_camera::to_image(const Eigen::Vector3f& p) const -> coordinates
 	return {x, y};
 }
 
-Eigen::Vector3f range_image_camera::point(coordinates_type im, float depth) const {
+
+Eigen::Vector3f range_image_camera::point(pixel_coordinates_type im, float depth) const {
 	spherical_coordinates s;
 	s.azimuth = azimuth_limits_.first + ((field_of_view_width() * im[0]) / image_width_);
 	s.elevation = elevation_limits_.first + ((field_of_view_height() * im[1]) / image_height_);

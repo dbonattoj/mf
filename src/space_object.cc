@@ -120,7 +120,7 @@ Eigen::Affine3f space_object::transformation_to(const space_object& obj) const {
 
 
 Eigen::Affine3f space_object::transformation_from(const space_object& obj) const {
-	return transformation_to(obj).inverse();
+	return obj.transformation_to(*this);
 }
 
 

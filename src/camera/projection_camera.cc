@@ -1,5 +1,6 @@
 #include "projection_camera.h"
 #include <cmath>
+#include <iostream>
 
 namespace mf {
 
@@ -74,11 +75,6 @@ bool projection_camera::in_field_of_view(const Eigen::Vector3f& wp) const {
 }
 
 
-bool projection_camera::has_viewing_frustum() const {
-	return true;
-}
-
-
 projection_frustum projection_camera::relative_viewing_frustum() const {
 	return projection_frustum(projection_matrix_);
 }
@@ -115,12 +111,13 @@ float projection_camera::projected_depth(const Eigen::Vector3f& wp) const {
 }
 
 
-Eigen::Vector2f projection_camera::to_projected(const Eigen::Vector3f& p) const {
+auto projection_camera::to_projected(const Eigen::Vector3f& p) const -> projected_coordinates_type {
 	Eigen::Vector4f projected = view_projection_transformation() * p.homogeneous();
 	return Eigen::Vector2f( projected[0]/projected[3], projected[1]/projected[3] );
 }
 
-Eigen::Vector2f projection_camera::to_projected(const Eigen::Vector3f& p, float& proj_depth) const {
+
+auto projection_camera::to_projected(const Eigen::Vector3f& p, float& proj_depth) const -> projected_coordinates_type {
 	Eigen::Vector4f projected = view_projection_transformation() * p.homogeneous();
 	projected /= projected[3];
 	proj_depth = projected[2];
@@ -128,19 +125,34 @@ Eigen::Vector2f projection_camera::to_projected(const Eigen::Vector3f& p, float&
 }
 
 
-Eigen::Vector3f projection_camera::point_with_projected_depth(const Eigen::Vector2f& projected, float z) const {
+Eigen::Vector3f projection_camera::point(projected_coordinates_type im, float depth) const {
+	const float intermediary_projected_depth = 1.0;
+	Eigen::Vector3f p = point_with_projected_depth(im, intermediary_projected_depth);
+	spherical_coordinates sp = spherical_coordinates::from_cartesian(p);
+	sp.radius = depth;
+	return sp.to_cartesian();
+}
+
+
+Eigen::Vector3f projection_camera::point_with_projected_depth(projected_coordinates_type projected, float z) const {
 	Eigen::Vector4f p(projected[0], projected[1], z, 1);
 	p = view_projection_transformation().inverse() * p;
 	return (p / p[3]).head(3);
 }
 
 
-Eigen::ParametrizedLine<float, 3> projection_camera::ray(const Eigen::Vector2f& projected) const {
+Eigen::ParametrizedLine<float, 3> projection_camera::ray(projected_coordinates_type projected) const {
 	Eigen::Vector3f p1 = point_with_projected_depth(projected, -1.0);
 	Eigen::Vector3f p2 = point_with_projected_depth(projected, -2.0);
 	return Eigen::ParametrizedLine<float, 3>::Through(p1, p2);
 }
 
+
+Eigen::Projective3f homography_transformation(const projection_camera& from, const projection_camera& to) {
+	Eigen::Matrix4f inv_proj = from.projection_transformation().matrix().inverse();
+	std::cout << "inv=" << from.projection_transformation().matrix()  << std::endl;
+	return to.projection_transformation() * pose_transformation(from, to) * Eigen::Projective3f(inv_proj);
+}
 
 
 }

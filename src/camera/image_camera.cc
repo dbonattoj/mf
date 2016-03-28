@@ -7,12 +7,12 @@ image_camera::image_camera(std::size_t imw, std::size_t imh) :
 
 
 float image_camera::image_aspect_ratio() const {
-	return float(image_width_) / image_height_;
+	return static_cast<float>(image_width_) / static_cast<float>(image_height_);
 }
 
-void image_camera::set_image_size(std::size_t imw, std::size_t imh) {
-	image_width_ = imw;
-	image_height_ = imh;
+void image_camera::set_image_size(ndsize<2> sz) {
+	image_width_ = sz[0];
+	image_height_ = sz[1];
 }
 
 void image_camera::set_image_width(std::size_t imw) {
@@ -32,7 +32,7 @@ std::size_t image_camera::image_number_of_pixels() const {
 }
 
 
-bool image_camera::in_bounds(coordinates_type ic) const {
+bool image_camera::in_bounds(pixel_coordinates_type ic) const {
 	return (ic[0] >= 0) && (ic[0] < image_width_) && (ic[1] >= 0) && (ic[1] < image_height_);
 }
 

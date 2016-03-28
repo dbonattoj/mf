@@ -88,6 +88,12 @@ public:
 };
 
 
+inline Eigen::Affine3f pose_transformation(const space_object& from, const space_object& to) {
+	return from.transformation_to(to);
+}
+
+
+
 }
 
 #endif

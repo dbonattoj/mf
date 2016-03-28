@@ -17,11 +17,6 @@ angle camera::field_of_view_height() const {
 	return limits.second - limits.first;
 }
 
-
-frustum camera::viewing_frustum() const {
-	return this->relative_viewing_frustum().transform(view_transformation());
-}
-
 Eigen::Affine3f camera::view_transformation() const {
 	return relative_pose().transformation_from_world();
 }

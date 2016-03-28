@@ -25,11 +25,9 @@ public:
 	image_camera(const image_camera&) = default;
 	
 	float image_aspect_ratio() const;
-	std::size_t image_width() const { return image_width_; }
-	std::size_t image_height() const { return image_height_; }
 	ndsize<2> image_size() const { return make_ndsize(image_width_, image_height_); }
 	std::size_t image_number_of_pixels() const;
-	void set_image_size(std::size_t imw, std::size_t imh);
+	void set_image_size(ndsize<2>);
 	
 	/// Set image width, and adjust height to keep same aspect ratio.
 	void set_image_width(std::size_t);
@@ -38,15 +36,15 @@ public:
 	void set_image_height(std::size_t);
 	
 	/// Check whether given coordinates are in image bounds.
-	bool in_bounds(coordinates_type) const;
+	bool in_bounds(pixel_coordinates_type) const;
 	
 	/// Map 3D point in space to image coordinates.
-	virtual coordinates_type to_image(const Eigen::Vector3f&) const = 0;
+	virtual pixel_coordinates_type to_image(const Eigen::Vector3f&) const = 0;
 	
 	/// Inverse mapping of image coordinates to point in space.
 	/** Depth is the distance of the point to the camera origin. `projection_image_camera` also provides a version
 	 ** which takes the projected depth instead. */
-	virtual Eigen::Vector3f point(coordinates_type, float depth) const = 0;
+	virtual Eigen::Vector3f point(pixel_coordinates_type, float depth) const = 0;
 };
 
 }

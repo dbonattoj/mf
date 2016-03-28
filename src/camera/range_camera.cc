@@ -41,23 +41,4 @@ bool range_camera::in_field_of_view(const Eigen::Vector3f& p) const {
 	    && (s.elevation >= elevation_limits_.first) && (s.elevation <= elevation_limits_.second);
 }
 
-
-bool range_camera::has_viewing_frustum() const {
-	return (field_of_view_width() < pi) && (field_of_view_height() < pi);
-}
-
-
-projection_frustum range_camera::relative_viewing_frustum() const {
-	return projection_frustum::asymmetric_perspective_fov(
-		field_of_view_limits_x(),
-		field_of_view_limits_y()
-	);
-}
-
-
-Eigen::Projective3f range_camera::projection_transformation() const {
-	return Eigen::Projective3f(relative_viewing_frustum().matrix);
-}
-
-
 }

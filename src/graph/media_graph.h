@@ -20,6 +20,9 @@ private:
 	bool setup_ = false; ///< True after setup() was called.
 
 public:
+	//template<std::size_t Dim, typename T> using input = media_node_input<Dim, T>;
+	//template<std::size_t Dim, typename T> using output = media_node_output<Dim, T>;
+	
 	~media_graph();
 
 	template<typename Node, typename... Args>

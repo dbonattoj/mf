@@ -19,8 +19,8 @@ public:
 	angle angular_resolution_x() const;
 	angle angular_resolution_y() const;
 	
-	coordinates_type to_image(const Eigen::Vector3f&) const override;
-	Eigen::Vector3f point(coordinates_type, float depth) const override;
+	pixel_coordinates_type to_image(const Eigen::Vector3f&) const override;
+	Eigen::Vector3f point(pixel_coordinates_type, float depth) const override;
 };
 
 }

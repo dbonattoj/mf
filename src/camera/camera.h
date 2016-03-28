@@ -3,6 +3,7 @@
 
 #include "../eigen.h"
 #include <array>
+#include <utility>
 #include "../space_object.h"
 #include "../geometry/angle.h"
 #include "../geometry/pose.h"
@@ -12,6 +13,7 @@
 namespace mf {
 
 /// Abstract base class for camera.
+/** Camera model which defined mapping from 3D spatial coordinates to 2D image pixel coordinates. */
 class camera : public space_object {
 protected:
 	camera() = default;
