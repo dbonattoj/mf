@@ -15,11 +15,11 @@ char im[] = "/Users/timlenertz/Desktop/mf/data/BBB_Flowers_cam0005.yuv";
 
 std::string dir = "/Users/timlenertz/Desktop/mf/data/";
 
-std::string im1 = dir + "BBB_Flowers_cam0005.yuv";
-std::string di1 = dir + "BBB_Flowers_1280x768_Depth_8bps_cf420_cam0005.yuv";
+std::string im1 = dir + "BBB_Flowers_cam0025.yuv";
+std::string di1 = dir + "BBB_Flowers_1280x768_Depth_8bps_cf420_cam0025.yuv";
 std::string cams_file = dir + "BBBFlowersNoBlur_Physical_and_Virtual_View_camera_parameters.txt";
-std::string cam1_name = "param_ptm05";
-std::string vcam_name = "param_ptm20";
+std::string cam1_name = "param_ptm25";
+std::string vcam_name = "param_ptm30";
 int w = 1280;
 int h = 768;
 int sampling = 420;

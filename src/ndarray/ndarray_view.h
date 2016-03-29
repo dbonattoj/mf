@@ -132,21 +132,6 @@ public:
 };
 
 
-template<typename Base, typename Array>
-inline auto ndarray_view_cast(const Array& arr) {
-	using derived_type = typename Array::value_type;
-	using base_type = Base;
-	
-	static_assert(std::is_base_of<Base, derived_type>::value, "Base must be base of Array::value_type");
-	if(reinterpret_cast<base_type*>(arr.start()) != static_cast<base_type*>(arr.start()))
-		throw std::invalid_argument("address of derived type must be same as address of base type");
-	return ndarray_view<Array::dimension, base_type>(
-		reinterpret_cast<Base*>(arr.start()),
-		arr.shape(),
-		arr.strides()
-	);
-}
-
 }
 
 #include "ndarray_view.tcc"

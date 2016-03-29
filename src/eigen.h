@@ -9,19 +9,32 @@
 
 #pragma GCC diagnostic pop
 
+#include "elem.h"
 
 namespace mf {
-	using Eigen_scalar = float;
 	
-	using Eigen_vec2 = Eigen::Matrix<Eigen_scalar, 2, 1>;
-	using Eigen_vec3 = Eigen::Matrix<Eigen_scalar, 3, 1>;
-	using Eigen_vec4 = Eigen::Matrix<Eigen_scalar, 4, 1>;
+using Eigen_scalar = float;
 	
-	using Eigen_mat2 = Eigen::Matrix<Eigen_scalar, 2, 2>;
-	using Eigen_mat3 = Eigen::Matrix<Eigen_scalar, 3, 3>;
-	using Eigen_mat4 = Eigen::Matrix<Eigen_scalar, 4, 4>;
+using Eigen_vec2 = Eigen::Matrix<Eigen_scalar, 2, 1>;
+using Eigen_vec3 = Eigen::Matrix<Eigen_scalar, 3, 1>;
+using Eigen_vec4 = Eigen::Matrix<Eigen_scalar, 4, 1>;
+	
+using Eigen_mat2 = Eigen::Matrix<Eigen_scalar, 2, 2>;
+using Eigen_mat3 = Eigen::Matrix<Eigen_scalar, 3, 3>;
+using Eigen_mat4 = Eigen::Matrix<Eigen_scalar, 4, 4>;
+// TODO complete&use	
 
-	// TODO complete&use	
+template<typename Scalar, std::size_t Rows, std::size_t Columns>
+struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> {
+	using scalar_type = Scalar;
+	using type = Eigen::Matrix<Scalar, Rows, Columns>;
+	enum {
+		dimension = Rows * Columns,
+		size = sizeof(type),
+		align = alignof(type)
+	}
+};
+
 }
 
 #endif
