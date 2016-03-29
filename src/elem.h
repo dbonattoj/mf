@@ -4,13 +4,48 @@
 #include <cstddef>
 #include <cstdint>
 #include <utility>
+#include <type_traits>
+#include <array>
 
 namespace mf {
+
+namespace detail {
+	template<typename Elem>
+	struct elem_traits_base {
+		static_assert(std::is_pod<Elem>::value, "elem must be POD type");
+		
+		using scalar_type = Elem;
+		using type = Elem;
+		constexpr static bool is_tuple = false;
+		constexpr static std::size_t components = 1;
+		constexpr static std::size_t size = sizeof(Elem);
+		constexpr static std::size_t stride = sizeof(Elem);
+	};
+}
+
+
+template<typename Elem>
+struct elem_traits : detail::elem_traits_base<Elem> { };
+
+
+template<typename T, std::size_t N>
+struct elem_traits<std::array<T, N>> {
+	static_assert(std::is_pod<T>::value, "T must be POD type");
+	
+	using scalar_type = T;
+	using type = std::array<T, N>;
+	constexpr static bool is_tuple = false;
+	constexpr static std::size_t components = N;
+	constexpr static std::size_t size = sizeof(type);
+	constexpr static std::size_t stride = sizeof(T);
+};
 
 
 template<typename First_elem, typename... Other_elems>
 class elem_tuple {
-private:
+	static_assert(! elem_traits<First_elem>::is_tuple, "elem_tuple element must not be another tuple");
+	
+public:
 	using others_tuple_type = elem_tuple<Other_elems...>;
 
 	First_elem first_;
@@ -21,52 +56,29 @@ public:
 	elem_tuple(const elem_tuple&) = default;
 	elem_tuple(elem_tuple&&) = default;
 	
-	elem_tuple(First_elem&& first, Other_elems&&... others) :
-		first_(std::forward<First_elem>(first)),
-		others_(std::forward<Other_elems>(others)...) { }
+	elem_tuple(const First_elem& first, const Other_elems&... others) :
+		first_(first), others_(others...) { }
 
 	elem_tuple& operator=(const elem_tuple&) = default;
 	elem_tuple& operator=(elem_tuple&&) = default;
 	
-	friend bool operator==(const elem_tuple& a, const elem_tuple& b) const {
+	friend bool operator==(const elem_tuple& a, const elem_tuple& b) {
 		return (a.first_ == b.first_) && (a.others_ == b.others_);
 	}
-	friend bool operator!)=(const elem_tuple& a, const elem_tuple& b) const {
+	friend bool operator!=(const elem_tuple& a, const elem_tuple& b) {
 		return (a.first_ != b.first_) || (a.others_ != b.others_);
 	}
 	
-	template<typename T> constexpr static std::ptrdiff_t index() const { return 1 + others_tuple_type::index<T>(); }
-	template<> constexpr static std::ptrdiff_t index<First_elem>() const { return 0; }
-
-	
-	template<std::ptrdiff_t Index> auto& get() { return others_.get<Index - 1>(); }
-	template<> First_elem& get<0>() { return first_; }
-	
-	template<std::ptrdiff_t Index> const auto& get() const { return others_.get<Index - 1>(); }
-	template<> const First_elem& get<0>() const { return first_; }
-	
-
-	template<typename T> auto& get() { return get<index<T>()>(); }
-	template<typename T> const auto& get() const { return get<index<T>()>(); }
-	
-	
-	template<typename T> constexpr static bool has() { return others_.has<T>(); }
-	template<> constexpr static bool has<First_elem>() { return true; }
-	
-	constexpr static std::size_t size() const { return 1 + sizeof...(Other_elems); }
-
-	template<std::ptrdiff_t Index> constexpr static std::ptrdiff_t offset() const {
-		return offsetof(elem_tuple, others_) + others_tuple_type::offset<Index - 1>();
-	}
-	template<> constexpr static std::ptrdiff_t offset<0>() const {
-		return 0;
-	}
+	constexpr static std::size_t size() { return 1 + sizeof...(Other_elems); }
 };
+
 
 
 template<typename First_elem>
 class elem_tuple<First_elem> {
-private:
+	static_assert(! elem_traits<First_elem>::is_tuple, "elem_tuple element must not be another tuple");
+
+public:
 	First_elem first_;
 
 public:
@@ -74,55 +86,128 @@ public:
 	elem_tuple(const elem_tuple&) = default;
 	elem_tuple(elem_tuple&&) = default;
 
-	elem_tuple(First_elem&& first) :
-		first_(std::forward<First_elem>(first)) { }	
+	explicit elem_tuple(const First_elem& first) :
+		first_(first) { }	
 
 	elem_tuple& operator=(const elem_tuple&) = default;
 	elem_tuple& operator=(elem_tuple&&) = default;
 
-	friend bool operator==(const elem_tuple& a, const elem_tuple& b) const {
+	friend bool operator==(const elem_tuple& a, const elem_tuple& b) {
 		return (a.first_ == b.first_);
 	}
-	friend bool operator!=(const elem_tuple& a, const elem_tuple& b) const {
+	friend bool operator!=(const elem_tuple& a, const elem_tuple& b) {
 		return (a.first_ != b.first_);
 	}
-
-	template<std::ptrdiff_t Index> First_elem& get() {
-		static_assert(Index == 0, "index out of range");
-		return first_;
-	}
-
-	template<std::ptrdiff_t Index> const First_elem& get() const {
-		static_assert(Index == 0, "index out of range");
-		return first_;
-	}
 	
-	template<typename T> First_elem& get() {
-		static_assert(std::is_same_t<T, First_elem>::value, "no such type in tuple");
-		return first_;
-	}
-	template<typename T> const First_elem& get() const {
-		static_assert(std::is_same_t<T, First_elem>::value, "no such type in tuple");
-		return first_;
-	}
-
-	template<typename T>
-	constexpr static std::ptrdiff_t index() const {
-		static_assert(std::is_same_t<T, First_elem>::value, "no such type in tuple");
-		return 0;
-	}
-	
-	template<typename T> constexpr static bool has() {
-		return std::is_same_t<T, First_elem>::value;
-	}
-	
-	constexpr static std::size_t size() const { return 1; }
-	
-	template<std::ptrdiff_t Index> constexpr std::ptrdiff_t offset() const {
-		static_assert(Index == 0, "index out of range");
-		return 0;
-	}
+	constexpr static std::size_t size() { return 1; }
 };
+
+
+
+namespace detail {
+
+	template<std::ptrdiff_t Index, typename Tuple>
+	struct elem_tuple_accessor;
+	
+	
+	template<std::ptrdiff_t Index, typename First_elem, typename... Other_elems>
+	struct elem_tuple_accessor<Index, elem_tuple<First_elem, Other_elems...>> {
+		using tuple_type = elem_tuple<First_elem, Other_elems...>;
+		using others_tuple_type = typename tuple_type::others_tuple_type;
+		
+		static auto& get(tuple_type& tup) {
+			return elem_tuple_accessor<Index - 1, others_tuple_type>::get(tup.others_);
+		}
+		
+		static const auto& get(const tuple_type& tup) {
+			return elem_tuple_accessor<Index - 1, others_tuple_type>::get(tup.others_);
+		}
+		
+		constexpr static std::ptrdiff_t offset() {
+			return offsetof(tuple_type, others_) + elem_tuple_accessor<Index - 1, others_tuple_type>::offset();
+		}
+	};
+	
+	
+	template<typename First_elem, typename... Other_elems>
+	struct elem_tuple_accessor<0, elem_tuple<First_elem, Other_elems...>> {
+		using tuple_type = elem_tuple<First_elem, Other_elems...>;
+		
+		static auto& get(tuple_type& tup) {
+			return tup.first_;
+		}
+		static const auto& get(const tuple_type& tup) {
+			return tup.first_;
+		}
+		constexpr static std::ptrdiff_t offset() {
+			return 0;
+		}
+	};
+
+}
+
+
+template<typename T, typename Tuple>
+constexpr std::ptrdiff_t elem_tuple_index = -1;
+
+template<typename T, typename First_elem, typename... Other_elems>
+constexpr std::ptrdiff_t elem_tuple_index<T, elem_tuple<First_elem, Other_elems...>>
+	= 1 + elem_tuple_index<T, elem_tuple<Other_elems...>>;
+	
+template<typename T, typename... Other_elems>
+constexpr std::ptrdiff_t elem_tuple_index<T, elem_tuple<T, Other_elems...>>
+	= 0;
+
+
+template<std::size_t Index, typename First_elem, typename... Other_elems>
+const auto& get(const elem_tuple<First_elem, Other_elems...>& tup) {
+	using tuple_type = std::decay_t<decltype(tup)>;
+	return detail::elem_tuple_accessor<Index, tuple_type>::get(tup);
+}
+
+template<std::size_t Index, typename First_elem, typename... Other_elems>
+auto& get(elem_tuple<First_elem, Other_elems...>& tup) {
+	using tuple_type = std::decay_t<decltype(tup)>;
+	return detail::elem_tuple_accessor<Index, tuple_type>::get(tup);
+}
+
+
+template<typename T, typename First_elem, typename... Other_elems>
+const auto& get(const elem_tuple<First_elem, Other_elems...>& tup) {
+	using tuple_type = std::decay_t<decltype(tup)>;
+	constexpr std::size_t index = elem_tuple_index<T, tuple_type>;
+	return detail::elem_tuple_accessor<index, tuple_type>::get(tup);
+}
+
+template<typename T, typename First_elem, typename... Other_elems>
+auto& get(elem_tuple<First_elem, Other_elems...>& tup) {
+	using tuple_type = std::decay_t<decltype(tup)>;
+	constexpr std::size_t index = elem_tuple_index<T, tuple_type>;
+	return detail::elem_tuple_accessor<index, tuple_type>::get(tup);
+}
+
+
+template<std::size_t Index, typename Tuple>
+constexpr std::ptrdiff_t elem_tuple_offset = -1;
+
+template<std::size_t Index, typename First_elem, typename... Other_elems>
+constexpr std::ptrdiff_t elem_tuple_offset<Index, elem_tuple<First_elem, Other_elems...>> =
+	detail::elem_tuple_accessor<Index, elem_tuple<First_elem, Other_elems...>>::offset();
+
+
+
+
+template<typename... Elems>
+struct elem_traits<elem_tuple<Elems...>> : detail::elem_traits_base<elem_tuple<Elems...>> {
+	constexpr static bool is_tuple = true;
+};
+
+
+}
+
+#endif
+
+
 
 /*
 namespace detail {
@@ -144,21 +229,3 @@ namespace detail {
 }
 */
 
-
-template<typename Elem>
-struct elem_traits {
-	static_assert(std::is_scalar<Elem>::value, "no elem_traits specialization and type is not scalar");
-
-	using scalar_type = Elem;
-	using type = Elem;
-	enum {
-		dimension = 1,
-		size = sizeof(Elem),
-		align = alignof(Elem)
-	}
-};
-
-
-}
-
-#endif

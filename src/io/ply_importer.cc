@@ -1,3 +1,4 @@
+/*
 #include "ply_importer.h"
 #include <algorithm>
 
@@ -336,3 +337,4 @@ bool ply_importer::all_valid() const {
 
 
 }
+*/

@@ -4,11 +4,11 @@
 namespace mf {
 
 
-template<typename Input, typename Output>
-inline Output* advance_raw_ptr(Input* ptr, std::ptrdiff_t diff) noexcept {
+template<typename T>
+inline T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept {
 	std::uintptr_t raw_ptr = reinterpret_cast<std::uintptr_t>(ptr);
 	raw_ptr += diff;
-	return reinterpret_cast<Output*>(raw_ptr);
+	return reinterpret_cast<T*>(raw_ptr);
 }
 
 

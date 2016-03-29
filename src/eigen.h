@@ -32,7 +32,7 @@ struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> {
 		dimension = Rows * Columns,
 		size = sizeof(type),
 		align = alignof(type)
-	}
+	};
 };
 
 }

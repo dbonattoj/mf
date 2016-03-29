@@ -4,6 +4,7 @@
 #include "ndcoord.h"
 #include "ndarray_iterator.h"
 #include "../utility/misc.h"
+#include "../elem.h"
 #include <type_traits>
 #include <utility>
 #include <memory>

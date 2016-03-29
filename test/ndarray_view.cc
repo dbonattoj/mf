@@ -629,40 +629,4 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 			REQUIRE(arr3.slice(2, 2)[1][2] == 0x1A);
 		}
 	}
-			
-	
-	SECTION("objects") {
-		struct base {
-			int b;
-		};
-		struct derived : base {
-			int d;
-		};
-		
-		ndsize<2> shp{10, 20};
-		std::vector<derived> raw(shp.product());
-		for(std::ptrdiff_t i = 0; i < raw.size(); ++i) {
-			raw[i].b = i;
-			raw[i].d = 2*i;
-		}
-		
-		ndarray_view<2, derived> arr(raw.data(), shp);
-		REQUIRE(arr.shape() == shp);
-		REQUIRE(arr.strides() == make_ndptrdiff( 20*sizeof(derived) ,sizeof(derived)) );
-		
-		SECTION("downcast") {
-			ndarray_view<2, base> arr2 = ndarray_view_cast<base>(arr);
-			auto raw_it = raw.begin();
-			auto it = arr2.begin();
-			for(; (it != arr2.end()) && (raw_it != raw.end()); it++, raw_it++) {
-				REQUIRE(raw_it->b == it->b);
-				it->b *= 3;
-			}
-			
-			for(std::ptrdiff_t i = 0; i < raw.size(); ++i) {
-				REQUIRE(raw[i].b == 3*i);
-				REQUIRE(raw[i].d == 2*i);
-			}
-		}
-	}
 }
