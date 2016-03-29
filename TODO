@@ -1,0 +1,16 @@
+BASE
+- ndarray_view_cast + join finish
+- elem_tuple constructor
+- use&complete Eigen_vec2 etc
+- Eigen::Matrix & color & cv::Vec --> elem_traits
+- point types
+
+CORE
+- point_cloud
+- parallel node (multiple frames in parallel)
+- simultaneous begin_read on inputs (and begin_write on outputs)
+- opencl node?
+
+NODES
+- to point cloud
+- warp
