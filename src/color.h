@@ -32,6 +32,18 @@ template<> rgb_color color_convert(const ycbcr_color& in);
 template<> mono_color color_convert(const ycbcr_color& in);
 template<> rgb_color color_convert(const mono_color& in);
 
+
+template<>
+struct elem_traits<rgb_color> {
+	using scalar_type = std::uint8_t;
+	constexpr static bool is_tuple = false;
+	constexpr static std::size_t components = 3;
+	constexpr static std::size_t size = sizeof(rgb_color);
+	constexpr static std::size_t stride = 1;
+};
+
+
+
 }
 
 #endif

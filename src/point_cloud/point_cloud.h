@@ -6,8 +6,13 @@
 namespace mf {
 
 template<class Point>
-class point_cloud : public ndarray_view<1, Point> {
+class point_cloud {
+private:
+	ndarray_view<1, Point> view_;
 
+public:
+	explicit point_cloud(const ndarray_view<1, Point>& arr) :
+		view_(arr) { }
 };
 
 }

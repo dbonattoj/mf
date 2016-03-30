@@ -130,6 +130,9 @@ public:
 	const shape_type& shape() const noexcept { return shape_; }
 	const strides_type& strides() const noexcept { return strides_; }
 	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
+	
+	template<std::size_t New_dim>
+	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
 };
 
 

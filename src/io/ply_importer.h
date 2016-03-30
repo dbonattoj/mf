@@ -96,12 +96,6 @@ public:
 	bool is_ascii() const { return format_ == ascii; }
 };
 
-
-class ply_importer_error : public std::runtime_error {
-public:
-	ply_importer_error(const std::string& str) : std::runtime_error(str) { }
-};
-
 }
 
 #endif

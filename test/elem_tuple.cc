@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include <type_traits>
-#include "../src/elem.h"
+#include "../src/elem_tuple.h"
 #include "../src/utility/misc.h"
 
 using namespace mf;
@@ -94,5 +94,4 @@ TEST_CASE("elem_tuple", "[elem_tuple]") {
 		REQUIRE_FALSE(tup == tup_diff);
 		REQUIRE(tup != tup_diff);
 	}
-	
 }

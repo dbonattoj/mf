@@ -28,7 +28,7 @@ private:
 
 	ring_type ring_; ///< Underlying, non thread-safe timed ring buffer.
 
-	mutable std::mutex mutex_; ///< Mutex used to protect read/write positions from concurrent access, and waiting for frames.
+	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access, and waiting for frames.
 	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.
 	std::condition_variable readable_cv_; ///< Condition variable, gets notified when readable frames become available.
 
