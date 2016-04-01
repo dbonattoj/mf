@@ -25,16 +25,14 @@ using Eigen_mat4 = Eigen::Matrix<Eigen_scalar, 4, 4>;
 // TODO complete&use	
 
 
-
 template<typename Scalar, std::size_t Rows, std::size_t Columns>
-struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> {
-	using scalar_type = Scalar;
-	constexpr static bool is_tuple = false;
-	constexpr static std::size_t components = Rows * Columns;
-	constexpr static std::size_t size = sizeof(type);
-	constexpr static std::size_t stride = sizeof(Scalar);
+struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> :
+	elem_traits_base<
+		Eigen::Matrix<Scalar, Rows, Columns>,
+		Scalar,
+		Rows * Columns
+	> { };
 
-};
 
 }
 

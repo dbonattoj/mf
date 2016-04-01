@@ -2,6 +2,7 @@
 
 #include <istream>
 #include <ostream>
+#include <fstream>
 #include <stdexcept>
 #include <cstdint>
 #include <type_traits>
@@ -104,18 +105,18 @@ void flip_endianness(char* data, std::size_t sz) {
 }
 
 
-std::string to_lower(const std::string& s_orig) {
-	std::string s(s_orig);
-	for(char& c: s) c = std::tolower(c);
-	return s;
+std::size_t file_size(const std::string& filename) {
+	std::ifstream stream(filename, std::ifstream::ate | std::ifstream::binary);
+	return stream.tellg();
 }
 
 
-std::string to_upper(const std::string& s_orig) {
-	std::string s(s_orig);
-	for(char& c: s) c = std::toupper(c);
-	return s;
+std::size_t file_size(std::ifstream& stream) {
+	auto pos = stream.tellg();
+	stream.seekg(0, std::ifstream::end);
+	auto size = stream.tellg();
+	stream.seekg(pos);
+	return size;
 }
-
 
 }

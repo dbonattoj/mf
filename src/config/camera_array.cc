@@ -15,7 +15,6 @@ projection_camera camera_array::read_camera_(std::istream& str) {
 	str >> intrinsic(1, 0) >> intrinsic(1, 1) >> intrinsic(1, 2);
 	str >> intrinsic(2, 0) >> intrinsic(2, 1) >> intrinsic(2, 2);
 	intrinsic(3, 2) = -1; intrinsic(2, 3) = -1;
-	std::cout << "in:\n" << intrinsic << std::endl << "++++++++++++++" << std::endl;
 	
 	float gomi[2]; // ?
 	str >> gomi[0] >> gomi[1];
@@ -25,7 +24,6 @@ projection_camera camera_array::read_camera_(std::istream& str) {
 	str >> extrinsic(1, 0) >> extrinsic(1, 1) >> extrinsic(1, 2) >> extrinsic(1, 3);
 	str >> extrinsic(2, 0) >> extrinsic(2, 1) >> extrinsic(2, 2) >> extrinsic(2, 3);
 	extrinsic(3, 3) = 1;
-	std::cout << "ex:\n" << extrinsic << std::endl << "++++++++++++++" << std::endl;
 	
 	Eigen::Affine3f extrinsic_affine;
 	extrinsic_affine = extrinsic;

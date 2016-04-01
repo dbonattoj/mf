@@ -211,7 +211,7 @@ template<std::size_t Dim, typename T> template<std::size_t New_dim>
 ndarray_view<New_dim, T> ndarray_view<Dim, T>::reshape(const ndsize<New_dim>& new_shape) const {
 	if(strides_ != default_strides(shape_)) throw std::logic_error("can reshape only with default strides");
 	if(new_shape.product() != shape_.product()) throw std::invalid_argument("new shape must have same product");
-	return ndarray_view<New_dim, T>(start_, new_start);
+	return ndarray_view<New_dim, T>(start_, new_shape);
 }
 
 

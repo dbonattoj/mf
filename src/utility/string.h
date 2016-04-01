@@ -22,6 +22,9 @@ std::vector<T> explode_from_string(char separator, const std::string&);
 template<typename T>
 std::string implode_to_string(char separator, const std::vector<T>&);
 
+std::string to_lower(const std::string&);
+std::string to_upper(const std::string&);
+
 }
 
 #include "string.tcc"

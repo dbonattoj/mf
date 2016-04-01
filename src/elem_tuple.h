@@ -173,7 +173,7 @@ elem_tuple<Elems...> make_elem_tuple(const Elems&... elems) {
 
 
 template<typename... Elems>
-struct elem_traits<elem_tuple<Elems...>> : detail::elem_traits_base<elem_tuple<Elems...>> {
+struct elem_traits<elem_tuple<Elems...>> : elem_traits_base<elem_tuple<Elems...>> {
 	constexpr static bool is_tuple = true;
 };
 

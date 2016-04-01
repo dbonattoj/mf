@@ -32,5 +32,17 @@ std::string implode(char separator, const std::vector<std::string>& vec) {
 }
 
 
+std::string to_lower(const std::string& s_orig) {
+	std::string s(s_orig);
+	for(char& c: s) c = std::tolower(c);
+	return s;
+}
+
+
+std::string to_upper(const std::string& s_orig) {
+	std::string s(s_orig);
+	for(char& c: s) c = std::toupper(c);
+	return s;
+}
 
 }

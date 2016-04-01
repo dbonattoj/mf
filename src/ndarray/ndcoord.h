@@ -192,6 +192,11 @@ auto make_ndptrdiff(Components... c) {
 }
 
 
+template<typename T>
+ndcoord<2, T> flip(const ndcoord<2, T>& coord) {
+	return {coord[1], coord[0]};
+}
+
 
 }
 
