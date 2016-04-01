@@ -76,7 +76,12 @@ void projection_image_camera::adjust_field_of_view_y() {
 
 
 Eigen::Vector3f projection_image_camera::point_with_projected_depth(pixel_coordinates_type im, float proj_depth) const {
-	return projection_camera::point_with_projected_depth(to_projected(im), proj_depth);
+	Eigen_vec2 proj = to_projected(im);
+	proj[0] *= proj_depth;
+	proj[1] *= proj_depth;
+	
+
+	return projection_camera::point_with_projected_depth(proj, proj_depth);
 }
 
 

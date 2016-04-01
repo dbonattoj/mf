@@ -215,4 +215,15 @@ ndarray_view<New_dim, T> ndarray_view<Dim, T>::reshape(const ndsize<New_dim>& ne
 }
 
 
+template<std::size_t Dim, typename T>
+auto ndarray_view<Dim, T>::swapaxis(std::size_t axis1, std::size_t axis2) const -> ndarray_view {
+	if(axis1 >= Dim || axis2 >= Dim) throw std::invalid_argument("axis index out of range");
+	auto new_strides = strides_;
+	std::swap(new_strides[axis1], new_strides[axis2]);
+	auto new_shape = shape_;
+	std::swap(new_shape[axis1], new_shape[axis2]);
+	return ndarray_view(start_, new_shape, new_strides);
+}
+
+
 }

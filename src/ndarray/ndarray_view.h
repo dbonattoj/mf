@@ -133,7 +133,15 @@ public:
 	
 	template<std::size_t New_dim>
 	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
+	
+	ndarray_view swapaxis(std::size_t axis1, std::size_t axis2) const;
 };
+
+
+template<typename T>
+ndarray_view<2, T> flip(const ndarray_view<2, T>& vw) {
+	return vw.swapaxis(0, 1);
+}
 
 
 }

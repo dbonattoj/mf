@@ -16,12 +16,11 @@ using namespace mf;
 
 std::string dir = "/data/test_sequences/bbb_flowers_noblur/";
 
-std::string im = dir + "BBB_Flowers_cam0025.yuv";
-std::string di = dir + "BBB_Flowers_1280x768_Depth_8bps_cf420_cam0025.yuv";
+std::string im = dir + "BBB_Flowers_cam0040.yuv";
+std::string di = dir + "BBB_Flowers_1280x768_Depth_8bps_cf420_cam0040.yuv";
 std::string cams_file = dir + "BBBFlowersNoBlur_Physical_and_Virtual_View_camera_parameters.txt";
-std::string cam_name = "param_ptm25";
-
-std::string pc = "output.ply";
+std::string cam_name = "param_ptm40";
+std::string pc = "output/output.ply";
 
 int w = 1280;
 int h = 768;
