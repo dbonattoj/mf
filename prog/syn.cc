@@ -14,9 +14,10 @@
 
 using namespace mf;
 
-std::string dir = "/data/test_sequences/bbb_flowers_noblur/";
+//std::string dir = "/data/test_sequences/bbb_flowers_noblur/";
+std::string dir = "/Users/timlenertz/Desktop/mf/data/";
 
-std::string L = "20", R = "20", V = "20";
+std::string L = "05", R = "05", V = "05";
 
 std::string im1 = dir + "BBB_Flowers_cam00"+L+".yuv";
 std::string di1 = dir + "BBB_Flowers_1280x768_Depth_8bps_cf420_cam00"+L+".yuv";

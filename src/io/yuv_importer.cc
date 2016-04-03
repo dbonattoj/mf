@@ -5,7 +5,8 @@ namespace mf {
 
 yuv_importer::yuv_importer(const std::string& filename, const ndsize<2>& frame_shape, int sampling) :
 	base(frame_shape),
-	file_(filename, std::ios_base::in | std::ios_base::binary)
+	file_(filename, std::ios_base::in | std::ios_base::binary),
+	file_size_(file_size(file_))
 {
 	file_.exceptions(std::ifstream::failbit | std::ifstream::badbit | std::ifstream::eofbit);
 	switch(sampling) {
@@ -54,7 +55,28 @@ void yuv_importer::read_frame(const ndarray_view<2, ycbcr_color>& out) {
 		col.cr = cr_view_[y / chroma_scale_y_][x / chroma_scale_x_];
 	}
 	
-	reached_end_ = (file_.peek() == -1);
+	current_time_++;
+}
+
+
+bool yuv_importer::reached_end() const {
+	return (current_time_ >= total_duration() - 1);
+}
+
+
+time_unit yuv_importer::current_time() const {
+	return current_time_;
+}
+
+
+time_unit yuv_importer::total_duration() const {
+	return file_size_ / frame_size_;
+}
+	
+
+void yuv_importer::seek(time_unit t) {
+	file_.seekg(t * frame_size_);
+	current_time_ = t;
 }
 
 

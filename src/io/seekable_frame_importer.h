@@ -17,14 +17,14 @@ protected:
 		base(frame_shape) { }
 
 public:
-	using base::frame_view_type;
+	using typename base::frame_view_type;
 	
 	virtual time_unit current_time() const = 0;
 	virtual time_unit total_duration() const = 0;
 	
 	virtual void seek(time_unit) = 0;
 	
-	void read_frame(const frame_view_type& vw, time_unit t) {
+	void read_frame_at(const frame_view_type& vw, time_unit t) {
 		this->seek(t);
 		this->read_frame(vw);
 	}

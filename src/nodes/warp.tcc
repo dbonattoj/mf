@@ -24,13 +24,11 @@ void warp<Color>::process_() {
 	for(in_pix[1] = 0; in_pix[1] != im_in.shape()[1]; ++in_pix[1]) {	
 		Eigen_scalar in_d = di_in.at(in_pix);
 		const Color& in_col = im_in.at(in_pix);
+			
+		auto pt = input_camera->point_with_projected_depth(in_pix, 1.0/in_d);	
+			
+		auto out_pix = output_camera->to_image(pt);
 		
-		auto in_proj2 = input_camera->to_projected(in_pix);
-		auto in_proj3 = Eigen_vec4(in_proj2[0], in_proj2[1], 1.0, 1.0/in_d);
-				
-		Eigen_vec3 out_proj3 = (homography * in_proj3).eval().hnormalized();
-		
-		auto out_pix = output_camera->to_image(Eigen_vec2(out_proj3.head<2>()));
 		if(output_camera->in_bounds(out_pix))
 			out.at(out_pix) = in_col;
 	}
