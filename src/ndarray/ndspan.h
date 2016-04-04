@@ -8,7 +8,7 @@
 namespace mf {
 
 
-template<std::size_t Dim, typename T>
+template<std::size_t Dim, typename T = std::ptrdiff_t>
 class ndspan {
 public:
 	using coordinates_type = ndcoord<Dim, T>;
@@ -42,6 +42,8 @@ public:
 			
 	shape_type shape() const { return end_ - start_; }
 	std::size_t size() const { return shape().product(); }
+
+	// TODO iterator over span coordinates
 };
 
 
@@ -54,7 +56,6 @@ std::ostream& operator<<(std::ostream& str, const ndspan<Dim, T>& span) {
 
 template<std::size_t Dim, typename T>
 ndspan<Dim, T> span_intersection(const ndspan<Dim, T>& a, const ndspan<Dim, T>& b);
-
 
 
 }

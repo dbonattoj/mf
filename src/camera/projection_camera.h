@@ -1,58 +1,32 @@
 #ifndef MF_PROJECTION_CAMERA_H_
 #define MF_PROJECTION_CAMERA_H_
 
-#include "camera.h"
+#include ""
+#include "depth_camera.h"
 #include "../geometry/projection_frustum.h"
-#include "../geometry/projection_bounding_box.h"
 
 namespace mf {
 
 /// Pin-hole camera with projection to a planar image space.
-/** Represented using its 4x4 projection matrix. Cannot have fields of view larger than 180 degrees. */
-class projection_camera : public camera {	
-protected:
-	/// Intrinsic projection parameter of camera.
-	/** 4x4 homogeneous matrix which projects 3D points in camera's coordinate system to 2D points on image plane.
-	 ** May represent perspective or orthogonal projection. May also include image scaling and offset for mapping onto
-	 ** pixel grid of `image_camera`. */
-	Eigen::Matrix4f projection_matrix_;
-
+class projection_camera : public depth_camera {
+public:
+	struct image_parameters {
+		Eigen_vec2 scale;
+		Eigen_vec2 translation;
+	};
+	
+private:
+	Eigen_mat4 projection_matrix_;
+	projection_view_frustum frustum_;
+	
 	static angle angle_between_(const Eigen::Vector3f&, const Eigen::Vector3f&);
 	static angle angle_between_(const Eigen::Vector4f&, const Eigen::Vector4f&);
 
-public:
-	/// 2D projected coordinates on the planar image plane.
-	using projected_coordinates_type = Eigen::Vector2f;
+public:		
+	projection_camera(const pose&, const projection_view_frustum&, const image_parameters&);
+	
+	projection_camera(const pose&, const Eigen_mat2x3& intrinsic_matrix, const image_parameters&);
 
-	projection_camera() = default;
-	
-	/// Create projection camera from pose (extrinsic), and 4x4 intrinsic parameter matrix.
-	projection_camera(const pose&, const Eigen::Matrix4f& intrinsic);
-	
-	/// Create perspective projection camera from pose (extrinsic), and projection frustum.
-	/** Positions in frustum are mapped to projected coordinates in [-1, +1]. */
-	projection_camera(const pose&, const projection_frustum&);
-	
-	/// Create orthogonal projection camera from pose (extrinsic), and projection bounding box.
-	/** Positions in bounding box are mapped to projected coordinates in [-1, +1]. */
-	projection_camera(const pose&, const projection_bounding_box&);
-
-	angle field_of_view_width() const override;
-	angle field_of_view_height() const override;
-	angle_pair field_of_view_limits_x() const override;
-	angle_pair field_of_view_limits_y() const override;
-	bool in_field_of_view(const Eigen::Vector3f&) const override;
-
-	projection_frustum relative_viewing_frustum() const;
-	void set_relative_viewing_frustum(const projection_frustum&);
-	
-	Eigen::Projective3f view_projection_transformation() const;
-	Eigen::Projective3f projection_transformation() const;
-	
-	const Eigen::Matrix4f& projection_matrix() const { return projection_matrix_; }
-	
-	bool is_orthogonal() const;
-	bool is_perspective() const;
 
 	/// Get projected depth of a 3D point.
 	float projected_depth(const Eigen::Vector3f&) const;
@@ -66,7 +40,6 @@ public:
 	Eigen::Vector3f point(projected_coordinates_type im, float depth) const;
 	Eigen::Vector3f point_with_projected_depth(projected_coordinates_type, float proj_depth) const;
 
-	Eigen::ParametrizedLine<float, 3> ray(projected_coordinates_type) const;
 };
 
 

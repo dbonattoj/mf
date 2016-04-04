@@ -10,6 +10,12 @@
 
 namespace mf {
 
+
+/// Real number type.
+using real = float;
+
+
+/// Discrete time unit type.
 using time_unit = std::ptrdiff_t;
 
 

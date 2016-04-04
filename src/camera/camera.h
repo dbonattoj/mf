@@ -5,15 +5,13 @@
 #include <array>
 #include <utility>
 #include "../space_object.h"
-#include "../geometry/angle.h"
-#include "../geometry/pose.h"
-#include "../geometry/spherical_coordinates.h"
-#include "../geometry/projection_frustum.h"
+#include "../eigen.h"
 
 namespace mf {
 
-/// Abstract base class for camera.
-/** Camera model which defined mapping from 3D spatial coordinates to 2D image pixel coordinates. */
+/// Camera which defines mapping from 3D spatial coordinates to 2D image coordinates.
+/** Inherited space object pose defined extrinsic camera parameters. Camera points in -Z direction in its coordinate
+ ** system. 3D points taken as function arguments are always in coordinate system of parent space object. */
 class camera : public space_object {
 protected:
 	camera() = default;
@@ -21,48 +19,53 @@ protected:
 	explicit camera(const pose&);
 
 public:
-	using angle_pair = std::pair<angle, angle>;
+	using image_coordinates = Eigen_vec2;
 
 	virtual ~camera() = default;
 
-	/// Angle of field of view on Y=0 plane.
-	virtual angle field_of_view_width() const;
-	
-	/// Angle of field of view on X=0 plane.
-	virtual angle field_of_view_height() const;
-	
-	/// Positive and negative angles of field of view on Y=0 plane, relative to -Z.
-	virtual angle_pair field_of_view_limits_x() const = 0;
-	
-	/// Positive and negative angles of field of view on X=0 plane, relative to -Z.
-	virtual angle_pair field_of_view_limits_y() const = 0;
-	
-	/// Checks whether 3D point \a p is in camera field of view.
-	virtual bool in_field_of_view(const Eigen::Vector3f& p) const = 0;
-
-	/// Extrinsic pose of camera.
-	/** Is transformation from parent space object coordinate system to coordinate system of the camera. */
-	Eigen::Affine3f view_transformation() const;
+	/// Extrinsic parameters of camera.
+	/** Transformation from parent space object coordinate system to coordinate system of the camera. */
+	Eigen_affine3 view_transformation() const;
 		
 	/// Direction vector of ray -Z pointing straight out camera.
 	/** Relative to parent space object coordinate system. */
-	Eigen::Vector3f view_ray_direction() const;
+	Eigen_vec3 center_ray_direction() const {
+		return ray_direction(Eigen_vec3(0, 0, -1));
+	}
+
+	/// Direction vector of ray pointing to point with spherical coordinates \a sp.
+	Eigen_vec3 ray_direction(const spherical_coordinates& sp) const {
+		return ray_direction(point(sp));
+	}
+
+	/// Direction vector of ray pointing to point \a p.
+	Eigen_vec3 ray_direction(const Eigen_vec3& p) const;
 
 	/// Squared distance of 3D point \a p to camera center.
-	/** \a p is in parent space object coordinate system. */
-	float depth_sq(const Eigen::Vector3f& p) const;
+	float distance_sq(const Eigen_vec3& p) const;
 
 	/// Distance of 3D point \a p to camera center.
-	/** \a p is in parent space object coordinate system. */
-	float depth(const Eigen::Vector3f& p) const;	
+	float distance(const Eigen_vec3& p) const;	
 
 	/// Convert 3D point cartesian coordinates \a p to spherical.
-	/** \a p is in parent space object coordinate system. */
-	spherical_coordinates to_spherical(const Eigen::Vector3f& p) const;
+	spherical_coordinates to_spherical(const Eigen_vec3& p) const;
 	
-	/// Convert 3D point spherical coordinates \a s to cartesian.
-	/** \a p is in parent space object coordinate system. */	
-	Eigen::Vector3f point(const spherical_coordinates& sp) const;
+	/// Convert 3D point spherical coordinates \a sp to cartesian.
+	Eigen_vec3 point(const spherical_coordinates& sp) const;
+	
+	/// Project point \a p to image coordinates.
+	/** Implemented by subclass. */
+	virtual image_coordinates project(const Eigen_vec3& p) const = 0;
+	
+	/// Project point with spherical coordinates \a sp to image coordinates.
+	/** Subclass may implemented more efficient version. */
+	virtual image_coordinates project(const spherical_coordinates& sp) const {
+		return this->project(point(sp));
+	}
+
+	/// Direction vector of ray pointing to point corresponding to image coordinates \a c.
+	/** Implemented by subclass. */
+	virtual Eigen_vec3 ray_direction(const image_coordinates& c) const = 0;
 };
 
 }

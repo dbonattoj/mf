@@ -3,37 +3,37 @@
 
 namespace mf {
 
-frustum::frustum(const Eigen::Matrix4f& m) :
+frustum::frustum(const Eigen_mat4& m) :
 	matrix(m) { }
 
 
 plane frustum::near_plane() const {
-	Eigen::Matrix4f m = matrix.transpose();
+	Eigen_mat4 m = view_projection_matrix_.transpose();
 	return plane(m(0,3) + m(0,2), m(1,3) + m(1,2), m(2,3) + m(2,2), m(3,3) + m(3,2));
 }
 
 plane frustum::far_plane() const {
-	Eigen::Matrix4f m = matrix.transpose();
+	Eigen_mat4 m = view_projection_matrix_.transpose();
 	return plane(m(0,3) - m(0,2), m(1,3) - m(1,2), m(2,3) - m(2,2), m(3,3) - m(3,2));
 }
 
 plane frustum::left_plane() const {
-	Eigen::Matrix4f m = matrix.transpose();
+	Eigen_mat4 m = view_projection_matrix_.transpose();
 	return plane(m(0,3) + m(0,0), m(1,3) + m(1,0), m(2,3) + m(2,0), m(3,3) + m(3,0));
 }
 
 plane frustum::right_plane() const {
-	Eigen::Matrix4f m = matrix.transpose();
+	Eigen_mat4 m = view_projection_matrix_.transpose();
 	return plane(m(0,3) - m(0,0), m(1,3) - m(1,0), m(2,3) - m(2,0), m(3,3) - m(3,0));
 }
 
 plane frustum::bottom_plane() const {
-	Eigen::Matrix4f m = matrix.transpose();
+	Eigen_mat4 m = view_projection_matrix_.transpose();
 	return plane(m(0,3) + m(0,1), m(1,3) + m(1,1), m(2,3) + m(2,1), m(3,3) + m(3,1));
 }
 
 plane frustum::top_plane() const {
-	Eigen::Matrix4f m = matrix.transpose();
+	Eigen_mat4 m = view_projection_matrix_.transpose();
 	return plane(m(0,3) - m(0,1), m(1,3) - m(1,1), m(2,3) - m(2,1), m(3,3) - m(3,1));
 }
 
@@ -51,22 +51,22 @@ frustum::planes_array frustum::planes() const {
 
 
 frustum::corners_array frustum::corners() const {
-	Eigen::Matrix4f view_projection_inv = matrix.inverse();
+	Eigen_mat4 view_projection_inv = matrix.inverse();
 	
-	std::array<Eigen::Vector3f, 8> corn {
-		Eigen::Vector3f(-1, -1, -1),
-		Eigen::Vector3f(-1, +1, -1),
-		Eigen::Vector3f(-1, +1, +1),
-		Eigen::Vector3f(-1, -1, +1),
-		Eigen::Vector3f(+1, -1, -1),
-		Eigen::Vector3f(+1, +1, -1),
-		Eigen::Vector3f(+1, +1, +1),
-		Eigen::Vector3f(+1, -1, +1),
+	std::array<Eigen_vec3, 8> corn {
+		Eigen_vec3(-1, -1, -1),
+		Eigen_vec3(-1, +1, -1),
+		Eigen_vec3(-1, +1, +1),
+		Eigen_vec3(-1, -1, +1),
+		Eigen_vec3(+1, -1, -1),
+		Eigen_vec3(+1, +1, -1),
+		Eigen_vec3(+1, +1, +1),
+		Eigen_vec3(+1, -1, +1),
 	};
 	
-	for(Eigen::Vector3f& p : corn) {
-		Eigen::Vector4f world_point = view_projection_inv * p.homogeneous();
-		p = (world_point / world_point[3]).head(3);
+	for(Eigen_vec3& p : corn) {
+		Eigen_vec4 world_point = view_projection_inv * p.homogeneous();
+		p = world_point.hnormalized();
 	}
 	
 	return corn;
@@ -100,11 +100,10 @@ frustum::edges_array frustum::edges() const {
 
 
 bool frustum::contains(const Eigen::Vector3f& world_point, bool consider_z_planes) const {
-	Eigen::Vector4f projected_point = matrix * world_point.homogeneous();
-	projected_point /= projected_point[3];
-	if(projected_point[0] < -1 || projected_point[0] > 1) return false;
-	if(projected_point[1] < -1 || projected_point[1] > 1) return false;
-	if(consider_z_planes && (projected_point[2] < -1 || projected_point[2] > 1)) return false;
+	Eigen_vec4 projected_point = (matrix * world_point.homogeneous()).hnormalized();
+	if(projected_point[0] < -1.0 || projected_point[0] > 1.0) return false;
+	if(projected_point[1] < -1.0 || projected_point[1] > 1.0) return false;
+	if(consider_z_planes && (projected_point[2] < 0.0 || projected_point[2] > 1.0)) return false;
 	return true;
 }
 
@@ -114,21 +113,9 @@ frustum::intersection frustum::contains(const bounding_box& box) const {
 }
 
 
-float frustum::projected_depth(const Eigen::Vector3f& world_point, bool clip) const {
-	Eigen::Vector4f projected_point = matrix * world_point.homogeneous();
-	float d = projected_point[2] / projected_point[3];
-	if(clip) {
-		if(d > 1.0f) d = INFINITY;
-		else if(d < -1.0f) d = -INFINITY; 
-	}
-	return d;
-}
-
-
-
 frustum::intersection frustum::contains(const planes_array& fr_planes, const bounding_box& box) {
-	const Eigen::Vector3f& a = box.origin;
-	const Eigen::Vector3f& b = box.extremity;
+	const Eigen_vec3& a = box.origin;
+	const Eigen_vec3& b = box.extremity;
 	std::size_t c, c2 = 0;
 	for(const plane& p : fr_planes) {
 		c = 0;

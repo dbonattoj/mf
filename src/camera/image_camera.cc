@@ -2,38 +2,24 @@
 
 namespace mf {
 
-image_camera::image_camera(std::size_t imw, std::size_t imh) :
-	image_width_(imw), image_height_(imh) { }
+image_camera::image_camera(const ndsize<2>& sz) :
+	image_size_(sz) { }
 
 
-float image_camera::image_aspect_ratio() const {
-	return static_cast<float>(image_width_) / static_cast<float>(image_height_);
+real image_camera::image_aspect_ratio() const {
+	return static_cast<real>(image_width_) / static_cast<real>(image_height_);
 }
 
-void image_camera::set_image_size(ndsize<2> sz) {
-	image_width_ = sz[0];
-	image_height_ = sz[1];
-}
 
 void image_camera::set_image_width(std::size_t imw) {
-	image_height_ = static_cast<float>(imw) / image_aspect_ratio();
-	image_width_ = imw;
+	image_size_[1] = imw / image_aspect_ratio();
+	image_size_[0] = imw;
 }
 
 
 void image_camera::set_image_height(std::size_t imh) {
-	image_width_ = image_aspect_ratio() * imh;
-	image_height_ = imh;
-}
-
-
-std::size_t image_camera::image_number_of_pixels() const {
-	return image_width_ * image_height_;
-}
-
-
-bool image_camera::in_bounds(pixel_coordinates_type ic) const {
-	return (ic[0] >= 0) && (ic[0] < image_width_) && (ic[1] >= 0) && (ic[1] < image_height_);
+	image_size_[0] = image_aspect_ratio() * imh;
+	image_size_[1] = imh;
 }
 
 
