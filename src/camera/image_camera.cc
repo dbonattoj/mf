@@ -23,4 +23,11 @@ void image_camera::set_image_height(std::size_t imh) {
 }
 
 
+void image_camera::flip_pixel_coordinates() {
+	image_size_ = flip(image_size_);
+	flipped_ = ! flipped_;
+}
+
+
+
 }

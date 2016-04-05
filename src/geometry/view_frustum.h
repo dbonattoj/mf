@@ -5,22 +5,11 @@
 #include <array>
 #include "angle.h"
 #include "../eigen.h"
+#include "depth_projection_parameters.h"
 
 namespace mf {
 
-struct projection_depth_parameters {
-	enum depth_range_convention {
-		signed_normal;  ///< Depths of points within frustum are in [-1, +1].
-		unsigned_normal; ///< Depths of points within frustum are in [0, 1].
-	};
-
-	depth_range_convention depth_range;
-	real z_near = 0.1;
-	real z_far = 100.0;
-};
-
-
-/// View frustum of a perspective camera, with near and far clipping planes.
+/// View frustum of a perspective camera.
 /** Represented using 4x4 view-projection matrix, with additional information about convention used. Includes the affine
  ** world to view transformation. Can be constructed only as `projection_view_frustum` (which does not include
  ** this view transformation), and can then be transformed using transform().  */
@@ -38,15 +27,19 @@ public:
 	using planes_array = std::array<Eigen_hyperplane3, 6>;
 
 protected:
-	view_frustum(const Eigen_mat4& mat, const projection_depth_parameters& conv);
+	view_frustum(const Eigen_mat4& mat, const projection_depth_parameters& dparam);
 	view_frustum() = delete;
+
+	Eigen_mat4& matrix_() { return view_projection_matrix_; }
+	const Eigen_mat4& matrix_() const { return view_projection_matrix_; }
 
 private:
 	Eigen_mat4 view_projection_matrix_;
-	projection_depth_parameters depth_range_;
+	depth_projection_parameters depth_parameters_;
 
 public:
 	const Eigen_mat4& view_projection_matrix() const { return view_projection_matrix_; }
+	const depth_projection_parameters& depth_parameters() const { return depth_parameters_; }
 	
 	Eigen_hyperplane3 near_plane() const;
 	Eigen_hyperplane3 far_plane() const;

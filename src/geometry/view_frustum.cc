@@ -1,10 +1,14 @@
 #include "view_frustum.h"
+#include <stdexcept>
 
 namespace mf {
 	
-view_frustum::view_frustum(const Eigen_mat4& mat, const projection_depth_parameters& conv) :
+view_frustum::view_frustum(const Eigen_mat4& mat, const projection_depth_parameters& dparam) :
 	view_projection_matrix_(mat),
-	depth_range_(conv) { }
+	depth_parameters_(dparam)
+{
+	if(! dparam.valid()) throw std::invalid_argument("projection depth parameters not valid");
+}
 
 
 Eigen_hyperplane3 view_frustum::near_plane() const {
@@ -13,7 +17,7 @@ Eigen_hyperplane3 view_frustum::near_plane() const {
 	real b = m(2, 1);
 	real c = m(2, 2);
 	real d = m(2, 3);
-	if(depth_range_ == projection_depth_parameters::signed_normal) {
+	if(depth_parameters_.range == depth_projection_parameters::signed_normalized) {
 		a += m(3, 0);
 		b += m(3, 1);
 		c += m(3, 2);
@@ -89,7 +93,7 @@ auto view_frustum::planes() const -> planes_array {
 auto view_frustum::corners() const -> corners_array {
 	Eigen_mat4 view_projection_inv = view_projection_matrix_.inverse();
 	
-	real n = (depth_range_ == opengl_depth_range ? -1.0 : 0.0);
+	real n = (depth_parameters_.range == depth_projection_parameters::signed_normalized ? -1.0 : 0.0);
 	
 	std::array<Eigen_vec3, 8> corn {
 		Eigen_vec3(-1.0, -1.0, n),

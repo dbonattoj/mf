@@ -10,8 +10,8 @@
 namespace mf {
 
 /// Camera which defines mapping from 3D spatial coordinates to 2D image coordinates.
-/** Inherited space object pose defined extrinsic camera parameters. Camera points in -Z direction in its coordinate
- ** system. 3D points taken as function arguments are always in coordinate system of parent space object. */
+/** Inherited space object pose defines extrinsic camera parameters. Camera points in -Z or +Z direction in its
+ ** coordinate system. 3D points taken as function arguments are always in coordinate system of parent space object. */
 class camera : public space_object {
 protected:
 	camera() = default;
@@ -19,7 +19,7 @@ protected:
 	explicit camera(const pose&);
 
 public:
-	using image_coordinates = Eigen_vec2;
+	using image_coordinates = Eigen_vec2; ///< 2D image coordinates, range and scale defined by subclass.
 
 	virtual ~camera() = default;
 
