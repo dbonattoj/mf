@@ -5,6 +5,8 @@
 #include "spherical_coordinates.h"
 #include <stdexcept>
 
+#include <iostream>
+
 namespace mf {
 
 pose::pose() :
@@ -15,7 +17,11 @@ pose::pose() :
 
 pose::pose(const Eigen::Affine3f& t) :
 	position(t.translation()),
-	orientation(t.rotation()) {
+	orientation(t.rotation())
+{
+	orientation.normalize();
+	
+	std::cout << "FROM\n" << t.matrix() << "\nTO:\n" << transformation_to_world().matrix() << "\n--------------------------------\n\n";
 }
 
 

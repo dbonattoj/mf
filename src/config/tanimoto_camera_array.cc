@@ -7,7 +7,8 @@
 
 namespace mf {
 
-projection_camera tanimoto_camera_array::read_camera_(std::istream& str, const depth_projection_parameters& dparam) {
+projection_camera tanimoto_camera_array::read_camera_
+(std::istream& str, const depth_projection_parameters& dparam, const ndsize<2>& img_sz) {
 	str.exceptions(std::ios_base::badbit | std::ios_base::failbit | std::ios_base::eofbit);
 	
 	Eigen_mat3 intrinsic = Eigen_mat3::Zero();
@@ -18,20 +19,21 @@ projection_camera tanimoto_camera_array::read_camera_(std::istream& str, const d
 	float gomi[2]; // ?
 	str >> gomi[0] >> gomi[1];
 
-	Eigen_mat4 extrinsic = Eigen_mat4::Zero();
-	str >> extrinsic(0, 0) >> extrinsic(0, 1) >> extrinsic(0, 2) >> extrinsic(0, 3);
-	str >> extrinsic(1, 0) >> extrinsic(1, 1) >> extrinsic(1, 2) >> extrinsic(1, 3);
-	str >> extrinsic(2, 0) >> extrinsic(2, 1) >> extrinsic(2, 2) >> extrinsic(2, 3);
-	extrinsic(3, 3) = 1.0;
+	Eigen_mat3 rotation;
+	Eigen_vec3 translation;
+	str >> rotation(0, 0) >> rotation(0, 1) >> rotation(0, 2); str >> translation(0);
+	str >> rotation(1, 0) >> rotation(1, 1) >> rotation(1, 2); str >> translation(1);
+	str >> rotation(2, 0) >> rotation(2, 1) >> rotation(2, 2); str >> translation(2);
 	
 	Eigen::Affine3f extrinsic_affine;
-	extrinsic_affine = extrinsic;
+	extrinsic_affine = Eigen::Translation3f(translation) * Eigen::Affine3f(rotation).inverse();
 		
-	return projection_camera(extrinsic_affine, intrinsic, dparam);
+	return projection_camera(extrinsic_affine, intrinsic, dparam, img_sz);
 }
 
 
-tanimoto_camera_array::tanimoto_camera_array(const std::string& filename, const depth_projection_parameters& dparam) {
+tanimoto_camera_array::tanimoto_camera_array
+(const std::string& filename, const depth_projection_parameters& dparam, const ndsize<2>& img_sz) {
 	std::ifstream file(filename);
 	
 	for(;;) {
@@ -43,7 +45,7 @@ tanimoto_camera_array::tanimoto_camera_array(const std::string& filename, const 
 		
 		cameras_.insert(std::make_pair(
 			name,
-			read_camera_(file, dparam)
+			read_camera_(file, dparam, img_sz)
 		));
 	}
 }

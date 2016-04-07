@@ -14,39 +14,46 @@
 using namespace mf;
 
 
-std::string dir = "/data/test_sequences/bbb_flowers_noblur/";
+std::string dir = "/data/test_sequences/poznan_blocks/";
 //std::string dir = "/Users/timlenertz/Desktop/mf/data/";
+std::string im = "Poznan_Blocks_1920x1080_texture_cam";
+std::string di = "Poznan_Blocks_1920x1080_depth_cf420_8bps_cam";
+std::string cm = "Poznan_Blocks_Physical_and_Virtual_View_camera_parameters.txt";
+std::string pr = "param_cam";
+std::size_t w = 1920, h = 1080;
+int sampling = 420;
+float z_far = 100.0, z_near = 15.0;
+std::string out = "output/video.avi";
 
-std::string im = dir + "BBB_Flowers_cam0035.yuv";
-std::string di = dir + "BBB_Flowers_1280x768_Depth_8bps_cf420_cam0035.yuv";
-std::string cams_file = dir + "BBBFlowersNoBlur_Physical_and_Virtual_View_camera_parameters.txt";
-std::string cam_name = "param_ptm35";
 std::string pc = "output/output.ply";
 
-int w = 1280;
-int h = 768;
-int sampling = 420;
 int frame = 25;
 
 
-int main() {	
+void add(std::string I, ply_exporter& exporter) {
+	std::string im1 = dir + im+I+".yuv";
+	std::string di1 = dir + di+I+".yuv";
+	std::string cams_file = dir + cm;
+	std::string cam_name = pr+I;
+
+
 	ndarray<2, point_xyzrgb> output_pc(make_ndsize(h, w));
 	ndarray<2, ycbcr_color> input_im(make_ndsize(h, w));
 	ndarray<2, ycbcr_color> input_di(make_ndsize(h, w));
 
 	std::cout << "load camera" << std::endl;
 	depth_projection_parameters dparam;
-	dparam.z_near = 0.2;
-	dparam.z_far = 700.0;
+	dparam.z_near = z_near;
+	dparam.z_far = z_far;
 	dparam.flip_z = false;
 	dparam.range = depth_projection_parameters::unsigned_normalized_disparity;
-	tanimoto_camera_array cams(cams_file, dparam);
+	tanimoto_camera_array cams(cams_file, dparam, {w, h});
 	projection_image_camera<std::uint8_t> cam(cams[cam_name], make_ndsize(w, h));
 	cam.flip_pixel_coordinates();
 
 	std::cout << "set up importers" << std::endl;
-	yuv_importer im_importer(im, make_ndsize(h, w), sampling);
-	yuv_importer di_importer(di, make_ndsize(h, w), sampling);
+	yuv_importer im_importer(im1, make_ndsize(h, w), sampling);
+	yuv_importer di_importer(di1, make_ndsize(h, w), sampling);
 	
 	std::cout << "read first frame" << std::endl;
 	im_importer.read_frame_at(input_im, frame);
@@ -63,6 +70,9 @@ int main() {
 		rgb_color col = color_convert<rgb_color>(input_im.view().at(pix_c));
 
 		real d = cam.to_depth(pix_d);
+		
+		if(d < 0.3) d = 1.0;
+		
 		auto c = cam.to_image(pix_c);
 		
 		Eigen_vec3 world_c = cam.point(c, d);
@@ -72,8 +82,10 @@ int main() {
 	}
 	
 	std::cout << "exporting ply" << std::endl;
-	ply_exporter exporter(pc);
 	exporter.write(output_pc.view().reshape(make_ndsize(h * w)));
-	
-	return 0;
+}
+
+int main() {
+	ply_exporter exporter(pc);
+	for(std::string I : {"2", "3", "4", "5"}) add(I, exporter);
 }

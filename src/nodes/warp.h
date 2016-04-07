@@ -13,7 +13,7 @@ template<typename Color, typename Depth>
 class warp : public media_node {
 public:
 	input_type<2, Color> image_input;
-	input_type<2, Depth> depth_input;
+	input_type<2, mono_color> depth_input;
 	output_type<2, Color> output;
 	
 	Color background_color{0,0,0};

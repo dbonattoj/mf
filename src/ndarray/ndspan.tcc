@@ -13,7 +13,7 @@ ndspan<Dim, T>::ndspan(const coordinates_type& start, const coordinates_type& en
 template<std::size_t Dim, typename T>
 bool ndspan<Dim, T>::includes(const coordinates_type& c) const {
 	for(std::ptrdiff_t i = 0; i < Dim; ++i)
-		if( (start_[i] > c) || (end_[i] <= c) ) return false;
+		if( (start_[i] > c[i]) || (end_[i] <= c[i]) ) return false;
 	return true;
 }
 

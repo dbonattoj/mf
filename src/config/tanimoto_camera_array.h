@@ -15,10 +15,10 @@ class tanimoto_camera_array {
 private:
 	std::map<std::string, projection_camera> cameras_;
 	
-	static projection_camera read_camera_(std::istream& str, const depth_projection_parameters&);
+	static projection_camera read_camera_(std::istream& str, const depth_projection_parameters&, const ndsize<2>&);
 
 public:
-	tanimoto_camera_array(const std::string& filename, const depth_projection_parameters&);
+	tanimoto_camera_array(const std::string& filename, const depth_projection_parameters&, const ndsize<2>&);
 	
 	bool has(const std::string&) const;
 	const projection_camera& operator[](const std::string&) const;
