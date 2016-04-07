@@ -1,4 +1,4 @@
-#include "projection_frustum.h"
+#include "projection_view_frustum.h"
 #include <array>
 #include <cmath>
 #include <stdexcept>
@@ -9,22 +9,28 @@
 namespace mf {
 
 
-std::array<real, 2> projection_view_frustum::depth_components_(const depth_projection_parameters& dparam) {
-	real z_diff = dparam.z_far - dparam.z_near;
+std::array<real, 3> projection_view_frustum::depth_components_(const depth_projection_parameters& dparam) {
 	std::array<real, 3> components;
+	real z_diff = dparam.z_far - dparam.z_near;
 	
-	if(dparam.depth == depth_projection_parameters::signed_normalized) {
+	switch(dparam.range) {
+	case depth_projection_parameters::signed_normalized:
 		components[0] = (dparam.z_far + dparam.z_near)/z_diff;
 		components[1] = -(2.0 * dparam.z_far * dparam.z_near)/z_diff;
-	} else {
-		components[0] = dparam.z_far/zdiff;
+		break;
+	case depth_projection_parameters::unsigned_normalized:
+		components[0] = dparam.z_far/z_diff;
 		components[1] = -(dparam.z_far * dparam.z_near)/z_diff;
+		break;
+	case depth_projection_parameters::unsigned_normalized_disparity:
+		components[0] = -dparam.z_near/z_diff;
+		components[1] = (dparam.z_far * dparam.z_near)/z_diff;
 	}
 	
-	components[3] = 1.0;	
+	components[2] = 1.0;	
 	if(dparam.flip_z) {
-		components[0] *= -1.0;
-		components[3] *= -1.0;
+		components[0] = -components[0];
+		components[2] = -components[2];
 	}
 	
 	return components;
@@ -45,7 +51,7 @@ projection_view_frustum projection_view_frustum::symmetric_perspective
 		0.0, 0.0, dcomp[0], dcomp[1],
 		0.0, 0.0, dcomp[2], 0.0;
 				
-	return projection_frustum(mat, dparam);
+	return projection_view_frustum(mat, dparam);
 }
 
 
@@ -60,7 +66,7 @@ projection_view_frustum projection_view_frustum::symmetric_perspective_fov
 		0.0, 0.0, dcomp[0], dcomp[1],
 		0.0, 0.0, dcomp[2], 0.0;
 				
-	return projection_frustum(mat, dparam);
+	return projection_view_frustum(mat, dparam);
 }
 
 
@@ -76,7 +82,7 @@ projection_view_frustum projection_view_frustum::symmetric_perspective_fov_x
 		0.0, 0.0, dcomp[0], dcomp[1],
 		0.0, 0.0, dcomp[2], 0.0;
 				
-	return projection_frustum(mat, dparam);
+	return projection_view_frustum(mat, dparam);
 }
 
 
@@ -93,7 +99,7 @@ projection_view_frustum projection_view_frustum::symmetric_perspective_fov_y
 		0.0, 0.0, dcomp[0], dcomp[1],
 		0.0, 0.0, dcomp[2], 0.0;
 				
-	return projection_frustum(mat, dparam);
+	return projection_view_frustum(mat, dparam);
 }
 
 
@@ -112,7 +118,7 @@ projection_view_frustum projection_view_frustum::asymmetric_perspective
 		0.0, 0.0, dcomp[0], dcomp[1],
 		0.0, 0.0, dcomp[2], 0.0;
 				
-	return projection_frustum(mat, dparam);
+	return projection_view_frustum(mat, dparam);
 }
 
 
@@ -126,7 +132,7 @@ projection_view_frustum projection_view_frustum::asymmetric_perspective_fov
 
 
 real projection_view_frustum::aspect_ratio() const {
-	return matrix_()(1, 1) / projection_matrix()(0, 0);
+	return matrix_()(1, 1) / matrix_()(0, 0);
 }
 
 

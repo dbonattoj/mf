@@ -5,10 +5,7 @@
 #include "../src/nodes/importer.h"
 #include "../src/nodes/exporter.h"
 #include "../src/nodes/color_converter.h"
-#include "../src/nodes/depth_converter.h"
-#include "../src/nodes/warp.h"
 #include "../src/utility/misc.h"
-#include "../src/config/camera_array.h"
 #include <string>
 
 using namespace mf;

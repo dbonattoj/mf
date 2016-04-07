@@ -23,6 +23,7 @@ protected:
 	
 public:
 	using pixel_coordinates_type = ndptrdiff<2>;
+	using image_coordinates_type = typename camera::image_coordinates_type;
 
 	image_camera(const image_camera&) = default;
 	
@@ -41,19 +42,19 @@ public:
 	void set_image_height(std::size_t);
 		
 	ndspan<2> image_span() const {
-		return ndspan<2>( {0, 0}, {image_size_[0], image_size_[1]} );
+		return ndspan<2>( make_ndptrdiff(0, 0), image_size_ );
 	}
 		
-	camera::image_coordinates to_image(pixel_coordinates_type pix) const {
+	image_coordinates_type to_image(pixel_coordinates_type pix) const {
 		auto x = static_cast<real>(pix[0]) + 0.5;
 		auto y = static_cast<real>(pix[1]) + 0.5;
-		return flipped_ ? {y, x} : {x, y};
+		return flipped_ ? image_coordinates_type(y, x) : image_coordinates_type(x, y);
 	}
 	
-	pixel_coordinates_type to_pixel(camera::image_coordinates im) const {
+	pixel_coordinates_type to_pixel(image_coordinates_type im) const {
 		auto x = static_cast<std::ptrdiff_t>(im[0] - 0.5);
 		auto y = static_cast<std::ptrdiff_t>(im[1] - 0.5);
-		return flipped_ ? {y, x} : {x, y};
+		return flipped_ ? pixel_coordinates_type{y, x} : pixel_coordinates_type{x, y};
 	}
 };
 

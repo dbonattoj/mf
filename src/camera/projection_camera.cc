@@ -6,8 +6,8 @@
 namespace mf {
 
 
-std::pair<projection_view_frustum, Eigen_mat4> read_intrinsic_matrix_
-(const Eigen_mat3& intrinsic_mat, const projection_depth_parameters& dpar) {
+auto projection_camera::read_intrinsic_matrix_
+(const Eigen_mat3& intrinsic_mat, const depth_projection_parameters& dpar) -> intrinsic_matrix_result {
 	// intrinsic matrix must be of the form
 	//   [ sx  0   tx ]
 	//   [ 0   sy  ty ]
@@ -24,9 +24,9 @@ std::pair<projection_view_frustum, Eigen_mat4> read_intrinsic_matrix_
 	
 	// creating frustum for symmetric perspective projection, disregarding offset (tx,ty)
 	real near_width = 2.0 * dpar.z_near / sx;
-	real near_height = 2.0 * dpar.z_near / sx;
+	real near_height = 2.0 * dpar.z_near / sy;
 	auto projection_fr = projection_view_frustum::symmetric_perspective(near_width, near_height, dpar);
-	Eigen_mat4 fr_projection_mat = fr.projection_matrix();
+	Eigen_mat4 fr_projection_mat = projection_fr.projection_transformation().matrix();
 
 
 	// form projection matrix (with offset)
@@ -37,7 +37,7 @@ std::pair<projection_view_frustum, Eigen_mat4> read_intrinsic_matrix_
 	projection_mat(0, 2) += tx;
 	projection_mat(1, 2) += ty;
 	
-	return std::make_pair(projection_fr, projection_mat);
+	return std::make_pair(projection_fr, Eigen_projective3(projection_mat));
 
 	// TODO verify for flip_z
 }
@@ -47,26 +47,28 @@ projection_camera::projection_camera(const pose& ps, const projection_view_frust
 	depth_camera(ps),
 	projection_frustum_(fr)
 {
-	Eigen_mat4 mat = fr.projection_matrix();
+	Eigen_mat4 mat = fr.projection_transformation().matrix();
 	mat(0, 0) *= ipar.scale[0];
 	mat(1, 1) *= ipar.scale[1];
 	mat(0, 3) += ipar.offset[0];
 	mat(1, 3) += ipar.offset[1];
 	
-	view_projection_matrix_ = mat * ps.transformation_from_world();
-	inverse_view_projection_matrix_ = view_projection_matrix_.inverse();
+	transformation_ = Eigen_projective3(mat) * ps.transformation_from_world();
+	inverse_transformation_ = transformation_.inverse();
 }
 
 
-projection_camera::projection_camera(const pose& ps, const std::pair<projection_view_frustum, Eigen_mat4>& par) :
+projection_camera::projection_camera(const pose& ps, const intrinsic_matrix_result& par) :
 	depth_camera(ps),
 	projection_frustum_(par.first)
 {
-	view_projection_matrix_ = par.second * ps.transformation_from_world();
-	inverse_view_projection_matrix_ = view_projection_matrix_.inverse();
+	transformation_ = par.second * ps.transformation_from_world();
+	inverse_transformation_ = transformation_.inverse();
 }
 	
 
 
-projection_camera::projection_camera(const pose& ps, const Eigen_mat3& mat, const projection_depth_parameters& dpar),
+projection_camera::projection_camera(const pose& ps, const Eigen_mat3& mat, const depth_projection_parameters& dpar) :
 	projection_camera(ps, read_intrinsic_matrix_(mat, dpar)) { }
+
+}

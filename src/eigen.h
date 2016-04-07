@@ -31,6 +31,9 @@ using Eigen_mat4 = Eigen_mat<4, 4>;
 using Eigen_affine2 = Eigen::Transform<Eigen_scalar, 2, Eigen::Affine>;
 using Eigen_affine3 = Eigen::Transform<Eigen_scalar, 3, Eigen::Affine>;
 
+using Eigen_projective2 = Eigen::Transform<Eigen_scalar, 2, Eigen::Projective>;
+using Eigen_projective3 = Eigen::Transform<Eigen_scalar, 3, Eigen::Projective>;
+
 using Eigen_hyperplane2 = Eigen::Hyperplane<Eigen_scalar, 2>;
 using Eigen_hyperplane3 = Eigen::Hyperplane<Eigen_scalar, 3>;
 

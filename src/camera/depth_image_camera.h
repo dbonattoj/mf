@@ -10,7 +10,7 @@ namespace mf {
 /// Base class for depth camera which handles mapping to integer depth values.
 template<typename Depth>
 class depth_image_camera : public image_camera {
-	static_assert(std::is_integral<Depth>::value, "Depth must be integer type")
+	static_assert(std::is_integral<Depth>::value, "Depth must be integer type");
 	
 private:
 	real depth_origin_ = 0.0;
@@ -39,12 +39,6 @@ public:
 	/// Map pixel depth value to depth value in range defined by depth projection parameter.
 	/** Values outside pixel depth range are mapped to values outside real depth range. */
 	real to_depth(pixel_depth_type pixd) const;
-	
-	/// Verify whether pixel depth decreases as depth increases.
-	bool pixel_depth_flipped() const;
-	
-	/// Flip pixel depths range.
-	void flip_pixel_depth();
 };
 
 }

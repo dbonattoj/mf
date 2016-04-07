@@ -1,4 +1,4 @@
-#include "camera_array.h"
+#include "tanimoto_camera_array.h"
 #include <fstream>
 #include <string>
 #include "../eigen.h"

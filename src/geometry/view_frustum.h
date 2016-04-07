@@ -6,6 +6,8 @@
 #include "angle.h"
 #include "../eigen.h"
 #include "depth_projection_parameters.h"
+#include "bounding_box.h"
+// TODO bounding_box -> Eigen_alignedbox
 
 namespace mf {
 
@@ -27,18 +29,18 @@ public:
 	using planes_array = std::array<Eigen_hyperplane3, 6>;
 
 protected:
-	view_frustum(const Eigen_mat4& mat, const projection_depth_parameters& dparam);
+	view_frustum(const Eigen_mat4& mat, const depth_projection_parameters& dparam);
 	view_frustum() = delete;
 
-	Eigen_mat4& matrix_() { return view_projection_matrix_; }
-	const Eigen_mat4& matrix_() const { return view_projection_matrix_; }
+	Eigen_mat4& matrix_() { return view_projection_transformation_.matrix(); }
+	const Eigen_mat4& matrix_() const { return view_projection_transformation_.matrix(); }
 
 private:
-	Eigen_mat4 view_projection_matrix_;
+	Eigen_projective3 view_projection_transformation_;
 	depth_projection_parameters depth_parameters_;
 
 public:
-	const Eigen_mat4& view_projection_matrix() const { return view_projection_matrix_; }
+	const Eigen_projective3& view_projection_transformation() const { return view_projection_transformation_; }	
 	const depth_projection_parameters& depth_parameters() const { return depth_parameters_; }
 	
 	Eigen_hyperplane3 near_plane() const;

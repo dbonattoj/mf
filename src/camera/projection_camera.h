@@ -2,7 +2,7 @@
 #define MF_PROJECTION_CAMERA_H_
 
 #include "depth_camera.h"
-#include "../geometry/projection_frustum.h"
+#include "../geometry/projection_view_frustum.h"
 #include <utility>
 
 namespace mf {
@@ -16,38 +16,43 @@ public:
 		Eigen_vec2 offset; ///< After scaling, maps coordinates to `[-scale+offset, +scale+offset]`.
 	};
 	
-private:
-	projection_view_frustum projection_frustum_;
-	Eigen_mat4 view_projection_matrix_;
-	Eigen_mat4 inverse_view_projection_matrix_;
-	
-	static std::pair<projection_view_frustum, Eigen_mat4> read_intrinsic_matrix_
-		(const Eigen_mat3& intrinsic_matrix, const projection_depth_parameters&);
+public:
+	using intrinsic_matrix_result = std::pair<projection_view_frustum, Eigen_projective3>;
 
-	projection_camera(const pose&, const std::pair<projection_view_frustum, Eigen_mat4>&);
+	projection_view_frustum projection_frustum_; ///< Projection frustum, without pose and without image scale, offset.
+	Eigen_projective3 transformation_;
+	Eigen_projective3 inverse_transformation_;
+	
+	static intrinsic_matrix_result read_intrinsic_matrix_
+		(const Eigen_mat3& intrinsic_matrix, const depth_projection_parameters&);
+
+	projection_camera(const pose&, const intrinsic_matrix_result&);
 	
 public:		
 	projection_camera(const pose&, const projection_view_frustum&, const image_parameters&);
 	
-	projection_camera(const pose&, const Eigen_mat3& intrinsic_matrix, const projection_depth_parameters&);
+	projection_camera(const pose&, const Eigen_mat3& intrinsic_matrix, const depth_projection_parameters&);
 	
 	const projection_view_frustum& relative_frustum() const { return projection_frustum_; }
-	const projection_depth_parameters& depth_parameters() const { return projection_frustum_.depth_parameters(); }
+	const depth_projection_parameters& depth_parameters() const { return projection_frustum_.depth_parameters(); }
 
-	image_coordinates project(const Eigen_vec3& p) const override {
-		return (view_projection_matrix_ * p.homogeneous()).hnormalized().head(2);
+	image_coordinates_type project(const Eigen_vec3& p) const override {
+		return (transformation_ * p.homogeneous()).eval().hnormalized().head(2);
 	}
 	
 	real depth(const Eigen_vec3& p) const override {
-		return (view_projection_matrix_ * p.homogeneous()).hormalized()[2];
+		return (transformation_ * p.homogeneous()).eval().hnormalized()[2];
 	}
 
-	Eigen_vec3 ray_direction(const image_coordinates& c) const override {
-		return (inverse_view_projection_matrix_ * Eigen_vec4(c[0], c[1], 1.0, 0.0)).hnormalized().normalized();
+	Eigen_vec3 ray_direction(const image_coordinates_type& c) const override {
+		real d = 1.0;
+		Eigen_vec3 p(c[0], c[1], d);
+		return (inverse_transformation_ * p.homogeneous()).eval().hnormalized().normalized();
 	}
 	
-	Eigen_vec3 point(const image_coordinates& c, real depth) const override {
-		return (inverse_view_projection_matrix_ * Eigen_vec4(c[0], c[1], depth, 1.0)).hnormalized();
+	Eigen_vec3 point(const image_coordinates_type& c, real depth) const override {
+		Eigen_vec3 p(c[0], c[1], depth);
+		return (inverse_transformation_ * p.homogeneous()).eval().hnormalized();
 	}
 };
 

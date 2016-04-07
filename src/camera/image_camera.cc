@@ -7,7 +7,7 @@ image_camera::image_camera(const ndsize<2>& sz) :
 
 
 real image_camera::image_aspect_ratio() const {
-	return static_cast<real>(image_width_) / static_cast<real>(image_height_);
+	return static_cast<real>(image_size_[0]) / static_cast<real>(image_size_[1]);
 }
 
 

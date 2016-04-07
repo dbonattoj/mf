@@ -48,7 +48,9 @@ public:
 	static projection_view_frustum asymmetric_perspective_fov
 		(angle_pair near_x, angle_pair near_y, const depth_projection_parameters&);	
 	
-	const Eigen_mat4& projection_matrix() const { return frustum::view_projection_matrix(); }
+	const Eigen_projective3& projection_transformation() const {
+		return view_frustum::view_projection_transformation();
+	}
 	
 	real aspect_ratio() const;
 	bool is_symmetric_x() const;

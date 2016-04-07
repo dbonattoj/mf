@@ -5,6 +5,7 @@
 #include <array>
 #include <utility>
 #include "../space_object.h"
+#include "../geometry/spherical_coordinates.h"
 #include "../eigen.h"
 
 namespace mf {
@@ -19,7 +20,7 @@ protected:
 	explicit camera(const pose&);
 
 public:
-	using image_coordinates = Eigen_vec2; ///< 2D image coordinates, range and scale defined by subclass.
+	using image_coordinates_type = Eigen_vec2; ///< 2D image coordinates, range and scale defined by subclass.
 
 	virtual ~camera() = default;
 
@@ -55,17 +56,17 @@ public:
 	
 	/// Project point \a p to image coordinates.
 	/** Implemented by subclass. */
-	virtual image_coordinates project(const Eigen_vec3& p) const = 0;
+	virtual image_coordinates_type project(const Eigen_vec3& p) const = 0;
 	
 	/// Project point with spherical coordinates \a sp to image coordinates.
 	/** Subclass may implemented more efficient version. */
-	virtual image_coordinates project(const spherical_coordinates& sp) const {
+	virtual image_coordinates_type project(const spherical_coordinates& sp) const {
 		return this->project(point(sp));
 	}
 
 	/// Direction vector of ray pointing to point corresponding to image coordinates \a c.
 	/** Implemented by subclass. */
-	virtual Eigen_vec3 ray_direction(const image_coordinates& c) const = 0;
+	virtual Eigen_vec3 ray_direction(const image_coordinates_type& c) const = 0;
 };
 
 }

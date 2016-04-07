@@ -57,7 +57,6 @@ std::ostream& operator<<(std::ostream& str, const ndspan<Dim, T>& span) {
 template<std::size_t Dim, typename T>
 ndspan<Dim, T> span_intersection(const ndspan<Dim, T>& a, const ndspan<Dim, T>& b);
 
-
 }
 
 #include "ndspan.tcc"
