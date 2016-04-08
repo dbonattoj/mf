@@ -42,6 +42,8 @@ public:
 	section_view_type begin_read_span(time_span);
 	void skip_span(time_span);
 	
+	void seek(time_unit);
+	
 	#ifndef NDEBUG
 	void debug_print(std::ostream&) const;
 	#endif

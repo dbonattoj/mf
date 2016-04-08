@@ -101,6 +101,18 @@ void ndarray_timed_ring<Dim, T>::skip_span(time_span span) {
 }
 
 
+template<std::size_t Dim, typename T>
+void ndarray_timed_ring<Dim, T>::seek(time_unit t) {
+	time_span readable = readable_time_span();
+	if(readable.includes(t)) {
+		base::skip(t - readable.start_time());
+	} else {
+		base::skip(readable.duration());
+		last_write_time_ = t - 1;
+	}
+}
+
+
 #ifndef NDEBUG
 template<std::size_t Dim, typename T>
 void ndarray_timed_ring<Dim, T>::debug_print(std::ostream& str) const {

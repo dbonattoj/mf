@@ -30,7 +30,7 @@ float z_far = 100.0, z_near = 15.0;
 std::string out = "output/video.avi";
 
 
-std::string L = "2", R = "8", V = "5";
+std::string L = "2", R = "6", V = "4";
 
 std::string im1 = dir + im+L+".yuv";
 std::string di1 = dir + di+L+".yuv";

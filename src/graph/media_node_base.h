@@ -18,7 +18,6 @@ protected:
 	std::vector<media_node_output_base*> outputs_; ///< Outputs of this node.
 	
 	bool did_setup_ = false; ///< Set to true after node was set up.
-	time_unit prefetch_duration_ = 0; ///< Maximal number of frames node may process in advance.
 	time_unit offset_ = -1; ///< Absolute offset, relative to graph sink node.
 	std::atomic<time_unit> time_{-1}; ///< Current time, i.e. time of last processed frame.
 	std::atomic<bool> reached_end_{false}; ///< True when last processed frame is last in stream.

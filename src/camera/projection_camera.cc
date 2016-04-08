@@ -39,13 +39,8 @@ auto projection_camera::read_intrinsic_matrix_
 
 	projection_mat(0, 2) += tx;
 	projection_mat(1, 2) += ty;
-
-std::cout << "matrix: \n" << projection_mat << "\n--------------------\n";
-
 	
 	return std::make_pair(projection_fr, Eigen_projective3(projection_mat));
-
-	// TODO verify for flip_z
 }
 
 
@@ -72,7 +67,6 @@ projection_camera::projection_camera(const pose& ps, const intrinsic_matrix_resu
 	image_to_world_ = world_to_image_.inverse();
 }
 	
-
 
 projection_camera::projection_camera
 (const pose& ps, const Eigen_mat3& mat, const depth_projection_parameters& dpar, const ndsize<2>& img_sz) :
