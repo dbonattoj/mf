@@ -48,23 +48,29 @@ void media_node::thread_main_() {
 
 
 void media_node::pull(time_unit target_time) {
-	// background thread will process the frame(s)
-	// launch it if not done yet
-	if(! thread_.joinable())
-		thread_ = std::thread(std::bind(&media_node::thread_main_, this));
+	if(sequential_) {
+		// sequential mode: process the required frame(s) now
+		while(time_ < target_time && !reached_end_) pull_frame_();
+	} else {
+		// parallel mode: background thread will process the frame(s)
+		// launch it if not done yet
+		if(! thread_.joinable())
+			thread_ = std::thread(std::bind(&media_node::thread_main_, this));
 	}
 }
 
 
 void media_node::stop_() {
+	if(sequential_) return;
+
 	if(thread_.joinable()) {
 		thread_.join();
 	}
 }
 
 
-media_node::media_node(time_unit prefetch, std::size_t parallel) :
-	prefetch_duration_(prefetch), parallel_count_(parallel) { }
+media_node::media_node(time_unit prefetch) :
+	media_node_base(prefetch), sequential_(prefetch == 0) { }
 	
 
 media_node::~media_node() {

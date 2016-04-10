@@ -3,6 +3,7 @@
 
 #include "ndarray_view.h"
 #include "../elem.h"
+#include "../elem_tuple.h"
 #include "../utility/misc.h"
 
 namespace mf {

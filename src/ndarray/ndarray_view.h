@@ -78,7 +78,7 @@ public:
 		{ assign(std::forward<Arg>(arg)); return *this; }
 	ndarray_view& operator=(const ndarray_view& other)
 		{ assign(other); return *this; }
-	
+		
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
 	pointer coordinates_to_pointer(const coordinates_type&) const;

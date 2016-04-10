@@ -1,9 +1,8 @@
 namespace mf {
 
 template<std::size_t Dim, typename T>
-ndarray_shared_ring<Dim, T>::ndarray_shared_ring
-(const ndsize<Dim>& frames_shape, std::size_t duration, bool seekable_writer) :
-	ring_(frames_shape, duration), seekable_writer_(seekable_writer) { }
+ndarray_shared_ring<Dim, T>::ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration) :
+	ring_(frames_shape, duration) { }
 
 
 template<std::size_t Dim, typename T>
@@ -14,15 +13,6 @@ void ndarray_shared_ring<Dim, T>::initialize() {
 	writer_state_ = idle;
 	end_time_ = -1;
 	read_start_time_ = 0;
-}
-
-
-template<std::size_t Dim, typename T>
-auto ndarray_shared_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
-	if(span.start_time() != ring_.current_time() + 1)
-		throw sequencing_error("time span to write must begin immediately after previous one");
-
-	return begin_write(span.duration());
 }
 
 
@@ -57,24 +47,24 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit duration) -> section_vie
 
 
 template<std::size_t Dim, typename T>
+auto ndarray_shared_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
+	if(span.start_time() != ring_.write_start_time())
+		throw std::invalid_argument("write span must start at write start time");
+	return begin_write(span.duration());
+}
+
+
+template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::end_write(time_unit written_duration, bool mark_eof) {
 	if(writer_state_ == idle) throw sequencing_error("was not writing");
 	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
-		
 		if(mark_eof)
 			end_time_ = ring_.writable_time_span().start_time() + written_duration;
-		
 		ring_.end_write(written_duration);
-		
-		if(seek_time_ != -1) {
-			ring_.seek(seek_time_);
-			read_start_time_ = ring_.read_start_time();
-			seek_time_ = -1;
-		}
 	}
-	
+
 	writer_state_ = idle;
 	readable_cv_.notify_one();	
 }
@@ -194,19 +184,11 @@ void ndarray_shared_ring<Dim, T>::skip(time_unit skip_duration) {
 		// simple case: only skip some of the already readable frames
 		skip_available_(skip_duration);
 
-	} else if(seekable_writer_)
-		// need to skip more than readable, and writer is seekable:
-		// if currently writing, let writer finish, then signal writer to write next frames at new time offset.
-		skip_with_writer_seek_(skip_duration);
-	
 	} else {
-		// need to skip more than readable, and writer is not seekable:
-		// read and discard frames, possibly filling whole buffer up multiple times
-		
 		auto remaining_skip_duration = skip_duration;
 			
-		// until less than buffer size remains to be skipped:
 		// wait for whole buffer to fill up and then skip all frames
+		// until less than buffer size remains to be skipped
 		while(remaining_skip_duration >= total_duration()) {
 			bool reached_eof;
 			auto readable_view = begin_read(total_duration(), reached_eof); // ...wait for buffer to fill up entirely
@@ -232,19 +214,6 @@ void ndarray_shared_ring<Dim, T>::skip(time_unit skip_duration) {
 		// there may be new readable frames already available (after skipped frames),
 		// if >1 frames get written at a time
 	}
-}
-
-
-template<std::size_t Dim, typename T>
-void ndarray_shared_ring<Dim, T>::seek(time_unit t) {
-	scheduled_seek_time_ = t;
-}
-
-
-
-template<std::size_t Dim, typename T>
-void ndarray_shared_ring<Dim, T>::skip_with_writer_seek_(time_unit duration) {
-	
 }
 
 

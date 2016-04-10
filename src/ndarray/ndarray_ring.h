@@ -27,30 +27,30 @@ public:
 	using section_view_type = ndarray_view<Dim + 1, T>;
 
 private:
-	std::size_t read_position_ = 0;
-	std::size_t write_position_ = 0;
+	time_unit read_position_ = 0;
+	time_unit write_position_ = 0;
 	bool full_ = false;
 	
-	static std::size_t adjust_padding_(const ndsize<Dim>& spatial_shape, std::size_t duration); 
-	section_view_type section_(std::ptrdiff_t start, std::size_t duration);
+	static std::size_t adjust_padding_(const ndsize<Dim>& spatial_shape, time_unit duration); 
+	section_view_type section_(time_unit start, time_unit duration);
 
 public:
-	ndarray_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
+	ndarray_ring(const ndsize<Dim>& frames_shape, time_unit duration);
 	
-	virtual void initialize();
+	void initialize();
 	
-	std::size_t total_duration() const noexcept { return base::shape().front(); }
+	time_unit total_duration() const noexcept { return base::shape().front(); }
 	
-	std::size_t writable_duration() const;
-	std::size_t readable_duration() const;
+	time_unit writable_duration() const;
+	time_unit readable_duration() const;
 	
-	virtual section_view_type begin_write(std::size_t duration);
-	virtual void end_write(std::size_t written_duration);
+	section_view_type begin_write(time_unit duration);
+	void end_write(time_unit written_duration);
 	
-	virtual section_view_type begin_read(std::size_t duration);
-	virtual void end_read(std::size_t read_duration);
+	section_view_type begin_read(time_unit duration);
+	void end_read(time_unit read_duration);
 		
-	virtual void skip(std::size_t duration);
+	void skip(time_unit duration);
 	
 	#ifndef NDEBUG
 	void debug_print(std::ostream&) const;

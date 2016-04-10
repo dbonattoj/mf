@@ -22,7 +22,7 @@ class ndarray_shared_ring {
 public:
 	using ring_type = ndarray_timed_ring<Dim, T>;
 	using section_view_type = typename ring_type::section_view_type;
-
+	
 private:
 	enum thread_state { idle, waiting, accessing };
 
@@ -38,38 +38,30 @@ private:
 	std::atomic<time_unit> end_time_{-1}; ///< One after last frame in stream.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
-	// can also be computed as ring.last_write_time_ + 1 - ring_.readable_duration().
+	// can also be computed as end_time_ + 1 - ring_.readable_duration().
 	// however this would require mutex lock, because both terms are altered by writer in end_write()
-
-	time_unit scheduled_seek_time_ = -1;
 		
 	void skip_available_(time_unit duration);
 	
-	void skip_with_writer_seek_(time_unit duration);
-		
 public:
-	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration, bool seekable_writer);
+	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
 		
 	void initialize();
 
 	time_unit total_duration() const noexcept { return ring_.shape().front(); }
 
+	section_view_type begin_write(time_unit write_duration);
 	section_view_type begin_write_span(time_span);
-	section_view_type begin_write(time_unit duration);
-	section_view_type change_write_span(time_span); /////////////////
 	void end_write(time_unit written_duration, bool mark_eof = false);
 
 	section_view_type begin_read_span(time_span);
 	section_view_type begin_read_span(time_span, bool& reaches_eof);
 	section_view_type begin_read(time_unit read_duration);
 	section_view_type begin_read(time_unit read_duration, bool& reaches_eof);
-	////////////////////:
 	void end_read(time_unit read_duration);	
 	
 	void skip(time_unit skip_duration);
 	void skip_span(time_span);	
-
-	void seek(time_unit);
 	
 	time_unit current_time() const noexcept;
 	time_unit write_start_time() const noexcept;

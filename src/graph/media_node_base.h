@@ -18,10 +18,14 @@ protected:
 	std::vector<media_node_output_base*> outputs_; ///< Outputs of this node.
 	
 	bool did_setup_ = false; ///< Set to true after node was set up.
+	time_unit prefetch_duration_;
 	time_unit offset_ = -1; ///< Absolute offset, relative to graph sink node.
 	std::atomic<time_unit> time_{-1}; ///< Current time, i.e. time of last processed frame.
 	std::atomic<bool> reached_end_{false}; ///< True when last processed frame is last in stream.
 			
+	explicit media_node_base(time_unit prefetch_dur) :
+		prefetch_duration_(prefetch_dur) { }
+	
 	/// Define offset of this node, and of preceding nodes.
 	/** Recursively also sets offsets of preceding nodes. If offset was already set, it is updated and propagated
 	 ** only when new value is larger. */
@@ -56,9 +60,6 @@ protected:
 	 ** returned true. */
 	virtual bool process_reached_end_() { return false; }
 	
-	explicit media_node_base(time_unit prefetch) :
-		prefetch_duration_(prefetch) { }
-
 private:
 	friend media_node_input_base::media_node_input_base(media_node_base&, time_unit, time_unit);
 	friend media_node_output_base::media_node_output_base(media_node_base&);

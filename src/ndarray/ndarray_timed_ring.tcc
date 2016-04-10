@@ -8,7 +8,7 @@ void ndarray_timed_ring<Dim, T>::initialize() {
 
 
 template<std::size_t Dim, typename T>
-void ndarray_timed_ring<Dim, T>::end_write(std::size_t written_duration) {
+void ndarray_timed_ring<Dim, T>::end_write(time_unit written_duration) {
 	base::end_write(written_duration);
 	last_write_time_ += written_duration;
 }
@@ -69,12 +69,25 @@ bool ndarray_timed_ring<Dim, T>::can_skip_span(time_span span) const {
 }
 
 
+template<std::size_t Dim, typename T>
+auto ndarray_timed_ring<Dim, T>::begin_write(time_unit duration) -> section_view_type {
+	auto sec = base::begin_write(duration);
+	return section_view_type(sec, write_start_time());
+}
+
 
 template<std::size_t Dim, typename T>
 auto ndarray_timed_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
-	if(span.duration() > base::total_duration()) throw std::invalid_argument("write duration larger than ring capacity");
-	if(! can_write_span(span)) throw sequencing_error("cannot write span");
-	return base::begin_write(span.duration());
+	if(span.start_time() != write_start_time())
+		throw std::invalid_argument("write span must start at write start time");
+	return begin_write(span.duration());
+}
+
+
+template<std::size_t Dim, typename T>
+auto ndarray_timed_ring<Dim, T>::begin_read(time_unit duration) -> section_view_type {
+	auto sec = base::begin_read(duration);
+	return section_view_type(sec, read_start_time());
 }
 
 
@@ -87,7 +100,9 @@ auto ndarray_timed_ring<Dim, T>::begin_read_span(time_span span) -> section_view
 		base::skip(span.start_time() - read_start);	
 
 	assert(readable_time_span().start_time() == span.start_time());
-	return base::begin_read(span.duration());
+	
+	auto sec = base::begin_read(span.duration());
+	return section_view_type(sec, read_start_time());
 }
 
 
