@@ -78,8 +78,7 @@ auto ndarray_timed_ring<Dim, T>::begin_write(time_unit duration) -> section_view
 
 template<std::size_t Dim, typename T>
 auto ndarray_timed_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
-	if(span.start_time() != write_start_time())
-		throw std::invalid_argument("write span must start at write start time");
+	if(span.start_time() != write_start_time()) throw sequencing_error("write span must start at write start time");
 	return begin_write(span.duration());
 }
 

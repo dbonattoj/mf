@@ -18,9 +18,9 @@ void ndarray_shared_ring<Dim, T>::initialize() {
 
 template<std::size_t Dim, typename T>
 auto ndarray_shared_ring<Dim, T>::begin_write(time_unit duration) -> section_view_type {
-	if(duration > total_duration()) throw std::invalid_argument("write duration larger than ring capacity");
+	if(duration > capacity()) throw std::invalid_argument("write duration larger than ring capacity");
 	if(writer_state_ != idle) throw sequencing_error("already writing");
-	if(eof_was_marked()) throw sequencing_error("writer already marked eof");
+	if(end_time_ != -1) throw sequencing_error("writer already marked eof");
 
 	std::unique_lock<std::mutex> lock(mutex_);
 
@@ -47,21 +47,20 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit duration) -> section_vie
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_shared_ring<Dim, T>::begin_write_span(time_span span) -> section_view_type {
-	if(span.start_time() != ring_.write_start_time())
-		throw std::invalid_argument("write span must start at write start time");
-	return begin_write(span.duration());
+void ndarray_shared_ring<Dim, T>::end_write(time_unit written_duration) {
+	end_write(written_duration, false);
 }
 
 
 template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::end_write(time_unit written_duration, bool mark_eof) {
+	assert(end_time_ == -1);
+	
 	if(writer_state_ == idle) throw sequencing_error("was not writing");
 	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
-		if(mark_eof)
-			end_time_ = ring_.writable_time_span().start_time() + written_duration;
+		if(mark_eof) end_time_ = ring_.writable_time_span().start_time() + written_duration;
 		ring_.end_write(written_duration);
 	}
 
@@ -74,7 +73,7 @@ template<std::size_t Dim, typename T>
 auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span, bool& reaches_eof) -> section_view_type
 {
 	reaches_eof = false;
-	if(span.duration() > total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
+	if(span.duration() > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
 	if(span.start_time() < read_start_time_) throw sequencing_error("time span to read already passed");
 	if(reader_state_ != idle) throw sequencing_error("already reading");
 
@@ -89,7 +88,7 @@ auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span, bool& reaches_
 	std::unique_lock<std::mutex> lock(mutex_);
 
 	// reduce span if it crosses eof
-	if(eof_was_marked()) {
+	if(end_time_ != -1) {
 		if(span.start_time() >= end_time_)
 			throw sequencing_error("read span starts after eof");
 	
@@ -114,7 +113,7 @@ auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span, bool& reaches_
 		assert(writer_state_ != waiting);
 		
 		// writer might have marked end while reader was waiting
-		if(eof_was_marked() && span.end_time() >= end_time_) {
+		if(end_time_ != -1 && span.end_time() >= end_time_) {
 			span = time_span(span.start_time(), end_time_);
 			reaches_eof = true;
 		}
@@ -135,7 +134,7 @@ auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span) -> section_vie
 
 template<std::size_t Dim, typename T>
 auto ndarray_shared_ring<Dim, T>::begin_read(time_unit duration, bool& reaches_eof) -> section_view_type {
-	// read_start_time_ only changed by reader, so no need to block
+	// read_start_time_ only changed by reader, so no need to lock
 	return begin_read_span(time_span(read_start_time_, read_start_time_ + duration), reaches_eof);
 }
 
@@ -176,7 +175,7 @@ template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::skip(time_unit skip_duration) {
 	// duration may be larger than ring capacity
 		
-	const auto initial_readable_duration = readable_duration(); // locks mutex_
+	const auto initial_readable_duration = readable_time_span().duration(); // locks mutex_
 	
 	// mutex_ briefly unlocked, but readable duration will not decrease
 	
@@ -189,13 +188,13 @@ void ndarray_shared_ring<Dim, T>::skip(time_unit skip_duration) {
 			
 		// wait for whole buffer to fill up and then skip all frames
 		// until less than buffer size remains to be skipped
-		while(remaining_skip_duration >= total_duration()) {
+		while(remaining_skip_duration >= capacity()) {
 			bool reached_eof;
-			auto readable_view = begin_read(total_duration(), reached_eof); // ...wait for buffer to fill up entirely
+			auto readable_view = begin_read(capacity(), reached_eof); // ...wait for buffer to fill up entirely
 			if(! reached_eof) {
 				// skip all and notify writable_cv_
-				skip_available_(total_duration());
-				remaining_skip_duration -= total_duration();
+				skip_available_(capacity());
+				remaining_skip_duration -= capacity();
 				reader_state_ = idle;
 			} else {
 				// eof was marked, don't try to skip beyond
@@ -218,35 +217,28 @@ void ndarray_shared_ring<Dim, T>::skip(time_unit skip_duration) {
 
 
 template<std::size_t Dim, typename T>
-void ndarray_shared_ring<Dim, T>::skip_span(time_span span) {
-	time_unit skip_duration = span.start_time() - read_start_time_ + span.duration();
-	skip(skip_duration);
+void ndarray_shared_ring<Dim, T>::seek(time_unit) {
+	throw std::logic_error("seeking not supported on non-seekable ring buffer");
 }
 
 
 template<std::size_t Dim, typename T>
-time_unit ndarray_shared_ring<Dim, T>::current_time() const noexcept {
+time_unit ndarray_shared_ring<Dim, T>::current_time() const {
 	return ring_.current_time();
 }
 
 
 template<std::size_t Dim, typename T>
-time_unit ndarray_shared_ring<Dim, T>::write_start_time() const noexcept {
+time_unit ndarray_shared_ring<Dim, T>::write_start_time() const {
 	// atomic, so no need to lock
 	return ring_.write_start_time();
 }
 
 
 template<std::size_t Dim, typename T>
-time_unit ndarray_shared_ring<Dim, T>::read_start_time() const noexcept {
+time_unit ndarray_shared_ring<Dim, T>::read_start_time() const {
 	// use atomic member, instead of non-atomic ring_.read_start_time()
 	return read_start_time_;
-}
-
-
-template<std::size_t Dim, typename T>
-time_unit ndarray_shared_ring<Dim, T>::writable_duration() const {
-	return writable_time_span().duration();
 }
 
 
@@ -260,22 +252,9 @@ time_span ndarray_shared_ring<Dim, T>::writable_time_span() const {
 
 
 template<std::size_t Dim, typename T>
-time_unit ndarray_shared_ring<Dim, T>::readable_duration() const {
-	std::lock_guard<std::mutex> lock(mutex_);
-	return ring_.readable_duration();
-}
-
-
-template<std::size_t Dim, typename T>
 time_span ndarray_shared_ring<Dim, T>::readable_time_span() const {
 	std::lock_guard<std::mutex> lock(mutex_);
 	return ring_.readable_time_span();
-}
-
-
-template<std::size_t Dim, typename T>
-bool ndarray_shared_ring<Dim, T>::eof_was_marked() const {
-	return (end_time_ != -1);
 }
 
 

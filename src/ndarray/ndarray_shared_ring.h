@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <atomic>
 #include <ostream>
-#include "ndarray_timed_ring.h"
+#include "ndarray_shared_ring_base.h"
 
 namespace mf {
 
@@ -18,13 +18,14 @@ namespace mf {
  ** - Writer can mark end of file. begin_read(), begin_read_span() and skip() then to not wait for more frames
  ** Does not inherit from base class because thread safety is added. Provides same interface. **/
 template<std::size_t Dim, typename T>
-class ndarray_shared_ring {
-public:
-	using ring_type = ndarray_timed_ring<Dim, T>;
-	using section_view_type = typename ring_type::section_view_type;
-	
+class ndarray_shared_ring : public ndarray_shared_ring_base<Dim, T> {
+	using base = ndarray_shared_ring_base<Dim, T>;
+		
 private:
-	enum thread_state { idle, waiting, accessing };
+	enum thread_state { idle, waiting, accessing };	
+
+	using typename base::ring_type;
+	using typename base::section_view_type;
 
 	ring_type ring_; ///< Underlying, non thread-safe timed ring buffer.
 
@@ -44,37 +45,48 @@ private:
 	void skip_available_(time_unit duration);
 	
 public:
-	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t duration);
+	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t capacity);
 		
 	void initialize();
 
-	time_unit total_duration() const noexcept { return ring_.shape().front(); }
+	time_unit capacity() const override { return ring_.shape().front(); }
 
-	section_view_type begin_write(time_unit write_duration);
-	section_view_type begin_write_span(time_span);
-	void end_write(time_unit written_duration, bool mark_eof = false);
+	section_view_type begin_write(time_unit write_duration) override;
+	void end_write(time_unit written_duration) override;
+	void end_write(time_unit written_duration, bool mark_end);
 
-	section_view_type begin_read_span(time_span);
-	section_view_type begin_read_span(time_span, bool& reaches_eof);
-	section_view_type begin_read(time_unit read_duration);
+	section_view_type begin_read_span(time_span) override;
+	section_view_type begin_read(time_unit read_duration) override;
 	section_view_type begin_read(time_unit read_duration, bool& reaches_eof);
-	void end_read(time_unit read_duration);	
+	section_view_type begin_read_span(time_span, bool& reaches_eof);
+	void end_read(time_unit read_duration) override;	
 	
-	void skip(time_unit skip_duration);
-	void skip_span(time_span);	
-	
-	time_unit current_time() const noexcept;
-	time_unit write_start_time() const noexcept;
-	time_unit read_start_time() const noexcept;
+	void skip(time_unit skip_duration) override;
 
-	time_unit writable_duration() const;
-	time_span writable_time_span() const;
-	time_unit readable_duration() const;	
-	time_span readable_time_span() const;
+	void seek(time_unit) override;
 	
-	/// Returns true if the EOF was marked by the writer.
-	/** EOF is marked by writer by an end_write() with \a eof argument set. */
-	bool eof_was_marked() const;
+	time_unit current_time() const override;
+	
+	/// True when last frame was written into buffer.
+	/** Equivalent to `end_time_is_defined()`, but specific to non-seekable buffer, because end gets marked only by
+	 ** end_write() when last frame got written.
+	 ** If true, last frame was written but not necessarily read yet. */
+	bool writer_reached_end() const { return end_time_is_defined(); }
+
+	/// True when last frame was read from buffer.
+	/** Implies `writer_reached_end()`. When true, no more data can be read and begin_read() always returns zero-length
+	 ** view. */
+	bool reader_reached_end() const { return read_start_time_ == end_time_; }
+	
+
+	bool end_time_is_defined() const override { return (end_time_ != -1); }
+	time_unit end_time() const override { return end_time_; }
+
+	time_span readable_time_span() const override;
+	time_span writable_time_span() const override;
+	time_unit read_start_time() const override;
+	time_unit write_start_time() const override;
+
 	
 	#ifndef NDEBUG
 	void debug_print(std::ostream&) const;

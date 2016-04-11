@@ -17,7 +17,8 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 	ndarray_shared_ring<2, int> ring(shape, duration);
 	REQUIRE(ring.read_start_time() == 0);
 	REQUIRE(ring.write_start_time() == 0);
-
+	
+	REQUIRE(ring.capacity() == 5);
 
 	SECTION("background writer") {
 		// secondary thread: keeps writing frames into buffer
@@ -27,18 +28,18 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 			while(running) {
 				std::this_thread::sleep_for(5ms);
 				auto w_section = ring.begin_write(1);
+				REQUIRE(w_section.duration() == 1);
+				REQUIRE(t == w_section.start_time());
+				REQUIRE(w_section.time_at(0) == t);
 				w_section[0] = make_frame(shape, t++);
 				ring.end_write(1);
 			}
 		});
-		
-		// check that writer is continuously writing
-		auto t0 = ring.current_time();
-		std::this_thread::sleep_for(20ms);
-		CHECK(ring.current_time() > t0);
-		
+				
 		// read 3 frames (0, 1, 2)
 		auto r_section = ring.begin_read(3);
+		REQUIRE(r_section.duration() == 3);
+		REQUIRE(r_section.start_time() == 0);
 		REQUIRE(ring.write_start_time() >= 3);
 		REQUIRE(compare_frames(shape, r_section, {0, 1, 2}));
 		ring.end_read(3);
@@ -59,6 +60,8 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 		
 		// read frames (5, 6)
 		r_section.reset(ring.begin_read_span(time_span(5, 7)));
+		REQUIRE(r_section.duration() == 2);
+		REQUIRE(r_section.start_time() == 5);
 		REQUIRE(compare_frames(shape, r_section, {5, 6}));
 		ring.end_read(2);
 		REQUIRE(ring.current_time() >= 6);
@@ -70,10 +73,10 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 		ring.end_read(2);
 		REQUIRE(ring.current_time() >= 21);
 		
-		// skip frames (24...40)
-		// skip previous & more than ring capacity
-		ring.skip_span(time_span(24, 41));
-		REQUIRE(ring.current_time() >= 40);
+		// skip 100 frames
+		// more than ring capacity
+		ring.skip(100);
+		REQUIRE(ring.current_time() >= 121);
 		
 		// end secondary thread
 		running = false;
@@ -131,28 +134,28 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 		REQUIRE_FALSE(started);
 		
 		// write ]0, 8], not enough
-		auto w_section = ring.begin_write_span(time_span(0, 8));
+		auto w_section = ring.begin_write(9);
 		for(int i = 0; i < 8; ++i) w_section[i] = make_frame(shape, i);
 		ring.end_write(8);
 		std::this_thread::sleep_for(10ms);
 		REQUIRE_FALSE(started);
 		
 		// write ]8, 12], still not enough
-		w_section.reset(ring.begin_write_span(time_span(8, 12)));
+		w_section.reset(ring.begin_write(5));
 		for(int i = 0; i < 4; ++i) w_section[i] = make_frame(shape, i + 8);
 		ring.end_write(4);
 		std::this_thread::sleep_for(10ms);
 		REQUIRE_FALSE(started);
 		
 		// write ]12, 13], still not enough
-		w_section.reset(ring.begin_write_span(time_span(12, 13)));
+		w_section.reset(ring.begin_write(2));
 		for(int i = 0; i < 1; ++i) w_section[i] = make_frame(shape, i + 12);
 		ring.end_write(1);
 		std::this_thread::sleep_for(10ms);
 		REQUIRE_FALSE(started);
 		
 		// write ]13, 15], now reading
-		w_section.reset(ring.begin_write_span(time_span(13, 15)));
+		w_section.reset(ring.begin_write(3));
 		for(int i = 0; i < 2; ++i) w_section[i] = make_frame(shape, i + 13);
 		ring.end_write(2);
 		std::this_thread::sleep_for(10ms);
@@ -307,18 +310,25 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 		ring.end_write(2);
 		
 		REQUIRE(ring.readable_duration() == 2);
-		REQUIRE_FALSE(ring.eof_was_marked());
 		REQUIRE(ring.writable_duration() == 3);
+
+		REQUIRE_FALSE(ring.end_time_is_defined());
+		REQUIRE(ring.end_time() == -1);
+		REQUIRE_FALSE(ring.writer_reached_end());
+		REQUIRE_FALSE(ring.reader_reached_end());
 		
 		SECTION("writer end, read, reaches eof test") {
-			// mark end at position 4 (frame 3 = last)
+			// mark end at position 3 (frame 2 = last)
 			auto w_section = ring.begin_write(2);
-			w_section[0] = make_frame(shape, 3);
+			w_section[0] = make_frame(shape, 2);
 			ring.end_write(1, true);
 
 			REQUIRE(ring.readable_duration() == 3);
 			REQUIRE(ring.writable_duration() == 0);
-			REQUIRE(ring.eof_was_marked());
+			REQUIRE(ring.writer_reached_end());
+			REQUIRE(ring.end_time_is_defined());
+			REQUIRE(ring.end_time() == 3);
+			REQUIRE_FALSE(ring.reader_reached_end());
 	
 			// read less than maximum
 			reaches_eof = true; // ...should be set to false
@@ -329,8 +339,11 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 			
 			REQUIRE(ring.readable_duration() == 2);
 			REQUIRE(ring.writable_duration() == 0);
-			REQUIRE(ring.eof_was_marked());
-			
+			REQUIRE(ring.writer_reached_end());
+			REQUIRE(ring.end_time_is_defined());
+			REQUIRE(ring.end_time() == 3);
+			REQUIRE_FALSE(ring.reader_reached_end());
+		
 			SECTION("exact") {
 				// read maximum
 				reaches_eof = false;
@@ -339,6 +352,7 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 				ring.end_read(2);
 				
 				REQUIRE(ring.readable_duration() == 0);
+				REQUIRE(ring.reader_reached_end());
 			}
 			
 			SECTION("more") {
@@ -350,15 +364,18 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 				ring.end_read(2);
 				
 				REQUIRE(ring.readable_duration() == 0);
+				REQUIRE(ring.reader_reached_end());
 			}
 		}
 		
 		
 		SECTION("writer end, skip") {
-			// mark end at position 4 (frame 3 = last)
+			// mark end at position 3 (frame 2 = last)
 			auto w_section = ring.begin_write(2);
-			w_section[0] = make_frame(shape, 3);
+			w_section[0] = make_frame(shape, 2);
 			ring.end_write(1, true);
+			REQUIRE(ring.end_time_is_defined());
+			REQUIRE(ring.end_time() == 3);
 			
 			// cannot write more after eof
 			REQUIRE_THROWS_AS(ring.begin_write(1), sequencing_error);
@@ -368,7 +385,8 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 			
 			REQUIRE(ring.readable_duration() == 0);
 			REQUIRE(ring.writable_duration() == 0);
-			REQUIRE(ring.eof_was_marked());
+			REQUIRE(ring.writer_reached_end());
+			REQUIRE(ring.reader_reached_end());
 		}
 	}
 }

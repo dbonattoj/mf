@@ -45,7 +45,8 @@ void media_node_output<Dim, T>::end_read(bool consume_frame) {
 
 template<std::size_t Dim, typename T>
 bool media_node_output<Dim, T>::reached_end() const {
-	return buffer_->eof_was_marked();
+	return buffer_->end_time_is_defined();
+	// TODO change, make seekable
 }
 
 
@@ -78,7 +79,7 @@ void media_node_output<Dim, T>::debug_print(std::ostream& str) const {
 		<< "]" << std::endl;
 
 	if(buffer_ != nullptr) {
-		str << "buffer: duration=" << buffer_->total_duration()
+		str << "buffer: capacity=" << buffer_->capacity()
 			<< ", readable=" << buffer_->readable_time_span()
 			<< ", writable=" << buffer_->writable_time_span()
 			<< ", read_start_time=" << buffer_->read_start_time()

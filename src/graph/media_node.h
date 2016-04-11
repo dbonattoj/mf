@@ -25,7 +25,7 @@ public:
 	template<std::size_t Dim, typename Elem> using input_type = media_node_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = media_node_output<Dim, Elem>;
 
-	explicit media_node(time_unit prefetch = 1);
+	explicit media_node(time_unit prefetch = 0);
 	~media_node();
 
 	void pull(time_unit target_time) override;
