@@ -123,6 +123,7 @@ void ndarray_timed_ring<Dim, T>::seek(time_unit t) {
 	} else {
 		base::skip(readable.duration());
 		last_write_time_ = t - 1;
+		//MF_DEBUG("post seek: ", *this);
 	}
 }
 

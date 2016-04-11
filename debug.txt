@@ -1,0 +1,36 @@
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:91, begin_read_span, thread 0x7fff73242000]
+reader: begin_read([0, 3[), readable=[0, 0[, writable=[0, 5[
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:39, begin_write, thread 0x700000081000]
+writer: begin_write(1), readable=[0, 0[, writable=[0, 5[
+
+[test/ndarray_seekable_shared_ring.cc:36, operator(), thread 0x700000081000]
+writer: writing 0 dur:1
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:121, begin_read_span, thread 0x7fff73242000]
+reader: wait...
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:39, begin_write, thread 0x700000081000]
+writer: begin_write(1), readable=[0, 1[, writable=[1, 5[
+
+[test/ndarray_seekable_shared_ring.cc:36, operator(), thread 0x700000081000]
+writer: writing 1 dur:1
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:121, begin_read_span, thread 0x7fff73242000]
+reader: wait...
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:39, begin_write, thread 0x700000081000]
+writer: begin_write(1), readable=[0, 2[, writable=[2, 5[
+
+[test/ndarray_seekable_shared_ring.cc:36, operator(), thread 0x700000081000]
+writer: writing 2 dur:1
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:121, begin_read_span, thread 0x7fff73242000]
+reader: wait...
+
+[test/../src/ndarray/ndarray_seekable_shared_ring.tcc:39, begin_write, thread 0x700000081000]
+writer: begin_write(1), readable=[0, 3[, writable=[3, 5[
+
+[test/ndarray_seekable_shared_ring.cc:36, operator(), thread 0x700000081000]
+writer: writing 3 dur:1
+

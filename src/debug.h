@@ -24,9 +24,9 @@
 		}
 		
 		inline std::ostream& debug_ostream() {
-			//static std::ofstream file("debug.txt");
-			//return file;
-			return std::cerr;
+			static std::ofstream file("debug.txt");
+			return file;
+			//return std::cerr;
 		}
 	
 		inline void debug_print_part(std::ostream& str) { }	
@@ -55,7 +55,8 @@
 		void debug_print(std::ostream& str, const char* file, int line, const char* func, const Args&... args) {
 			std::lock_guard<std::mutex> lock(debug_print_mutex());			
 			auto tid = std::this_thread::get_id();
-			str << "\x1b[34;1m[" << file << ':' << line << ", " << func << ", thread " << tid << "]:\n\x1b[0m";
+			//str << "\x1b[34;1m[" << file << ':' << line << ", " << func << ", thread " << tid << "]:\n\x1b[0m";
+			str << '[' << file << ':' << line << ", " << func << ", thread " << tid << "]\n";
 			debug_print_part(str, args...);
 			str << "\n\n";	
 		}
@@ -65,8 +66,7 @@
 
 #else
 	// debugging is disabled	
-	#define MF_DEBUG(...) 
-	
+	#define MF_DEBUG(...)
 #endif
 
 #endif

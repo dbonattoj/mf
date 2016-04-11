@@ -30,9 +30,10 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 			try {
 			int t = 0;
 			for(;;) {
+				//std::this_thread::sleep_for(600ms);
+
 				auto w_section = ring.begin_write(1);
-				MF_DEBUG("writer at ", w_section.start_time(), " dur:", w_section.duration());
-				std::this_thread::sleep_for(100ms);
+				MF_DEBUG("writer: writing ", w_section.start_time(), " dur:", w_section.duration());
 				if(w_section.duration() == 0) return; // end when eof reached
 				REQUIRE(w_section.duration() == 1);
 				w_section[0] = make_frame(shape, w_section.start_time());
@@ -41,7 +42,7 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 				if(w_section.start_time() != t++) discontinuity = true;
 			}
 			MF_DEBUG("ending writer");
-			} catch(const std::exception& ex) { MF_DEBUG("writer ex: ", ex.what()); }
+			} catch(const std::exception& ex) { MF_DEBUG("writer ex: ", ex.what()); throw; }
 		});
 
 		// read 3 frames (0, 1, 2)
@@ -68,10 +69,10 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		REQUIRE(ring.current_time() >= 8);
 		REQUIRE(ring.write_start_time() >= 9);
 		REQUIRE(ring.read_start_time() == 9);
-		
-		// read 3 frames (9, 10, 11), request 4
-		r_section.reset(ring.begin_read(4));
-		REQUIRE(r_section.duration() == 4);
+				
+		// read 3 frames (9, 10, 11), request 5
+		r_section.reset(ring.begin_read(5));
+		REQUIRE(r_section.duration() == 5);
 		REQUIRE(r_section.start_time() == 9);
 		REQUIRE(ring.write_start_time() >= 12);
 		REQUIRE(compare_frames(shape, r_section, {9, 10, 11, 12, 13}));
@@ -79,8 +80,7 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		REQUIRE(ring.current_time() >= 13);
 		REQUIRE(ring.write_start_time() >= 14);
 		REQUIRE(ring.read_start_time() == 12);
-		
-		
+			
 		// read frames (20, 21)
 		// skip previous (--> seek, necessarily because inbetween frames don't fit in buffer capacity)
 		discontinuity = false;
@@ -120,7 +120,7 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 
 
 		// attempt to seek beyond end
-		REQUIRE_THROWS(ring.seek(200));
+		REQUIRE_THROWS(ring.seek(201));
 
 		// seek near end
 		ring.seek(198);
@@ -131,43 +131,9 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		ring.end_read(2);
 		// will end writer, because writer arrived at end and begin_write().duration() == 0
 
-	
 		writer.join();
-
-/*
-		// seek to past
-		ring.seek(50);
-		r_section.reset(ring.begin_read(3));
-		REQUIRE(r_section.duration() == 3);
-		REQUIRE(r_section.start_time() == 50);
-		REQUIRE(ring.write_start_time() >= 3);
-		//REQUIRE(compare_frames(shape, r_section, {50, 51, 52}));
-		ring.end_read(3);
-		REQUIRE(discontinuity);
-		discontinuity = false;
-		
-		// attempt to seek beyond end
-		REQUIRE_THROWS(ring.seek(200));
-				
-		// seek near end
-		ring.seek(198);
-		r_section.reset(ring.begin_read(5));
-		REQUIRE(r_section.duration() == 2); // must be truncated
-		REQUIRE(r_section.start_time() == 198);
-		//REQUIRE(compare_frames(shape, r_section, {198, 199}));
-		ring.end_read(2);
-			*/
-		// will end writer, because writer arrived at end and begin_write().duration() == 0
-	
-		// end secondary thread
-//		writer.join();
-		
-		// seek to end
-		
-
 	}
 	
-	/*
 	SECTION("seek while writing") {
 		// fill up 4/5 of buffer
 		auto w_section = ring.begin_write(4);
@@ -222,7 +188,7 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		reader.join();	
 	}
 
-
+/*
 	SECTION("wait for reader") {
 		// fill up 4/5 of buffer
 		auto w_section = ring.begin_write(4);
