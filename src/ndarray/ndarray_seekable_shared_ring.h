@@ -15,7 +15,12 @@ class ndarray_seekable_shared_ring : public ndarray_shared_ring_base<Dim, T> {
 	using base = ndarray_shared_ring_base<Dim, T>;
 	
 private:
-	enum thread_state { idle = 0, waiting = 1, accessing = 2 };	
+	using thread_state = time_unit;
+	enum : thread_state {
+		idle = 0,
+		accessing = -1
+	};
+	// positive number = number of frames waiting for
 
 	using typename base::ring_type;
 	using typename base::section_view_type;
@@ -28,13 +33,14 @@ private:
 	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.
 	std::condition_variable readable_cv_; ///< Condition variable, gets notified when readable frames become available.
 
+
 	std::atomic<thread_state> reader_state_{idle}; ///< Current state of reader thread. Used to prevent deadlocks.
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
 	// can also be computed as end_time_ + 1 - ring_.readable_duration().
 	// however this would require mutex lock, because both terms are altered by writer in end_write()
-		
+	
 public:
 	ndarray_seekable_shared_ring(const ndsize<Dim>& frames_shape, std::size_t capacity, time_unit end_time);
 		

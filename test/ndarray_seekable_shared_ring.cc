@@ -69,7 +69,7 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		REQUIRE(ring.current_time() >= 8);
 		REQUIRE(ring.write_start_time() >= 9);
 		REQUIRE(ring.read_start_time() == 9);
-				
+								
 		// read 3 frames (9, 10, 11), request 5
 		r_section.reset(ring.begin_read(5));
 		REQUIRE(r_section.duration() == 5);
@@ -117,7 +117,6 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		REQUIRE(ring.write_start_time() >= 53);
 		REQUIRE(ring.read_start_time() == 53);
 		REQUIRE(discontinuity);
-
 
 		// attempt to seek beyond end
 		REQUIRE_THROWS(ring.seek(201));
@@ -188,7 +187,7 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 		reader.join();	
 	}
 
-/*
+
 	SECTION("wait for reader") {
 		// fill up 4/5 of buffer
 		auto w_section = ring.begin_write(4);
@@ -328,6 +327,5 @@ TEST_CASE("ndarray_seekable_shared_ring", "[ndarray_shared_ring][seek][parallel]
 			reader.join();
 		}
 	}
-*/
 }
 
