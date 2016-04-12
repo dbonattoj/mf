@@ -5,6 +5,7 @@ namespace mf {
 void media_sink_node::setup_graph() {
 	propagate_offset_(0);
 	propagate_output_buffer_durations_();
+	propagate_stream_duration_();
 	propagate_setup_();
 }
 

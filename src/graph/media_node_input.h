@@ -51,6 +51,7 @@ public:
 	/** begin_read() cannot be called after this has returned true. */
 	bool reached_end() const override;
 
+	bool is_active() const { return connected_output_->is_active(); }
 	
 	/// Get readable view of current frame.
 	/** Only callable while in media_node::process_(). */

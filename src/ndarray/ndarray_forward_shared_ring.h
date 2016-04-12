@@ -1,5 +1,5 @@
-#ifndef MF_NDARRAY_SHARED_RING_H_
-#define MF_NDARRAY_SHARED_RING_H_
+#ifndef MF_NDARRAY_FORWARD_SHARED_RING_H_
+#define MF_NDARRAY_FORWARD_SHARED_RING_H_
 
 #include <mutex>
 #include <condition_variable>
@@ -18,7 +18,7 @@ namespace mf {
  ** - Writer can mark end of file. begin_read(), begin_read_span() and skip() then to not wait for more frames
  ** Does not inherit from base class because thread safety is added. Provides same interface. **/
 template<std::size_t Dim, typename T>
-class ndarray_shared_ring : public ndarray_shared_ring_base<Dim, T> {
+class ndarray_forward_shared_ring : public ndarray_shared_ring_base<Dim, T> {
 	using base = ndarray_shared_ring_base<Dim, T>;
 		
 private:
@@ -45,7 +45,7 @@ private:
 	void skip_available_(time_unit duration);
 	
 public:
-	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t capacity);
+	ndarray_forward_shared_ring(const ndsize<Dim>& frames_shape, std::size_t capacity);
 		
 	void initialize();
 
@@ -64,21 +64,13 @@ public:
 	void skip(time_unit skip_duration) override;
 
 	void seek(time_unit) override;
+	bool can_seek(time_unit) const override { return false; }
 	
 	time_unit current_time() const override;
 	
-	/// True when last frame was written into buffer.
-	/** Equivalent to `end_time_is_defined()`, but specific to non-seekable buffer, because end gets marked only by
-	 ** end_write() when last frame got written.
-	 ** If true, last frame was written but not necessarily read yet. */
-	bool writer_reached_end() const { return end_time_is_defined(); }
-
-	/// True when last frame was read from buffer.
-	/** Implies `writer_reached_end()`. When true, no more data can be read and begin_read() always returns zero-length
-	 ** view. */
-	bool reader_reached_end() const { return read_start_time_ == end_time_; }
+	bool writer_reached_end() const override { return end_time_is_defined(); }
+	bool reader_reached_end() const override { return read_start_time_ == end_time_; }
 	
-
 	bool end_time_is_defined() const override { return (end_time_ != -1); }
 	time_unit end_time() const override { return end_time_; }
 
@@ -95,6 +87,6 @@ public:
 
 }
 
-#include "ndarray_shared_ring.tcc"
+#include "ndarray_forward_shared_ring.tcc"
 
 #endif

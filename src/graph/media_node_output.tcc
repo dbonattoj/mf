@@ -1,5 +1,7 @@
 #include <sstream>
 #include "media_node_output.h"
+#include "../ndarray/ndarray_seekable_shared_ring.h"
+#include "../ndarray/ndarray_forward_shared_ring.h"
 
 namespace mf {
 
@@ -21,7 +23,11 @@ void media_node_output<Dim, T>::setup() {
 	assert(required_buffer_duration_is_defined());
 	assert(frame_shape_is_defined());
 
-	buffer_.reset(new buffer_type(frame_shape_, buffer_duration_));
+	if(stream_duration_is_defined()) {
+		buffer_.reset(new ndarray_seekable_shared_ring<Dim, T>(frame_shape_, required_buffer_duration(), stream_duration()));
+	} else {
+		buffer_.reset(new ndarray_forward_shared_ring<Dim, T>(frame_shape_, required_buffer_duration()));
+	}
 }
 
 
@@ -45,8 +51,7 @@ void media_node_output<Dim, T>::end_read(bool consume_frame) {
 
 template<std::size_t Dim, typename T>
 bool media_node_output<Dim, T>::reached_end() const {
-	return buffer_->end_time_is_defined();
-	// TODO change, make seekable
+	return buffer_->reader_reached_end();
 }
 
 
@@ -66,7 +71,7 @@ void media_node_output<Dim, T>::begin_write() {
 
 template<std::size_t Dim, typename T>
 void media_node_output<Dim, T>::end_write(bool is_last_frame) {
-	buffer_->end_write(1, is_last_frame);
+	buffer_->end_write(1);
 }
 
 

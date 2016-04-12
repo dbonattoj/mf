@@ -2,19 +2,19 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include "../src/ndarray/ndarray_shared_ring.h"
+#include "../src/ndarray/ndarray_forward_shared_ring.h"
 #include "support/ndarray.h"
 
 using namespace mf;
 using namespace mf::test;
 using namespace std::literals;
 
-TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
+TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
 	ndsize<2> shape{320, 240};
 	std::size_t duration = 5;
 	bool reaches_eof;
 	
-	ndarray_shared_ring<2, int> ring(shape, duration);
+	ndarray_forward_shared_ring<2, int> ring(shape, duration);
 	REQUIRE(ring.read_start_time() == 0);
 	REQUIRE(ring.write_start_time() == 0);
 	
@@ -118,7 +118,7 @@ TEST_CASE("ndarray_shared_ring", "[ndarray_shared_ring][parallel]") {
 	
 	
 	SECTION("wait for writer (span)") {
-		ndarray_shared_ring<2, int> ring(shape, 20); // use longer ring
+		ndarray_forward_shared_ring<2, int> ring(shape, 20); // use longer ring
 		
 		// reader thread: waits until frames [10, 14[
 		std::atomic<bool> started{false};

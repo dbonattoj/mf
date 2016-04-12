@@ -40,6 +40,29 @@ void media_node_base::propagate_output_buffer_durations_() {
 }
 
 
+void media_node_base::propagate_stream_durations_() {
+	if(inputs.size() == 0) return;
+	
+	bool first = false;
+	time_unit minimal_input_stream_duration;
+
+	for(media_node_input_base* input : inputs_) {
+		auto& output = input->connected_output();
+
+		media_node_base& connected_node = output.node();
+		connected_node.propagate_stream_durations_();
+
+		time_unit dur = connected_node.stream_duration();
+		if(first || dur < minimal_input_stream_duration) minimal_input_stream_duration = dur;
+	}
+	
+	stream_duration_ = minimal_input_stream_duration;
+	
+	for(media_node_output_base* output : outputs_)
+		output->define_stream_duration(stream_duration_);
+}
+
+
 void media_node_base::propagate_setup_() {
 	// do nothing when did_setup_ is already set:
 	// during recursive propagation it may be called multiple times on same node
@@ -55,15 +78,29 @@ void media_node_base::propagate_setup_() {
 	this->setup_();
 	
 	// set up outputs
-	// their frame shape are now defined, and required durations were defined before
-	// (in propagate_output_buffer_durations_())
+	// their frame shape are now defined
+	// required durations were defined in propagate_output_buffer_durations_()
+	// stream duration from node, was defined in propagate_stream_durations_()
 	for(media_node_output_base* output : outputs_) {
 		if(! output->frame_shape_is_defined())
 			throw std::logic_error("concrete subclass did not define output frame shapes");
+			
 		output->setup();
 	}
 	
 	did_setup_ = true;
+}
+
+
+bool media_node_base::is_active() const {
+	// node is always active if it has no outputs (i.e. sink node)
+	if(outputs_.size() == 0) return true;
+	
+	// otherwise, it is active if any output is active
+	for(media_node_output_base* output : outputs_)
+		if(output->is_active()) return true;
+		
+	return false;
 }
 
 

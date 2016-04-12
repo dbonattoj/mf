@@ -14,25 +14,32 @@ protected:
 	/// Media node that this output belongs to.
 	media_node_base& node_;
 		
-	/// Required buffer duration.
-	/** Minimal duration that the ring buffer must have. Needs to be defined prior to initialization. */
-	time_unit buffer_duration_ = -1;
-
+	time_unit required_buffer_duration_ = -1;
+	time_unit stream_duration_ = -1;
+	
+	bool active_ = true;
+	
 public:
-	media_node_output_base(media_node_base&);
+	explicit media_node_output_base(media_node_base&);
 
 	media_node_base& node() const { return node_; }
 
 	virtual void setup() = 0;
 
-	virtual void begin_write() = 0;
-	virtual void end_write(bool eof) = 0;
-	
-	void define_required_buffer_duration(time_unit dur);
-	time_unit required_buffer_duration() const;
-	bool required_buffer_duration_is_defined() const;
-	
+	virtual time_unit begin_write() = 0;
+	virtual void end_write(bool is_last_frame) = 0;
+
+	void define_required_buffer_duration(time_unit dur) { required_buffer_duration_ = dur; }
+	time_unit required_buffer_duration() const { return required_buffer_duration_; }
+	bool buffer_required_duration_is_defined() const { return (required_buffer_duration_ != -1); }
+
+	void define_stream_duration(time_unit duration) { stream_duration_ = dur; }
+	time_unit stream_duration() const { return stream_duration_; }
+	bool stream_duration_is_defined() const { return (stream_duration != -1); }
+		
 	virtual bool frame_shape_is_defined() const = 0;
+	
+	bool is_active() const { return active_; }
 
 	#ifndef NDEBUG
 	virtual void debug_print(std::ostream&) const = 0;
@@ -44,10 +51,7 @@ public:
 /// Abstract base class for media node input.
 class media_node_input_base {
 protected:
-	/// Number of frames preceding current frame that input will see.
 	time_unit past_window_ = 0;
-	
-	/// Number of frames succeeding current frame that input will see.
 	time_unit future_window_ = 0;
 
 public:	

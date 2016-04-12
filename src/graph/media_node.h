@@ -13,8 +13,7 @@ template<std::size_t Dim, typename Elem> class media_node_output;
 class media_node : public media_node_base {
 private:
 	std::thread thread_;
-	bool sequential_;
-	
+
 	void thread_main_();
 	void pull_frame_();
 
@@ -27,8 +26,6 @@ public:
 
 	explicit media_node(time_unit prefetch = 0);
 	~media_node();
-
-	void pull(time_unit target_time) override;
 };
 
 }

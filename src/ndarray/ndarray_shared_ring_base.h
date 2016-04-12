@@ -64,6 +64,10 @@ public:
 	 ** to writer by the section returned by `begin_write()`, and writer must react by writing frames for that time. */
 	virtual void seek(time_unit t) = 0;
 	
+	/// Verifies if is is possible to seek to read time \a t.
+	/** Returns false when buffer is not seekable, or when time is out of bounds. */
+	virtual bool can_seek(time_unit t) = 0;
+	
 	/// Capacity of buffer.
 	/** Maximal readable and writable frames that fit in buffer. */
 	virtual time_unit capacity() const = 0;
@@ -79,6 +83,13 @@ public:
 	/// Time of last written frame in buffer.
 	/** Equivalent to `write_start_time() - 1`. -1 in initial state. */
 	virtual time_unit current_time() const = 0;
+	
+	/// True when last frame was written to buffer.
+	virtual bool writer_reached_end() const = 0;
+
+	/// True when last frame was read from buffer.
+	virtual bool reader_reached_end() const = 0;
+
 	
 	virtual time_span readable_time_span() const = 0;
 	virtual time_span writable_time_span() const = 0;

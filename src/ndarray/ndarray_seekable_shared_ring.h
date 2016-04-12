@@ -58,6 +58,7 @@ public:
 	void skip(time_unit skip_duration) override;
 	
 	void seek(time_unit target_time) override;
+	bool can_seek(time_unit target_time) const override { return (t <= end_time_); }
 	
 	time_unit current_time() const override;
 	
@@ -68,6 +69,9 @@ public:
 	
 	bool end_time_is_defined() const override { return true; }
 	time_unit end_time() const override { return end_time_; }
+	
+	bool writer_reached_end() const override { return write_start_time() == end_time_; }
+	bool reader_reached_end() const override { return read_start_time() == end_time_; }
 		
 	#ifndef NDEBUG
 	void debug_print(std::ostream&) const;
