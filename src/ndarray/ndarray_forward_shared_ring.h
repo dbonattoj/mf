@@ -39,8 +39,6 @@ private:
 	std::atomic<time_unit> end_time_{-1}; ///< One after last frame in stream.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
-	// can also be computed as end_time_ + 1 - ring_.readable_duration().
-	// however this would require mutex lock, because both terms are altered by writer in end_write()
 		
 	void skip_available_(time_unit duration);
 	
@@ -81,7 +79,7 @@ public:
 
 	
 	#ifndef NDEBUG
-	void debug_print(std::ostream&) const;
+	void debug_print(std::ostream&) const override;
 	#endif
 };
 

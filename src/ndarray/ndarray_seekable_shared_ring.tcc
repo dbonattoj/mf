@@ -85,7 +85,7 @@ void ndarray_seekable_shared_ring<Dim, T>::end_write(time_unit written_duration)
 	}
 	
 	writer_state_ = idle;
-	readable_cv_.notify_one();	
+	if(written_duration > 0) readable_cv_.notify_one();	
 }
 
 
@@ -153,7 +153,7 @@ void ndarray_seekable_shared_ring<Dim, T>::end_read(time_unit read_duration) {
 	reader_state_ = idle;
 	
 	// notify condition variable: more writable frames have become available
-	writable_cv_.notify_one();
+	if(read_duration > 0) writable_cv_.notify_one();
 }
 
 
@@ -167,14 +167,14 @@ template<std::size_t Dim, typename T>
 void ndarray_seekable_shared_ring<Dim, T>::seek(time_unit t) {	
 	if(t > end_time_) throw std::invalid_argument("cannot seek beyond end");
 
+	throw std::logic_error("SEEKED");
+
 	// lock the mutex
 	// writer will not start or end while locked, and readable time span will not change
 	std::unique_lock<std::mutex> lock(mutex_);
 
 	bool already_readable = ring_.readable_time_span().includes(t);
-	
-	MF_DEBUG("reader: seek to ", t, ", already_readable=", already_readable);
-	
+		
 	if(!already_readable && writer_state_ == accessing) {
 		// target tile span is not in buffer, and writer is currently accessing data:
 		// need to let the writer finish writing first 
@@ -234,7 +234,8 @@ time_unit ndarray_seekable_shared_ring<Dim, T>::write_start_time() const {
 template<std::size_t Dim, typename T>
 time_unit ndarray_seekable_shared_ring<Dim, T>::read_start_time() const {
 	// use atomic member, instead of non-atomic ring_.read_start_time()
-	return read_start_time_;
+	//return read_start_time_;
+	return readable_time_span().start_time();
 }
 
 

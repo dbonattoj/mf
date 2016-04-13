@@ -11,6 +11,7 @@ void media_node::thread_main_() {
 	try{
 	for(;;) pull_frame_();
 	}catch(int){} 
+	MF_DEBUG("node:: ended");
 }
 
 
@@ -37,6 +38,10 @@ void media_node::pull_frame_() {
 	this->process_();
 	
 	bool reached_end = false;
+
+	MF_DEBUG("node::pull(), before input end_read:\n", inputs_[0]->connected_output());
+
+
 	for(media_node_input_base* input : inputs_) {
 		input->end_read(time_);
 		if(input->reached_end()) { reached_end = true; }
@@ -46,8 +51,8 @@ void media_node::pull_frame_() {
 		output->end_write(reached_end);
 	}
 	
-	MF_DEBUG("node::pull() (time = ", time_, ", end=", reached_end, ")");
-	
+	MF_DEBUG("node::pull() (t=", time_, ", end=", reached_end, "), \n", *outputs_[0]);
+
 	if(reached_end) throw 1;
 }
 

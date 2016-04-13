@@ -90,6 +90,7 @@ auto ndarray_ring<Dim, T>::begin_read(time_unit duration) -> section_view_type {
 
 template<std::size_t Dim, typename T>
 void ndarray_ring<Dim, T>::end_read(time_unit read_duration) {
+	if(read_duration == 0) return;
 	if(read_duration > readable_duration()) throw std::invalid_argument("reported read duration too large");
 	read_position_ = (read_position_ + read_duration) % total_duration();
 	full_ = false;

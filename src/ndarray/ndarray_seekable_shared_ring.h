@@ -38,8 +38,6 @@ private:
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
-	// can also be computed as end_time_ + 1 - ring_.readable_duration().
-	// however this would require mutex lock, because both terms are altered by writer in end_write()
 	
 public:
 	ndarray_seekable_shared_ring(const ndsize<Dim>& frames_shape, std::size_t capacity, time_unit end_time);
@@ -74,7 +72,7 @@ public:
 	bool reader_reached_end() const override { return read_start_time() == end_time_; }
 		
 	#ifndef NDEBUG
-	void debug_print(std::ostream&) const;
+	void debug_print(std::ostream&) const override;
 	#endif
 };
 

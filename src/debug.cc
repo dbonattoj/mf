@@ -1,6 +1,3 @@
-#ifndef MF_DEBUG_H_
-#define MF_DEBUG_H_
-
 #ifndef NDEBUG
 
 #include "debug.h"
@@ -10,6 +7,7 @@
 #include <mutex>
 #include <fstream>
 #include <vector>
+#include <cassert>
 
 namespace mf {
 
@@ -19,7 +17,7 @@ namespace {
 	std::ptrdiff_t next_thread_color_ = 0;
 	
 	std::mutex mutex_;
-	bool active_ = true;
+	debug_mode mode_ = debug_mode::cerr;
 }
 
 namespace detail {
@@ -37,20 +35,28 @@ namespace detail {
 			return col;
 		}
 	}
-	
-	bool debug_is_active() { return active_; }
-	void set_debug_active(bool active) { active_ = active; }
-	
+		
 	std::mutex& debug_mutex() { return mutex_; }
 	
 	std::ostream& debug_ostream() {
-		static std::ofstream file("debug.txt");
-		return file;
+		assert(mode_ != debug_mode::inactive);
+		if(mode_ == debug_mode::file) {
+			static std::ofstream file("debug.txt");
+			return file;
+		} else if(mode_ == debug_mode::cerr) {
+			return std::cerr;
+		}
+	}
+	
+	bool debug_is_enabled() {
+		return (mode_ != debug_mode::inactive);
 	}
 }
 
+void set_debug_mode(debug_mode mode) {
+	mode_ = mode;
 }
 
-#endif
+}
 
 #endif

@@ -55,8 +55,10 @@ template<std::size_t Dim, typename T>
 bool media_node_input<Dim, T>::reached_end() const {
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
 
-	if(! connected_output_->ring().reader_reached_end()) return false;
-	return (connected_output_->ring().end_time() - connected_output_->ring().read_start_time() - 1) <= past_window_;
+	MF_DEBUG("reader_reached_end=", connected_output_->ring().reader_reached_end(), " - \n output:=", *connected_output_);
+
+	if(connected_output_->ring().reader_reached_end()) return true;
+	else return (connected_output_->ring().end_time() - past_window_) <= connected_output_->ring().read_start_time();
 }
 
 }

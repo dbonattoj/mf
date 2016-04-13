@@ -42,11 +42,9 @@ void media_node_output<Dim, T>::debug_print(std::ostream& str) const {
 		<< "]" << std::endl;
 
 	if(buffer_ != nullptr) {
-		str << "buffer: capacity=" << buffer_->capacity()
-			<< ", readable=" << buffer_->readable_time_span()
-			<< ", writable=" << buffer_->writable_time_span()
-			<< ", read_start_time=" << buffer_->read_start_time()
-			<< ", write_start_time=" << buffer_->write_start_time() << std::endl;
+		str << "buffer: ";
+		buffer_->debug_print(str);
+		str << std::endl;
 	}
 }
 #endif

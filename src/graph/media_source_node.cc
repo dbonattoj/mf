@@ -11,6 +11,7 @@ void media_source_node::thread_main_() {
 	try{
 	for(;;) pull_frame_();
 	}catch(int){}
+	MF_DEBUG("source:: ended");
 }
 
 
@@ -46,7 +47,7 @@ void media_source_node::pull_frame_() {
 		output->end_write(reached_end);
 	}
 	
-	MF_DEBUG("source::pull() (t=", time_, ", end=", reached_end, ")");
+	MF_DEBUG("source::pull() (t=", time_, ", end=", reached_end, "), \n", *outputs_[0]);
 	
 	if(reached_end) throw 1;
 }
@@ -55,6 +56,7 @@ void media_source_node::stop_() {
 }
 
 void media_source_node::launch_() {
+	MF_DEBUG("source:: launch");
 	thread_ = std::move(std::thread((std::bind(&media_source_node::thread_main_, this))));
 }
 

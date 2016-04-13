@@ -97,6 +97,10 @@ public:
 	virtual time_unit write_start_time() const { return this->writable_time_span().start_time(); }
 	time_unit readable_duration() const { return this->readable_time_span().duration(); }
 	time_unit writable_duration() const { return this->writable_time_span().duration(); }
+	
+	#ifndef NDEBUG
+	virtual void debug_print(std::ostream&) const = 0;
+	#endif
 };
 
 }
