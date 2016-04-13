@@ -66,7 +66,7 @@ public:
 	
 	/// Verifies if is is possible to seek to read time \a t.
 	/** Returns false when buffer is not seekable, or when time is out of bounds. */
-	virtual bool can_seek(time_unit t) = 0;
+	virtual bool can_seek(time_unit t) const = 0;
 	
 	/// Capacity of buffer.
 	/** Maximal readable and writable frames that fit in buffer. */

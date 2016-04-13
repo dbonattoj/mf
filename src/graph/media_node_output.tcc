@@ -24,54 +24,12 @@ void media_node_output<Dim, T>::setup() {
 	assert(frame_shape_is_defined());
 
 	if(stream_duration_is_defined()) {
+		MF_DEBUG("ndarray_seekable_shared_ring");
 		buffer_.reset(new ndarray_seekable_shared_ring<Dim, T>(frame_shape_, required_buffer_duration(), stream_duration()));
 	} else {
+		MF_DEBUG("ndarray_forward_shared_ring");
 		buffer_.reset(new ndarray_forward_shared_ring<Dim, T>(frame_shape_, required_buffer_duration()));
 	}
-}
-
-
-template<std::size_t Dim, typename T>
-void media_node_output<Dim, T>::pull(time_unit target_time) {
-	node_.pull(target_time);
-}
-
-
-template<std::size_t Dim, typename T>
-auto media_node_output<Dim, T>::begin_read_span(time_span span) -> full_view_type {
-	return buffer_->begin_read_span(span);
-}
-
-
-template<std::size_t Dim, typename T>
-void media_node_output<Dim, T>::end_read(bool consume_frame) {
-	buffer_->end_read(consume_frame ? 1 : 0);
-}
-
-
-template<std::size_t Dim, typename T>
-bool media_node_output<Dim, T>::reached_end() const {
-	return buffer_->reader_reached_end();
-}
-
-
-template<std::size_t Dim, typename T>
-time_unit media_node_output<Dim, T>::readable_frames_till_end() const {	
-	assert(reached_end());
-	return buffer_->readable_duration();
-}
-
-
-template<std::size_t Dim, typename T>
-void media_node_output<Dim, T>::begin_write() {
-	auto view = buffer_->begin_write(1);
-	view_.reset(view[0]);
-}
-
-
-template<std::size_t Dim, typename T>
-void media_node_output<Dim, T>::end_write(bool is_last_frame) {
-	buffer_->end_write(1);
 }
 
 

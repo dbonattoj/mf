@@ -38,8 +38,10 @@ void media_graph::run() {
 	if(! setup_) throw std::logic_error("media graph not set up");
 	while(!sink_->reached_end()) {
 		sink_->pull_next_frame();
-		//std::cout << "frame " << current_time() << std::endl;
 	}
+
+	MF_DEBUG("graph::reached end!");
+
 	sink_->stop_graph();
 }
 

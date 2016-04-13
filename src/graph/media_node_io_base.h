@@ -31,11 +31,11 @@ public:
 
 	void define_required_buffer_duration(time_unit dur) { required_buffer_duration_ = dur; }
 	time_unit required_buffer_duration() const { return required_buffer_duration_; }
-	bool buffer_required_duration_is_defined() const { return (required_buffer_duration_ != -1); }
+	bool required_buffer_duration_is_defined() const { return (required_buffer_duration_ != -1); }
 
-	void define_stream_duration(time_unit duration) { stream_duration_ = dur; }
+	void define_stream_duration(time_unit dur) { stream_duration_ = dur; }
 	time_unit stream_duration() const { return stream_duration_; }
-	bool stream_duration_is_defined() const { return (stream_duration != -1); }
+	bool stream_duration_is_defined() const { return (stream_duration_ != -1); }
 		
 	virtual bool frame_shape_is_defined() const = 0;
 	

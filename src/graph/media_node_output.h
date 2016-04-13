@@ -16,9 +16,10 @@ class media_node_base;
 template<std::size_t Dim, typename T>
 class media_node_output : public media_node_output_base {
 public:
+	using frame_view_type = ndarray_view<Dim, T>;
 	using frame_shape_type = typename frame_view_type::shape_type;
 
-	using ring_type = ndarray_shared_ring<Dim, T>;
+	using ring_type = ndarray_shared_ring_base<Dim, T>;
 
 public:
 	ndsize<Dim> frame_shape_;
@@ -41,14 +42,21 @@ public:
 		
 	ring_type& ring() { return *buffer_; }
 	
+	frame_view_type& view() { return view_; }
+	
 	time_unit begin_write() override {
+		MF_DEBUG("output::begin_write()....");
 		auto view = ring().begin_write(1);
-		view_ = view[0];
+		if(view.duration() != 1) throw std::runtime_error("output at end");
+		view_.reset(view[0]);
+		MF_DEBUG("output::begin_write() --> ", view.span(), " t=", view.start_time());
 		return view.start_time();
 	}
 	
 	void end_write(bool is_last_frame) override {
+		MF_DEBUG("output::end_write()....");
 		ring().end_write(1);
+		MF_DEBUG("output::end_write()");
 	}
 
 	#ifndef NDEBUG

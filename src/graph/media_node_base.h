@@ -25,7 +25,6 @@ protected:
 	time_unit stream_duration_ = -1;
 
 	std::atomic<time_unit> time_{-1}; ///< Current time, i.e. time of last processed frame.
-	std::atomic<bool> reached_end_{false}; ///< True when last processed frame is last in stream.
 			
 	explicit media_node_base(time_unit prefetch_dur) :
 		prefetch_duration_(prefetch_dur) { }
@@ -52,13 +51,15 @@ protected:
 	void propagate_setup_();
 	
 	void propagate_stop_();
-	virtual void stop_() = 0;
+	virtual void stop_() { }
 
 	
 	/// Set up the node.
 	/** Implemented in concrete subclass. Must define frame shapes of outputs. Preceding nodes are already set up
 	 ** when this is called, allowing node to define output frame shapes in function of input frame shapes. */
 	virtual void setup_() { }
+	
+	virtual void launch_() { }
 		
 	/// Process current frame.
 	/** Implemented in concrete subclass. Input and output views are made available while in this function. Subclass
@@ -67,6 +68,7 @@ protected:
 	
 	void define_stream_duration(time_unit dur) { stream_duration_ = dur; }
 	time_unit stream_duration() const { return stream_duration_; }
+	bool stream_duration_is_defined() const { return (stream_duration_ != -1); }
 		
 private:
 	friend media_node_input_base::media_node_input_base(media_node_base&, time_unit, time_unit);
@@ -81,24 +83,14 @@ public:
 
 	virtual ~media_node_base() { }
 		
-	/// Time last processed frame.
+	/// Time of last processed frame.
 	/** When currently processing a frame, time of that frame. */
 	time_unit current_time() const noexcept { return time_; }
 	
-	/// Returns true when no more frame can be pulled.
-	/** Either because process_reached_end_() returns true, or because an input has reached end. */
-	bool reached_end() const { return reached_end_; }
-
 	/// Absolute offset, relative to graph sink node.
 	/** Maximal number of frames that this node can be in advance relative to graph sink node. -1 when not yet defined.
 	 ** Gets computed in propagate_offset_(), during graph setup. Used to determine output buffer durations in graph. */
 	time_unit offset() const noexcept { return offset_; }
-
-	/// Pull frames until \a target_time.
-	/** Pulls until \a target_time, or until end, whichever comes first. Implemented by subclass (media_sequential_node
-	 ** or media_parallel_node). Must ensure that after call, frame \a target_time will eventually be available in
-	 ** output buffer(s), and/or end time will be set in buffer(s). Cannot be called when reached_end() is true. */
-	virtual void pull(time_unit target_time) = 0;
 	
 	void print(std::ostream& str) const;
 	

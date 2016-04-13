@@ -8,6 +8,7 @@
 #include "../../src/common.h"
 #include "../../src/graph/media_node.h"
 #include "../../src/graph/media_sink_node.h"
+#include "../../src/graph/media_source_node.h"
 #include "../../src/graph/media_node_input.h"
 #include "../../src/graph/media_node_output.h"
 #include "../../src/ndarray/ndcoord.h"
@@ -15,16 +16,16 @@
 
 namespace mf { namespace test {
 
-class sequence_frame_source : public media_node {
+class sequence_frame_source : public media_source_node {
 private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
 
 public:
-	media_node_output<2, int> output;
+	output_type<2, int> output;
 
-	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape) :
-		last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
+	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable) :
+		media_source_node(seekable, last_frame + 1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
 	
 	void setup_() override {
 		output.define_frame_shape(frame_shape_);
@@ -34,10 +35,11 @@ public:
 		output.view() = make_frame(frame_shape_, current_time());
 	}
 	
-	bool process_reached_end_() override {
+	bool reached_end() const override {
 		return (current_time() == last_frame_);
 	}
 };
+
 
 
 class expected_frames_sink : public media_sink_node {
@@ -48,7 +50,7 @@ private:
 	std::size_t counter_ = 0;
 
 public:
-	media_node_input<2, int> input;
+	input_type<2, int> input;
 	
 	explicit expected_frames_sink(const std::vector<int>& seq) :
 		expected_frames_(seq), input(*this) { }
@@ -74,9 +76,7 @@ public:
 
 class passthrough_node : public media_node {
 public:
-	using input_type = media_node_input<2, int>;
-	using output_type = media_node_output<2, int>;
-	using callback_func = void(passthrough_node& self, input_type& in, output_type& out);
+	using callback_func = void(passthrough_node& self, input_type<2, int>& in, output_type<2, int>& out);
 	
 private:
 	std::function<callback_func> callback_;
@@ -92,8 +92,8 @@ private:
 	}
 	
 public:
-	input_type input;
-	output_type output;
+	input_type<2, int> input;
+	output_type<2, int> output;
 
 	passthrough_node(time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
 		media_node(prefetch),
@@ -106,15 +106,15 @@ public:
 	}
 };
 
-
+/*
 class input_synchronize_test_node : public media_node {
 private:
 	bool failed_ = false;
 
 public:
-	media_node_input<2, int> input1;
-	media_node_input<2, int> input2;
-	media_node_output<2, int> output;
+	input_type<2, int> input1;
+	input_type<2, int> input2;
+	output_type<2, int> output;
 	
 	input_synchronize_test_node(time_unit prefetch = 0) :
 		media_node(prefetch),
@@ -138,9 +138,9 @@ public:
 
 class multiplexer_node : public media_node {
 public:
-	media_node_input<2, int> input;
-	media_node_output<2, int> output1;
-	media_node_output<2, int> output2;
+	input_type<2, int> input;
+	output_type<2, int> output1;
+	output_type<2, int> output2;
 	
 	multiplexer_node(time_unit prefetch = 0):
 		media_node(prefetch),
@@ -157,7 +157,7 @@ public:
 		output2.view() = input.view();
 	}
 };
-
+*/
 
 }}
 

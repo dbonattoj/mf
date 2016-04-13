@@ -19,7 +19,9 @@ private:
 
 protected:
 	void stop_() override;
-
+	
+	void launch_() override;
+			
 public:
 	template<std::size_t Dim, typename Elem> using input_type = media_node_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = media_node_output<Dim, Elem>;

@@ -41,7 +41,7 @@ void media_node_base::propagate_output_buffer_durations_() {
 
 
 void media_node_base::propagate_stream_durations_() {
-	if(inputs.size() == 0) return;
+	if(inputs_.size() != 0) {
 	
 	bool first = false;
 	time_unit minimal_input_stream_duration;
@@ -55,9 +55,10 @@ void media_node_base::propagate_stream_durations_() {
 		time_unit dur = connected_node.stream_duration();
 		if(first || dur < minimal_input_stream_duration) minimal_input_stream_duration = dur;
 	}
-	
+		
 	stream_duration_ = minimal_input_stream_duration;
-	
+
+	}
 	for(media_node_output_base* output : outputs_)
 		output->define_stream_duration(stream_duration_);
 }
@@ -89,6 +90,8 @@ void media_node_base::propagate_setup_() {
 	}
 	
 	did_setup_ = true;
+	
+	this->launch_();
 }
 
 

@@ -58,7 +58,7 @@ public:
 	void skip(time_unit skip_duration) override;
 	
 	void seek(time_unit target_time) override;
-	bool can_seek(time_unit target_time) const override { return (t <= end_time_); }
+	bool can_seek(time_unit target_time) const override { return (target_time <= end_time_); }
 	
 	time_unit current_time() const override;
 	

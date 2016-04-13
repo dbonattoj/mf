@@ -28,6 +28,8 @@ public:
 	time_unit duration() const { return base::shape().front(); }
 	time_unit time_at(std::ptrdiff_t i) const { return start_time_ + base::fix_coordinate_(i, 0); }
 	
+	time_span span() const { return time_span(start_time(), start_time() + duration()); }
+	
 	void reset(const ndarray_timed_view& vw) {
 		start_time_ = vw.start_time_;
 		base::reset(vw);

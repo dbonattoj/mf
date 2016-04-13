@@ -1,6 +1,7 @@
-DEBUG := 0
+DEBUG := 1
+
 ifeq ($(MAKECMDGOALS), test)
-	DEBUG := 0
+	DEBUG := 1
 endif
 
 DIST_DIR := dist
