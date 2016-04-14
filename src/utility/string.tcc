@@ -11,6 +11,16 @@ std::string to_string(const T& t) {
 }
 
 
+template<typename It> std::string to_string(It begin, It end, const std::string& separator) {
+	std::ostringstream str;
+	for(It it = begin; it != end; ++it) {
+		if(it != begin) str << separator;
+		str << *it;
+	}
+	return str.str();
+}
+
+
 template<typename T>
 T from_string(const std::string& s) {
 	std::istringstream str(s);

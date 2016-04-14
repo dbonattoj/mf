@@ -12,23 +12,26 @@ TEST_CASE("media graph", "[media_graph]") {
 	media_graph graph;
 	auto shp = make_ndsize(320, 240);
 
-	std::vector<int> seq(20);
+	std::vector<int> seq(2);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
-	
+
 	set_debug_mode(debug_mode::file);
 
-/*
 	SECTION("source -> sink") {
+	MF_DEBUG("AA************************************************************************************");
+
 		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
 		graph.setup();
 		graph.run();
-		REQUIRE(sink.got_expected_frames());
+		REQUIRE(sink.check());
 	}
-*/
+
 
 	SECTION("source --> passthrough --> sink") {
+	MF_DEBUG("BB************************************************************************************");
+
 		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& passthrough = graph.add_node<passthrough_node>(0, 0);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
@@ -36,19 +39,18 @@ TEST_CASE("media graph", "[media_graph]") {
 		sink.input.connect(passthrough.output);
 		graph.setup();
 		graph.run();
-		REQUIRE(sink.got_expected_frames());
+		REQUIRE(sink.check());
 	}
 
-
-	SECTION("detailled time window test") {
-	/*	const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
+	SECTION("detailled time window test") { 
+ 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
 		auto& source = graph.add_node<sequence_frame_source>(5, shp, true);		
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);
 
-	//set_debug_mode(debug_mode::cerr);
-
 
 		SECTION("source [-3]--> pass --> sink") {
+			MF_DEBUG("CC************************************************************************************");
+
 			auto& node = graph.add_node<passthrough_node>(3, 0);
 	
 			node.input.connect(source.output);
@@ -56,7 +58,6 @@ TEST_CASE("media graph", "[media_graph]") {
 			graph.setup();
 				
 			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
-				std::this_thread::sleep_for(100ms);
 				switch(self.current_time()) {
 				case 0:
 					REQUIRE(in.view() == make_frame(shp, 0));
@@ -98,10 +99,10 @@ TEST_CASE("media graph", "[media_graph]") {
 
 			graph.run();
 			
-			REQUIRE(sink.got_expected_frames());	
+			REQUIRE(sink.check());	
 		}
-*/
-/*
+	
+
 		SECTION("source [+3]--> pass --> sink") {
 			auto& node = graph.add_node<passthrough_node>(0, 3);
 	
@@ -151,9 +152,9 @@ TEST_CASE("media graph", "[media_graph]") {
 			
 			graph.run();
 			
-			//REQUIRE(sink.got_expected_frames());
+			REQUIRE(sink.check());
 		}
-	*/
+
 /*
 		SECTION("source [-3,+3]--> sink") {
 			auto& node = graph.add_node<passthrough_node>(3, 3);

@@ -1,51 +1,1738 @@
-[37m[src/graph/media_graph.cc:12, media_graph, thread 0x7fff73242000]:[0m 
-[34mmedia_graph[0m
+[test/media_graph.cc:21, ____C_A_T_C_H____T_E_S_T____11]
+AA************************************************************************************
 
-[37m[test/../src/graph/media_node_output.tcc:27, setup, thread 0x7fff73242000]:[0m 
-[34mndarray_seekable_shared_ring[0m
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
 
-[37m[src/graph/media_source_node.cc:60, launch_, thread 0x7fff73242000]:[0m 
-[34msource:: launch[0m
+[src/graph/media_source_node.cc:60, launch_]
+source:: launch
 
-[37m[test/../src/graph/media_node_output.tcc:27, setup, thread 0x7fff73242000]:[0m 
-[34mndarray_seekable_shared_ring[0m
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=-1)
 
-[37m[src/graph/media_source_node.cc:19, pull_frame_, thread 0x700000081000]:[0m 
-[31msource::pull().... (t=-1)[0m
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
 
-[37m[test/../src/graph/media_node_output.h:48, begin_write, thread 0x700000081000]:[0m 
-[31moutput::begin_write()....[0m
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=-1)
 
-[37m[test/../src/graph/media_node_output.h:52, begin_write, thread 0x700000081000]:[0m 
-[31moutput::begin_write() --> [0, 1[ t=0[0m
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
 
-[37m[src/graph/media_graph.cc:53, run, thread 0x7fff73242000]:[0m 
-[34mgraph::reached end![0m
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
 
-[37m[src/graph/media_node.cc:19, pull_frame_, thread 0x700000104000]:[0m 
-[32mnode::pull().... (time = -1)[0m
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
 
-[37m[test/../src/graph/media_node_output.h:48, begin_write, thread 0x700000104000]:[0m 
-[32moutput::begin_write()....[0m
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
 
-[37m[test/../src/graph/media_node_output.h:52, begin_write, thread 0x700000104000]:[0m 
-[32moutput::begin_write() --> [0, 1[ t=0[0m
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=-1, writer state=0, end_time=2, read_start_time=0
 
-[37m[test/../src/graph/media_node_input.tcc:22, begin_read, thread 0x700000104000]:[0m 
-[32minput::begin_read(time = 0)....[0m
 
-[37m[src/graph/media_graph.cc:17, ~media_graph, thread 0x7fff73242000]:[0m 
-[34mmedia_graph stopping[0m
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 1[
 
-[37m[src/graph/media_graph.cc:19, ~media_graph, thread 0x7fff73242000]:[0m 
-[34mmedia_graph no more[0m
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=0)
 
-[37m[src/graph/media_graph.cc:12, media_graph, thread 0x7fff73242000]:[0m 
-[34mmedia_graph[0m
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
 
-[37m[src/graph/media_graph.cc:17, ~media_graph, thread 0x7fff73242000]:[0m 
-[34mmedia_graph stopping[0m
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
 
-[37m[src/graph/media_graph.cc:19, ~media_graph, thread 0x7fff73242000]:[0m 
-[34mmedia_graph no more[0m
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
+reader state=0, writer state=-1, end_time=2, read_start_time=1
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=0)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=0)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=1, end=1), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
+reader state=1, writer state=0, end_time=2, read_start_time=1
+
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [1, 2[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=1 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=1, readable_time_span=[2, 2[, writable_time_span=[2, 3[
+reader state=0, writer state=0, end_time=2, read_start_time=2
+
+
+[src/graph/media_sink_node.cc:23, pull_frame_]
+sink: reached end!
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=1)
+
+[src/graph/media_graph.cc:53, run]
+graph::reached end!
+
+[src/graph/media_source_node.cc:14, thread_main_]
+source:: ended
+
+[src/graph/media_graph.cc:17, ~media_graph]
+media_graph stopping
+
+[src/graph/media_graph.cc:19, ~media_graph]
+media_graph no more
+
+[src/graph/media_graph.cc:12, media_graph]
+media_graph
+
+[test/media_graph.cc:33, ____C_A_T_C_H____T_E_S_T____11]
+BB************************************************************************************
+
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
+
+[src/graph/media_source_node.cc:60, launch_]
+source:: launch
+
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=-1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=-1)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = -1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=1, writer state=0, end_time=2, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=0)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 1[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=-1, writer state=1, end_time=2, read_start_time=0
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
+reader state=0, writer state=1, end_time=2, read_start_time=1
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=1, writer state=0, end_time=2, read_start_time=0
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 0)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 1[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
+reader state=0, writer state=1, end_time=2, read_start_time=1
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=0)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=0)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=1, end=1), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
+reader state=1, writer state=0, end_time=2, read_start_time=1
+
+
+[src/graph/media_source_node.cc:14, thread_main_]
+source:: ended
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [1, 2[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
+reader state=-1, writer state=0, end_time=2, read_start_time=1
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=1 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=1, readable_time_span=[2, 2[, writable_time_span=[2, 3[
+reader state=0, writer state=0, end_time=2, read_start_time=2
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=1, end=1), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
+reader state=1, writer state=0, end_time=2, read_start_time=1
+
+
+[src/graph/media_node.cc:14, thread_main_]
+node:: ended
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [1, 2[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=1 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=1, readable_time_span=[2, 2[, writable_time_span=[2, 3[
+reader state=0, writer state=0, end_time=2, read_start_time=2
+
+
+[src/graph/media_sink_node.cc:23, pull_frame_]
+sink: reached end!
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=1)
+
+[src/graph/media_graph.cc:53, run]
+graph::reached end!
+
+[src/graph/media_graph.cc:17, ~media_graph]
+media_graph stopping
+
+[src/graph/media_graph.cc:19, ~media_graph]
+media_graph no more
+
+[src/graph/media_graph.cc:12, media_graph]
+media_graph
+
+[test/media_graph.cc:52, ____C_A_T_C_H____T_E_S_T____11]
+CC************************************************************************************
+
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
+
+[src/graph/media_source_node.cc:60, launch_]
+source:: launch
+
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=-1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=-1)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = -1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=1, full=0
+total_duration=4
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 4[
+reader state=1, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=0)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 1[
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=1, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=2, full=0
+total_duration=4
+last_write_time=1, readable_time_span=[0, 2[, writable_time_span=[2, 4[
+reader state=-1, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [2, 3[ t=2
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=2, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=3, full=0
+total_duration=4
+last_write_time=2, readable_time_span=[0, 3[, writable_time_span=[3, 4[
+reader state=-1, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=2)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [3, 4[ t=3
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=3, full=0
+total_duration=4
+last_write_time=2, readable_time_span=[0, 3[, writable_time_span=[3, 4[
+reader state=-1, writer state=-1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=3, full=0
+total_duration=4
+last_write_time=2, readable_time_span=[0, 3[, writable_time_span=[3, 4[
+reader state=0, writer state=-1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=-1, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 0)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 1[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
+reader state=0, writer state=1, end_time=6, read_start_time=1
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=0)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=0)
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [0, 2[
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=3, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=-1, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=3)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=-1, writer state=1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=0, writer state=1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=1, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
+reader state=1, writer state=0, end_time=6, read_start_time=1
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [1, 2[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=1, readable_time_span=[2, 2[, writable_time_span=[2, 3[
+reader state=0, writer state=1, end_time=6, read_start_time=2
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=1)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=1)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 2)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [2, 3[ t=2
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 2)....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 2) --> [0, 3[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=-1, writer state=1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 2)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=0, writer state=1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=2, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=2, readable_time_span=[2, 3[, writable_time_span=[3, 3[
+reader state=1, writer state=0, end_time=6, read_start_time=2
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 2)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 2) --> [2, 3[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 2)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=2, readable_time_span=[3, 3[, writable_time_span=[3, 4[
+reader state=0, writer state=1, end_time=6, read_start_time=3
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=2)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=2)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 3)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [3, 4[ t=3
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 3)....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 3) --> [0, 4[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=-1, writer state=1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 3)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=0, full=0
+total_duration=4
+last_write_time=3, readable_time_span=[1, 4[, writable_time_span=[4, 5[
+reader state=0, writer state=1, end_time=6, read_start_time=1
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=3, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+cannot lock mutex for debug_print
+
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 3)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [4, 5[ t=4
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 3) --> [3, 4[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 3)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+cannot lock mutex for debug_print
+
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=3)
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [4, 5[ t=4
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=3)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 4)....
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 4)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=4, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=1, full=1
+total_duration=4
+last_write_time=4, readable_time_span=[1, 5[, writable_time_span=[5, 5[
+reader state=4, writer state=0, end_time=6, read_start_time=1
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=4)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 4) --> [1, 5[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=1, full=1
+total_duration=4
+last_write_time=4, readable_time_span=[1, 5[, writable_time_span=[5, 5[
+reader state=-1, writer state=1, end_time=6, read_start_time=1
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 4)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=1, full=0
+total_duration=4
+last_write_time=4, readable_time_span=[2, 5[, writable_time_span=[5, 6[
+reader state=0, writer state=1, end_time=6, read_start_time=2
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=4, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=4, readable_time_span=[4, 5[, writable_time_span=[5, 5[
+reader state=1, writer state=0, end_time=6, read_start_time=4
+
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [5, 6[ t=5
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 4)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 4) --> [4, 5[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 4)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=4, readable_time_span=[5, 5[, writable_time_span=[5, 6[
+reader state=0, writer state=1, end_time=6, read_start_time=5
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=4)
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [5, 6[ t=5
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=4)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 5)....
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 5)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=5, end=1), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=2, full=1
+total_duration=4
+last_write_time=5, readable_time_span=[2, 6[, writable_time_span=[6, 6[
+reader state=4, writer state=0, end_time=6, read_start_time=2
+
+
+[src/graph/media_source_node.cc:14, thread_main_]
+source:: ended
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 5) --> [2, 6[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=2, full=1
+total_duration=4
+last_write_time=5, readable_time_span=[2, 6[, writable_time_span=[6, 6[
+reader state=-1, writer state=0, end_time=6, read_start_time=2
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 5)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=3, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[3, 6[, writable_time_span=[6, 7[
+reader state=0, writer state=0, end_time=6, read_start_time=3
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=5, end=1), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=5, readable_time_span=[5, 6[, writable_time_span=[6, 6[
+reader state=1, writer state=0, end_time=6, read_start_time=5
+
+
+[src/graph/media_node.cc:14, thread_main_]
+node:: ended
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 5) --> [5, 6[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 5)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=1 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=5, readable_time_span=[6, 6[, writable_time_span=[6, 7[
+reader state=0, writer state=0, end_time=6, read_start_time=6
+
+
+[src/graph/media_sink_node.cc:23, pull_frame_]
+sink: reached end!
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=5)
+
+[src/graph/media_graph.cc:53, run]
+graph::reached end!
+
+[src/graph/media_graph.cc:17, ~media_graph]
+media_graph stopping
+
+[src/graph/media_graph.cc:19, ~media_graph]
+media_graph no more
+
+[src/graph/media_graph.cc:12, media_graph]
+media_graph
+
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
+
+[src/graph/media_source_node.cc:60, launch_]
+source:: launch
+
+[test/../src/graph/media_node_output.tcc:27, setup]
+ndarray_seekable_shared_ring
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=-1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=-1)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = -1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [0, 1[ t=0
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 0)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=1, full=0
+total_duration=4
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 4[
+reader state=4, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=0)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=1, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=2, full=0
+total_duration=4
+last_write_time=1, readable_time_span=[0, 2[, writable_time_span=[2, 4[
+reader state=4, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [2, 3[ t=2
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=2, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=3, full=0
+total_duration=4
+last_write_time=2, readable_time_span=[0, 3[, writable_time_span=[3, 4[
+reader state=4, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=2)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [3, 4[ t=3
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=3, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=4, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=3)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 4[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=4
+last_write_time=3, readable_time_span=[0, 4[, writable_time_span=[4, 4[
+reader state=-1, writer state=1, end_time=6, read_start_time=0
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=0, full=0
+total_duration=4
+last_write_time=3, readable_time_span=[1, 4[, writable_time_span=[4, 5[
+reader state=0, writer state=1, end_time=6, read_start_time=1
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=1, writer state=0, end_time=6, read_start_time=0
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 0)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [4, 5[ t=4
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 0) --> [0, 1[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 0)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
+reader state=0, writer state=1, end_time=6, read_start_time=1
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=0)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=0)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [1, 2[ t=1
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 1)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=4, end=0), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=1, full=1
+total_duration=4
+last_write_time=4, readable_time_span=[1, 5[, writable_time_span=[5, 5[
+reader state=4, writer state=0, end_time=6, read_start_time=1
+
+
+[src/graph/media_source_node.cc:19, pull_frame_]
+source::pull().... (t=4)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [1, 5[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=1, full=1
+total_duration=4
+last_write_time=4, readable_time_span=[1, 5[, writable_time_span=[5, 5[
+reader state=-1, writer state=1, end_time=6, read_start_time=1
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=1, full=0
+total_duration=4
+last_write_time=4, readable_time_span=[2, 5[, writable_time_span=[5, 6[
+reader state=0, writer state=1, end_time=6, read_start_time=2
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=1, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+cannot lock mutex for debug_print
+
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 1)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [5, 6[ t=5
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 1) --> [1, 2[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 1)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+cannot lock mutex for debug_print
+
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=1)
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [2, 3[ t=2
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=1)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 2)....
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 2)....
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_source_node.cc:50, pull_frame_]
+source::pull() (t=5, end=1), 
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=2, full=1
+total_duration=4
+last_write_time=5, readable_time_span=[2, 6[, writable_time_span=[6, 6[
+reader state=4, writer state=0, end_time=6, read_start_time=2
+
+
+[src/graph/media_source_node.cc:14, thread_main_]
+source:: ended
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 2) --> [2, 6[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=2, full=1
+total_duration=4
+last_write_time=5, readable_time_span=[2, 6[, writable_time_span=[6, 6[
+reader state=-1, writer state=0, end_time=6, read_start_time=2
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 2)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=3, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[3, 6[, writable_time_span=[6, 7[
+reader state=0, writer state=0, end_time=6, read_start_time=3
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=2, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=2, readable_time_span=[2, 3[, writable_time_span=[3, 3[
+reader state=1, writer state=0, end_time=6, read_start_time=2
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 2)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 2) --> [2, 3[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 2)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=2, readable_time_span=[3, 3[, writable_time_span=[3, 4[
+reader state=0, writer state=1, end_time=6, read_start_time=3
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=2)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=2)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 3)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [3, 4[ t=3
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 3)....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 3) --> [3, 6[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=3, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[3, 6[, writable_time_span=[6, 7[
+reader state=-1, writer state=0, end_time=6, read_start_time=3
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 3)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[4, 6[, writable_time_span=[6, 8[
+reader state=0, writer state=0, end_time=6, read_start_time=4
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=3, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=3, readable_time_span=[3, 4[, writable_time_span=[4, 4[
+reader state=1, writer state=0, end_time=6, read_start_time=3
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 3)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 3) --> [3, 4[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 3)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=3, readable_time_span=[4, 4[, writable_time_span=[4, 5[
+reader state=0, writer state=1, end_time=6, read_start_time=4
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=3)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=3)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 4)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [4, 5[ t=4
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 4)....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 4) --> [4, 6[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[4, 6[, writable_time_span=[6, 8[
+reader state=-1, writer state=0, end_time=6, read_start_time=4
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 4)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[5, 6[, writable_time_span=[6, 9[
+reader state=0, writer state=0, end_time=6, read_start_time=5
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=4, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=4, readable_time_span=[4, 5[, writable_time_span=[5, 5[
+reader state=1, writer state=0, end_time=6, read_start_time=4
+
+
+[src/graph/media_node.cc:19, pull_frame_]
+node::pull().... (time = 4)
+
+[test/../src/graph/media_node_output.h:48, begin_write]
+output::begin_write()....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 4) --> [4, 5[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 4)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=4, readable_time_span=[5, 5[, writable_time_span=[5, 6[
+reader state=0, writer state=1, end_time=6, read_start_time=5
+
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=4)
+
+[src/graph/media_sink_node.cc:6, pull_frame_]
+sink::pull().... (t=4)
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 5)....
+
+[test/../src/graph/media_node_output.h:52, begin_write]
+output::begin_write() --> [5, 6[ t=5
+
+[test/../src/graph/media_node_input.tcc:22, begin_read]
+input::begin_read(time = 5)....
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 5) --> [5, 6[
+
+[src/graph/media_node.cc:42, pull_frame_]
+node::pull(), before input end_read:
+[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=1, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[5, 6[, writable_time_span=[6, 9[
+reader state=-1, writer state=0, end_time=6, read_start_time=5
+
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 5)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=1 - 
+ output:=[frame_shape=(320, 240), required_duration=4, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=2, write_position=2, full=0
+total_duration=4
+last_write_time=5, readable_time_span=[6, 6[, writable_time_span=[6, 10[
+reader state=0, writer state=0, end_time=6, read_start_time=6
+
+
+[test/../src/graph/media_node_output.h:57, end_write]
+output::end_write()....
+
+[test/../src/graph/media_node_output.h:59, end_write]
+output::end_write()
+
+[src/graph/media_node.cc:54, pull_frame_]
+node::pull() (t=5, end=1), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=5, readable_time_span=[5, 6[, writable_time_span=[6, 6[
+reader state=1, writer state=0, end_time=6, read_start_time=5
+
+
+[src/graph/media_node.cc:14, thread_main_]
+node:: ended
+
+[test/../src/graph/media_node_input.tcc:39, begin_read]
+input::begin_read(time = 5) --> [5, 6[
+
+[test/../src/graph/media_node_input.tcc:50, end_read]
+input::end_read(time = 5)
+
+[test/../src/graph/media_node_input.tcc:58, reached_end]
+reader_reached_end=1 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_seekable_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=5, readable_time_span=[6, 6[, writable_time_span=[6, 7[
+reader state=0, writer state=0, end_time=6, read_start_time=6
+
+
+[src/graph/media_sink_node.cc:23, pull_frame_]
+sink: reached end!
+
+[src/graph/media_sink_node.cc:25, pull_frame_]
+sink::pull() (t=5)
+
+[src/graph/media_graph.cc:53, run]
+graph::reached end!
+
+[src/graph/media_graph.cc:17, ~media_graph]
+media_graph stopping
+
+[src/graph/media_graph.cc:19, ~media_graph]
+media_graph no more
 

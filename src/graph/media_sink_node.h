@@ -11,7 +11,7 @@ template<std::size_t Dim, typename Elem> class media_node_input;
 
 class media_sink_node : public media_node_base {
 private:
-	std::atomic<bool> reached_end_;
+	std::atomic<bool> reached_end_{false};
 
 	void pull_frame_();
 

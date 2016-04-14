@@ -13,6 +13,8 @@ std::string remove_file_name_extension(const std::string& filename);
 template<typename T> std::string to_string(const T&);
 template<typename T> T from_string(const std::string&);
 
+template<typename It> std::string to_string(It begin, It end, const std::string& separator = ", ");
+
 std::vector<std::string> explode(char separator, const std::string&);
 std::string implode(char separator, const std::vector<std::string>&);
 

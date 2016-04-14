@@ -1,4 +1,5 @@
 #include "common.h"
+#include "debug.h"
 #include "eigen.h"
 #include "utility/os.h"
 
@@ -8,6 +9,7 @@ namespace {
 	///< Initialization function.
 	/** Needs to be called when library is loaded, before any other functions. */
 	void initialize_mf_() {
+		initialize_debug();
 		Eigen::initParallel();
 	}
 }

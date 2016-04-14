@@ -12,6 +12,7 @@
 #include "../../src/graph/media_node_input.h"
 #include "../../src/graph/media_node_output.h"
 #include "../../src/ndarray/ndcoord.h"
+#include "../../src/utility/string.h"
 #include "ndarray.h"
 
 namespace mf { namespace test {
@@ -45,10 +46,8 @@ public:
 class expected_frames_sink : public media_sink_node {
 private:
 	const std::vector<int> expected_frames_;
+	std::vector<int> got_frames_;
 	
-	bool got_mismatch_ = false;
-	std::size_t counter_ = 0;
-
 public:
 	input_type<2, int> input;
 	
@@ -56,20 +55,18 @@ public:
 		expected_frames_(seq), input(*this) { }
 	
 	void process_() override {
-		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in sink");
-		if(counter_ >= expected_frames_.size()) {
-			got_mismatch_ = true;
-		} else {
-			int expected = expected_frames_.at(counter_);
-			int got = frame_index(input.view());
-			if(expected != got) got_mismatch_ = true;
-		}
-		counter_++;
+		got_frames_.push_back( frame_index(input.view()) );
+	}
+
+	bool check() const {
+		bool ok = (expected_frames_ == got_frames_);
+		if(! ok) print();
+		return ok;
 	}
 	
-	bool got_expected_frames() const {
-		if(counter_ == expected_frames_.size()) return !got_mismatch_;
-		else return false;	
+	void print() const {
+		std::cout << "expected: {" << to_string(expected_frames_.begin(), expected_frames_.end()) << "}\n"
+		          << "     got: {" << to_string(got_frames_.begin(), got_frames_.end()) << "}" << std::endl;
 	}
 };
 

@@ -15,33 +15,53 @@ enum class debug_mode {
 	// debugging is enabled
 	#include <thread>
 	#include <mutex>
+	#include <cstdio>
 	#include <ostream>
+	#include <sstream>
+
+	#define MF_DEBUG_SOURCE_LOCATION() \
+		::mf::detail::source_location { __FILE__, __LINE__, __func__ }
 
 	#define MF_DEBUG(...) \
-		if(::mf::detail::debug_is_enabled()) \
-			::mf::detail::debug_print( \
-				::mf::detail::debug_ostream(), \
-				__FILE__, \
-				__LINE__, \
-				__func__, \
-				__VA_ARGS__)
+		::mf::detail::debug_print( \
+			MF_DEBUG_SOURCE_LOCATION(), \
+			__VA_ARGS__)
+			
+	#define MF_DEBUG_BACKTRACE() \
+		::mf::detail::debug_print_backtrace( \
+			MF_DEBUG_SOURCE_LOCATION(), \
+			::mf::detail::debug_get_backtrace())
+
 
 	namespace mf {
 		
-	namespace detail {		
+	namespace detail {					
+		struct source_location {
+			const char* file;
+			int line;
+			const char* func;
+		};
+		
+		struct debug_backtrace {
+			constexpr static std::size_t max_size = 20;
+		
+			void* trace[max_size];
+			std::size_t size;
+		};	
+		
 		std::string debug_thread_color();	
 		std::mutex& debug_mutex();
-		std::ostream& debug_ostream();
-		bool debug_is_enabled();
+		std::FILE* debug_stream();
+		debug_backtrace debug_get_backtrace();
 	
 		inline void debug_print_part(std::ostream& str) { }	
 		
 		template<typename First_arg, typename... Args>
-		auto debug_print_part(std::ostream& str, const First_arg& first, const Args&... args)
+		auto debug_print_part(std::ostringstream& str, const First_arg& first, const Args&... args)
 			-> decltype(first.debug_print(str), void());
 		
 		template<typename First_arg, typename... Args>
-		auto debug_print_part(std::ostream& str, const First_arg& first, const Args&... args)
+		auto debug_print_part(std::ostringstream& str, const First_arg& first, const Args&... args)
 			-> decltype(str << first, void())
 		{
 			str << first;
@@ -49,27 +69,37 @@ enum class debug_mode {
 		}
 		
 		template<typename First_arg, typename... Args>
-		auto debug_print_part(std::ostream& str, const First_arg& first, const Args&... args)
+		auto debug_print_part(std::ostringstream& str, const First_arg& first, const Args&... args)
 			-> decltype(first.debug_print(str), void())
 		{
 			first.debug_print(str);
 			debug_print_part(str, args...);
 		}
 		
+		std::string debug_head(const source_location& loc);
+		std::string debug_tail();
+		
 		template<typename... Args>
-		void debug_print(std::ostream& str, const char* file, int line, const char* func, const Args&... args) {
-			auto tid = std::this_thread::get_id();
-			std::string color = debug_thread_color();			
-			std::lock_guard<std::mutex> lock(debug_mutex());
+		void debug_print(const source_location& loc, const Args&... args) {		
+			std::FILE* output = debug_stream();
+			if(! output) return;
 			
-			str << "\x1b[37m[" << file << ':' << line << ", " << func << ", thread " << tid << "]:\x1b[0m \n";
-			str << "\x1b[" + color + "m";
+			std::string head = debug_head(loc);
+			std::string tail = debug_tail();
+
+			std::ostringstream str;			
 			debug_print_part(str, args...);
-			str << "\x1b[0m\n" << std::endl;
+
+			std::lock_guard<std::mutex> lock(debug_mutex());			
+			std::fprintf(output, "%s%s%s\n", head.c_str(), str.str().c_str(), tail.c_str());
 		}
+		
+		void debug_print_backtrace(const source_location&, const debug_backtrace&);
 	}
 	
 	void set_debug_mode(debug_mode);
+	
+	void initialize_debug();
 	
 	}
 
@@ -77,8 +107,16 @@ enum class debug_mode {
 	// debugging is disabled	
 	#define MF_DEBUG(...)
 	
-	inline void set_debug_mode(debug_mode) { }
+	#define MF_DEBUG_BACKTRACE()
 	
+	namespace mf {
+	
+	inline void set_debug_mode(debug_mode) { }
+	inline void initialize_debug() { }
+
+	}
+
 #endif
+
 
 #endif

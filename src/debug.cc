@@ -1,5 +1,6 @@
 #ifndef NDEBUG
 
+#include "utility/os.h"
 #include "debug.h"
 #include <map>
 #include <iostream>
@@ -9,6 +10,12 @@
 #include <vector>
 #include <cassert>
 
+#ifdef MF_OS_LINUX
+#include <execinfo.h>
+#include <unistd.h>
+#include <signal.h>
+#endif
+
 namespace mf {
 
 namespace {
@@ -17,10 +24,45 @@ namespace {
 	std::ptrdiff_t next_thread_color_ = 0;
 	
 	std::mutex mutex_;
-	debug_mode mode_ = debug_mode::file;
+	debug_mode mode_ = debug_mode::cerr;
+	
+	std::string filename_ = "debug.txt";
+	
+	#ifdef MF_OS_LINUX
+	[[noreturn]] void signal_handler_(int sig) {
+		MF_DEBUG_BACKTRACE();
+		std::fprintf(stderr, "signal %i, aborting", sig);
+		std::fflush(nullptr);
+		std::abort();
+	}
+	
+	[[noreturn]] void terminate_handler_() {
+		MF_DEBUG_BACKTRACE();
+		std::fprintf(stderr, "terminated");
+		std::fflush(nullptr);
+		std::abort();
+	}
+	#endif
 }
 
+
 namespace detail {
+	std::string debug_head(const source_location& loc) {	
+		if(mode_ == debug_mode::cerr) {
+			auto tid = std::this_thread::get_id();
+			std::string color = debug_thread_color();	
+			return "\x1b[37m[" + std::string(loc.file) + ":" + std::to_string(loc.line) + ", " + std::string(loc.func)
+				+ "]:\x1b[0m \n" + "\x1b[" + color + "m";
+		} else {
+			return "[" + std::string(loc.file) + ":" + std::to_string(loc.line) + ", " + std::string(loc.func) + "]\n";
+		}
+	}
+	
+	std::string debug_tail() {	
+		if(mode_ == debug_mode::file) return "\n";	
+		else return "\x1b[0m\n";
+	}
+
 	std::string debug_thread_color() {
 		std::lock_guard<std::mutex> lock(mutex_);
 		auto tid = std::this_thread::get_id();
@@ -38,23 +80,56 @@ namespace detail {
 		
 	std::mutex& debug_mutex() { return mutex_; }
 	
-	std::ostream& debug_ostream() {
-		assert(mode_ != debug_mode::inactive);
+	std::FILE* debug_stream() {
 		if(mode_ == debug_mode::file) {
-			static std::ofstream file("debug.txt");
+			static std::FILE* file = nullptr;
+			if(! file) file = std::fopen(filename_.c_str(), "w");
 			return file;
 		} else if(mode_ == debug_mode::cerr) {
-			return std::cerr;
+			return stderr;
+		} else {
+			return nullptr;
 		}
 	}
 	
-	bool debug_is_enabled() {
-		return (mode_ != debug_mode::inactive);
+	#ifdef MF_OS_LINUX
+	debug_backtrace debug_get_backtrace() {
+		debug_backtrace bt;
+		bt.size = ::backtrace(bt.trace, debug_backtrace::max_size);
+		return bt;
 	}
+	
+	void debug_print_backtrace(const source_location& loc, const debug_backtrace& bt) {
+		std::FILE* output = debug_stream();
+		if(! output) return;
+		
+		std::string head = debug_head(loc);
+		std::string tail = debug_tail();
+
+		std::lock_guard<std::mutex> lock(debug_mutex());	
+			
+		std::fprintf(output, "%sBacktrace:\n", head.c_str());
+		::backtrace_symbols_fd(bt.trace, bt.size, fileno(output));
+		std::fprintf(output, "%s", head.c_str());
+	}
+	#else
+	struct debug_backtrace { };
+	debug_backtrace debug_get_backtrace() { return debug_backtrace(); }
+	void debug_print_backtrace(const source_location& loc, const backtrace&) {
+		debug_print(loc, "no support for debug backtrace print");
+	}
+	#endif
 }
 
 void set_debug_mode(debug_mode mode) {
 	mode_ = mode;
+}
+
+void initialize_debug() {
+	#ifdef MF_OS_LINUX
+	std::set_terminate(&terminate_handler_);
+	::signal(SIGSEGV, &signal_handler_);
+	#endif
 }
 
 }

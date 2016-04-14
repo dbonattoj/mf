@@ -23,14 +23,11 @@ long_line_behaviour=2
 long_line_column=120
 
 [files]
-current_page=0
+current_page=3
 FILE_NAME_0=553;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_shared_ring_base.h;0;4
 FILE_NAME_1=497;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_seekable_shared_ring.h;0;4
 FILE_NAME_2=8743;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_seekable_shared_ring.tcc;0;4
-FILE_NAME_3=69;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_shared_ring.h;0;4
-FILE_NAME_4=8793;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_shared_ring.tcc;0;4
-FILE_NAME_5=0;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Ftest%2Fndarray_shared_ring.cc;0;4
-FILE_NAME_6=1525;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_timed_ring.h;0;4
+FILE_NAME_3=1525;C++;0;EUTF-8;1;1;0;%2Fhome%2Ftimlenertz%2FDesktop%2Fmf%2Fsrc%2Fndarray%2Fndarray_timed_ring.h;0;4
 
 [VTE]
 last_dir=/home/timlenertz/Desktop/mf
