@@ -56,11 +56,11 @@ void node::pull_frame_() {
 	if(reached_end) throw 1;
 }
 
-void node::stop_() {
+void node::stop() {
 	thread_.join();
 }
 
-void node::launch_() {
+void node::launch() {
 	thread_ = std::move(std::thread((std::bind(&node::thread_main_, this))));
 }
 

@@ -26,13 +26,6 @@ void sink_node::pull_frame_() {
 }
 
 
-void sink_node::stop_() {
-}
-
-void sink_node::launch_() {
-}
-
-
 sink_node::sink_node() :
 	node_base(0) { }	
 
@@ -40,7 +33,6 @@ sink_node::sink_node() :
 void sink_node::setup_graph() {
 	propagate_offset_(0);
 	propagate_output_buffer_durations_();
-	propagate_stream_durations_();
 	propagate_setup_();
 }
 

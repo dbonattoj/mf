@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_NODE_INPUT_H_
-#define MF_MEDIA_NODE_INPUT_H_
+#ifndef MF_FLOW_NODE_INPUT_H_
+#define MF_FLOW_NODE_INPUT_H_
 
 #include <stdexcept>
 #include "../common.h"

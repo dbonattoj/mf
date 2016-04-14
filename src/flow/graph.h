@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_GRAPH_H_
-#define MF_MEDIA_GRAPH_H_
+#ifndef MF_FLOW_GRAPH_H_
+#define MF_FLOW_GRAPH_H_
 
 #include <vector>
 #include <memory>
@@ -13,11 +13,13 @@ namespace mf { namespace flow {
 class node_base;
 class sink_node;
 
+/// Graph containing interconnected nodes through which media frames flow.
 class graph {
 private:
 	std::vector<std::unique_ptr<node_base>> nodes_; ///< Nodes in the graph, including sink.
 	sink_node* sink_ = nullptr; ///< Sink node.
-	bool setup_ = false; ///< True after setup() was called.
+	bool was_setup_ = false;
+	bool running_ = false;
 
 public:
 	graph();
@@ -40,12 +42,21 @@ public:
 		return sink;
 	}
 	
+	bool was_setup() const { return was_setup_; }
+	bool is_running() const { return running_; }
+	
 	void setup();
 	
+	void launch();
+	void stop();
+
 	time_unit current_time() const;
 	
 	void run_until(time_unit last_frame);
+	void run_for(time_unit duration);
 	void run();
+
+	void seek(time_unit target_time);
 };
 
 }}

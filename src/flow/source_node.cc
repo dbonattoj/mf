@@ -52,18 +52,18 @@ void source_node::pull_frame_() {
 	if(reached_end) throw 1;
 }
 
-void source_node::stop_() {
+void source_node::stop() {
 	thread_.join();
 }
 
-void source_node::launch_() {
-	MF_DEBUG("source:: launch");
+void source_node::launch() {
 	thread_ = std::move(std::thread((std::bind(&source_node::thread_main_, this))));
 }
 
 
-source_node::source_node(bool seekable, time_unit stream_duration) :
-	node_base(0) { if(seekable) define_stream_duration(stream_duration); }	
+source_node::source_node(bool seekable, time_unit stream_duration) {
+	if(seekable) define_stream_duration(stream_duration);
+}	
 	
 
 source_node::~source_node() {

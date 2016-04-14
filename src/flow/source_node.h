@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_SOURCE_NODE_H_
-#define MF_MEDIA_SOURCE_NODE_H_
+#ifndef MF_FLOW_SOURCE_NODE_H_
+#define MF_FLOW_SOURCE_NODE_H_
 
 #include <thread>
 #include "../common.h"
@@ -17,15 +17,13 @@ private:
 	void pull_frame_();
 
 protected:
-	void stop_() override;
-	void launch_() override;
+	void stop() override;
+	void launch() override;
 	
 	virtual bool reached_end() const { throw std::runtime_error("not implemented"); } // called for forward source only
 			
 public:
 	template<std::size_t Dim, typename Elem> using output_type = node_output<Dim, Elem>;
-
-	source_node(); // forward source
 
 	explicit source_node(bool seekable, time_unit stream_duration = -1);
 	~source_node();

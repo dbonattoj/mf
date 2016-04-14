@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_SINK_NODE_H_
-#define MF_MEDIA_SINK_NODE_H_
+#ifndef MF_FLOW_SINK_NODE_H_
+#define MF_FLOW_SINK_NODE_H_
 
 #include <thread>
 #include "../common.h"
@@ -14,10 +14,6 @@ private:
 	std::atomic<bool> reached_end_{false};
 
 	void pull_frame_();
-
-protected:
-	void stop_() override;
-	void launch_() override;
 			
 public:
 	template<std::size_t Dim, typename Elem> using input_type = node_input<Dim, Elem>;

@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_NODE_H_
-#define MF_MEDIA_NODE_H_
+#ifndef MF_FLOW_NODE_H_
+#define MF_FLOW_NODE_H_
 
 #include <thread>
 #include "../common.h"
@@ -10,6 +10,7 @@ namespace mf { namespace flow {
 template<std::size_t Dim, typename Elem> class node_input;
 template<std::size_t Dim, typename Elem> class node_output;
 
+
 class node : public node_base {
 private:
 	std::thread thread_;
@@ -18,9 +19,8 @@ private:
 	void pull_frame_();
 
 protected:
-	void stop_() override;
-	
-	void launch_() override;
+	void stop() override;
+	void launch() override;
 			
 public:
 	template<std::size_t Dim, typename Elem> using input_type = node_input<Dim, Elem>;

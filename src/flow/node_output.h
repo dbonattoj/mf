@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_NODE_OUTPUT_H_
-#define MF_MEDIA_NODE_OUTPUT_H_
+#ifndef MF_FLOW_NODE_OUTPUT_H_
+#define MF_FLOW_NODE_OUTPUT_H_
 
 #include <memory>
 #include <stdexcept>

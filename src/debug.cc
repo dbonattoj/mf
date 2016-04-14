@@ -134,4 +134,11 @@ void initialize_debug() {
 
 }
 
+#else
+
+
+void set_debug_mode(debug_mode) { }
+void initialize_debug() { }
+
+
 #endif

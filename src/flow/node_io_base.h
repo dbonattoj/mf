@@ -1,5 +1,5 @@
-#ifndef MF_MEDIA_NODE_IO_BASE_H_
-#define MF_MEDIA_NODE_IO_BASE_H_
+#ifndef MF_FLOW_NODE_IO_BASE_H_
+#define MF_FLOW_NODE_IO_BASE_H_
 
 #include <ostream>
 #include "../common.h"
@@ -13,9 +13,8 @@ class node_output_base {
 protected:
 	/// Media node that this output belongs to.
 	node_base& node_;
-		
+	
 	time_unit required_buffer_duration_ = -1;
-	time_unit stream_duration_ = -1;
 	
 	bool active_ = true;
 	
@@ -31,15 +30,14 @@ public:
 
 	void define_required_buffer_duration(time_unit dur) { required_buffer_duration_ = dur; }
 	time_unit required_buffer_duration() const { return required_buffer_duration_; }
-	bool required_buffer_duration_is_defined() const { return (required_buffer_duration_ != -1); }
-
-	void define_stream_duration(time_unit dur) { stream_duration_ = dur; }
-	time_unit stream_duration() const { return stream_duration_; }
-	bool stream_duration_is_defined() const { return (stream_duration_ != -1); }
+	bool required_buffer_duration_is_defined() const { return (required_buffer_duration_ != -1); }	
 		
 	virtual bool frame_shape_is_defined() const = 0;
 	
 	bool is_active() const { return active_; }
+	
+	void activate() { active_ = true; }
+	void desactivate() { active_ = false; }
 
 	#ifndef NDEBUG
 	virtual void debug_print(std::ostream&) const = 0;
