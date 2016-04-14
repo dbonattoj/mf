@@ -81,7 +81,7 @@ private:
 public:
 	std::string name;
 
-	virtual ~media_node_base() { }
+	~media_node_base() { }
 		
 	/// Time of last processed frame.
 	/** When currently processing a frame, time of that frame. */

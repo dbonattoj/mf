@@ -53,6 +53,7 @@ void media_source_node::pull_frame_() {
 }
 
 void media_source_node::stop_() {
+	thread_.join();
 }
 
 void media_source_node::launch_() {
@@ -66,7 +67,7 @@ media_source_node::media_source_node(bool seekable, time_unit stream_duration) :
 	
 
 media_source_node::~media_source_node() {
-	thread_.join();
+	assert(! thread_.joinable());
 }
 
 }

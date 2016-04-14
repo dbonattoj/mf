@@ -57,7 +57,7 @@ void media_node::pull_frame_() {
 }
 
 void media_node::stop_() {
-
+	thread_.join();
 }
 
 void media_node::launch_() {
@@ -69,7 +69,7 @@ media_node::media_node(time_unit prefetch) :
 	media_node_base(0) { }	
 
 media_node::~media_node() {
-	thread_.join();
+	assert(! thread_.joinable());
 }
 
 }

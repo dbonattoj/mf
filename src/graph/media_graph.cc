@@ -7,8 +7,16 @@
 
 namespace mf {
 
+
+media_graph::media_graph() {
+	MF_DEBUG("media_graph");
+}
+
+
 media_graph::~media_graph() {
+	MF_DEBUG("media_graph stopping");
 	sink_->stop_graph();
+	MF_DEBUG("media_graph no more");
 }
 
 

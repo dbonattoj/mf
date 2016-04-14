@@ -20,6 +20,7 @@ private:
 	bool setup_ = false; ///< True after setup() was called.
 
 public:
+	media_graph();
 	~media_graph();
 
 	template<typename Node, typename... Args>
