@@ -8,24 +8,24 @@
 #include <type_traits>
 #include "../common.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
-class media_node_base;
-class media_sink_node;
+class node_base;
+class sink_node;
 
-class media_graph {
+class graph {
 private:
-	std::vector<std::unique_ptr<media_node_base>> nodes_; ///< Nodes in the graph, including sink.
-	media_sink_node* sink_ = nullptr; ///< Sink node.
+	std::vector<std::unique_ptr<node_base>> nodes_; ///< Nodes in the graph, including sink.
+	sink_node* sink_ = nullptr; ///< Sink node.
 	bool setup_ = false; ///< True after setup() was called.
 
 public:
-	media_graph();
-	~media_graph();
+	graph();
+	~graph();
 
 	template<typename Node, typename... Args>
 	Node& add_node(Args&&... args) {
-		static_assert(std::is_base_of<media_node_base, Node>::value, "sink node must be subclass of media_node");
+		static_assert(std::is_base_of<node_base, Node>::value, "sink node must be subclass of media_node");
 		if(setup_) throw std::logic_error("cannot add node after graph already set up");
 		Node* node = new Node(std::forward<Args>(args)...);
 		nodes_.emplace_back(node);
@@ -34,7 +34,7 @@ public:
 	
 	template<typename Node, typename... Args>
 	Node& add_sink(Args&&... args) {
-		static_assert(std::is_base_of<media_sink_node, Node>::value, "sink node must be subclass of media_sink_node");
+		static_assert(std::is_base_of<sink_node, Node>::value, "sink node must be subclass of media_sink_node");
 		Node& sink = add_node<Node>(std::forward<Args>(args)...);
 		sink_ = &sink;
 		return sink;
@@ -48,6 +48,6 @@ public:
 	void run();
 };
 
-}
+}}
 
 #endif

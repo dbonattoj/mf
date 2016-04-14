@@ -1,24 +1,24 @@
-#include "media_node_input.h"
+#include "node_input.h"
 #include <cassert>
 
-namespace mf {
+namespace mf { namespace flow {
 
 
 template<std::size_t Dim, typename T>
-auto media_node_input<Dim, T>::connected_output() const -> output_type& {
+auto node_input<Dim, T>::connected_output() const -> output_type& {
 	if(! is_connected()) throw std::logic_error("input is not connected to an output");
 	return *connected_output_;
 }
 
 
 template<std::size_t Dim, typename T>
-void media_node_input<Dim, T>::connect(output_type& output) {
+void node_input<Dim, T>::connect(output_type& output) {
 	connected_output_ = &output;
 }
 
 
 template<std::size_t Dim, typename T>
-void media_node_input<Dim, T>::begin_read(time_unit t) {	
+void node_input<Dim, T>::begin_read(time_unit t) {	
 	MF_DEBUG("input::begin_read(time = ", t, ")....");
 
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
@@ -41,7 +41,7 @@ void media_node_input<Dim, T>::begin_read(time_unit t) {
 
 
 template<std::size_t Dim, typename T>
-void media_node_input<Dim, T>::end_read(time_unit t) {
+void node_input<Dim, T>::end_read(time_unit t) {
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
 		
 	bool consume_frame = (t >= past_window_);
@@ -52,7 +52,7 @@ void media_node_input<Dim, T>::end_read(time_unit t) {
 
 
 template<std::size_t Dim, typename T>
-bool media_node_input<Dim, T>::reached_end() const {
+bool node_input<Dim, T>::reached_end() const {
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
 
 	MF_DEBUG("reader_reached_end=", connected_output_->ring().reader_reached_end(), " - \n output:=", *connected_output_);
@@ -64,4 +64,4 @@ bool media_node_input<Dim, T>::reached_end() const {
 	return false;
 }
 
-}
+}}

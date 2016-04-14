@@ -3,11 +3,14 @@
 
 #include <utility>
 #include "../io/frame_importer.h"
+#include "../flow/node.h"
+#include "../flow/node_input.h"
+#include "../flow/node_output.h"
 
 namespace mf { namespace node {
 
 template<typename Importer>
-class importer : public media_node {
+class importer : public flow::source_node {
 private:
 	Importer importer_;
 

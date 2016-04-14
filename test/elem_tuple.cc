@@ -1,4 +1,3 @@
-/*
 #include <catch.hpp>
 #include <type_traits>
 #include "../src/elem_tuple.h"
@@ -96,4 +95,3 @@ TEST_CASE("elem_tuple", "[elem_tuple]") {
 		REQUIRE(tup != tup_diff);
 	}
 }
-*/

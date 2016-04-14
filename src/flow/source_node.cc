@@ -1,13 +1,13 @@
-#include "media_source_node.h"
+#include "source_node.h"
 
 #include <cassert>
 #include <typeinfo>
 #include <algorithm>
 #include <exception>
 
-namespace mf {
+namespace mf { namespace flow {
 
-void media_source_node::thread_main_() {
+void source_node::thread_main_() {
 	try{
 	for(;;) pull_frame_();
 	}catch(int){}
@@ -15,11 +15,11 @@ void media_source_node::thread_main_() {
 }
 
 
-void media_source_node::pull_frame_() {
+void source_node::pull_frame_() {
 	MF_DEBUG("source::pull().... (t=", time_, ")");
 	
 	time_unit time = -1;
-	for(media_node_output_base* output : outputs_) {
+	for(node_output_base* output : outputs_) {
 		if(! output->is_active()) continue;
 		
 		time_unit t = output->begin_write();
@@ -43,7 +43,7 @@ void media_source_node::pull_frame_() {
 		reached_end = this->reached_end();
 	}
 	
-	for(media_node_output_base* output : outputs_) {
+	for(node_output_base* output : outputs_) {
 		output->end_write(reached_end);
 	}
 	
@@ -52,22 +52,22 @@ void media_source_node::pull_frame_() {
 	if(reached_end) throw 1;
 }
 
-void media_source_node::stop_() {
+void source_node::stop_() {
 	thread_.join();
 }
 
-void media_source_node::launch_() {
+void source_node::launch_() {
 	MF_DEBUG("source:: launch");
-	thread_ = std::move(std::thread((std::bind(&media_source_node::thread_main_, this))));
+	thread_ = std::move(std::thread((std::bind(&source_node::thread_main_, this))));
 }
 
 
-media_source_node::media_source_node(bool seekable, time_unit stream_duration) :
-	media_node_base(0) { if(seekable) define_stream_duration(stream_duration); }	
+source_node::source_node(bool seekable, time_unit stream_duration) :
+	node_base(0) { if(seekable) define_stream_duration(stream_duration); }	
 	
 
-media_source_node::~media_source_node() {
+source_node::~source_node() {
 	assert(! thread_.joinable());
 }
 
-}
+}}

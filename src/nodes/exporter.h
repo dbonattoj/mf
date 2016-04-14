@@ -4,14 +4,14 @@
 #include <utility>
 #include <tuple>
 #include "../io/frame_importer.h"
-#include "../graph/media_sink_node.h"
-#include "../graph/media_node_input.h"
-#include "../graph/media_node_output.h"
+#include "../flow/node.h"
+#include "../flow/node_input.h"
+#include "../flow/node_output.h"
 
 namespace mf { namespace node {
 
 template<typename Exporter>
-class exporter : public media_sink_node {
+class exporter : public flow::sink_node {
 private:
 	Exporter exporter_;
 

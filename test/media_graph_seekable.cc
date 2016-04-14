@@ -15,8 +15,6 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
 
-	set_debug_mode(debug_mode::cerr);
-
 	SECTION("source -> sink") {
 		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& sink = graph.add_sink<expected_frames_sink>(seq);

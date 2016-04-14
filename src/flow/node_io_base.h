@@ -4,15 +4,15 @@
 #include <ostream>
 #include "../common.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
-class media_node_base;
+class node_base;
 
 /// Abstract base class for media node output.
-class media_node_output_base {
+class node_output_base {
 protected:
 	/// Media node that this output belongs to.
-	media_node_base& node_;
+	node_base& node_;
 		
 	time_unit required_buffer_duration_ = -1;
 	time_unit stream_duration_ = -1;
@@ -20,9 +20,9 @@ protected:
 	bool active_ = true;
 	
 public:
-	explicit media_node_output_base(media_node_base&);
+	explicit node_output_base(node_base&);
 
-	media_node_base& node() const { return node_; }
+	node_base& node() const { return node_; }
 
 	virtual void setup() = 0;
 
@@ -49,13 +49,13 @@ public:
 
 
 /// Abstract base class for media node input.
-class media_node_input_base {
+class node_input_base {
 protected:
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
 
 public:	
-	media_node_input_base(media_node_base&, time_unit past_window, time_unit future_window);
+	node_input_base(node_base&, time_unit past_window, time_unit future_window);
 
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
@@ -64,10 +64,10 @@ public:
 	virtual void end_read(time_unit t) = 0;
 	virtual bool reached_end() const = 0;
 	
-	virtual media_node_output_base& connected_output() const = 0;
+	virtual node_output_base& connected_output() const = 0;
 };
 
 
-}
+}}
 
 #endif

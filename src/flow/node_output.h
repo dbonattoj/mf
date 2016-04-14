@@ -6,15 +6,15 @@
 #include "../common.h"
 #include "../ndarray/ndarray_view.h"
 #include "../ndarray/ndarray_shared_ring.h"
-#include "media_node_io_base.h"
+#include "node_io_base.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
-class media_node_base;
+class node_base;
 
 /// Output of a media node.
 template<std::size_t Dim, typename T>
-class media_node_output : public media_node_output_base {
+class node_output : public node_output_base {
 public:
 	using frame_view_type = ndarray_view<Dim, T>;
 	using frame_shape_type = typename frame_view_type::shape_type;
@@ -28,8 +28,8 @@ public:
 	frame_view_type view_;
 	
 public:
-	explicit media_node_output(media_node_base& node) :
-		media_node_output_base(node) { }
+	explicit node_output(node_base& nd) :
+		node_output_base(nd) { }
 		
 	void define_frame_shape(const frame_shape_type& shp);
 	bool frame_shape_is_defined() const override { return frame_shape_.product() != 0; }
@@ -69,8 +69,8 @@ public:
 	#endif
 };
 
-}
+}}
 
-#include "media_node_output.tcc"
+#include "node_output.tcc"
 
 #endif

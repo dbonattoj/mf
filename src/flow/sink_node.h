@@ -3,13 +3,13 @@
 
 #include <thread>
 #include "../common.h"
-#include "media_node_base.h"
+#include "node_base.h"
 
-namespace mf {
+namespace mf { namespace flow {
 	
-template<std::size_t Dim, typename Elem> class media_node_input;
+template<std::size_t Dim, typename Elem> class node_input;
 
-class media_sink_node : public media_node_base {
+class sink_node : public node_base {
 private:
 	std::atomic<bool> reached_end_{false};
 
@@ -20,7 +20,7 @@ protected:
 	void launch_() override;
 			
 public:
-	template<std::size_t Dim, typename Elem> using input_type = media_node_input<Dim, Elem>;
+	template<std::size_t Dim, typename Elem> using input_type = node_input<Dim, Elem>;
 
 	void setup_graph();
 	void stop_graph();
@@ -31,9 +31,9 @@ public:
 
 	bool reached_end() const { return reached_end_; }
 
-	explicit media_sink_node();
+	explicit sink_node();
 };
 
-}
+}}
 
 #endif

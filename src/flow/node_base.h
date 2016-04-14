@@ -7,15 +7,15 @@
 #include <string>
 #include <ostream>
 #include "../common.h"
-#include "media_node_io_base.h"
+#include "node_io_base.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
 /// Base class for nodes of media graph.
-class media_node_base {
+class node_base {
 protected:
-	std::vector<media_node_input_base*> inputs_; ///< Inputs of this node.
-	std::vector<media_node_output_base*> outputs_; ///< Outputs of this node.
+	std::vector<node_input_base*> inputs_; ///< Inputs of this node.
+	std::vector<node_output_base*> outputs_; ///< Outputs of this node.
 	
 	bool did_setup_ = false;
 
@@ -26,7 +26,7 @@ protected:
 
 	std::atomic<time_unit> time_{-1}; ///< Current time, i.e. time of last processed frame.
 			
-	explicit media_node_base(time_unit prefetch_dur) :
+	explicit node_base(time_unit prefetch_dur) :
 		prefetch_duration_(prefetch_dur) { }
 	
 	/// Define offset of this node, and of preceding nodes.
@@ -71,17 +71,17 @@ protected:
 	bool stream_duration_is_defined() const { return (stream_duration_ != -1); }
 		
 private:
-	friend media_node_input_base::media_node_input_base(media_node_base&, time_unit, time_unit);
-	friend media_node_output_base::media_node_output_base(media_node_base&);
+	friend node_input_base::node_input_base(node_base&, time_unit, time_unit);
+	friend node_output_base::node_output_base(node_base&);
 
-	void register_input_(media_node_input_base&);	
-	void register_output_(media_node_output_base&);
+	void register_input_(node_input_base&);	
+	void register_output_(node_output_base&);
 
 	
 public:
 	std::string name;
 
-	~media_node_base() { }
+	~node_base() { }
 		
 	/// Time of last processed frame.
 	/** When currently processing a frame, time of that frame. */
@@ -97,6 +97,6 @@ public:
 	bool is_active() const;
 };
 
-}
+}}
 
 #endif

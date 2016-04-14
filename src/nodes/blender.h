@@ -2,15 +2,15 @@
 #define MF_NODE_BLENDER_H_
 
 #include <algorithm>
-#include "../graph/media_node.h"
-#include "../graph/media_node_input.h"
-#include "../graph/media_node_output.h"
+#include "../flow/node.h"
+#include "../flow/node_input.h"
+#include "../flow/node_output.h"
 #include "../color.h"
 
 namespace mf { namespace node {
 
 template<typename Color>
-class blender : public media_node {	
+class blender : public flow::node {	
 public:
 	output_type<2, Color> output;
 	input_type<2, Color> input1;

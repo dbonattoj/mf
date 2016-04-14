@@ -4,18 +4,18 @@
 #include <stdexcept>
 #include "../common.h"
 #include "../ndarray/ndarray_view.h"
-#include "media_node_io_base.h"
-#include "media_node_output.h"
+#include "node_io_base.h"
+#include "node_output.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
-class media_node_base;
+class node_base;
 
 /// Input of a media node.
 template<std::size_t Dim, typename T>
-class media_node_input : public media_node_input_base {
+class node_input : public node_input_base {
 public:
-	using output_type = media_node_output<Dim, T>;
+	using output_type = node_output<Dim, T>;
 	
 	using frame_view_type = ndarray_view<Dim, T>;
 	using full_view_type = ndarray_view<Dim + 1, T>;
@@ -28,8 +28,8 @@ private:
 	std::ptrdiff_t view_center_;
 
 public:
-	media_node_input(media_node_base& node, time_unit past_window = 0, time_unit future_window = 0) :
-		media_node_input_base(node, past_window, future_window) { }
+	node_input(node_base& nd, time_unit past_window = 0, time_unit future_window = 0) :
+		node_input_base(nd, past_window, future_window) { }
 			
 	void connect(output_type& output);
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
@@ -63,8 +63,8 @@ public:
 	full_view_type future_view() const { return view_(view_center_, -1); }
 };	
 
-}
+}}
 
-#include "media_node_input.tcc"
+#include "node_input.tcc"
 
 #endif
