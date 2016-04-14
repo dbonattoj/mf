@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include "../common.h"
 #include "../ndarray/ndarray_view.h"
-#include "../ndarray/ndarray_shared_ring_base.h"
+#include "../ndarray/ndarray_shared_ring.h"
 #include "media_node_io_base.h"
 
 namespace mf {
@@ -19,7 +19,7 @@ public:
 	using frame_view_type = ndarray_view<Dim, T>;
 	using frame_shape_type = typename frame_view_type::shape_type;
 
-	using ring_type = ndarray_shared_ring_base<Dim, T>;
+	using ring_type = ndarray_shared_ring<Dim, T>;
 
 public:
 	ndsize<Dim> frame_shape_;

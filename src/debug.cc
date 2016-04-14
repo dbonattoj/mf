@@ -127,8 +127,8 @@ void set_debug_mode(debug_mode mode) {
 
 void initialize_debug() {
 	#ifdef MF_OS_LINUX
-	std::set_terminate(&terminate_handler_);
-	::signal(SIGSEGV, &signal_handler_);
+	//std::set_terminate(&terminate_handler_);
+	//::signal(SIGSEGV, &signal_handler_);
 	#endif
 }
 

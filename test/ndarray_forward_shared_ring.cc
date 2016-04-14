@@ -2,19 +2,19 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include "../src/ndarray/ndarray_forward_shared_ring.h"
+#include "../src/ndarray/ndarray_shared_ring.h"
 #include "support/ndarray.h"
 
 using namespace mf;
 using namespace mf::test;
 using namespace std::literals;
 
-TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
+TEST_CASE("ndarray_shared_ring_forward", "[ndarray_shared_ring][parallel]") {
 	ndsize<2> shape{320, 240};
 	std::size_t duration = 5;
 	bool reaches_eof;
 	
-	ndarray_forward_shared_ring<2, int> ring(shape, duration);
+	ndarray_shared_ring<2, int> ring(shape, duration, false);
 	REQUIRE(ring.read_start_time() == 0);
 	REQUIRE(ring.write_start_time() == 0);
 	
@@ -118,7 +118,7 @@ TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
 	
 	
 	SECTION("wait for writer (span)") {
-		ndarray_forward_shared_ring<2, int> ring(shape, 20); // use longer ring
+		ndarray_shared_ring<2, int> ring(shape, 20, false); // use longer ring
 		
 		// reader thread: waits until frames [10, 14[
 		std::atomic<bool> started{false};
@@ -331,9 +331,8 @@ TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
 			REQUIRE_FALSE(ring.reader_reached_end());
 	
 			// read less than maximum
-			reaches_eof = true; // ...should be set to false
-			auto r_section = ring.begin_read(1, reaches_eof);
-			REQUIRE_FALSE(reaches_eof);
+			auto r_section = ring.begin_read(1);
+			REQUIRE_FALSE(r_section.end_time() == ring.end_time());
 			REQUIRE(r_section.shape()[0] == 1);
 			ring.end_read(1);
 			
@@ -346,9 +345,8 @@ TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
 		
 			SECTION("exact") {
 				// read maximum
-				reaches_eof = false;
-				r_section.reset(ring.begin_read(2, reaches_eof));
-				REQUIRE(reaches_eof);
+				r_section.reset(ring.begin_read(2));
+				REQUIRE(r_section.end_time() == ring.end_time());
 				ring.end_read(2);
 				
 				REQUIRE(ring.readable_duration() == 0);
@@ -357,9 +355,8 @@ TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
 			
 			SECTION("more") {
 				// read beyond maximum
-				reaches_eof = false;
-				r_section.reset(ring.begin_read(3, reaches_eof));
-				REQUIRE(reaches_eof);
+				r_section.reset(ring.begin_read(3));
+				REQUIRE(r_section.end_time() == ring.end_time());
 				REQUIRE(r_section.shape()[0] == 2);
 				ring.end_read(2);
 				
@@ -378,7 +375,8 @@ TEST_CASE("ndarray_forward_shared_ring", "[ndarray_shared_ring][parallel]") {
 			REQUIRE(ring.end_time() == 3);
 			
 			// cannot write more after eof
-			REQUIRE_THROWS_AS(ring.begin_write(1), sequencing_error);
+			auto wsection = ring.begin_write(1);
+			REQUIRE(wsection.duration() == 0);
 			
 			// skip: will not wait for any more
 			ring.skip(10);

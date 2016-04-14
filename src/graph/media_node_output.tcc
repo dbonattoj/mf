@@ -1,7 +1,5 @@
 #include <sstream>
 #include "media_node_output.h"
-#include "../ndarray/ndarray_seekable_shared_ring.h"
-#include "../ndarray/ndarray_forward_shared_ring.h"
 
 namespace mf {
 
@@ -23,13 +21,7 @@ void media_node_output<Dim, T>::setup() {
 	assert(required_buffer_duration_is_defined());
 	assert(frame_shape_is_defined());
 
-	if(stream_duration_is_defined()) {
-		MF_DEBUG("ndarray_seekable_shared_ring");
-		buffer_.reset(new ndarray_seekable_shared_ring<Dim, T>(frame_shape_, required_buffer_duration(), stream_duration()));
-	} else {
-		MF_DEBUG("ndarray_forward_shared_ring");
-		buffer_.reset(new ndarray_forward_shared_ring<Dim, T>(frame_shape_, required_buffer_duration()));
-	}
+	buffer_.reset(new ring_type(frame_shape_, required_buffer_duration(), stream_duration_is_defined(), stream_duration()));
 }
 
 
