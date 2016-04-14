@@ -57,8 +57,11 @@ bool media_node_input<Dim, T>::reached_end() const {
 
 	MF_DEBUG("reader_reached_end=", connected_output_->ring().reader_reached_end(), " - \n output:=", *connected_output_);
 
-	if(connected_output_->ring().reader_reached_end()) return true;
-	else return (connected_output_->ring().end_time() - past_window_) <= connected_output_->ring().read_start_time();
+	if(connected_output_->ring().end_time_is_defined()) {
+		if(connected_output_->ring().reader_reached_end()) return true;
+		else return (connected_output_->ring().end_time() - past_window_) <= connected_output_->ring().read_start_time();
+	}
+	return false;
 }
 
 }

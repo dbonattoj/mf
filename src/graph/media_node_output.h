@@ -55,7 +55,12 @@ public:
 	
 	void end_write(bool is_last_frame) override {
 		MF_DEBUG("output::end_write()....");
-		ring().end_write(1);
+		if(ring().is_seekable()) {
+			ring().end_write(1);
+			if(is_last_frame) assert(ring().writer_reached_end());
+		} else {
+			ring().end_write(1, is_last_frame);
+		}
 		MF_DEBUG("output::end_write()");
 	}
 

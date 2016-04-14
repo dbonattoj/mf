@@ -103,7 +103,7 @@ public:
 	}
 };
 
-/*
+
 class input_synchronize_test_node : public media_node {
 private:
 	bool failed_ = false;
@@ -154,7 +154,7 @@ public:
 		output2.view() = input.view();
 	}
 };
-*/
+
 
 }}
 

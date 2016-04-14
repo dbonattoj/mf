@@ -336,8 +336,7 @@ time_unit ndarray_shared_ring<Dim, T>::write_start_time() const {
 template<std::size_t Dim, typename T>
 time_unit ndarray_shared_ring<Dim, T>::read_start_time() const {
 	// use atomic member, instead of non-atomic ring_.read_start_time()
-	//return read_start_time_;
-	return readable_time_span().start_time();
+	return read_start_time_;
 }
 
 
@@ -361,14 +360,14 @@ time_span ndarray_shared_ring<Dim, T>::readable_time_span() const {
 template<std::size_t Dim, typename T>
 bool ndarray_shared_ring<Dim, T>::writer_reached_end() const {
 	if(end_time_ == -1) return false;
-	else return write_start_time() == end_time_;
+	else return (write_start_time() == end_time_);
 }
 
 
 template<std::size_t Dim, typename T>
 bool ndarray_shared_ring<Dim, T>::reader_reached_end() const {
 	if(end_time_ == -1) return false;
-	else return read_start_time() == end_time_;
+	else return (read_start_time() == end_time_);
 }
 
 
