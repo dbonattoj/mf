@@ -138,12 +138,20 @@ std::vector<std::reference_wrapper<node_input_base>> node_base::activated_inputs
 }
 
 
-std::vector<std::reference_wrapper<node_output_base>> node_base::active_outputs() {
+std::vector<std::reference_wrapper<node_output_base>> node_base::all_outputs() {
 	std::vector<std::reference_wrapper<node_output_base>> active_outputs;
 	for(node_output_base* output : outputs_) {
-		if(output->is_active()) active_outputs.emplace_back(*output);
+		active_outputs.emplace_back(*output);
 	}
 	return active_outputs;
+}
+
+
+bool node_base::is_bounded() const {
+	if(stream_duration_ != -1) return true;
+	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](node_input_base* input) {
+		return (input->is_activated() && input->connected_node().is_bounded());
+	});
 }
 
 

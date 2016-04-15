@@ -16,7 +16,11 @@ void source_node::thread_main_() {
 
 
 void source_node::pull_frame_() {
-	auto outputs = active_outputs();
+	//if(! is_active()) return;
+	
+	if(stream_duration() != -1 && time_ == stream_duration()-1) return;
+	
+	auto outputs = all_outputs();
 	
 	MF_DEBUG("source::pull().... (t=", time_, ")");
 	

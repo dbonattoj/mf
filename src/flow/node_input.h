@@ -24,6 +24,7 @@ public:
 private:
 	output_type* connected_output_ = nullptr; ///< Output of other media node to which input is connected.
 	
+	bool view_available_ = false;
 	full_view_type view_;
 	std::ptrdiff_t view_center_;
 
@@ -51,11 +52,13 @@ public:
 	/** begin_read() cannot be called after this has returned true. */
 	bool reached_end() const override;
 	
+	bool view_is_available() const { return view_available_; }
+	
 	/// Get readable view of current frame.
 	/** Only callable while in media_node::process_(). */
-	frame_view_type view() const { return view_[view_center_]; }
+	frame_view_type view() const { assert(view_available_); return view_[view_center_]; }
 	
-	const full_view_type& full_view() const { return view_; }	
+	const full_view_type& full_view() const { assert(view_available_); return view_; }	
 	std::ptrdiff_t full_view_center() const { return view_center_; }
 	full_view_type past_view() const { return view_(0, view_center_ + 1); }
 	full_view_type future_view() const { return view_(view_center_, -1); }

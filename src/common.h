@@ -12,6 +12,19 @@
 #include "debug.h"
 #include "exceptions.h"
 
+
+#ifndef NDEBUG
+	#define MF_ASSERT(condition) \
+		if(!(condition)) { \
+			MF_DEBUG_BACKTRACE("assertion failed: `" #condition "`"); \
+			std::abort(); \
+		}
+		
+#else
+	#define MF_ASSERT(condition) ((void)0)
+#endif
+
+
 namespace mf {
 
 
@@ -21,7 +34,6 @@ using real = float;
 
 /// Discrete time unit type.
 using time_unit = std::ptrdiff_t;
- 
 
 
 class time_span : public ndspan<1, time_unit> {

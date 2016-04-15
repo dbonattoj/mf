@@ -30,8 +30,7 @@ namespace {
 	
 	#ifdef MF_OS_LINUX
 	[[noreturn]] void signal_handler_(int sig) {
-		MF_DEBUG_BACKTRACE();
-		std::fprintf(stderr, "signal %i, aborting", sig);
+		MF_DEBUG_BACKTRACE("signal, aborting");
 		std::fflush(nullptr);
 		std::abort();
 	}
@@ -48,17 +47,22 @@ namespace {
 
 namespace detail {
 	std::string debug_head(const debug_header& header) {
+		auto tid = std::this_thread::get_id();
+		std::string color = debug_thread_color();	
+
+		std::string header_beg, body_beg;
+
 		if(mode_ == debug_mode::cerr) {
 			auto tid = std::this_thread::get_id();
 			std::string color = debug_thread_color();	
-			return "\x1b[" + color + ";1m" + "[" + std::string(header.file) + ":" + std::to_string(header.line) + ", "
-				+ std::string(header.func) + "]: \n"
-				+ (header.caption.empty() ? "" : (header.caption + "\n"))
-				+ "\x1b[0m" + "\x1b[" + color + "m";
-		} else {
-			return "[" + std::string(header.file) + ":" + std::to_string(header.line) + ", "
-				+ std::string(header.func) + "]\n";
+	
+			header_beg = "\x1b[" + color + ";1m";
+			body_beg = "\x1b[0m" "\x1b[" + color + "m";
 		}
+
+		return header_beg + "[" + std::string(header.file) + ":" + std::to_string(header.line) + ", "
+			+ std::string(header.func) + "]: \n" + (header.caption.empty() ? "" : (header.caption + "\n"))
+			+ body_beg;
 	}
 	
 	std::string debug_tail() {	
@@ -130,7 +134,8 @@ void set_debug_mode(debug_mode mode) {
 void initialize_debug() {
 	#ifdef MF_OS_LINUX
 	//std::set_terminate(&terminate_handler_);
-	//::signal(SIGSEGV, &signal_handler_);
+	::signal(SIGSEGV, &signal_handler_);
+	::signal(SIGILL, &signal_handler_);
 	#endif
 }
 

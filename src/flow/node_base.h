@@ -30,14 +30,11 @@ protected:
 	bool active_ = true; ///< True if any path with activated inputs connects node to graph sink.
 	std::atomic<time_unit> time_{-1}; ///< Time of last processed frame by this node.
 
-
 	std::vector<std::reference_wrapper<node_input_base>> activated_inputs();
-	std::vector<std::reference_wrapper<node_output_base>> active_outputs();
+	std::vector<std::reference_wrapper<node_output_base>> all_outputs();
 
 	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
 
-
-			
 	/// Define offset of this node, and of preceding nodes.
 	/** Recursively also sets offsets of preceding nodes. If offset was already set, it is updated and propagated
 	 ** only when new value is larger. */
@@ -59,6 +56,8 @@ protected:
 	 ** when this is called, allowing node to define output frame shapes in function of input frame shapes. */
 	virtual void setup() { }
 	
+	
+	virtual void pre_process() { }
 		
 	/// Process current frame.
 	/** Implemented in concrete subclass. Input and output views are made available while in this function. Subclass
@@ -104,6 +103,8 @@ public:
 	
 	bool is_source() const { return (inputs_.size() == 0); }
 	bool is_sink() const { return (outputs_.size() == 0); }
+
+	bool is_bounded() const;
 
 	#ifndef NDEBUG
 	void debug_print(std::ostream&) const;

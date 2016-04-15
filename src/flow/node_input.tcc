@@ -35,6 +35,7 @@ void node_input<Dim, T>::begin_read(time_unit t) {
 	auto view = connected_output_->ring().begin_read_span(requested_span);
 	assert(view.shape().front() <= requested_span.duration());
 	view_.reset(view);
+	view_available_ = true;
 	
 	MF_DEBUG("input::begin_read(time = ", t, ") --> ", view.span());
 }
@@ -46,6 +47,7 @@ void node_input<Dim, T>::end_read(time_unit t) {
 		
 	bool consume_frame = (t >= past_window_);
 	connected_output_->ring().end_read(consume_frame ? 1 : 0);
+	view_available_ = false;
 
 	MF_DEBUG("input::end_read(time = ", t, ")");
 }

@@ -29,6 +29,7 @@ private:
 	ring_type ring_; ///< Underlying, non thread-safe timed ring buffer.
 
 	std::atomic<time_unit> end_time_{-1};
+	// TODO make non-atomic? verify
 
 	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access, and waiting for frames.
 	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.

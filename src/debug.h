@@ -12,9 +12,9 @@
 			MF_DEBUG_HEADER("", ""), \
 			__VA_ARGS__)
 			
-	#define MF_DEBUG_BACKTRACE() \
+	#define MF_DEBUG_BACKTRACE(caption) \
 		::mf::detail::debug_print_backtrace( \
-			MF_DEBUG_HEADER("Backtrace", ""), \
+			MF_DEBUG_HEADER(caption "\nbacktrace:", ""), \
 			::mf::detail::debug_get_backtrace())
 
 	#define MF_DEBUG_EXPR(...) \

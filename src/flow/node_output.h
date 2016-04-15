@@ -25,6 +25,7 @@ public:
 	ndsize<Dim> frame_shape_;
 
 	std::unique_ptr<ring_type> buffer_; ///< Ring buffer containing the output frames.
+	bool view_available_ = false;
 	frame_view_type view_;
 	
 public:
@@ -42,14 +43,22 @@ public:
 		
 	ring_type& ring() { return *buffer_; }
 	
-	frame_view_type& view() { return view_; }
+	frame_view_type& view() { MF_ASSERT(view_available_); return view_; }
+	
+	bool view_is_available() const { return view_available_; }
 	
 	time_unit begin_write() override {
 		MF_DEBUG("output::begin_write()....");
+		
+		// not active: take out 1 frame first
+		if(! is_active() && ring().readable_duration() >= 1) ring().skip(1);
+		
+		
 		auto view = ring().begin_write(1);
 		if(view.duration() != 1) throw std::runtime_error("output at end");
 		view_.reset(view[0]);
 		MF_DEBUG("output::begin_write() --> ", view.span(), " t=", view.start_time());
+		view_available_ = true;
 		return view.start_time();
 	}
 	
@@ -62,6 +71,7 @@ public:
 			ring().end_write(1, is_last_frame);
 		}
 		MF_DEBUG("output::end_write()");
+		view_available_ = false;
 	}
 
 	#ifndef NDEBUG

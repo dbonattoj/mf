@@ -60,6 +60,7 @@ void graph::run_for(time_unit duration) {
 
 
 void graph::run() {
+	if(! sink_->is_bounded()) throw std::logic_error("sink is not bounded");
 	run_until(std::numeric_limits<time_unit>::max());
 }
 

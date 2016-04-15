@@ -10,8 +10,11 @@ void sink_node::pull_frame_() {
 	// sink controlls time flow --> propagated to rest of graph
 	
 	time_++;
+	
+	if(time_ == stream_duration_) { reached_end_ = true; return; }
 
 	for(node_input_base& input : inputs) {
+		assert(! input.reached_end());
 		input.begin_read(time_);
 	}
 		
@@ -42,10 +45,10 @@ void sink_node::stop_graph() {
 }
 
 void sink_node::seek(time_unit t) {
+	reached_end_ = false;
 	if(is_seekable()) time_ = t - 1;
 	else throw std::logic_error("sink node is not seekable");
 }
-
 
 
 void sink_node::pull_next_frame() {

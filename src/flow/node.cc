@@ -16,7 +16,9 @@ void node::thread_main_() {
 
 
 void node::pull_frame_() {
-	auto outputs = active_outputs();
+	if(! is_active()) return;
+	
+	auto outputs = all_outputs();
 	auto inputs = activated_inputs();
 	
 	MF_DEBUG("node::pull().... (time = ", time_, ")");

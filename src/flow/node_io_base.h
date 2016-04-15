@@ -71,6 +71,7 @@ public:
 	virtual bool reached_end() const = 0;
 	
 	virtual node_output_base& connected_output() const = 0;
+	node_base& connected_node() const { return this->connected_output().node(); }
 	
 	bool is_activated() const { return activated_; }
 	

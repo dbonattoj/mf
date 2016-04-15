@@ -17,6 +17,8 @@
 
 namespace mf { namespace test {
 
+constexpr int noframe = -2;
+
 class sequence_frame_source : public flow::source_node {
 private:
 	time_unit last_frame_;
@@ -25,8 +27,8 @@ private:
 public:
 	output_type<2, int> output;
 
-	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable) :
-		flow::source_node(seekable, last_frame + 1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
+	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
+		flow::source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
 	
 	void setup() override {
 		output.define_frame_shape(frame_shape_);
@@ -55,7 +57,10 @@ public:
 		expected_frames_(seq), input(*this) { }
 	
 	void process() override {
-		got_frames_.push_back( frame_index(input.view()) );
+		int index;
+		if(input.is_activated()) index = frame_index(input.view());
+		else index = noframe;
+		got_frames_.push_back(index);
 	}
 
 	bool check() const {
@@ -85,7 +90,8 @@ private:
 	void process() override {
 		if(callback_) callback_(*this, input, output);
 		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
-		output.view() = input.view();
+		if(input.is_activated()) output.view() = input.view();
+		else output.view() = make_frame(input.frame_shape(), noframe);
 	}
 	
 public:

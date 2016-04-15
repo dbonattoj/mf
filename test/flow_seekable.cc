@@ -14,7 +14,7 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
-
+/*
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
@@ -23,7 +23,31 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
+*/	
+	
+	SECTION("input activation") {
+		const std::vector<int>& seq { 0, 1, 2, noframe, noframe, noframe, 6, 7, noframe, noframe, 10 };
+		
+		SECTION("source -> sink") {
+			auto& source = gr.add_node<sequence_frame_source>(10, shp, true);
+			auto& sink = gr.add_sink<expected_frames_sink>(seq);
+			sink.input.connect(source.output);
+			gr.setup();
+			gr.launch();
+			gr.run_until(2);
+			sink.input.desactivate();
+			gr.run_until(5);
+			sink.input.activate();
+			gr.run_until(7);
+			sink.input.desactivate();
+			gr.run_until(9);
+			sink.input.activate();
+			gr.run();
+			REQUIRE(sink.check());
+		}
+	}
 
+	return;
 
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
