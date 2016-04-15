@@ -25,8 +25,8 @@ public:
 		image_input(*this), depth_input(*this), output(*this) { }
 
 protected:
-	void setup_() override;
-	void process_() override;
+	void setup() override;
+	void process() override;
 };
 
 }}

@@ -21,7 +21,12 @@ void node_output<Dim, T>::setup() {
 	assert(required_buffer_duration_is_defined());
 	assert(frame_shape_is_defined());
 
-	buffer_.reset(new ring_type(frame_shape_, required_buffer_duration(), stream_duration_is_defined(), stream_duration()));
+	buffer_.reset(new ring_type(
+		frame_shape_,
+		required_buffer_duration(),
+		node_.is_seekable(),
+		node_.stream_duration())
+	);
 }
 
 

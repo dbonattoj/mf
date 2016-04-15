@@ -67,7 +67,7 @@ void node_base::deduce_stream_properties_() {
 		time_unit input_node_stream_duration = connected_node.stream_duration_;
 		bool input_node_seekable = connected_node.seekable_;
 		
-		stream_duration = std::min(stream_duration, input_node_stream_duration);
+		stream_duration_ = std::min(stream_duration_, input_node_stream_duration);
 		seekable_ = seekable_ && input_node_seekable;
 	}
 	
@@ -75,12 +75,12 @@ void node_base::deduce_stream_properties_() {
 }
 
 
-void node_base::propagate_setup_() {
+void node_base::propagate_setup_() {	
 	assert(offset_ != -1); // ...was defined in prior setup phase
 	
-	// do nothing when did_setup_ is already set:
+	// do nothing when was_setup_ is already set:
 	// during recursive propagation it may be called multiple times on same node
-	if(did_setup_) return;
+	if(was_setup_) return;
 	
 	// first set up preceding nodes
 	for(node_input_base* input : inputs_) {
@@ -107,21 +107,44 @@ void node_base::propagate_setup_() {
 		output->setup();
 	}
 	
-	did_setup_ = true;
+	was_setup_ = true;
 }
 
 
-bool node_base::is_active() const {
-	// node is always active if it has no outputs (i.e. sink node)
-	if(is_sink()) return true;
-	
-	// otherwise, it is active if any output is active
-	for(node_output_base* output : outputs_)
-		if(output->is_active()) return true;
-		
-	return false;
+void node_base::propagate_activation() {
+	// activation of succeeding nodes (down to sink) must already have been defined
+
+	// this node is active if any of its outputs are active
+	// an output is active, if its connected input is activated AND the connected node is active
+	active_ = std::any_of(
+		outputs_.cbegin(), outputs_.cend(),
+		[](node_output_base* output) { return output->is_active(); }
+	);
+
+	// now set activation of preceeding nodes
+	for(node_input_base* input : inputs_) {
+		node_base& connected_node = input->connected_output().node();
+		connected_node.propagate_activation();
+	}
 }
 
+
+std::vector<std::reference_wrapper<node_input_base>> node_base::activated_inputs() {
+	std::vector<std::reference_wrapper<node_input_base>> activated_inputs;
+	for(node_input_base* input : inputs_) {
+		if(input->is_activated()) activated_inputs.emplace_back(*input);
+	}
+	return activated_inputs;
+}
+
+
+std::vector<std::reference_wrapper<node_output_base>> node_base::active_outputs() {
+	std::vector<std::reference_wrapper<node_output_base>> active_outputs;
+	for(node_output_base* output : outputs_) {
+		if(output->is_active()) active_outputs.emplace_back(*output);
+	}
+	return active_outputs;
+}
 
 
 #ifndef NDEBUG
@@ -129,7 +152,7 @@ void node_base::debug_print(std::ostream& str) const {
 	str << "node ";
 	if(! name.empty()) str << '"' << name << '"';
 
-	str << "[offset=" << offset_ << ", prefetch=" << prefetch_duration_ << ", setup=" << did_setup_ << "]" << std::endl;
+	str << "[offset=" << offset_ << ", prefetch=" << prefetch_duration_ << ", setup=" << was_setup_ << "]" << std::endl;
 	
 	for(std::ptrdiff_t i = 0; i < inputs_.size(); ++i) {
 		const node_input_base& input = *inputs_[i];

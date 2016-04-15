@@ -1,5 +1,5 @@
-#ifndef MF_TEST_GRAPH_H_
-#define MF_TEST_GRAPH_H_
+#ifndef MF_TEST_FLOW_H_
+#define MF_TEST_FLOW_H_
 
 #include <vector>
 #include <functional>
@@ -28,11 +28,11 @@ public:
 	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable) :
 		flow::source_node(seekable, last_frame + 1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
 	
-	void setup_() override {
+	void setup() override {
 		output.define_frame_shape(frame_shape_);
 	}
 	
-	void process_() override {
+	void process() override {
 		output.view() = make_frame(frame_shape_, current_time());
 	}
 	
@@ -54,7 +54,7 @@ public:
 	explicit expected_frames_sink(const std::vector<int>& seq) :
 		expected_frames_(seq), input(*this) { }
 	
-	void process_() override {
+	void process() override {
 		got_frames_.push_back( frame_index(input.view()) );
 	}
 
@@ -78,11 +78,11 @@ public:
 private:
 	std::function<callback_func> callback_;
 		
-	void setup_() override {
+	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
 	}
 	
-	void process_() override {
+	void process() override {
 		if(callback_) callback_(*this, input, output);
 		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
 		output.view() = input.view();
@@ -117,11 +117,11 @@ public:
 		flow::node(prefetch),
 		input1(*this), input2(*this), output(*this) { }
 
-	void setup_() override {
+	void setup() override {
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
-	void process_() override {		
+	void process() override {		
 		if(frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
 		if(frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
 
@@ -143,12 +143,12 @@ public:
 		flow::node(prefetch),
 		input(*this), output1(*this), output2(*this) { }
 	
-	void setup_() override {
+	void setup() override {
 		output1.define_frame_shape(input.frame_shape());
 		output2.define_frame_shape(input.frame_shape());
 	}
 	
-	void process_() override {
+	void process() override {
 		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in multiplexer");	
 		output1.view() = input.view();
 		output2.view() = input.view();

@@ -24,7 +24,7 @@ namespace {
 	std::ptrdiff_t next_thread_color_ = 0;
 	
 	std::mutex mutex_;
-	debug_mode mode_ = debug_mode::file;
+	debug_mode mode_ = debug_mode::cerr;
 	
 	std::string filename_ = "debug.txt";
 	
@@ -47,14 +47,17 @@ namespace {
 
 
 namespace detail {
-	std::string debug_head(const source_location& loc) {	
+	std::string debug_head(const debug_header& header) {
 		if(mode_ == debug_mode::cerr) {
 			auto tid = std::this_thread::get_id();
 			std::string color = debug_thread_color();	
-			return "\x1b[37m[" + std::string(loc.file) + ":" + std::to_string(loc.line) + ", " + std::string(loc.func)
-				+ "]:\x1b[0m \n" + "\x1b[" + color + "m";
+			return "\x1b[" + color + ";1m" + "[" + std::string(header.file) + ":" + std::to_string(header.line) + ", "
+				+ std::string(header.func) + "]: \n"
+				+ (header.caption.empty() ? "" : (header.caption + "\n"))
+				+ "\x1b[0m" + "\x1b[" + color + "m";
 		} else {
-			return "[" + std::string(loc.file) + ":" + std::to_string(loc.line) + ", " + std::string(loc.func) + "]\n";
+			return "[" + std::string(header.file) + ":" + std::to_string(header.line) + ", "
+				+ std::string(header.func) + "]\n";
 		}
 	}
 	
@@ -99,23 +102,22 @@ namespace detail {
 		return bt;
 	}
 	
-	void debug_print_backtrace(const source_location& loc, const debug_backtrace& bt) {
+	void debug_print_backtrace(const debug_header& header, const debug_backtrace& bt) {
 		std::FILE* output = debug_stream();
 		if(! output) return;
 		
-		std::string head = debug_head(loc);
+		std::string head = debug_head(header);
 		std::string tail = debug_tail();
 
 		std::lock_guard<std::mutex> lock(debug_mutex());	
 			
-		std::fprintf(output, "%sBacktrace:\n", head.c_str());
-		::backtrace_symbols_fd(bt.trace, bt.size, fileno(output));
 		std::fprintf(output, "%s", head.c_str());
+		::backtrace_symbols_fd(bt.trace, bt.size, fileno(output));
+		std::fprintf(output, "%s", tail.c_str());
 	}
 	#else
-	struct debug_backtrace { };
 	debug_backtrace debug_get_backtrace() { return debug_backtrace(); }
-	void debug_print_backtrace(const source_location& loc, const backtrace&) {
+	void debug_print_backtrace(const debug_header&, const backtrace&) {
 		debug_print(loc, "no support for debug backtrace print");
 	}
 	#endif

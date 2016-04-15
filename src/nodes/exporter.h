@@ -22,11 +22,11 @@ public:
 	explicit exporter(Args&&... args) :
 		exporter_(std::forward<Args>(args)...), input(*this) { }
 	
-	void setup_() override {
+	void setup() override {
 		// TODO define frame shape after exporter construction
 	}
 	
-	void process_() override {
+	void process() override {
 		exporter_.write_frame(input.view());
 	}
 };

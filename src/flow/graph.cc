@@ -15,7 +15,7 @@ graph::~graph() {
 
 
 void graph::setup() {
-	if(setup_) throw std::logic_error("media graph was already set up");
+	if(was_setup_) throw std::logic_error("media graph was already set up");
 	if(sink_ == nullptr) throw std::logic_error("no sink node was added to media graph");
 	sink_->setup_graph();
 	was_setup_ = true;
@@ -37,12 +37,12 @@ void graph::stop() {
 
 
 time_unit graph::current_time() const {
-	if(! setup_) throw std::logic_error("graph not set up");
+	if(! was_setup_) throw std::logic_error("graph not set up");
 	return sink_->current_time();
 }
 
 void graph::run_until(time_unit last_frame) {
-	if(! setup_) throw std::logic_error("graph not set up");
+	if(! was_setup_) throw std::logic_error("graph not set up");
 	
 	if(! running_) launch();
 	

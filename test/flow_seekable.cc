@@ -1,7 +1,7 @@
 #include <catch.hpp>
-#include "../src/graph/media_graph.h"
-#include "../src/graph/media_node.h"
-#include "support/graph.h"
+#include "../src/flow/graph.h"
+#include "../src/flow/node.h"
+#include "support/flow.h"
 #include "support/ndarray.h"
 #include <iostream>
 
@@ -9,45 +9,45 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
-	media_graph graph;
+	flow::graph gr;
 	auto shp = make_ndsize(320, 240);
 
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
 
 	SECTION("source -> sink") {
-		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
-		graph.setup();
-		graph.run();
+		gr.setup();
+		gr.run();
 		REQUIRE(sink.check());
 	}
 
 
 	SECTION("source --> passthrough --> sink") {
-		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& passthrough = graph.add_node<passthrough_node>(0, 0);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& passthrough = gr.add_node<passthrough_node>(0, 0);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
-		graph.setup();
-		graph.run();
+		gr.setup();
+		gr.run();
 		REQUIRE(sink.check());
 	}
 
 	SECTION("detailled time window test") { 
  		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
-		auto& source = graph.add_node<sequence_frame_source>(5, shp, true);		
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_node<sequence_frame_source>(5, shp, true);		
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 
 		SECTION("source [-3]--> pass --> sink") {
-			auto& node = graph.add_node<passthrough_node>(3, 0);
+			auto& node = gr.add_node<passthrough_node>(3, 0);
 	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
-			graph.setup();
+			gr.setup();
 				
 			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
 				switch(self.current_time()) {
@@ -89,18 +89,18 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 				}
 			});
 
-			graph.run();
+			gr.run();
 			
 			REQUIRE(sink.check());	
 		}
 	
 
 		SECTION("source [+3]--> pass --> sink") {
-			auto& node = graph.add_node<passthrough_node>(0, 3);
+			auto& node = gr.add_node<passthrough_node>(0, 3);
 	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
-			graph.setup();
+			gr.setup();
 			
 			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
 				switch(self.current_time()) {
@@ -142,18 +142,18 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 				}
 			});
 			
-			graph.run();
+			gr.run();
 			
 			REQUIRE(sink.check());
 		}
 
 
 		SECTION("source [-3,+3]--> sink") {
-			auto& node = graph.add_node<passthrough_node>(3, 3);
+			auto& node = gr.add_node<passthrough_node>(3, 3);
 	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
-			graph.setup();
+			gr.setup();
 			
 			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
 				switch(self.current_time()) {
@@ -195,21 +195,21 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 				}
 			});
 
-			graph.run();
+			gr.run();
 			REQUIRE(sink.check());
 		}
 	}
 	
 
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
-		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& passthrough1 = graph.add_node<passthrough_node>(0, 3);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node>(0, 3);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
 		
-		graph.setup();
+		gr.setup();
 
 		REQUIRE(sink.offset() == 0);
 		REQUIRE(passthrough1.offset() == 0);
@@ -218,22 +218,22 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		REQUIRE(passthrough1.output.required_buffer_duration() == 1);
 		REQUIRE(source1.output.required_buffer_duration() == 4);
 
-		graph.run();
+		gr.run();
 		
-		REQUIRE(graph.current_time() == seq.size()-1);
+		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
 	
 	
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
-		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& passthrough1 = graph.add_node<passthrough_node>(3, 0);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node>(3, 0);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
 		
-		graph.setup();
+		gr.setup();
 
 		REQUIRE(sink.offset() == 0);
 		REQUIRE(passthrough1.offset() == 0);
@@ -242,21 +242,21 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		REQUIRE(passthrough1.output.required_buffer_duration() == 1);
 		REQUIRE(source1.output.required_buffer_duration() == 4);
 
-		graph.run();
+		gr.run();
 				
-		REQUIRE(graph.current_time() == seq.size()-1);
+		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
 	
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
-		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& passthrough1 = graph.add_node<passthrough_node>(3, 3);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node>(3, 3);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
 		
-		graph.setup();
+		gr.setup();
 
 		REQUIRE(sink.offset() == 0);
 		REQUIRE(passthrough1.offset() == 0);
@@ -265,23 +265,23 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		REQUIRE(passthrough1.output.required_buffer_duration() == 1);
 		REQUIRE(source1.output.required_buffer_duration() == 7);
 
-		graph.run();
+		gr.run();
 				
-		REQUIRE(graph.current_time() == seq.size()-1);
+		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
 
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
-		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& passthrough1 = graph.add_node<passthrough_node>(3, 1);
-		auto& passthrough2 = graph.add_node<passthrough_node>(2, 2);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node>(3, 1);
+		auto& passthrough2 = gr.add_node<passthrough_node>(2, 2);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 		passthrough1.input.connect(source1.output);
 		passthrough2.input.connect(passthrough1.output);
 		sink.input.connect(passthrough2.output);
 		
-		graph.setup();
+		gr.setup();
 
 		REQUIRE(sink.offset() == 0);
 		REQUIRE(passthrough2.offset() == 0);
@@ -292,18 +292,18 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		REQUIRE(passthrough1.output.required_buffer_duration() == 5);
 		REQUIRE(source1.output.required_buffer_duration() == 5);
 
-		graph.run();
+		gr.run();
 		
-		REQUIRE(graph.current_time() == seq.size()-1);
+		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
 	
 	
 	SECTION("input synchronize") {
-		auto& source1 = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& source2 = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
-		auto& merge = graph.add_node<input_synchronize_test_node>();
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source2 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& merge = gr.add_node<input_synchronize_test_node>();
 		
 		SECTION("graph 1") {
 			/*
@@ -311,14 +311,14 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			source2 ----------------------> /
 			*/
 			
-			auto& passthrough = graph.add_node<passthrough_node>(0, 5);
+			auto& passthrough = gr.add_node<passthrough_node>(0, 5);
 		
 			passthrough.input.connect(source1.output);
 			merge.input1.connect(passthrough.output);
 			merge.input2.connect(source2.output);
 			sink.input.connect(merge.output);
 		
-			graph.setup();
+			gr.setup();
 			
 			REQUIRE(sink.offset() == 0);
 			REQUIRE(merge.offset() == 0);
@@ -331,10 +331,10 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			REQUIRE(source1.output.required_buffer_duration() == 6); // current + 5 future
 			REQUIRE(source2.output.required_buffer_duration() == 1);
 			
-			graph.run();
+			gr.run();
 			
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == seq.size()-1);
+			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
 
@@ -344,8 +344,8 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			source2 --> [-1, +2]passthrough2 --> /
 			*/
 			
-			auto& passthrough1 = graph.add_node<passthrough_node>(3, 1);
-			auto& passthrough2 = graph.add_node<passthrough_node>(1, 2);
+			auto& passthrough1 = gr.add_node<passthrough_node>(3, 1);
+			auto& passthrough2 = gr.add_node<passthrough_node>(1, 2);
 		
 			passthrough1.input.connect(source1.output);
 			passthrough2.input.connect(source2.output);
@@ -353,7 +353,7 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			merge.input2.connect(passthrough2.output);
 			sink.input.connect(merge.output);
 		
-			graph.setup();
+			gr.setup();
 			
 			REQUIRE(sink.offset() == 0);
 			REQUIRE(merge.offset() == 0);
@@ -368,20 +368,20 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			REQUIRE(source1.output.required_buffer_duration() == 5);
 			REQUIRE(source2.output.required_buffer_duration() == 4);
 			
-			graph.run();
+			gr.run();
 			
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == seq.size()-1);
+			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
 	}
 	
 	
 	SECTION("multiple outputs") {
-		auto& source = graph.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& merge = graph.add_node<input_synchronize_test_node>();
-		auto& multiplex = graph.add_node<multiplexer_node>();
-		auto& sink = graph.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& merge = gr.add_node<input_synchronize_test_node>();
+		auto& multiplex = gr.add_node<multiplexer_node>();
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 		SECTION("graph 1") {
 			/*
@@ -394,7 +394,7 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			merge.input2.connect(multiplex.output2);
 			sink.input.connect(merge.output);
 			
-			graph.setup();
+			gr.setup();
 			
 			REQUIRE(sink.offset() == 0);
 			REQUIRE(merge.offset() == 0);
@@ -406,10 +406,10 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			REQUIRE(multiplex.output2.required_buffer_duration() == 1);
 			REQUIRE(source.output.required_buffer_duration() == 1);
 			
-			graph.run();
+			gr.run();
 
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == seq.size()-1);
+			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());		
 		}
 		
@@ -419,8 +419,8 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			                   \ --> [+5]passthrough1 --> [+3]passthrough2 --> /
 			*/
 			
-			auto& passthrough1 = graph.add_node<passthrough_node>(0, 5);
-			auto& passthrough2 = graph.add_node<passthrough_node>(0, 3);
+			auto& passthrough1 = gr.add_node<passthrough_node>(0, 5);
+			auto& passthrough2 = gr.add_node<passthrough_node>(0, 3);
 
 			multiplex.input.connect(source.output);
 			merge.input1.connect(multiplex.output1);
@@ -429,7 +429,7 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			merge.input2.connect(passthrough2.output);
 			sink.input.connect(merge.output);
 			
-			graph.setup();
+			gr.setup();
 			
 			REQUIRE(sink.offset() == 0);
 			REQUIRE(merge.offset() == 0);
@@ -445,10 +445,10 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			REQUIRE(multiplex.output2.required_buffer_duration() == 1+5);
 			REQUIRE(source.output.required_buffer_duration() == 1);			
 			
-			graph.run();
+			gr.run();
 
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == seq.size()-1);
+			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
 		
@@ -458,9 +458,9 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			                   \ --> [-2,+5]passthrough1 --> [-1,+3]passthrough2 --> /
 			*/
 			
-			auto& passthrough1 = graph.add_node<passthrough_node>(2, 5);
-			auto& passthrough2 = graph.add_node<passthrough_node>(1, 3);
-			auto& passthrough3 = graph.add_node<passthrough_node>(1, 1);
+			auto& passthrough1 = gr.add_node<passthrough_node>(2, 5);
+			auto& passthrough2 = gr.add_node<passthrough_node>(1, 3);
+			auto& passthrough3 = gr.add_node<passthrough_node>(1, 1);
 
 			multiplex.input.connect(source.output);
 			passthrough3.input.connect(multiplex.output1);
@@ -470,11 +470,11 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			merge.input2.connect(passthrough2.output);
 			sink.input.connect(merge.output);
 			
-			graph.setup();			
-			graph.run();
+			gr.setup();			
+			gr.run();
 
 			REQUIRE(! merge.failed());
-			REQUIRE(graph.current_time() == seq.size()-1);
+			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
 	}

@@ -13,17 +13,18 @@ namespace mf {
 template<std::size_t Dim, typename T>
 class ndarray_shared_ring {
 private:
+	/// Indicates current state of reader and writer.
+	/** May be `idle` or `accessing`, or a positive integer if thread is waiting for that number of frames. */
 	using thread_state = time_unit;
 	enum : thread_state {
 		idle = 0,
 		accessing = -1
 	};
-	// positive number = number of frames waiting for
 
 	using ring_type = ndarray_timed_ring<Dim, T>;
 	using section_view_type = typename ring_type::section_view_type;
 	
-	bool seekable_;
+	const bool seekable_; ///< Whether buffer is seekable or non-seekable, set on construction.
 
 	ring_type ring_; ///< Underlying, non thread-safe timed ring buffer.
 

@@ -16,39 +16,40 @@ void node::thread_main_() {
 
 
 void node::pull_frame_() {
+	auto outputs = active_outputs();
+	auto inputs = activated_inputs();
+	
 	MF_DEBUG("node::pull().... (time = ", time_, ")");
 	
 	time_unit time = -1;
-	for(node_output_base* output : outputs_) {
-		if(! output->is_active()) continue;
-		
-		time_unit t = output->begin_write();
+	for(node_output_base& output : outputs) {		
+		time_unit t = output.begin_write();
 		if(time == -1) time = t;
 		else if(time != t) throw std::runtime_error("wrong time");
 	}
 	// time = as requested by output (sequential, except when seeked)
 	
 	
-	for(node_input_base* input : inputs_) {		
-		input->begin_read(time);
+	for(node_input_base& input : inputs) {
+		input.begin_read(time);
 	}
 		
 	time_ = time;
 	
-	this->process_();
+	this->process();
 	
 	bool reached_end = false;
 
 	MF_DEBUG("node::pull(), before input end_read:\n", inputs_[0]->connected_output());
 
 
-	for(node_input_base* input : inputs_) {
-		input->end_read(time_);
-		if(input->reached_end()) { reached_end = true; }
+	for(node_input_base& input : inputs) {
+		input.end_read(time_);
+		if(input.reached_end()) { reached_end = true; }
 	}
 	// input reached end (after read) --> this was last frame
-	for(node_output_base* output : outputs_) {
-		output->end_write(reached_end);
+	for(node_output_base& output : outputs) {
+		output.end_write(reached_end);
 	}
 	
 	MF_DEBUG("node::pull() (t=", time_, ", end=", reached_end, "), \n", *outputs_[0]);
@@ -66,7 +67,7 @@ void node::launch() {
 
 
 node::node(time_unit prefetch) :
-	node_base(0) { }	
+	node_base() { }	
 
 node::~node() {
 	assert(! thread_.joinable());

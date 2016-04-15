@@ -19,11 +19,11 @@ public:
 	blender() :
 		output(*this), input1(*this), input2(*this) { }
 	
-	void setup_() override {
+	void setup() override {
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
-	void process_() override {
+	void process() override {
 		std::transform(
 			input1.view().begin(),
 			input1.view().end(),

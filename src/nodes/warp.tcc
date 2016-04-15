@@ -4,13 +4,13 @@
 namespace mf { namespace node {
 
 template<typename Color, typename Depth>
-void warp<Color, Depth>::setup_() {
+void warp<Color, Depth>::setup() {
 	output.define_frame_shape(image_input.frame_shape());
 }
 
 
 template<typename Color, typename Depth>
-void warp<Color, Depth>::process_() {
+void warp<Color, Depth>::process() {
 	Eigen_projective3 homography = homography_transformation(*input_camera, *output_camera);
 	
 	std::fill(output.view().begin(), output.view().end(), background_color);

@@ -6,6 +6,7 @@
 #include <atomic>
 #include <string>
 #include <ostream>
+#include <functional>
 #include "../common.h"
 #include "node_io_base.h"
 
@@ -17,15 +18,21 @@ protected:
 	std::vector<node_input_base*> inputs_; ///< Inputs of this node.
 	std::vector<node_output_base*> outputs_; ///< Outputs of this node.
 	
+	
+protected:
 	bool was_setup_ = false;
 
-	time_unit prefetch_duration_ = -1;
+	time_unit prefetch_duration_ = 0;
 	time_unit stream_duration_ = -1;
 	bool seekable_ = false;
 	time_unit offset_ = -1;
 
+	bool active_ = true; ///< True if any path with activated inputs connects node to graph sink.
 	std::atomic<time_unit> time_{-1}; ///< Time of last processed frame by this node.
 
+
+	std::vector<std::reference_wrapper<node_input_base>> activated_inputs();
+	std::vector<std::reference_wrapper<node_output_base>> active_outputs();
 
 	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
 
@@ -42,8 +49,8 @@ protected:
 	void propagate_output_buffer_durations_();
 		
 	/// Set up preceding nodes, and then this node.
-	/** Calls setup_() on concrete subclass, calls setup_() on outputs, and sets did_setup_. Does not re-initialize
-	 ** when did_setup_ is already set. */
+	/** Defines stream properties (duration, seekable) of preceding nodes and of this node, calls `setup()`, and 
+	 ** sets up outputs. */
 	void propagate_setup_();
 	
 	
@@ -72,7 +79,6 @@ public:
 	std::string name;
 	
 	bool was_setup() const { return was_setup_; }
-	bool was_launched() const { return was_launched_; }
 	
 	virtual void launch() { }
 	virtual void stop() { }
@@ -88,8 +94,13 @@ public:
 	/** Maximal number of frames that this node can be in advance relative to graph sink node. -1 when not yet defined.
 	 ** Gets computed in propagate_offset_(), during graph setup. Used to determine output buffer durations in graph. */
 	time_unit offset() const noexcept { return offset_; }
+	
+	/// Determine activation, based on succeeding nodes.
+	/** Called recursively from succeeding nodes, or from this node's outputs, when their connected input gets activated
+	 ** or desactivated. */
+	void propagate_activation();
 		
-	bool is_active() const;
+	bool is_active() const { return active_; }
 	
 	bool is_source() const { return (inputs_.size() == 0); }
 	bool is_sink() const { return (outputs_.size() == 0); }

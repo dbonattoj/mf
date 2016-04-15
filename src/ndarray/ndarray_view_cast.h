@@ -38,7 +38,6 @@ namespace detail {
 		}
 	};
 	
-	
 	// scalars from elem
 	template<std::size_t Dim, typename Input_elem>
 	struct ndarray_view_caster<

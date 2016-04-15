@@ -15,6 +15,8 @@ protected:
 	node_base& node_;
 	
 	time_unit required_buffer_duration_ = -1;
+	
+	bool input_activated_ = true;
 		
 public:
 	explicit node_output_base(node_base&);
@@ -31,7 +33,15 @@ public:
 	bool required_buffer_duration_is_defined() const { return (required_buffer_duration_ != -1); }	
 		
 	virtual bool frame_shape_is_defined() const = 0;
-		
+
+	/// Called by connected input when it is activated or desactivated.
+	/**  */
+	void propagate_activation(bool input_activated);
+	
+	bool input_is_activated() const { return input_activated_; }
+
+	bool is_active() const;
+	
 	#ifndef NDEBUG
 	virtual void debug_print(std::ostream&) const = 0;
 	#endif
@@ -45,7 +55,10 @@ protected:
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
 	
-	bool activated_ = false;
+	/// Whether input is currently activated.
+	/** Controlled by node using activate() and desactivate().
+	 ** If false, node will not receive frames from this input. Determines if preceding nodes in graph are active. */
+	bool activated_ = true;
 
 public:	
 	node_input_base(node_base&, time_unit past_window, time_unit future_window);
@@ -58,6 +71,8 @@ public:
 	virtual bool reached_end() const = 0;
 	
 	virtual node_output_base& connected_output() const = 0;
+	
+	bool is_activated() const { return activated_; }
 	
 	void activate();
 	void desactivate();

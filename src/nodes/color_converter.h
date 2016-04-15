@@ -18,11 +18,11 @@ public:
 	color_converter() :
 		output(*this), input(*this) { }
 	
-	void setup_() override {
+	void setup() override {
 		output.define_frame_shape(input.frame_shape());
 	}
 	
-	void process_() override {
+	void process() override {
 		std::transform(
 			input.view().begin(),
 			input.view().end(),

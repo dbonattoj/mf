@@ -1,8 +1,12 @@
 #ifndef MF_COMMON_H_
 #define MF_COMMON_H_
 
+#include <cstddef>
 #include <cassert>
-#include <cstdint>
+#include <exception>
+#include <stdexcept>
+
+#include <ostream>
 
 #include "ndarray/ndspan.h"
 #include "debug.h"

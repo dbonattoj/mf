@@ -5,11 +5,15 @@
 #include <cstdio>
 #include <ostream>
 #include <sstream>
+#include <string>
 
 namespace mf {
 	
 namespace detail {					
-	struct source_location {
+	struct debug_header {
+		std::string caption;
+		std::string separator;
+
 		const char* file;
 		int line;
 		const char* func;
@@ -27,47 +31,49 @@ namespace detail {
 	std::FILE* debug_stream();
 	debug_backtrace debug_get_backtrace();
 
-	inline void debug_print_part(std::ostream& str) { }	
+	inline void debug_print_part(std::ostream& str, const std::string& sep) { }	
 	
 	template<typename First_arg, typename... Args>
-	auto debug_print_part(std::ostringstream& str, const First_arg& first, const Args&... args)
+	auto debug_print_part(std::ostringstream& str, const std::string& sep, const First_arg& first, const Args&... args)
 		-> decltype(first.debug_print(str), void());
 	
 	template<typename First_arg, typename... Args>
-	auto debug_print_part(std::ostringstream& str, const First_arg& first, const Args&... args)
+	auto debug_print_part(std::ostringstream& str, const std::string& sep, const First_arg& first, const Args&... args)
 		-> decltype(str << first, void())
 	{
 		str << first;
-		debug_print_part(str, args...);
+		if(sizeof...(Args) > 0) str << sep;
+		debug_print_part(str, sep, args...);
 	}
 	
 	template<typename First_arg, typename... Args>
-	auto debug_print_part(std::ostringstream& str, const First_arg& first, const Args&... args)
+	auto debug_print_part(std::ostringstream& str, const std::string& sep, const First_arg& first, const Args&... args)
 		-> decltype(first.debug_print(str), void())
 	{
 		first.debug_print(str);
-		debug_print_part(str, args...);
+		if(sizeof...(Args) > 0) str << sep;
+		debug_print_part(str, sep, args...);
 	}
 	
-	std::string debug_head(const source_location& loc);
+	std::string debug_head(const debug_header&);
 	std::string debug_tail();
 	
 	template<typename... Args>
-	void debug_print(const source_location& loc, const Args&... args) {		
+	void debug_print(const debug_header& header, const Args&... args) {		
 		std::FILE* output = debug_stream();
 		if(! output) return;
 		
-		std::string head = debug_head(loc);
+		std::string head = debug_head(header);
 		std::string tail = debug_tail();
 
 		std::ostringstream str;			
-		debug_print_part(str, args...);
+		debug_print_part(str, header.separator, args...);
 
-		std::lock_guard<std::mutex> lock(debug_mutex());			
+		std::lock_guard<std::mutex> lock(debug_mutex());
 		std::fprintf(output, "%s%s%s\n", head.c_str(), str.str().c_str(), tail.c_str());
 	}
 	
-	void debug_print_backtrace(const source_location&, const debug_backtrace&);
+	void debug_print_backtrace(const debug_header&, const debug_backtrace&);
 }
 
 }

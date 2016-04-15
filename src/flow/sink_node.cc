@@ -3,21 +3,23 @@
 namespace mf { namespace flow {
 
 void sink_node::pull_frame_() {
+	auto inputs = activated_inputs();
+
 	MF_DEBUG("sink::pull().... (t=", time_, ")");
 	
 	// sink controlls time flow --> propagated to rest of graph
 	
 	time_++;
 
-	for(node_input_base* input : inputs_) {
-		input->begin_read(time_);
+	for(node_input_base& input : inputs) {
+		input.begin_read(time_);
 	}
 		
-	this->process_();
+	this->process();
 	
-	for(node_input_base* input : inputs_) {
-		input->end_read(time_);
-		if(input->reached_end()) reached_end_ = true;
+	for(node_input_base& input : inputs) {
+		input.end_read(time_);
+		if(input.reached_end()) reached_end_ = true;
 	}
 	
 	if(reached_end_) MF_DEBUG("sink: reached end!");
@@ -27,7 +29,7 @@ void sink_node::pull_frame_() {
 
 
 sink_node::sink_node() :
-	node_base(0) { }	
+	node_base() { }	
 
 
 void sink_node::setup_graph() {

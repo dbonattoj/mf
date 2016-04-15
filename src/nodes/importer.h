@@ -21,15 +21,15 @@ public:
 	explicit importer(Args&&... args) :
 		importer_(std::forward<Args>(args)...), output(*this) { }
 	
-	void setup_() override {
+	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void process_() override {
+	void process() override {
 		return importer_.read_frame(output.view());
 	}
 	
-	bool process_reached_end_() override {
+	bool reached_end() override {
 		return importer_.reached_end();
 	}
 };
