@@ -40,7 +40,8 @@ void sink_node::stop_graph() {
 }
 
 void sink_node::seek(time_unit t) {
-	time_ = t - 1;
+	if(is_seekable()) time_ = t - 1;
+	else throw std::logic_error("sink node is not seekable");
 }
 
 

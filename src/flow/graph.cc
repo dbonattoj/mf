@@ -2,14 +2,11 @@
 #include "node.h"
 #include "sink_node.h"
 #include "../debug.h"
+#include <limits>
 
 #include <iostream>
 
 namespace mf { namespace flow {
-
-
-graph::graph() {
-}
 
 
 graph::~graph() {
@@ -28,12 +25,14 @@ void graph::setup() {
 void graph::launch() {
 	if(running_) throw std::logic_error("graph is already running");
 	for(const auto& nd : nodes_) nd->launch();
+	running_ = true;
 }
 
 
 void graph::stop() {
 	if(! running_) throw std::logic_error("graph is not running");
 	for(const auto& nd : nodes_) nd->stop();
+	running_ = false;
 }
 
 
@@ -47,30 +46,26 @@ void graph::run_until(time_unit last_frame) {
 	
 	if(! running_) launch();
 	
-	while(sink_->current_time() < last_frame && !sink_->reached_end()) {
+	while(sink_->current_time() <= last_frame && !sink_->reached_end()) {
 		sink_->pull_next_frame();
 	}
 
 	MF_DEBUG("graph::reached end!");
 }
 
-void run_for(time_unit durgation) {
-	
+
+void graph::run_for(time_unit duration) {
+	run_until(current_time() + duration);
 }
 
 
 void graph::run() {
-	if(! setup_) throw std::logic_error("media graph not set up");
-	while(!sink_->reached_end()) {
-		sink_->pull_next_frame();
-	}
-
-	MF_DEBUG("graph::reached end!");
+	run_until(std::numeric_limits<time_unit>::max());
 }
 
 
-void seek(time_unit target_time) {
-	
+void graph::seek(time_unit target_time) {
+	sink_->seek(target_time);
 }
 
 

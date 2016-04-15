@@ -15,9 +15,7 @@ protected:
 	node_base& node_;
 	
 	time_unit required_buffer_duration_ = -1;
-	
-	bool active_ = true;
-	
+		
 public:
 	explicit node_output_base(node_base&);
 
@@ -33,12 +31,7 @@ public:
 	bool required_buffer_duration_is_defined() const { return (required_buffer_duration_ != -1); }	
 		
 	virtual bool frame_shape_is_defined() const = 0;
-	
-	bool is_active() const { return active_; }
-	
-	void activate() { active_ = true; }
-	void desactivate() { active_ = false; }
-
+		
 	#ifndef NDEBUG
 	virtual void debug_print(std::ostream&) const = 0;
 	#endif
@@ -51,6 +44,8 @@ class node_input_base {
 protected:
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
+	
+	bool activated_ = false;
 
 public:	
 	node_input_base(node_base&, time_unit past_window, time_unit future_window);
@@ -63,6 +58,9 @@ public:
 	virtual bool reached_end() const = 0;
 	
 	virtual node_output_base& connected_output() const = 0;
+	
+	void activate();
+	void desactivate();
 };
 
 

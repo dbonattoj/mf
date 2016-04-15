@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <cmath>
 
 #include "ndarray/ndspan.h"
 #include "debug.h"
@@ -13,11 +12,12 @@ namespace mf {
 
 
 /// Real number type.
-using real = std::float_t;
+using real = float;
 
 
 /// Discrete time unit type.
 using time_unit = std::ptrdiff_t;
+ 
 
 
 class time_span : public ndspan<1, time_unit> {

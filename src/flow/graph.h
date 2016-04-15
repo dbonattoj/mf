@@ -22,7 +22,6 @@ private:
 	bool running_ = false;
 
 public:
-	graph();
 	~graph();
 
 	template<typename Node, typename... Args>
