@@ -68,6 +68,7 @@ public:
 
 	virtual void begin_read(time_unit t) = 0;
 	virtual void end_read(time_unit t) = 0;
+	virtual void skip(time_unit t) = 0;
 	virtual bool reached_end() const = 0;
 	
 	virtual node_output_base& connected_output() const = 0;

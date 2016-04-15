@@ -51,6 +51,7 @@ public:
 		MF_DEBUG("output::begin_write()....");
 		
 		// not active: take out 1 frame first
+		// --> in other thread
 		if(! is_active() && ring().readable_duration() >= 1) ring().skip(1);
 		
 		

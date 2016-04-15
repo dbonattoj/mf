@@ -42,6 +42,13 @@ public:
 	/** Recursively pulls frame from connected node. View to the frame becomes available via view(), and to whole
 	 ** window via full_view(). */
 	void begin_read(time_unit t) override;
+
+	/// Skip the frame at time \a t.
+	void skip(time_unit t) override {
+		// don't skip/seek frames from inactive node outputs --> they don't get written into
+		// propagate to semi-active output, and skip there
+		
+	}
 	
 	/// Must be called after frame has been processed.
 	/** Called after begin_read(). View is becomes longer available. reached_end() becomes true if this

@@ -46,7 +46,7 @@ void graph::run_until(time_unit last_frame) {
 	
 	if(! running_) launch();
 	
-	while(sink_->current_time() <= last_frame && !sink_->reached_end()) {
+	while(sink_->current_time() < last_frame && !sink_->reached_end()) {
 		sink_->pull_next_frame();
 	}
 
