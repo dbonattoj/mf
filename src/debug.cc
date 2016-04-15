@@ -24,7 +24,7 @@ namespace {
 	std::ptrdiff_t next_thread_color_ = 0;
 	
 	std::mutex mutex_;
-	debug_mode mode_ = debug_mode::cerr;
+	debug_mode mode_ = debug_mode::file;
 	
 	std::string filename_ = "debug.txt";
 	
@@ -131,7 +131,8 @@ void set_debug_mode(debug_mode mode) {
 	mode_ = mode;
 }
 
-void initialize_debug() {
+void initialize_debug(
+) {
 	#ifdef MF_OS_LINUX
 	//std::set_terminate(&terminate_handler_);
 	::signal(SIGSEGV, &signal_handler_);

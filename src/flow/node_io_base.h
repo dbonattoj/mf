@@ -28,6 +28,9 @@ public:
 	virtual time_unit begin_write() = 0;
 	virtual void end_write(bool is_last_frame) = 0;
 
+	virtual void skip(time_unit t) = 0;
+
+
 	void define_required_buffer_duration(time_unit dur) { required_buffer_duration_ = dur; }
 	time_unit required_buffer_duration() const { return required_buffer_duration_; }
 	bool required_buffer_duration_is_defined() const { return (required_buffer_duration_ != -1); }	
@@ -78,6 +81,7 @@ public:
 	
 	void activate();
 	void desactivate();
+	void set_activated(bool a) { if(a) activate(); else desactivate(); }
 };
 
 

@@ -9,12 +9,14 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
+	set_debug_mode(debug_mode::cerr);
+	
 	flow::graph gr;
 	auto shp = make_ndsize(320, 240);
 
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
-/*
+
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
@@ -23,11 +25,13 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-*/	
+
 	
 	SECTION("input activation") {
 		const std::vector<int>& seq { 0, 1, 2, noframe, noframe, noframe, 6, 7, noframe, noframe, 10 };
-		
+		const std::vector<bool>& act { 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1 };
+
+
 		SECTION("source -> sink") {
 			auto& source = gr.add_node<sequence_frame_source>(10, shp, true);
 			auto& sink = gr.add_sink<expected_frames_sink>(seq);
@@ -45,10 +49,22 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 			gr.run();
 			REQUIRE(sink.check());
 		}
+	
+		SECTION("source -> passthrough -> sink") {
+			auto& source = gr.add_node<sequence_frame_source>(10, shp, true);
+			auto& passthrough = gr.add_node<passthrough_node>(0, 0);
+			auto& sink = gr.add_sink<expected_frames_sink>(seq);
+			passthrough.input.connect(source.output);
+			sink.input.connect(passthrough.output);
+			passthrough.activation = act;
+			gr.setup();
+			gr.launch();
+			gr.run();
+			REQUIRE(sink.check());
+		}
+		
 	}
-
-	return;
-
+	
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& passthrough = gr.add_node<passthrough_node>(0, 0);
@@ -59,7 +75,7 @@ TEST_CASE("media_graph_seekable", "[media_graph][seek]") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-
+	
 	SECTION("detailled time window test") { 
  		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
 		auto& source = gr.add_node<sequence_frame_source>(5, shp, true);		

@@ -46,14 +46,10 @@ public:
 	frame_view_type& view() { MF_ASSERT(view_available_); return view_; }
 	
 	bool view_is_available() const { return view_available_; }
-	
+		
 	time_unit begin_write() override {
 		MF_DEBUG("output::begin_write()....");
-		
-		// not active: take out 1 frame first
-		// --> in other thread
-		if(! is_active() && ring().readable_duration() >= 1) ring().skip(1);
-		
+				
 		
 		auto view = ring().begin_write(1);
 		if(view.duration() != 1) throw std::runtime_error("output at end");
@@ -73,6 +69,10 @@ public:
 		}
 		MF_DEBUG("output::end_write()");
 		view_available_ = false;
+	}
+		
+	void skip(time_unit t) override {
+		ring().skip(1);
 	}
 
 	#ifndef NDEBUG

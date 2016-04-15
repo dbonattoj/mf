@@ -19,6 +19,7 @@ namespace mf { namespace test {
 
 constexpr int noframe = -2;
 
+
 class sequence_frame_source : public flow::source_node {
 private:
 	time_unit last_frame_;
@@ -58,7 +59,7 @@ public:
 	
 	void process() override {
 		int index;
-		if(input.is_activated()) index = frame_index(input.view());
+		if(input.view_is_available()) index = frame_index(input.view());
 		else index = noframe;
 		got_frames_.push_back(index);
 	}
@@ -87,16 +88,26 @@ private:
 		output.define_frame_shape(input.frame_shape());	
 	}
 	
+	void pre_process() override {
+		if(time_ < activation.size()) input.set_activated(activation[time_]);
+		else input.set_activated(true);
+	}
+	
 	void process() override {
 		if(callback_) callback_(*this, input, output);
-		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
-		if(input.is_activated()) output.view() = input.view();
-		else output.view() = make_frame(input.frame_shape(), noframe);
+		if(input.view_is_available()) {
+			if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
+			output.view() = input.view();
+		} else {
+			output.view() = make_frame(input.frame_shape(), noframe);
+		}
 	}
 	
 public:
 	input_type<2, int> input;
 	output_type<2, int> output;
+	
+	std::vector<bool> activation;
 
 	passthrough_node(time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
 		flow::node(prefetch),

@@ -116,15 +116,21 @@ void node_base::propagate_activation() {
 
 	// this node is active if any of its outputs are active
 	// an output is active, if its connected input is activated AND the connected node is active
-	active_ = std::any_of(
+	
+	bool now_active = std::any_of(
 		outputs_.cbegin(), outputs_.cend(),
 		[](node_output_base* output) { return output->is_active(); }
 	);
 
-	// now set activation of preceeding nodes
-	for(node_input_base* input : inputs_) {
-		node_base& connected_node = input->connected_output().node();
-		connected_node.propagate_activation();
+	if(now_active != active_) {
+		active_ = now_active;
+
+		// now set activation of preceeding nodes
+		for(node_input_base* input : inputs_) {
+			node_base& connected_node = input->connected_output().node();
+			connected_node.propagate_activation();
+		}
+	
 	}
 }
 

@@ -47,7 +47,7 @@ public:
 	void skip(time_unit t) override {
 		// don't skip/seek frames from inactive node outputs --> they don't get written into
 		// propagate to semi-active output, and skip there
-		
+		connected_output().skip(t);
 	}
 	
 	/// Must be called after frame has been processed.
@@ -63,7 +63,7 @@ public:
 	
 	/// Get readable view of current frame.
 	/** Only callable while in media_node::process_(). */
-	frame_view_type view() const { assert(view_available_); return view_[view_center_]; }
+	frame_view_type view() const { MF_ASSERT(view_available_); return view_[view_center_]; }
 	
 	const full_view_type& full_view() const { assert(view_available_); return view_; }	
 	std::ptrdiff_t full_view_center() const { return view_center_; }

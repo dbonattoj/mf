@@ -3,7 +3,6 @@
 namespace mf { namespace flow {
 
 void sink_node::pull_frame_() {
-	auto inputs = activated_inputs();
 
 	MF_DEBUG("sink::pull().... (t=", time_, ")");
 	
@@ -13,16 +12,22 @@ void sink_node::pull_frame_() {
 	
 	if(time_ == stream_duration_) { reached_end_ = true; return; }
 
-	for(node_input_base& input : inputs) {
-		assert(! input.reached_end());
-		input.begin_read(time_);
+	for(node_input_base* input : inputs_) {
+		assert(! input->reached_end());
+		
+		if(input->is_activated())
+			input->begin_read(time_);
+		else
+			input->skip(time_);
 	}
 		
 	this->process();
 	
-	for(node_input_base& input : inputs) {
-		input.end_read(time_);
-		if(input.reached_end()) reached_end_ = true;
+	for(node_input_base* input : inputs_) {
+		if(input->is_activated())
+			input->end_read(time_);
+			
+		if(input->reached_end()) reached_end_ = true;
 	}
 	
 	if(reached_end_) MF_DEBUG("sink: reached end!");
