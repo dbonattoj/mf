@@ -46,7 +46,13 @@ public:
 	}
 };
 
+// node active when 1+ output active
+// active node always produces output to all its outputs,
+// even if input(s) desactivated
 
+// node:   active/inactive
+// input:  activated/desactivated
+// output: active/inactive (still pulls/skips)
 
 class passthrough_node : public flow::node {
 public:
@@ -94,20 +100,21 @@ public:
 
 class expected_frames_sink : public flow::sink_node {
 private:
-	const std::vector<int> expected_frames_;
 	std::vector<int> got_frames_;
 	
 public:
+	std::vector<int> expected_frames;
 	input_type<2, int> input;
 
 	std::vector<bool> activation;
 	
 	explicit expected_frames_sink(const std::vector<int>& seq) :
-		expected_frames_(seq), input(*this) { }
+		expected_frames(seq), input(*this) { }
 	
 	void pre_process() override {
-		MF_DEBUG("activation at t=", time_, " : ", activation[time_]);
-		if(time_ < activation.size()) input.set_activated(activation[time_]);
+		if(time_ < activation.size()) {
+			input.set_activated(activation[time_]);
+		}
 	}
 	
 	void process() override {
@@ -118,13 +125,13 @@ public:
 	}
 
 	bool check() const {
-		bool ok = (expected_frames_ == got_frames_);
+		bool ok = (expected_frames == got_frames_);
 		if(! ok) print();
 		return ok;
 	}
 	
 	void print() const {
-		std::cout << "expected: {" << to_string(expected_frames_.begin(), expected_frames_.end()) << "}\n"
+		std::cout << "expected: {" << to_string(expected_frames.begin(), expected_frames.end()) << "}\n"
 		          << "     got: {" << to_string(got_frames_.begin(), got_frames_.end()) << "}" << std::endl;
 	}
 };
@@ -157,15 +164,23 @@ public:
 	}
 	
 	void process() override {
-		if(input1.is_activated() && frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
-		if(input2.is_activated() && frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
+		std::cout << "time " << time_ << std::endl;
+		std::cout << "1: av:" << input1.view_is_available() << ", act:" << input1.is_activated() << std::endl;
+		std::cout << "2: av:" << input2.view_is_available() << ", act:" << input2.is_activated() << std::endl;
+		std::cout << "////////////" << std::endl;
+		
+		if(input1.view_is_available() && frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
+		if(input2.view_is_available() && frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
 
-		if(input1.is_activated() && input2.is_activated()) {
-			if(input1.view() != input2.view()) failed_ = true;
+		if(input1.view_is_available() && input2.view_is_available()) {
+			if(input1.view() != input2.view()) {
+				std::cout << "////////////////////////////////////// " << frame_index(input1.view()) << " <--> " << frame_index(input2.view()) << std::endl;
+				failed_ = true;
+			}
 			output.view() = input1.view();
-		} else if(input1.is_activated()) {
+		} else if(input1.view_is_available()) {
 			output.view() = input1.view();
-		} else if(input2.is_activated()) {
+		} else if(input2.view_is_available()) {
 			output.view() = input2.view();
 		} else {
 			output.view() = make_frame(input1.frame_shape(), noframe);
