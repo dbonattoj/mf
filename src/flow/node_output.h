@@ -28,7 +28,7 @@ public:
 	bool view_available_ = false;
 	frame_view_type view_;
 	
-public:
+public:	
 	explicit node_output(node_base& nd) :
 		node_output_base(nd) { }
 		
@@ -43,7 +43,7 @@ public:
 		
 	ring_type& ring() { return *buffer_; }
 	
-	frame_view_type& view() { MF_ASSERT(view_available_); return view_; }
+	frame_view_type& view() { MF_ASSERT(view_available_, "view not available"); return view_; }
 	
 	bool view_is_available() const { return view_available_; }
 		
@@ -57,6 +57,10 @@ public:
 		MF_DEBUG("output::begin_write() --> ", view.span(), " t=", view.start_time());
 		view_available_ = true;
 		return view.start_time();
+	}
+	
+	void didnt_write() override {
+		ring().end_write(0);
 	}
 	
 	void end_write(bool is_last_frame) override {

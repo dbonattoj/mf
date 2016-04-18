@@ -170,4 +170,132 @@ TEST_CASE("ndarray_timed_ring", "[ndarray_timed_ring]") {
 		REQUIRE(ring.read_start_time() == 12);
 		REQUIRE(ring.write_start_time() == 12);
 	}
+	
+	
+	SECTION("seek") {
+		// write frames [0, 3[
+		auto w_section(ring.begin_write(3));
+		w_section[0] = make_frame(shape, 0);
+		w_section[1] = make_frame(shape, 1);
+		w_section[2] = make_frame(shape, 2);
+		ring.end_write(3);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 0);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(0, 3));
+		REQUIRE(ring.readable_duration() == 3);
+		REQUIRE(ring.writable_time_span() == time_span(3, 10));
+		REQUIRE(ring.writable_duration() == 7);
+
+		// seek to 1 (--> short seek)
+		ring.seek(1);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 1);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(1, 3));
+		REQUIRE(ring.readable_duration() == 2);
+		REQUIRE(ring.writable_time_span() == time_span(3, 11));
+		REQUIRE(ring.writable_duration() == 8);
+		
+		// seek to 0 (--> long seek)
+		ring.seek(0);
+		REQUIRE(ring.current_time() == -1);
+		REQUIRE(ring.read_start_time() == 0);
+		REQUIRE(ring.write_start_time() == 0);
+		REQUIRE(ring.readable_time_span() == time_span(0, 0));
+		REQUIRE(ring.readable_duration() == 0);
+		REQUIRE(ring.writable_time_span() == time_span(0, 10));
+		REQUIRE(ring.writable_duration() == 10);
+
+		// seek to 3 (--> long seek)
+		ring.seek(3);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 3);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(3, 3));
+		REQUIRE(ring.readable_duration() == 0);
+		REQUIRE(ring.writable_time_span() == time_span(3, 13));
+		REQUIRE(ring.writable_duration() == 10);
+		
+		// seek to 3 (--> noop)
+		ring.seek(3);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 3);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(3, 3));
+		REQUIRE(ring.readable_duration() == 0);
+		REQUIRE(ring.writable_time_span() == time_span(3, 13));
+		REQUIRE(ring.writable_duration() == 10);
+
+		// seek to 30 (--> long seek)
+		ring.seek(30);
+		REQUIRE(ring.current_time() == 29);
+		REQUIRE(ring.read_start_time() == 30);
+		REQUIRE(ring.write_start_time() == 30);
+		REQUIRE(ring.readable_time_span() == time_span(30, 30));
+		REQUIRE(ring.readable_duration() == 0);
+		REQUIRE(ring.writable_time_span() == time_span(30, 40));
+		REQUIRE(ring.writable_duration() == 10);
+
+		// seek to 1 (--> long seek)
+		ring.seek(1);
+		REQUIRE(ring.current_time() == 0);
+		REQUIRE(ring.read_start_time() == 1);
+		REQUIRE(ring.write_start_time() == 1);
+		REQUIRE(ring.readable_time_span() == time_span(1, 1));
+		REQUIRE(ring.readable_duration() == 0);
+		REQUIRE(ring.writable_time_span() == time_span(1, 11));
+		REQUIRE(ring.writable_duration() == 10);
+	}
+	
+	
+	SECTION("zero read/write") {
+		// write frames [0, 3[
+		auto w_section(ring.begin_write(3));
+		w_section[0] = make_frame(shape, 0);
+		w_section[1] = make_frame(shape, 1);
+		w_section[2] = make_frame(shape, 2);
+		ring.end_write(3);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 0);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(0, 3));
+		REQUIRE(ring.readable_duration() == 3);
+		REQUIRE(ring.writable_time_span() == time_span(3, 10));
+		REQUIRE(ring.writable_duration() == 7);
+
+		// read none, out of [0, 2[
+		auto r_section(ring.begin_read_span(time_span(0, 2)));
+		ring.end_read(0);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 0);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(0, 3));
+		REQUIRE(ring.readable_duration() == 3);
+		REQUIRE(ring.writable_time_span() == time_span(3, 10));
+		REQUIRE(ring.writable_duration() == 7);
+
+
+		// write none, out of [3, 5[
+		w_section.reset(ring.begin_write(2));
+		ring.end_write(0);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 0);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(0, 3));
+		REQUIRE(ring.readable_duration() == 3);
+		REQUIRE(ring.writable_time_span() == time_span(3, 10));
+		REQUIRE(ring.writable_duration() == 7);
+		
+		// read none, out of [1, 3[, skips 1
+		r_section.reset(ring.begin_read_span(time_span(1, 3)));
+		ring.end_write(0);
+		REQUIRE(ring.current_time() == 2);
+		REQUIRE(ring.read_start_time() == 1);
+		REQUIRE(ring.write_start_time() == 3);
+		REQUIRE(ring.readable_time_span() == time_span(1, 3));
+		REQUIRE(ring.readable_duration() == 2);
+		REQUIRE(ring.writable_time_span() == time_span(3, 11));
+		REQUIRE(ring.writable_duration() == 8);
+	}
 }

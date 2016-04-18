@@ -170,4 +170,33 @@ TEST_CASE("ndarray_ring", "[ndarray_ring]") {
 		REQUIRE(ring.writable_duration() == 14);
 		REQUIRE(ring.readable_duration() == 0);
 	}
+	
+	
+	SECTION("zero read/write") {
+		// write frames 0, 1, 2
+		auto w_section(ring.begin_write(3));
+		w_section[0] = make_frame(shape, 0);
+		w_section[1] = make_frame(shape, 1);
+		w_section[2] = make_frame(shape, 2);
+		ring.end_write(3);
+		REQUIRE(ring.writable_duration() == 11);
+		REQUIRE(ring.readable_duration() == 3);
+
+		// read none, out of 0, 1
+		auto r_section(ring.begin_read(2));
+		ring.end_read(0);
+		REQUIRE(ring.writable_duration() == 11);
+		REQUIRE(ring.readable_duration() == 3);
+
+		// write none, out of 3, 4
+		w_section.reset(ring.begin_write(2));
+		ring.end_write(0);
+		REQUIRE(ring.writable_duration() == 11);
+		REQUIRE(ring.readable_duration() == 3);
+		
+		// skip none
+		ring.skip(0);
+		REQUIRE(ring.writable_duration() == 11);
+		REQUIRE(ring.readable_duration() == 3);
+	}
 }

@@ -18,7 +18,7 @@ public:
 	using output_type = node_output<Dim, T>;
 	
 	using frame_view_type = ndarray_view<Dim, T>;
-	using full_view_type = ndarray_view<Dim + 1, T>;
+	using full_view_type = ndarray_timed_view<Dim + 1, T>;
 	using frame_shape_type = typename frame_view_type::shape_type;	
 
 private:
@@ -63,7 +63,7 @@ public:
 	
 	/// Get readable view of current frame.
 	/** Only callable while in media_node::process_(). */
-	frame_view_type view() const { MF_ASSERT(view_available_); return view_[view_center_]; }
+	frame_view_type view() const { MF_ASSERT(view_available_, "view not available"); return view_[view_center_]; }
 	
 	const full_view_type& full_view() const { assert(view_available_); return view_; }	
 	std::ptrdiff_t full_view_center() const { return view_center_; }

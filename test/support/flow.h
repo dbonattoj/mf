@@ -32,10 +32,12 @@ public:
 		flow::source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
 	
 	void setup() override {
+		std::cout << "-------------"<< std::endl;
 		output.define_frame_shape(frame_shape_);
 	}
 	
 	void process() override {
+		std::cout << "source: t="  << current_time() << std::endl;
 		output.view() = make_frame(frame_shape_, current_time());
 	}
 	
@@ -137,6 +139,9 @@ public:
 	input_type<2, int> input2;
 	output_type<2, int> output;
 	
+	std::vector<bool> activation1;
+	std::vector<bool> activation2;
+	
 	input_synchronize_test_node(time_unit prefetch = 0) :
 		flow::node(prefetch),
 		input1(*this), input2(*this), output(*this) { }
@@ -145,12 +150,25 @@ public:
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
-	void process() override {		
-		if(frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
-		if(frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
+	void pre_process() override {
+		if(time_ < activation1.size()) input1.set_activated(activation1[time_]);
+		if(time_ < activation2.size()) input2.set_activated(activation2[time_]);
+	}
+	
+	void process() override {
+		if(input1.is_activated() && frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
+		if(input2.is_activated() && frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
 
-		if(input1.view() != input2.view()) failed_ = true;
-		output.view() = input1.view();
+		if(input1.is_activated() && input2.is_activated()) {
+			if(input1.view() != input2.view()) failed_ = true;
+			output.view() = input1.view();
+		} else if(input1.is_activated()) {
+			output.view() = input1.view();
+		} else if(input2.is_activated()) {
+			output.view() = input2.view();
+		} else {
+			output.view() = make_frame(input1.frame_shape(), noframe);
+		}
 	}
 	
 	bool failed() const { return failed_; }

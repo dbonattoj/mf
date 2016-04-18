@@ -17,6 +17,9 @@ T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept;
 template<typename T>
 T clamp(T value, T minimum, T maximum);
 
+template<typename T>
+T gcd(T a, T b);
+
 }
 
 #include "misc.tcc"

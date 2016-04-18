@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 
 namespace mf {
 
@@ -252,7 +253,7 @@ void ndarray_shared_ring<Dim, T>::skip_available_(time_unit skip_duration) {
 		std::lock_guard<std::mutex> lock(mutex_);
 		assert(skip_duration <= ring_.readable_duration()); // ...can only skip frames that are already readable
 		ring_.skip(skip_duration);
-		read_start_time_ += skip_duration;
+		read_start_time_ = ring_.read_start_time();
 	}
 	writable_cv_.notify_one(); // ...notify condition variable: more writable frames have become available
 }
@@ -270,6 +271,10 @@ void ndarray_shared_ring<Dim, T>::seek(time_unit t) {
 	if(! seekable_) throw std::logic_error("ring buffer is not seekable");
 	if(end_time_ == -1) throw std::logic_error("cannot seek when end time is not defined");
 	if(t > end_time_) throw std::invalid_argument("cannot seek beyond end");
+
+	// no need to do anything if already at time t
+	if(t == read_start_time_) return;
+
 
 	// lock the mutex
 	// writer will not start or end while locked, and readable time span will not change

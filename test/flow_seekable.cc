@@ -44,7 +44,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 
-		SECTION("source [-3]--> pass --> sink") {
+		SECTION("source --> [-3]pass --> sink") {
 			auto& node = gr.add_node<passthrough_node>(3, 0);
 	
 			node.input.connect(source.output);
@@ -97,7 +97,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		}
 	
 
-		SECTION("source [+3]--> pass --> sink") {
+		SECTION("source --> [+3]pass --> sink") {
 			auto& node = gr.add_node<passthrough_node>(0, 3);
 	
 			node.input.connect(source.output);
@@ -150,7 +150,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		}
 
 
-		SECTION("source [-3,+3]--> sink") {
+		SECTION("source --> [-3,+3]pass --> sink") {
 			auto& node = gr.add_node<passthrough_node>(3, 3);
 	
 			node.input.connect(source.output);

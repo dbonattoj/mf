@@ -32,6 +32,8 @@ void node_input<Dim, T>::begin_read(time_unit t) {
 		view_center_ = past_window_;
 	}
 
+	connected_output_->node().time_limit_ = requested_span.end_time() + connected_output_->node().prefetch_duration_;
+
 	auto view = connected_output_->ring().begin_read_span(requested_span);
 	assert(view.shape().front() <= requested_span.duration());
 	view_.reset(view);

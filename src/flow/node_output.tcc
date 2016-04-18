@@ -1,6 +1,8 @@
 #include <sstream>
 #include "node_output.h"
 
+#include <iostream>
+
 namespace mf { namespace flow {
 
 template<std::size_t Dim, typename T>

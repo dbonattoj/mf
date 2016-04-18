@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <exception>
 
+#include <thread>
+#include <chrono>
+using namespace std::chrono;
+
 namespace mf { namespace flow {
 
 void source_node::thread_main_() {
@@ -20,6 +24,8 @@ void source_node::pull_frame_() {
 	
 	if(stream_duration() != -1 && time_ == stream_duration()-1) return;
 	
+	//std::this_thread::sleep_for(400ms);
+	
 	auto outputs = all_outputs();
 	
 	MF_DEBUG("source::pull().... (t=", time_, ")");
@@ -32,6 +38,14 @@ void source_node::pull_frame_() {
 	}
 	
 	time_ = time;
+	
+	if(time_ > time_limit_) {
+		MF_DEBUG("source::nowrite, ", time_, " > ", time_limit_);
+		for(node_output_base& output : outputs) {
+			output.didnt_write();
+		}
+		return;
+	}
 
 	if(stream_duration() != -1)
 		assert(time < stream_duration()); // seek must have respected stream duration of this node

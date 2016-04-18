@@ -30,8 +30,8 @@ private:
 	time_unit read_position_ = 0;
 	time_unit write_position_ = 0;
 	bool full_ = false;
-	
-	static std::size_t adjust_padding_(const ndsize<Dim>& spatial_shape, time_unit duration); 
+		
+	static std::size_t adjust_padding_(const ndsize<Dim>& spatial_shape, std::size_t duration); 
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:

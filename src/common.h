@@ -14,14 +14,14 @@
 
 
 #ifndef NDEBUG
-	#define MF_ASSERT(condition) \
+	#define MF_ASSERT(condition, caption) \
 		if(!(condition)) { \
-			MF_DEBUG_BACKTRACE("assertion failed: `" #condition "`"); \
+			MF_DEBUG_BACKTRACE("assertion failed: " caption); \
 			std::abort(); \
 		}
 		
 #else
-	#define MF_ASSERT(condition) ((void)0)
+	#define MF_ASSERT(condition, caption) ((void)0)
 #endif
 
 

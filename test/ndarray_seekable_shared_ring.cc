@@ -9,7 +9,7 @@ using namespace mf;
 using namespace mf::test;
 using namespace std::literals;
 
-TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable][parallel]") {
+TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable]") {
 	ndsize<2> shape{320, 240};
 	std::size_t duration = 5;
 	bool reaches_eof;
@@ -63,6 +63,13 @@ TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable][paral
 		REQUIRE(ring.current_time() >= 8);
 		REQUIRE(ring.write_start_time() >= 9);
 		REQUIRE(ring.read_start_time() == 9);
+	
+		// skip 0 frames
+		ring.skip(0);
+		REQUIRE(ring.current_time() >= 8);
+		REQUIRE(ring.write_start_time() >= 9);
+		REQUIRE(ring.read_start_time() == 9);
+//ring.debug_print(std::cout);
 								
 		// read 3 frames (9, 10, 11), request 5
 		r_section.reset(ring.begin_read(5));
@@ -74,6 +81,13 @@ TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable][paral
 		REQUIRE(ring.current_time() >= 13);
 		REQUIRE(ring.write_start_time() >= 14);
 		REQUIRE(ring.read_start_time() == 12);
+		
+		// read 0 frames, request 3
+		r_section.reset(ring.begin_read(3));
+		ring.end_read(0);
+		REQUIRE(ring.current_time() >= 13);
+		REQUIRE(ring.write_start_time() >= 14);
+		REQUIRE(ring.read_start_time() == 12);		
 			
 		// read frames (20, 21)
 		// skip previous (--> seek, necessarily because inbetween frames don't fit in buffer capacity)

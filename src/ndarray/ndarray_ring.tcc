@@ -4,6 +4,7 @@
 #include "../utility/memory.h"
 
 namespace mf {
+	
 
 template<std::size_t Dim, typename T>
 ndarray_ring<Dim, T>::ndarray_ring(const ndsize<Dim>& frame_shape, time_unit duration) :
@@ -15,19 +16,41 @@ ndarray_ring<Dim, T>::ndarray_ring(const ndsize<Dim>& frame_shape, time_unit dur
 
 
 template<std::size_t Dim, typename T>
-std::size_t ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, time_unit duration) {
-	// sizeof(T) already includes necessary padding, so that packed array respects alignment
-	static_assert(sizeof(T) % alignof(T) != 0, "sizeof(T) if not a multiple of alignof(T)");
-
+std::size_t ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, std::size_t duration) {
 	std::size_t frame_size = frame_shape.product() * sizeof(T);
 	std::size_t page_size = system_page_size();
-		
-	std::size_t frame_padding_unit = alignof(T);
-	std::size_t frame_padding = 0;
-	while( (duration * (frame_size + frame_padding)) % page_size != 0 )
-		frame_padding += frame_padding_unit;
-		
-	return frame_padding;
+
+	constexpr std::size_t a = alignof(T);
+
+	// will compute minimal padding frame_padding (bytes to insert between frames)
+	// such that duration * (frame_size + frame_padding) is a multiple of page_size
+	//       and (frame_size + frame_padding) is a multiple of a
+	
+	// frame_size and page_size are necessarily multiples of a, because:
+	//    a and page_size are both powers of 2,
+	//    page_size >>> a,
+	//    and sizeof(T) is always multiple of a
+	// need to make frame_padding also multiple of a
+	// --> count in units a
+	
+	static_assert(sizeof(T) % a == 0, "sizeof(T) is not a multiple of alignof(T)");
+	
+	MF_ASSERT(frame_size % a == 0, "frame size not multiple of alignof(T)");
+	MF_ASSERT(page_size % a == 0, "system page size not multiple of alignof(T)");
+	
+	std::size_t frame_size_a = frame_size / a;
+	std::size_t page_size_a = page_size / a;
+	// duration * (frame_size_a + frame_padding_a) must be multiple of page_size_a
+	
+	std::size_t d = page_size_a / gcd(page_size_a, duration);	
+	// --> (frame_size_a + frame_padding_a) must be multiple of d
+	// d is a power of 2
+	// d = factors 2 that are missing in duration for it to be multiple of page_size_a
+	
+	// if frame_size_a is already multiple of d, no padding is needed
+	std::size_t r = frame_size_a % d;
+	if(r == 0) return 0;
+	else return (d - r) * a;
 }
 
 
@@ -103,8 +126,8 @@ void ndarray_ring<Dim, T>::end_read(time_unit read_duration) {
 template<std::size_t Dim, typename T>
 void ndarray_ring<Dim, T>::skip(time_unit duration) {
 	// no check whether duration > total_duration: unlike begin_read/write, the data to skip will not be accessed
-	// from a view, and subclass (shared) can skip more than the buffer capacity
-	if(duration > readable_duration()) throw sequencing_error("skip duration larger than readable frames");
+	if(duration == 0) return;
+	if(duration > readable_duration()) throw std::invalid_argument("skip duration larger than readable frames");
 	read_position_ = (read_position_ + duration) % total_duration();
 	full_ = false;
 }

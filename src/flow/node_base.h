@@ -19,7 +19,7 @@ protected:
 	std::vector<node_output_base*> outputs_; ///< Outputs of this node.
 	
 	
-protected:
+public:
 	bool was_setup_ = false;
 
 	time_unit prefetch_duration_ = 0;
@@ -29,6 +29,9 @@ protected:
 
 	bool active_ = true; ///< True if any path with activated inputs connects node to graph sink.
 	std::atomic<time_unit> time_{-1}; ///< Time of last processed frame by this node.
+	
+	
+	std::atomic<time_unit> time_limit_{-1};
 
 	std::vector<std::reference_wrapper<node_input_base>> activated_inputs();
 	std::vector<std::reference_wrapper<node_output_base>> all_outputs();

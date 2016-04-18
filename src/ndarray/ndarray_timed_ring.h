@@ -17,6 +17,8 @@ private:
 	time_unit start_time_;
 	
 public:
+	ndarray_timed_view() : base(), start_time_(-1) { }
+
 	explicit ndarray_timed_view(time_unit start_time) :
 		base(), start_time_(start_time) { }
 

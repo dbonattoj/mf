@@ -28,6 +28,8 @@ public:
 	virtual time_unit begin_write() = 0;
 	virtual void end_write(bool is_last_frame) = 0;
 
+	virtual void didnt_write() = 0;
+
 	virtual void skip(time_unit t) = 0;
 
 

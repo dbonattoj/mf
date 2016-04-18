@@ -1,5 +1,6 @@
 #include <sstream>
 #include <typeinfo>
+#include <algorithm>
 
 namespace mf {
 
@@ -17,6 +18,20 @@ inline T clamp(T value, T minimum, T maximum) {
 	if(value > maximum) value = maximum;
 	else if(value < minimum) value = minimum;
 	return value;
+}
+
+
+template<typename T>
+T gcd(T a, T b) {
+	if(a < b) std::swap(a, b);
+	
+	while(b > 0) {
+		T c = a % b;
+		a = b;
+		b = c;
+	}
+	
+	return a;
 }
 
 

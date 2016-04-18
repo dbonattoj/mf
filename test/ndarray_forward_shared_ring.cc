@@ -52,6 +52,12 @@ TEST_CASE("ndarray_shared_ring_forward", "[ndarray_shared_ring][parallel]") {
 		REQUIRE(ring.write_start_time() >= 5);
 		REQUIRE(ring.read_start_time() == 5);
 	
+		// skip 0 frames
+		ring.skip(0);
+		REQUIRE(ring.current_time() >= 4);
+		REQUIRE(ring.write_start_time() >= 5);
+		REQUIRE(ring.read_start_time() == 5);
+	
 		// try to read frames span (4, 5, 6) (already passed)
 		REQUIRE_THROWS_AS(ring.begin_read_span(time_span(4, 7)), sequencing_error);
 		REQUIRE(ring.current_time() >= 4);

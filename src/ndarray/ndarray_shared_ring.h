@@ -63,6 +63,11 @@ public:
 	 ** Must be called from single writer thread only, and followed by call to end_write(). */
 	section_view_type begin_write(time_unit duration);
 	
+	void wait_write() {
+		std::unique_lock<std::mutex> lock(mutex_);
+		writable_cv_.wait(lock);
+	}
+	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned
 	 ** by begin_write().
