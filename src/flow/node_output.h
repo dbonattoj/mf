@@ -50,7 +50,7 @@ public:
 	time_unit begin_write() override {
 		MF_DEBUG("output::begin_write()....");
 		auto view = ring().begin_write(1);
-		if(view.duration() != 1) throw std::runtime_error("output at end");
+		if(view.duration() == 0) return -1; // was seeked to end
 		view_.reset(view[0]);
 		MF_DEBUG("output::begin_write() --> ", view.span(), " t=", view.start_time());
 		view_available_ = true;

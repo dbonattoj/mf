@@ -21,10 +21,11 @@ void source_node::thread_main_() {
 
 void source_node::pull_frame_() {
 	//if(! is_active()) return;
-	
-	if(stream_duration() != -1 && time_ == stream_duration()-1) return;
-	
+		
 	//std::this_thread::sleep_for(400ms);
+
+	if(stream_duration() != -1 && time_ == stream_duration()-1) throw 1;
+
 	
 	auto outputs = all_outputs();
 	
@@ -33,10 +34,12 @@ void source_node::pull_frame_() {
 	time_unit time = -1;
 	for(node_output_base& output : outputs) {
 		time_unit t = output.begin_write();
+		if(t == -1) { time_ = stream_duration()-1; return; }
+		
 		if(time == -1) time = t;
 		else if(time != t) throw std::runtime_error("wrong time");
 	}
-	
+		
 	MF_DEBUG("source:buffer time=", time);
 	
 	

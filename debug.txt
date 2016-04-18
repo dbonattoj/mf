@@ -1,14 +1,25 @@
 [src/flow/sink_node.cc:7, pull_frame_]: 
 sink::pull().... (t=-1)
 
-[src/flow/source_node.cc:31, pull_frame_]: 
-source::pull().... (t=-1)
+-1)
 
 [test/../src/flow/node_output.h:51, begin_write]: 
 output::begin_write()....
 
 [test/../src/flow/node_output.h:55, begin_write]: 
 output::begin_write() --> [0, 1[ t=0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=0
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=0 : 1
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, -1 > -1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, -1 > -1
 
 [test/../src/flow/node_input.tcc:75, reached_end]: 
 reader_reached_end=0 - 
@@ -18,23 +29,66 @@ ndarray_timed_ring:
 ndarray_ring: read_position=0, write_position=0, full=0
 total_duration=1
 last_write_time=-1, readable_time_span=[0, 0[, writable_time_span=[0, 1[
-reader state=0, writer state=-1, end_time=100, read_start_time=0
+reader state=0, writer state=0, end_time=100, read_start_time=0
 
 
-[src/flow/source_node.cc:43, pull_frame_]: 
-source::nowrite, 0 > -1
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=-1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
 
 [test/../src/flow/node_input.tcc:22, begin_read]: 
 input::begin_read(time = 0)....
 
-[src/flow/source_node.cc:31, pull_frame_]: 
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [0, 1[ t=0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=0
+
+[src/flow/source_node.cc:65, pull_frame_]: 
+processing t=0, output buffer: [frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=-1, readable_time_span=[0, 0[, writable_time_span=[0, 1[
+reader state=1, writer state=-1, end_time=100, read_start_time=0
+
+
+[test/../src/flow/node_output.h:65, end_write]: 
+output::end_write()....
+
+[test/../src/flow/node_output.h:72, end_write]: 
+output::end_write()
+
+[src/flow/source_node.cc:81, pull_frame_]: 
+source::pull() (t=0, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+reader state=1, writer state=0, end_time=100, read_start_time=0
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
 source::pull().... (t=0)
 
 [test/../src/flow/node_output.h:51, begin_write]: 
 output::begin_write()....
 
 [test/../src/flow/node_input.tcc:42, begin_read]: 
-input::begin_read(time = 0) --> [-1, 0[
+input::begin_read(time = 0) --> [0, 1[
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:187, end_read]: 
+VBEFORE: read_start_time_ mismatch: ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+ rst=0
 
 [test/../src/flow/node_input.tcc:67, end_read]: 
 input::end_read(time = 0)
@@ -46,7 +100,7 @@ buffer: ndarray_shared_ring:
 ndarray_timed_ring: 
 ndarray_ring: read_position=0, write_position=0, full=0
 total_duration=1
-last_write_time=-1, readable_time_span=[0, 0[, writable_time_span=[0, 1[
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
 reader state=0, writer state=1, end_time=100, read_start_time=1
 
 
@@ -56,8 +110,8 @@ sink::pull() (t=0)
 [src/flow/sink_node.cc:7, pull_frame_]: 
 sink::pull().... (t=0)
 
-[test/../src/flow/node_output.h:55, begin_write]: 
-output::begin_write() --> [0, 1[ t=0
+[test/support/flow.h:109, pre_process]: 
+activation at t=1 : 0
 
 [test/../src/flow/node_input.tcc:75, reached_end]: 
 reader_reached_end=0 - 
@@ -66,12 +120,28 @@ buffer: ndarray_shared_ring:
 ndarray_timed_ring: 
 ndarray_ring: read_position=0, write_position=0, full=0
 total_duration=1
-last_write_time=-1, readable_time_span=[0, 0[, writable_time_span=[0, 1[
+last_write_time=0, readable_time_span=[1, 1[, writable_time_span=[1, 2[
 reader state=0, writer state=-1, end_time=100, read_start_time=1
 
 
 [test/../src/flow/node_input.tcc:49, skip]: 
 input::skip(time = 1)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [1, 2[ t=1
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=1
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:65, pull_frame_]: 
+processing t=1, output buffer: [frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+cannot lock mutex for debug_print
+
+
 
 [test/../src/flow/node_output.h:65, end_write]: 
 output::end_write()....
@@ -79,19 +149,19 @@ output::end_write()....
 [test/../src/flow/node_output.h:72, end_write]: 
 output::end_write()
 
-[src/flow/source_node.cc:68, pull_frame_]: 
-source::pull() (t=0, end=0), 
+[src/flow/source_node.cc:81, pull_frame_]: 
+source::pull() (t=1, end=0), 
 [frame_shape=(320, 240), required_duration=1, setup=1]
 buffer: ndarray_shared_ring: 
 ndarray_timed_ring: 
 ndarray_ring: read_position=0, write_position=0, full=1
 total_duration=1
-last_write_time=0, readable_time_span=[0, 1[, writable_time_span=[1, 1[
+last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
 reader state=0, writer state=0, end_time=100, read_start_time=1
 
 
-[src/flow/source_node.cc:31, pull_frame_]: 
-source::pull().... (t=0)
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
 
 [test/../src/flow/node_output.h:51, begin_write]: 
 output::begin_write()....
@@ -99,8 +169,49 @@ output::begin_write()....
 [test/../src/flow/node_output.h:55, begin_write]: 
 output::begin_write() --> [2, 3[ t=2
 
-[src/flow/source_node.cc:43, pull_frame_]: 
-source::nowrite, 2 > 1
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=2
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=1, readable_time_span=[2, 2[, writable_time_span=[2, 3[
+reader state=0, writer state=0, end_time=100, read_start_time=2
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [2, 3[ t=2
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=1)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=2 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=2
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
 
 [test/../src/flow/node_input.tcc:75, reached_end]: 
 reader_reached_end=0 - 
@@ -113,31 +224,20 @@ last_write_time=1, readable_time_span=[2, 2[, writable_time_span=[2, 3[
 reader state=0, writer state=-1, end_time=100, read_start_time=2
 
 
-[src/flow/source_node.cc:31, pull_frame_]: 
-source::pull().... (t=2)
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
 
-[src/flow/sink_node.cc:37, pull_frame_]: 
-sink::pull() (t=1)
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 2)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
 
 [test/../src/flow/node_output.h:51, begin_write]: 
 output::begin_write()....
 
-[src/flow/sink_node.cc:7, pull_frame_]: 
-sink::pull().... (t=1)
-
-[test/../src/flow/node_input.tcc:75, reached_end]: 
-reader_reached_end=0 - 
- output:=[frame_shape=(320, 240), required_duration=1, setup=1]
-buffer: ndarray_shared_ring: 
-ndarray_timed_ring: 
-ndarray_ring: read_position=0, write_position=0, full=1
-total_duration=1
-last_write_time=1, readable_time_span=[1, 2[, writable_time_span=[2, 2[
-reader state=0, writer state=1, end_time=100, read_start_time=2
-
-
-[test/../src/flow/node_input.tcc:49, skip]: 
-input::skip(time = 2)....
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [3, 4[ t=3
 
 [test/../src/flow/node_input.tcc:75, reached_end]: 
 reader_reached_end=0 - 
@@ -147,14 +247,35 @@ ndarray_timed_ring:
 ndarray_ring: read_position=0, write_position=0, full=0
 total_duration=1
 last_write_time=2, readable_time_span=[3, 3[, writable_time_span=[3, 4[
-reader state=0, writer state=1, end_time=100, read_start_time=3
+reader state=0, writer state=-1, end_time=100, read_start_time=3
 
 
 [src/flow/sink_node.cc:37, pull_frame_]: 
 sink::pull() (t=2)
 
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=3
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
 [src/flow/sink_node.cc:7, pull_frame_]: 
 sink::pull().... (t=2)
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=3 : 0
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [3, 4[ t=3
 
 [test/../src/flow/node_input.tcc:75, reached_end]: 
 reader_reached_end=0 - 
@@ -164,21 +285,5827 @@ ndarray_timed_ring:
 ndarray_ring: read_position=0, write_position=0, full=0
 total_duration=1
 last_write_time=2, readable_time_span=[3, 3[, writable_time_span=[3, 4[
-reader state=0, writer state=1, end_time=100, read_start_time=3
+reader state=0, writer state=-1, end_time=100, read_start_time=3
 
 
 [test/../src/flow/node_input.tcc:49, skip]: 
 input::skip(time = 3)....
 
-[test/../src/flow/node_output.h:55, begin_write]: 
-output::begin_write() --> [3, 4[ t=3
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=3
 
-[src/flow/source_node.cc:43, pull_frame_]: 
-source::nowrite, 3 > 1
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
 
-[src/flow/source_node.cc:31, pull_frame_]: 
-source::pull().... (t=3)
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=3, readable_time_span=[4, 4[, writable_time_span=[4, 5[
+reader state=0, writer state=0, end_time=100, read_start_time=4
+
 
 [test/../src/flow/node_output.h:51, begin_write]: 
 output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=3)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=3)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [4, 5[ t=4
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=4
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=4 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=3, readable_time_span=[4, 4[, writable_time_span=[4, 5[
+reader state=0, writer state=0, end_time=100, read_start_time=4
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 4)....
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [4, 5[ t=4
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=4
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [4, 5[ t=4
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=4
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=4, readable_time_span=[5, 5[, writable_time_span=[5, 6[
+reader state=0, writer state=-1, end_time=100, read_start_time=5
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [5, 6[ t=5
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=4)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=5
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=4)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=5 : 0
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=4, readable_time_span=[5, 5[, writable_time_span=[5, 6[
+reader state=0, writer state=0, end_time=100, read_start_time=5
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 5)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=5, readable_time_span=[6, 6[, writable_time_span=[6, 7[
+reader state=0, writer state=0, end_time=100, read_start_time=6
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=5)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=5)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=6 : 0
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [6, 7[ t=6
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=6
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=5, readable_time_span=[6, 6[, writable_time_span=[6, 7[
+reader state=0, writer state=-1, end_time=100, read_start_time=6
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 6)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=6, readable_time_span=[7, 7[, writable_time_span=[7, 8[
+reader state=0, writer state=0, end_time=100, read_start_time=7
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=6)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=6)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [7, 8[ t=7
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=7 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=7
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=6, readable_time_span=[7, 7[, writable_time_span=[7, 8[
+reader state=0, writer state=-1, end_time=100, read_start_time=7
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 7)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=7, readable_time_span=[8, 8[, writable_time_span=[8, 9[
+reader state=0, writer state=0, end_time=100, read_start_time=8
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=7)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [8, 9[ t=8
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=7)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=8
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=8 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=7, readable_time_span=[8, 8[, writable_time_span=[8, 9[
+reader state=0, writer state=0, end_time=100, read_start_time=8
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 8)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [9, 10[ t=9
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=8, readable_time_span=[9, 9[, writable_time_span=[9, 10[
+reader state=0, writer state=-1, end_time=100, read_start_time=9
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=9
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=8)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=8)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=9 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=8, readable_time_span=[9, 9[, writable_time_span=[9, 10[
+reader state=0, writer state=0, end_time=100, read_start_time=9
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 9)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [9, 10[ t=9
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=9
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=9, readable_time_span=[10, 10[, writable_time_span=[10, 11[
+reader state=0, writer state=0, end_time=100, read_start_time=10
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=9)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [10, 11[ t=10
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=9)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=10
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=10 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=9, readable_time_span=[10, 10[, writable_time_span=[10, 11[
+reader state=0, writer state=0, end_time=100, read_start_time=10
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 10)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [10, 11[ t=10
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=10
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=10, readable_time_span=[11, 11[, writable_time_span=[11, 12[
+reader state=0, writer state=0, end_time=100, read_start_time=11
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=10)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [11, 12[ t=11
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=10)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=11
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=11 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=10, readable_time_span=[11, 11[, writable_time_span=[11, 12[
+reader state=0, writer state=0, end_time=100, read_start_time=11
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 11)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [12, 13[ t=12
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=11, readable_time_span=[12, 12[, writable_time_span=[12, 13[
+reader state=0, writer state=-1, end_time=100, read_start_time=12
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=12
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=11)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=11)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=12 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=11, readable_time_span=[12, 12[, writable_time_span=[12, 13[
+reader state=0, writer state=0, end_time=100, read_start_time=12
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 12)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [12, 13[ t=12
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=12
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=12, readable_time_span=[13, 13[, writable_time_span=[13, 14[
+reader state=0, writer state=0, end_time=100, read_start_time=13
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=12)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=12)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [13, 14[ t=13
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=13 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=13
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=12, readable_time_span=[13, 13[, writable_time_span=[13, 14[
+reader state=0, writer state=-1, end_time=100, read_start_time=13
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 13)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=13, readable_time_span=[14, 14[, writable_time_span=[14, 15[
+reader state=0, writer state=0, end_time=100, read_start_time=14
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=13)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [14, 15[ t=14
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=13)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=14
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=14 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=13, readable_time_span=[14, 14[, writable_time_span=[14, 15[
+reader state=0, writer state=0, end_time=100, read_start_time=14
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 14)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=14, readable_time_span=[15, 15[, writable_time_span=[15, 16[
+reader state=0, writer state=0, end_time=100, read_start_time=15
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=14)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [15, 16[ t=15
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=14)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=15
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=15 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=14, readable_time_span=[15, 15[, writable_time_span=[15, 16[
+reader state=0, writer state=0, end_time=100, read_start_time=15
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 15)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [16, 17[ t=16
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=16
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=15, readable_time_span=[16, 16[, writable_time_span=[16, 17[
+reader state=0, writer state=-1, end_time=100, read_start_time=16
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=15)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=15)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=16 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=15, readable_time_span=[16, 16[, writable_time_span=[16, 17[
+reader state=0, writer state=-1, end_time=100, read_start_time=16
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [16, 17[ t=16
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 16)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=16
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=16, readable_time_span=[17, 17[, writable_time_span=[17, 18[
+reader state=0, writer state=0, end_time=100, read_start_time=17
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=16)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=16)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [17, 18[ t=17
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=17 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=17
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=16, readable_time_span=[17, 17[, writable_time_span=[17, 18[
+reader state=0, writer state=-1, end_time=100, read_start_time=17
+
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 17)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+cannot lock mutex for debug_print
+
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [18, 19[ t=18
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=17)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=18
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=17)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=18 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=17, readable_time_span=[18, 18[, writable_time_span=[18, 19[
+reader state=0, writer state=0, end_time=100, read_start_time=18
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 18)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [18, 19[ t=18
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=18
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=18, readable_time_span=[19, 19[, writable_time_span=[19, 20[
+reader state=0, writer state=0, end_time=100, read_start_time=19
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=18)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=18)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [19, 20[ t=19
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=19 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=19
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=18, readable_time_span=[19, 19[, writable_time_span=[19, 20[
+reader state=0, writer state=-1, end_time=100, read_start_time=19
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 19)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=19, readable_time_span=[20, 20[, writable_time_span=[20, 21[
+reader state=0, writer state=0, end_time=100, read_start_time=20
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=19)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=19)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [20, 21[ t=20
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=20 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=20
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=19, readable_time_span=[20, 20[, writable_time_span=[20, 21[
+reader state=0, writer state=-1, end_time=100, read_start_time=20
+
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 20)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=20, readable_time_span=[21, 21[, writable_time_span=[21, 22[
+reader state=0, writer state=-1, end_time=100, read_start_time=21
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [21, 22[ t=21
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=20)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=21
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=20)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=21 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=20, readable_time_span=[21, 21[, writable_time_span=[21, 22[
+reader state=0, writer state=0, end_time=100, read_start_time=21
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 21)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [22, 23[ t=22
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=21, readable_time_span=[22, 22[, writable_time_span=[22, 23[
+reader state=0, writer state=-1, end_time=100, read_start_time=22
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=21)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=22
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=21)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=22 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=21, readable_time_span=[22, 22[, writable_time_span=[22, 23[
+reader state=0, writer state=0, end_time=100, read_start_time=22
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 22)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [22, 23[ t=22
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=22
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=22, readable_time_span=[23, 23[, writable_time_span=[23, 24[
+reader state=0, writer state=0, end_time=100, read_start_time=23
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=22)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [23, 24[ t=23
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=22)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=23
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=23 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=22, readable_time_span=[23, 23[, writable_time_span=[23, 24[
+reader state=0, writer state=0, end_time=100, read_start_time=23
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 23)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [24, 25[ t=24
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=23, readable_time_span=[24, 24[, writable_time_span=[24, 25[
+reader state=0, writer state=-1, end_time=100, read_start_time=24
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=23)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=24
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=23)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=24 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=23, readable_time_span=[24, 24[, writable_time_span=[24, 25[
+reader state=0, writer state=0, end_time=100, read_start_time=24
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [24, 25[ t=24
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 24)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=24
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=24, readable_time_span=[25, 25[, writable_time_span=[25, 26[
+reader state=0, writer state=0, end_time=100, read_start_time=25
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=24)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [25, 26[ t=25
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=24)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=25
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=25 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=24, readable_time_span=[25, 25[, writable_time_span=[25, 26[
+reader state=0, writer state=0, end_time=100, read_start_time=25
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 25)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=25, readable_time_span=[26, 26[, writable_time_span=[26, 27[
+reader state=0, writer state=0, end_time=100, read_start_time=26
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [26, 27[ t=26
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=25)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=26
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=25)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=26 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=25, readable_time_span=[26, 26[, writable_time_span=[26, 27[
+reader state=0, writer state=0, end_time=100, read_start_time=26
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 26)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [27, 28[ t=27
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=26, readable_time_span=[27, 27[, writable_time_span=[27, 28[
+reader state=0, writer state=-1, end_time=100, read_start_time=27
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=26)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=27
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=26)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=27 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=26, readable_time_span=[27, 27[, writable_time_span=[27, 28[
+reader state=0, writer state=0, end_time=100, read_start_time=27
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [27, 28[ t=27
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 27)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=27
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=27, readable_time_span=[28, 28[, writable_time_span=[28, 29[
+reader state=0, writer state=0, end_time=100, read_start_time=28
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=27)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [28, 29[ t=28
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=27)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=28
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=28 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=27, readable_time_span=[28, 28[, writable_time_span=[28, 29[
+reader state=0, writer state=0, end_time=100, read_start_time=28
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 28)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [29, 30[ t=29
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=28, readable_time_span=[29, 29[, writable_time_span=[29, 30[
+reader state=0, writer state=-1, end_time=100, read_start_time=29
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=29
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=28)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=28)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=29 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=28, readable_time_span=[29, 29[, writable_time_span=[29, 30[
+reader state=0, writer state=0, end_time=100, read_start_time=29
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 29)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [29, 30[ t=29
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=29
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=29, readable_time_span=[30, 30[, writable_time_span=[30, 31[
+reader state=0, writer state=0, end_time=100, read_start_time=30
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=29)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [30, 31[ t=30
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=29)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=30
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=30 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=29, readable_time_span=[30, 30[, writable_time_span=[30, 31[
+reader state=0, writer state=0, end_time=100, read_start_time=30
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 30)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [31, 32[ t=31
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=30, readable_time_span=[31, 31[, writable_time_span=[31, 32[
+reader state=0, writer state=-1, end_time=100, read_start_time=31
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=30)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=31
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=30)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=31 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=30, readable_time_span=[31, 31[, writable_time_span=[31, 32[
+reader state=0, writer state=0, end_time=100, read_start_time=31
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 31)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=31, readable_time_span=[32, 32[, writable_time_span=[32, 33[
+reader state=0, writer state=-1, end_time=100, read_start_time=32
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [32, 33[ t=32
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=31)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=32
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=31)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=32 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=31, readable_time_span=[32, 32[, writable_time_span=[32, 33[
+reader state=0, writer state=0, end_time=100, read_start_time=32
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 32)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [32, 33[ t=32
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=32
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=32, readable_time_span=[33, 33[, writable_time_span=[33, 34[
+reader state=0, writer state=0, end_time=100, read_start_time=33
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [33, 34[ t=33
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=32)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=32)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=33
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=33 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=32, readable_time_span=[33, 33[, writable_time_span=[33, 34[
+reader state=0, writer state=0, end_time=100, read_start_time=33
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 33)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [34, 35[ t=34
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=33, readable_time_span=[34, 34[, writable_time_span=[34, 35[
+reader state=0, writer state=-1, end_time=100, read_start_time=34
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=33)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=34
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=33)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=34 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=33, readable_time_span=[34, 34[, writable_time_span=[34, 35[
+reader state=0, writer state=0, end_time=100, read_start_time=34
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [34, 35[ t=34
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 34)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=34
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=34, readable_time_span=[35, 35[, writable_time_span=[35, 36[
+reader state=0, writer state=0, end_time=100, read_start_time=35
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=34)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [35, 36[ t=35
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=34)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=35
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=35 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=34, readable_time_span=[35, 35[, writable_time_span=[35, 36[
+reader state=0, writer state=0, end_time=100, read_start_time=35
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 35)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [36, 37[ t=36
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=35, readable_time_span=[36, 36[, writable_time_span=[36, 37[
+reader state=0, writer state=-1, end_time=100, read_start_time=36
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=36
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=35)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=35)
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=36 : 0
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [36, 37[ t=36
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=35, readable_time_span=[36, 36[, writable_time_span=[36, 37[
+reader state=0, writer state=-1, end_time=100, read_start_time=36
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 36)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=36
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=36, readable_time_span=[37, 37[, writable_time_span=[37, 38[
+reader state=0, writer state=0, end_time=100, read_start_time=37
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=36)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [37, 38[ t=37
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=36)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=37
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=37 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=36, readable_time_span=[37, 37[, writable_time_span=[37, 38[
+reader state=0, writer state=0, end_time=100, read_start_time=37
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 37)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [37, 38[ t=37
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=37
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=37, readable_time_span=[38, 38[, writable_time_span=[38, 39[
+reader state=0, writer state=0, end_time=100, read_start_time=38
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=37)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=37)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [38, 39[ t=38
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=38
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=38 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=37, readable_time_span=[38, 38[, writable_time_span=[38, 39[
+reader state=0, writer state=0, end_time=100, read_start_time=38
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 38)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=38, readable_time_span=[39, 39[, writable_time_span=[39, 40[
+reader state=0, writer state=-1, end_time=100, read_start_time=39
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [39, 40[ t=39
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=38)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=38)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=39
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=39 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=38, readable_time_span=[39, 39[, writable_time_span=[39, 40[
+reader state=0, writer state=0, end_time=100, read_start_time=39
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 39)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [39, 40[ t=39
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=39
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=39, readable_time_span=[40, 40[, writable_time_span=[40, 41[
+reader state=0, writer state=0, end_time=100, read_start_time=40
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [40, 41[ t=40
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=39)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=40
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=39)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=40 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=39, readable_time_span=[40, 40[, writable_time_span=[40, 41[
+reader state=0, writer state=0, end_time=100, read_start_time=40
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 40)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [40, 41[ t=40
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=40
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=40, readable_time_span=[41, 41[, writable_time_span=[41, 42[
+reader state=0, writer state=0, end_time=100, read_start_time=41
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=40)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [41, 42[ t=41
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=40)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=41
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=41 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=40, readable_time_span=[41, 41[, writable_time_span=[41, 42[
+reader state=0, writer state=0, end_time=100, read_start_time=41
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 41)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [42, 43[ t=42
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=42
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=41, readable_time_span=[42, 42[, writable_time_span=[42, 43[
+reader state=0, writer state=-1, end_time=100, read_start_time=42
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=41)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=41)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=42 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=41, readable_time_span=[42, 42[, writable_time_span=[42, 43[
+reader state=0, writer state=0, end_time=100, read_start_time=42
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [42, 43[ t=42
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 42)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=42
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=42, readable_time_span=[43, 43[, writable_time_span=[43, 44[
+reader state=0, writer state=0, end_time=100, read_start_time=43
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [43, 44[ t=43
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=42)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=43
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=42)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=43 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=42, readable_time_span=[43, 43[, writable_time_span=[43, 44[
+reader state=0, writer state=0, end_time=100, read_start_time=43
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [43, 44[ t=43
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 43)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=43
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=43, readable_time_span=[44, 44[, writable_time_span=[44, 45[
+reader state=0, writer state=0, end_time=100, read_start_time=44
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=43)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=43)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [44, 45[ t=44
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=44 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=44
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=43, readable_time_span=[44, 44[, writable_time_span=[44, 45[
+reader state=0, writer state=-1, end_time=100, read_start_time=44
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 44)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=44, readable_time_span=[45, 45[, writable_time_span=[45, 46[
+reader state=0, writer state=0, end_time=100, read_start_time=45
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=44)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=44)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [45, 46[ t=45
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=45 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=45
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=44, readable_time_span=[45, 45[, writable_time_span=[45, 46[
+reader state=0, writer state=-1, end_time=100, read_start_time=45
+
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 45)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=45, readable_time_span=[46, 46[, writable_time_span=[46, 47[
+reader state=0, writer state=0, end_time=100, read_start_time=46
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [46, 47[ t=46
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=45)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=46
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=45)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=46 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=45, readable_time_span=[46, 46[, writable_time_span=[46, 47[
+reader state=0, writer state=0, end_time=100, read_start_time=46
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 46)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [47, 48[ t=47
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=46, readable_time_span=[47, 47[, writable_time_span=[47, 48[
+reader state=0, writer state=-1, end_time=100, read_start_time=47
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=47
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=46)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=46)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=47 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=46, readable_time_span=[47, 47[, writable_time_span=[47, 48[
+reader state=0, writer state=0, end_time=100, read_start_time=47
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 47)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [47, 48[ t=47
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=47
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=47, readable_time_span=[48, 48[, writable_time_span=[48, 49[
+reader state=0, writer state=0, end_time=100, read_start_time=48
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=47)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=47)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [48, 49[ t=48
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=48 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=48
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=47, readable_time_span=[48, 48[, writable_time_span=[48, 49[
+reader state=0, writer state=-1, end_time=100, read_start_time=48
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 48)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=48, readable_time_span=[49, 49[, writable_time_span=[49, 50[
+reader state=0, writer state=0, end_time=100, read_start_time=49
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=48)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [49, 50[ t=49
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=48)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=49
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=49 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=48, readable_time_span=[49, 49[, writable_time_span=[49, 50[
+reader state=0, writer state=0, end_time=100, read_start_time=49
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 49)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [49, 50[ t=49
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=49
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=49, readable_time_span=[50, 50[, writable_time_span=[50, 51[
+reader state=0, writer state=0, end_time=100, read_start_time=50
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=49)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [50, 51[ t=50
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=49)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=50 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=50
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=49, readable_time_span=[50, 50[, writable_time_span=[50, 51[
+reader state=0, writer state=-1, end_time=100, read_start_time=50
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 50)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=50, readable_time_span=[51, 51[, writable_time_span=[51, 52[
+reader state=0, writer state=0, end_time=100, read_start_time=51
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [51, 52[ t=51
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=50)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=51
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=50)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=51 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=50, readable_time_span=[51, 51[, writable_time_span=[51, 52[
+reader state=0, writer state=0, end_time=100, read_start_time=51
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 51)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [52, 53[ t=52
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=51, readable_time_span=[52, 52[, writable_time_span=[52, 53[
+reader state=0, writer state=-1, end_time=100, read_start_time=52
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=51)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=52
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=51)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=52 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=51, readable_time_span=[52, 52[, writable_time_span=[52, 53[
+reader state=0, writer state=0, end_time=100, read_start_time=52
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 52)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [52, 53[ t=52
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=52
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=52, readable_time_span=[53, 53[, writable_time_span=[53, 54[
+reader state=0, writer state=0, end_time=100, read_start_time=53
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=52)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=52)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [53, 54[ t=53
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=53 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=53
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=52, readable_time_span=[53, 53[, writable_time_span=[53, 54[
+reader state=0, writer state=-1, end_time=100, read_start_time=53
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 53)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=53, readable_time_span=[54, 54[, writable_time_span=[54, 55[
+reader state=0, writer state=0, end_time=100, read_start_time=54
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=53)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [54, 55[ t=54
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=53)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=54
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=54 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=53, readable_time_span=[54, 54[, writable_time_span=[54, 55[
+reader state=0, writer state=0, end_time=100, read_start_time=54
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 54)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [55, 56[ t=55
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=55
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=54, readable_time_span=[55, 55[, writable_time_span=[55, 56[
+reader state=0, writer state=-1, end_time=100, read_start_time=55
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=54)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=54)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=55 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=54, readable_time_span=[55, 55[, writable_time_span=[55, 56[
+reader state=0, writer state=-1, end_time=100, read_start_time=55
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [55, 56[ t=55
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 55)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=55
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=55, readable_time_span=[56, 56[, writable_time_span=[56, 57[
+reader state=0, writer state=0, end_time=100, read_start_time=56
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=55)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [56, 57[ t=56
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=55)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=56
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=56 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=55, readable_time_span=[56, 56[, writable_time_span=[56, 57[
+reader state=0, writer state=0, end_time=100, read_start_time=56
+
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 56)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=56, readable_time_span=[57, 57[, writable_time_span=[57, 58[
+reader state=0, writer state=0, end_time=100, read_start_time=57
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=56)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [57, 58[ t=57
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=56)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=57
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=57 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=56, readable_time_span=[57, 57[, writable_time_span=[57, 58[
+reader state=0, writer state=0, end_time=100, read_start_time=57
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 57)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [58, 59[ t=58
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=57, readable_time_span=[58, 58[, writable_time_span=[58, 59[
+reader state=0, writer state=-1, end_time=100, read_start_time=58
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=57)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=58
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=57)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=58 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=57, readable_time_span=[58, 58[, writable_time_span=[58, 59[
+reader state=0, writer state=0, end_time=100, read_start_time=58
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 58)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [58, 59[ t=58
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=58
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=58, readable_time_span=[59, 59[, writable_time_span=[59, 60[
+reader state=0, writer state=0, end_time=100, read_start_time=59
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=58)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=58)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [59, 60[ t=59
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=59 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=59
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=58, readable_time_span=[59, 59[, writable_time_span=[59, 60[
+reader state=0, writer state=-1, end_time=100, read_start_time=59
+
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 59)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=59, readable_time_span=[60, 60[, writable_time_span=[60, 61[
+reader state=0, writer state=0, end_time=100, read_start_time=60
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=59)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [60, 61[ t=60
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=59)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=60
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=60 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=59, readable_time_span=[60, 60[, writable_time_span=[60, 61[
+reader state=0, writer state=0, end_time=100, read_start_time=60
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 60)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [61, 62[ t=61
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=60, readable_time_span=[61, 61[, writable_time_span=[61, 62[
+reader state=0, writer state=-1, end_time=100, read_start_time=61
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=60)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=61
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=60)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=61 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=60, readable_time_span=[61, 61[, writable_time_span=[61, 62[
+reader state=0, writer state=0, end_time=100, read_start_time=61
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 61)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [62, 63[ t=62
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=61, readable_time_span=[62, 62[, writable_time_span=[62, 63[
+reader state=0, writer state=-1, end_time=100, read_start_time=62
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=61)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=62
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=61)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=62 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=61, readable_time_span=[62, 62[, writable_time_span=[62, 63[
+reader state=0, writer state=0, end_time=100, read_start_time=62
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [62, 63[ t=62
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 62)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=62
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=62, readable_time_span=[63, 63[, writable_time_span=[63, 64[
+reader state=0, writer state=0, end_time=100, read_start_time=63
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=62)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=62)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [63, 64[ t=63
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=63 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=63
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=62, readable_time_span=[63, 63[, writable_time_span=[63, 64[
+reader state=0, writer state=-1, end_time=100, read_start_time=63
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 63)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=63, readable_time_span=[64, 64[, writable_time_span=[64, 65[
+reader state=0, writer state=0, end_time=100, read_start_time=64
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [64, 65[ t=64
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=63)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=64
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=63)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=64 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=63, readable_time_span=[64, 64[, writable_time_span=[64, 65[
+reader state=0, writer state=0, end_time=100, read_start_time=64
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 64)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [64, 65[ t=64
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=64
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=64, readable_time_span=[65, 65[, writable_time_span=[65, 66[
+reader state=0, writer state=0, end_time=100, read_start_time=65
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [65, 66[ t=65
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=64)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=65
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=64)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=65 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=64, readable_time_span=[65, 65[, writable_time_span=[65, 66[
+reader state=0, writer state=0, end_time=100, read_start_time=65
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 65)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=65, readable_time_span=[66, 66[, writable_time_span=[66, 67[
+reader state=0, writer state=0, end_time=100, read_start_time=66
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [66, 67[ t=66
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=65)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=66
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=65)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=66 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=65, readable_time_span=[66, 66[, writable_time_span=[66, 67[
+reader state=0, writer state=0, end_time=100, read_start_time=66
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 66)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [67, 68[ t=67
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=67
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=66, readable_time_span=[67, 67[, writable_time_span=[67, 68[
+reader state=0, writer state=-1, end_time=100, read_start_time=67
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=66)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=66)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=67 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=66, readable_time_span=[67, 67[, writable_time_span=[67, 68[
+reader state=0, writer state=-1, end_time=100, read_start_time=67
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [67, 68[ t=67
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 67)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=67
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=67, readable_time_span=[68, 68[, writable_time_span=[68, 69[
+reader state=0, writer state=0, end_time=100, read_start_time=68
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=67)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [68, 69[ t=68
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=67)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=68
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=68 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=67, readable_time_span=[68, 68[, writable_time_span=[68, 69[
+reader state=0, writer state=0, end_time=100, read_start_time=68
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 68)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=68, readable_time_span=[69, 69[, writable_time_span=[69, 70[
+reader state=0, writer state=-1, end_time=100, read_start_time=69
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [69, 70[ t=69
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=68)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=69
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=68)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=69 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=68, readable_time_span=[69, 69[, writable_time_span=[69, 70[
+reader state=0, writer state=0, end_time=100, read_start_time=69
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 69)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [70, 71[ t=70
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=70
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=69, readable_time_span=[70, 70[, writable_time_span=[70, 71[
+reader state=0, writer state=-1, end_time=100, read_start_time=70
+
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=69)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=69)
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=70 : 0
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=69, readable_time_span=[70, 70[, writable_time_span=[70, 71[
+reader state=0, writer state=-1, end_time=100, read_start_time=70
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [70, 71[ t=70
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=70
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 70)....
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=70, readable_time_span=[71, 71[, writable_time_span=[71, 72[
+reader state=0, writer state=0, end_time=100, read_start_time=71
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [71, 72[ t=71
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=70)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=71
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=70)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=71 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=70, readable_time_span=[71, 71[, writable_time_span=[71, 72[
+reader state=0, writer state=0, end_time=100, read_start_time=71
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [71, 72[ t=71
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 71)....
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=71
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=71, readable_time_span=[72, 72[, writable_time_span=[72, 73[
+reader state=0, writer state=0, end_time=100, read_start_time=72
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=71)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=71)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [72, 73[ t=72
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=72 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=72
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=71, readable_time_span=[72, 72[, writable_time_span=[72, 73[
+reader state=0, writer state=-1, end_time=100, read_start_time=72
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 72)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=72, readable_time_span=[73, 73[, writable_time_span=[73, 74[
+reader state=0, writer state=0, end_time=100, read_start_time=73
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=72)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [73, 74[ t=73
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=72)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=73 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=73
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=72, readable_time_span=[73, 73[, writable_time_span=[73, 74[
+reader state=0, writer state=0, end_time=100, read_start_time=73
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 73)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=73, readable_time_span=[74, 74[, writable_time_span=[74, 75[
+reader state=0, writer state=0, end_time=100, read_start_time=74
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=73)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [74, 75[ t=74
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=73)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=74
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=74 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=73, readable_time_span=[74, 74[, writable_time_span=[74, 75[
+reader state=0, writer state=0, end_time=100, read_start_time=74
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 74)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=74, readable_time_span=[75, 75[, writable_time_span=[75, 76[
+reader state=0, writer state=0, end_time=100, read_start_time=75
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [75, 76[ t=75
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=74)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=75
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=74)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=75 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=74, readable_time_span=[75, 75[, writable_time_span=[75, 76[
+reader state=0, writer state=0, end_time=100, read_start_time=75
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 75)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [75, 76[ t=75
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=75
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=75, readable_time_span=[76, 76[, writable_time_span=[76, 77[
+reader state=0, writer state=0, end_time=100, read_start_time=76
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=75)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=75)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [76, 77[ t=76
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=76 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=76
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=75, readable_time_span=[76, 76[, writable_time_span=[76, 77[
+reader state=0, writer state=-1, end_time=100, read_start_time=76
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 76)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=76, readable_time_span=[77, 77[, writable_time_span=[77, 78[
+reader state=0, writer state=0, end_time=100, read_start_time=77
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=76)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [77, 78[ t=77
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=76)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=77
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=77 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=76, readable_time_span=[77, 77[, writable_time_span=[77, 78[
+reader state=0, writer state=0, end_time=100, read_start_time=77
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 77)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [78, 79[ t=78
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=77, readable_time_span=[78, 78[, writable_time_span=[78, 79[
+reader state=0, writer state=-1, end_time=100, read_start_time=78
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=77)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=78
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=77)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=78 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=77, readable_time_span=[78, 78[, writable_time_span=[78, 79[
+reader state=0, writer state=0, end_time=100, read_start_time=78
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 78)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [78, 79[ t=78
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=78
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=78, readable_time_span=[79, 79[, writable_time_span=[79, 80[
+reader state=0, writer state=0, end_time=100, read_start_time=79
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=78)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [79, 80[ t=79
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=78)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=79
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=79 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=78, readable_time_span=[79, 79[, writable_time_span=[79, 80[
+reader state=0, writer state=0, end_time=100, read_start_time=79
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 79)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [80, 81[ t=80
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=79, readable_time_span=[80, 80[, writable_time_span=[80, 81[
+reader state=0, writer state=-1, end_time=100, read_start_time=80
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=79)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=80
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=79)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=80 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=79, readable_time_span=[80, 80[, writable_time_span=[80, 81[
+reader state=0, writer state=0, end_time=100, read_start_time=80
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 80)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [80, 81[ t=80
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=80
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=80, readable_time_span=[81, 81[, writable_time_span=[81, 82[
+reader state=0, writer state=0, end_time=100, read_start_time=81
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=80)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [81, 82[ t=81
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=80)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=81
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=81 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=80, readable_time_span=[81, 81[, writable_time_span=[81, 82[
+reader state=0, writer state=0, end_time=100, read_start_time=81
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 81)....
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=81, readable_time_span=[82, 82[, writable_time_span=[82, 83[
+reader state=0, writer state=0, end_time=100, read_start_time=82
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [82, 83[ t=82
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=81)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=82
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=81)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=82 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=81, readable_time_span=[82, 82[, writable_time_span=[82, 83[
+reader state=0, writer state=0, end_time=100, read_start_time=82
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 82)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [83, 84[ t=83
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=82, readable_time_span=[83, 83[, writable_time_span=[83, 84[
+reader state=0, writer state=-1, end_time=100, read_start_time=83
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=83
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=82)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=82)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=83 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=82, readable_time_span=[83, 83[, writable_time_span=[83, 84[
+reader state=0, writer state=0, end_time=100, read_start_time=83
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [83, 84[ t=83
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 83)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=83
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=83, readable_time_span=[84, 84[, writable_time_span=[84, 85[
+reader state=0, writer state=0, end_time=100, read_start_time=84
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=83)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=83)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [84, 85[ t=84
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=84 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=84
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=83, readable_time_span=[84, 84[, writable_time_span=[84, 85[
+reader state=0, writer state=-1, end_time=100, read_start_time=84
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 84)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=84, readable_time_span=[85, 85[, writable_time_span=[85, 86[
+reader state=0, writer state=0, end_time=100, read_start_time=85
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=84)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [85, 86[ t=85
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=84)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=85
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=85 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=84, readable_time_span=[85, 85[, writable_time_span=[85, 86[
+reader state=0, writer state=0, end_time=100, read_start_time=85
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 85)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [86, 87[ t=86
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=86
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=85, readable_time_span=[86, 86[, writable_time_span=[86, 87[
+reader state=0, writer state=-1, end_time=100, read_start_time=86
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=85)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=85)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=86 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=85, readable_time_span=[86, 86[, writable_time_span=[86, 87[
+reader state=0, writer state=0, end_time=100, read_start_time=86
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [86, 87[ t=86
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 86)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=86
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=86, readable_time_span=[87, 87[, writable_time_span=[87, 88[
+reader state=0, writer state=0, end_time=100, read_start_time=87
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=86)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=86)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [87, 88[ t=87
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=87 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=87
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=86, readable_time_span=[87, 87[, writable_time_span=[87, 88[
+reader state=0, writer state=-1, end_time=100, read_start_time=87
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 87)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=87, readable_time_span=[88, 88[, writable_time_span=[88, 89[
+reader state=0, writer state=0, end_time=100, read_start_time=88
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=87)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=87)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [88, 89[ t=88
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=88 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=88
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=87, readable_time_span=[88, 88[, writable_time_span=[88, 89[
+reader state=0, writer state=-1, end_time=100, read_start_time=88
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 88)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=88, readable_time_span=[89, 89[, writable_time_span=[89, 90[
+reader state=0, writer state=0, end_time=100, read_start_time=89
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=88)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [89, 90[ t=89
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=88)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=89
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=89 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=88, readable_time_span=[89, 89[, writable_time_span=[89, 90[
+reader state=0, writer state=0, end_time=100, read_start_time=89
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 89)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=89, readable_time_span=[90, 90[, writable_time_span=[90, 91[
+reader state=0, writer state=-1, end_time=100, read_start_time=90
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [90, 91[ t=90
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=89)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=90
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=89)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=90 : 0
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=89, readable_time_span=[90, 90[, writable_time_span=[90, 91[
+reader state=0, writer state=0, end_time=100, read_start_time=90
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 90)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [91, 92[ t=91
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=91
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=90, readable_time_span=[91, 91[, writable_time_span=[91, 92[
+reader state=0, writer state=-1, end_time=100, read_start_time=91
+
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=90)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=90)
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=91 : 0
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=90, readable_time_span=[91, 91[, writable_time_span=[91, 92[
+reader state=0, writer state=0, end_time=100, read_start_time=91
+
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [91, 92[ t=91
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 91)....
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=91
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=91, readable_time_span=[92, 92[, writable_time_span=[92, 93[
+reader state=0, writer state=0, end_time=100, read_start_time=92
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=91)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=91)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [92, 93[ t=92
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=92 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=92
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=91, readable_time_span=[92, 92[, writable_time_span=[92, 93[
+reader state=0, writer state=-1, end_time=100, read_start_time=92
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 92)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=92, readable_time_span=[93, 93[, writable_time_span=[93, 94[
+reader state=0, writer state=0, end_time=100, read_start_time=93
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=92)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=92)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [93, 94[ t=93
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=93 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=93
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=92, readable_time_span=[93, 93[, writable_time_span=[93, 94[
+reader state=0, writer state=-1, end_time=100, read_start_time=93
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 93)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=93, readable_time_span=[94, 94[, writable_time_span=[94, 95[
+reader state=0, writer state=0, end_time=100, read_start_time=94
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=93)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [94, 95[ t=94
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=93)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=94
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=94 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=93, readable_time_span=[94, 94[, writable_time_span=[94, 95[
+reader state=0, writer state=0, end_time=100, read_start_time=94
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 94)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [94, 95[ t=94
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=94
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=94, readable_time_span=[95, 95[, writable_time_span=[95, 96[
+reader state=0, writer state=0, end_time=100, read_start_time=95
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=94)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=94)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [95, 96[ t=95
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=95 : 0
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=95
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=94, readable_time_span=[95, 95[, writable_time_span=[95, 96[
+reader state=0, writer state=-1, end_time=100, read_start_time=95
+
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 95)....
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=95, readable_time_span=[96, 96[, writable_time_span=[96, 97[
+reader state=0, writer state=0, end_time=100, read_start_time=96
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=95)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [96, 97[ t=96
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=95)
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=96
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=96 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=95, readable_time_span=[96, 96[, writable_time_span=[96, 97[
+reader state=0, writer state=0, end_time=100, read_start_time=96
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 96)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [96, 97[ t=96
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=96
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:308, seek]: 
+letting writer finish...
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=96, readable_time_span=[97, 97[, writable_time_span=[97, 98[
+reader state=0, writer state=0, end_time=100, read_start_time=97
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=96)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=96)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [97, 98[ t=97
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=97
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=97 : 0
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=96, readable_time_span=[97, 97[, writable_time_span=[97, 98[
+reader state=0, writer state=0, end_time=100, read_start_time=97
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:49, skip]: 
+input::skip(time = 97)....
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [98, 99[ t=98
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=97, readable_time_span=[98, 98[, writable_time_span=[98, 99[
+reader state=0, writer state=-1, end_time=100, read_start_time=98
+
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=98
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=97)
+
+[src/flow/source_node.cc:51, pull_frame_]: 
+source::nowrite, 1 > 1
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=97)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=98 : 1
+
+[src/flow/source_node.cc:55, pull_frame_]: 
+source::nowrite DONE, 1 > 1
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=1)
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=97, readable_time_span=[98, 98[, writable_time_span=[98, 99[
+reader state=0, writer state=0, end_time=100, read_start_time=98
+
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:22, begin_read]: 
+input::begin_read(time = 98)....
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [98, 99[ t=98
+
+[src/flow/source_node.cc:47, pull_frame_]: 
+source:buffer time=98
+
+[src/flow/source_node.cc:65, pull_frame_]: 
+processing t=98, output buffer: [frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=97, readable_time_span=[98, 98[, writable_time_span=[98, 99[
+reader state=1, writer state=-1, end_time=100, read_start_time=98
+
+
+[test/../src/flow/node_output.h:65, end_write]: 
+output::end_write()....
+
+[test/../src/flow/node_output.h:72, end_write]: 
+output::end_write()
+
+[src/flow/source_node.cc:81, pull_frame_]: 
+source::pull() (t=98, end=0), 
+[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+cannot lock mutex for debug_print
+
+
+
+[src/flow/source_node.cc:32, pull_frame_]: 
+source::pull().... (t=98)
+
+[test/../src/flow/node_output.h:51, begin_write]: 
+output::begin_write()....
+
+[test/../src/flow/node_input.tcc:42, begin_read]: 
+input::begin_read(time = 98) --> [98, 99[
+
+[test/../src/flow/../ndarray/ndarray_shared_ring.tcc:187, end_read]: 
+VBEFORE: read_start_time_ mismatch: ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=1
+total_duration=1
+last_write_time=98, readable_time_span=[98, 99[, writable_time_span=[99, 99[
+ rst=98
+
+[test/../src/flow/node_input.tcc:67, end_read]: 
+input::end_read(time = 98)
+
+[test/../src/flow/node_output.h:55, begin_write]: 
+output::begin_write() --> [99, 100[ t=99
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=98, readable_time_span=[99, 99[, writable_time_span=[99, 100[
+reader state=0, writer state=-1, end_time=100, read_start_time=99
+
+
+[src/flow/source_node.cc:42, pull_frame_]: 
+end reached
+
+[src/flow/sink_node.cc:37, pull_frame_]: 
+sink::pull() (t=98)
+
+[src/flow/sink_node.cc:7, pull_frame_]: 
+sink::pull().... (t=98)
+
+[test/support/flow.h:109, pre_process]: 
+activation at t=99 : 1
+
+[test/../src/flow/node_input.tcc:75, reached_end]: 
+reader_reached_end=0 - 
+ output:=[frame_shape=(320, 240), required_duration=1, setup=1]
+buffer: ndarray_shared_ring: 
+ndarray_timed_ring: 
+ndarray_ring: read_position=0, write_position=0, full=0
+total_duration=1
+last_write_time=98, readable_time_span=[99, 99[, writable_time_span=[99, 100[
+reader state=0, writer state=-1, end_time=100, read_start_time=99
+
+
+[test/../src/flow/node_input.tcc:22, begin_read]: 
+input::begin_read(time = 99)....
 

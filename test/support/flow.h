@@ -106,6 +106,7 @@ public:
 		expected_frames_(seq), input(*this) { }
 	
 	void pre_process() override {
+		MF_DEBUG("activation at t=", time_, " : ", activation[time_]);
 		if(time_ < activation.size()) input.set_activated(activation[time_]);
 	}
 	
