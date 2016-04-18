@@ -8,7 +8,7 @@
 using namespace mf;
 using namespace mf::test;
 
-TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
+TEST_CASE("flow graph forward", "[flow_graph][forward]") {
 	//set_debug_mode(debug_mode::cerr);
 	
 	flow::graph gr;
@@ -18,7 +18,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
 
 	SECTION("source -> sink") {
-		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
 		gr.setup();
@@ -28,7 +28,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 
 		
 	SECTION("source --> passthrough --> sink") {
-		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& passthrough = gr.add_node<passthrough_node>(0, 0);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
@@ -40,7 +40,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	
 	SECTION("detailled time window test") { 
  		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
-		auto& source = gr.add_node<sequence_frame_source>(5, shp, true);		
+		auto& source = gr.add_node<sequence_frame_source>(5, shp, false);		
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
 
@@ -204,7 +204,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	
 
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& passthrough1 = gr.add_node<passthrough_node>(0, 3);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
@@ -228,7 +228,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	
 	
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& passthrough1 = gr.add_node<passthrough_node>(3, 0);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
@@ -251,7 +251,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	}
 	
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& passthrough1 = gr.add_node<passthrough_node>(3, 3);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 
@@ -274,7 +274,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	}
 
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& passthrough1 = gr.add_node<passthrough_node>(3, 1);
 		auto& passthrough2 = gr.add_node<passthrough_node>(2, 2);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
@@ -302,8 +302,8 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	
 	
 	SECTION("input synchronize") {
-		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& source2 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
+		auto& source2 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 		auto& merge = gr.add_node<input_synchronize_test_node>();
 		
@@ -380,7 +380,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	
 	
 	SECTION("multiple outputs") {
-		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, false);
 		auto& merge = gr.add_node<input_synchronize_test_node>();
 		auto& multiplex = gr.add_node<multiplexer_node>();
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);

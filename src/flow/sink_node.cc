@@ -12,6 +12,8 @@ void sink_node::pull_frame_() {
 	
 	if(time_ == stream_duration_) { reached_end_ = true; return; }
 
+	this->pre_process();
+
 	for(node_input_base* input : inputs_) {
 		assert(! input->reached_end());
 		

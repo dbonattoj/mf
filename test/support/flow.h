@@ -27,7 +27,7 @@ private:
 
 public:
 	output_type<2, int> output;
-
+	
 	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
 		flow::source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
 	
@@ -46,37 +46,6 @@ public:
 
 
 
-class expected_frames_sink : public flow::sink_node {
-private:
-	const std::vector<int> expected_frames_;
-	std::vector<int> got_frames_;
-	
-public:
-	input_type<2, int> input;
-	
-	explicit expected_frames_sink(const std::vector<int>& seq) :
-		expected_frames_(seq), input(*this) { }
-	
-	void process() override {
-		int index;
-		if(input.view_is_available()) index = frame_index(input.view());
-		else index = noframe;
-		got_frames_.push_back(index);
-	}
-
-	bool check() const {
-		bool ok = (expected_frames_ == got_frames_);
-		if(! ok) print();
-		return ok;
-	}
-	
-	void print() const {
-		std::cout << "expected: {" << to_string(expected_frames_.begin(), expected_frames_.end()) << "}\n"
-		          << "     got: {" << to_string(got_frames_.begin(), got_frames_.end()) << "}" << std::endl;
-	}
-};
-
-
 class passthrough_node : public flow::node {
 public:
 	using callback_func = void(passthrough_node& self, input_type<2, int>& in, output_type<2, int>& out);
@@ -90,7 +59,6 @@ private:
 	
 	void pre_process() override {
 		if(time_ < activation.size()) input.set_activated(activation[time_]);
-		else input.set_activated(true);
 	}
 	
 	void process() override {
@@ -119,6 +87,45 @@ public:
 		callback_ = func;
 	}
 };
+
+
+
+class expected_frames_sink : public flow::sink_node {
+private:
+	const std::vector<int> expected_frames_;
+	std::vector<int> got_frames_;
+	
+public:
+	input_type<2, int> input;
+
+	std::vector<bool> activation;
+	
+	explicit expected_frames_sink(const std::vector<int>& seq) :
+		expected_frames_(seq), input(*this) { }
+	
+	void pre_process() override {
+		if(time_ < activation.size()) input.set_activated(activation[time_]);
+	}
+	
+	void process() override {
+		int index;
+		if(input.view_is_available()) index = frame_index(input.view());
+		else index = noframe;
+		got_frames_.push_back(index);
+	}
+
+	bool check() const {
+		bool ok = (expected_frames_ == got_frames_);
+		if(! ok) print();
+		return ok;
+	}
+	
+	void print() const {
+		std::cout << "expected: {" << to_string(expected_frames_.begin(), expected_frames_.end()) << "}\n"
+		          << "     got: {" << to_string(got_frames_.begin(), got_frames_.end()) << "}" << std::endl;
+	}
+};
+
 
 
 class input_synchronize_test_node : public flow::node {

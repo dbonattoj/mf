@@ -10,7 +10,7 @@ using namespace mf;
 using namespace mf::test;
 using namespace std::literals;
 
-TEST_CASE("media graph (parallel)", "[media_graph][parallel]") {
+TEST_CASE("flow graph (parallel)", "[media_graph][parallel]") {
 	media_graph graph;
 	auto shp = make_ndsize(320, 240);
 

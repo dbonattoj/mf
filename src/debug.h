@@ -27,8 +27,9 @@
 
 #else
 
-	#define MF_DEBUG(...)
-	#define MF_DEBUG_BACKTRACE()
+	#define MF_DEBUG(...) ((void)0)
+	#define MF_DEBUG_BACKTRACE() ((void)0)
+	#define MF_DEBUG_EXPR(...) ((void)0)
 
 #endif
 

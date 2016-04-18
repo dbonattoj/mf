@@ -16,6 +16,9 @@ ndarray_ring<Dim, T>::ndarray_ring(const ndsize<Dim>& frame_shape, time_unit dur
 
 template<std::size_t Dim, typename T>
 std::size_t ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape, time_unit duration) {
+	// sizeof(T) already includes necessary padding, so that packed array respects alignment
+	static_assert(sizeof(T) % alignof(T) != 0, "sizeof(T) if not a multiple of alignof(T)");
+
 	std::size_t frame_size = frame_shape.product() * sizeof(T);
 	std::size_t page_size = system_page_size();
 		

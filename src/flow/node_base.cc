@@ -154,7 +154,7 @@ std::vector<std::reference_wrapper<node_output_base>> node_base::all_outputs() {
 
 
 bool node_base::is_bounded() const {
-	if(stream_duration_ != -1) return true;
+	if(stream_duration_ != -1 || is_source()) return true;
 	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](node_input_base* input) {
 		return (input->is_activated() && input->connected_node().is_bounded());
 	});

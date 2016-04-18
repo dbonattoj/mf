@@ -121,8 +121,8 @@ namespace detail {
 	}
 	#else
 	debug_backtrace debug_get_backtrace() { return debug_backtrace(); }
-	void debug_print_backtrace(const debug_header&, const backtrace&) {
-		debug_print(loc, "no support for debug backtrace print");
+	void debug_print_backtrace(const debug_header& header, const debug_backtrace&) {
+		debug_print(header, "no support for debug backtrace print");
 	}
 	#endif
 }
