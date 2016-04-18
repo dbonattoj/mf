@@ -99,6 +99,7 @@ auto ndarray_ring<Dim, T>::begin_write(time_unit duration) -> section_view_type 
 
 template<std::size_t Dim, typename T>
 void ndarray_ring<Dim, T>::end_write(time_unit written_duration) {
+	if(written_duration == 0) return;
 	if(written_duration > writable_duration()) throw std::invalid_argument("reported written duration too large");
 	write_position_ = (write_position_ + written_duration) % total_duration();
 	if(write_position_ == read_position_) full_ = true;

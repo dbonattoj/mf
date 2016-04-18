@@ -29,6 +29,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		std::vector<bool> act(100, false);
 		seq[0] = 0; act[0] = true;
 		seq[99] = 99; act[99] = true;
+		seq[98] = 98; act[98] = true;
 		std::size_t len = 99;
 		
 		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);

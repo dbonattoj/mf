@@ -69,7 +69,6 @@ TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable]") {
 		REQUIRE(ring.current_time() >= 8);
 		REQUIRE(ring.write_start_time() >= 9);
 		REQUIRE(ring.read_start_time() == 9);
-//ring.debug_print(std::cout);
 								
 		// read 3 frames (9, 10, 11), request 5
 		r_section.reset(ring.begin_read(5));

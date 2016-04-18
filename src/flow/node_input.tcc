@@ -43,6 +43,19 @@ void node_input<Dim, T>::begin_read(time_unit t) {
 }
 
 
+
+template<std::size_t Dim, typename T>
+void node_input<Dim, T>::skip(time_unit t) {	
+	MF_DEBUG("input::skip(time = ", t, ")....");
+
+	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");
+	
+	bool consume_frame = (t >= past_window_);
+	connected_output_->ring().skip(consume_frame ? 1 : 0);
+}
+
+
+
 template<std::size_t Dim, typename T>
 void node_input<Dim, T>::end_read(time_unit t) {
 	if(connected_output_ == nullptr) throw std::logic_error("node input is not connected");

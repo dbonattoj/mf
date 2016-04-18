@@ -37,19 +37,25 @@ void source_node::pull_frame_() {
 		else if(time != t) throw std::runtime_error("wrong time");
 	}
 	
-	time_ = time;
+	MF_DEBUG("source:buffer time=", time);
 	
-	if(time_ > time_limit_) {
+	
+	if(time > time_limit_) {
 		MF_DEBUG("source::nowrite, ", time_, " > ", time_limit_);
 		for(node_output_base& output : outputs) {
 			output.didnt_write();
 		}
+		MF_DEBUG("source::nowrite DONE, ", time_, " > ", time_limit_);
+		
 		return;
 	}
+
+	time_ = time;
 
 	if(stream_duration() != -1)
 		assert(time < stream_duration()); // seek must have respected stream duration of this node
 	
+	MF_DEBUG("processing t=", time_, ", output buffer: ", *outputs_[0]);
 	this->process();
 	
 	// check if this was last frame

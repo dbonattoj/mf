@@ -30,8 +30,6 @@ public:
 
 	virtual void didnt_write() = 0;
 
-	virtual void skip(time_unit t) = 0;
-
 
 	void define_required_buffer_duration(time_unit dur) { required_buffer_duration_ = dur; }
 	time_unit required_buffer_duration() const { return required_buffer_duration_; }

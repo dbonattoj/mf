@@ -49,8 +49,6 @@ public:
 		
 	time_unit begin_write() override {
 		MF_DEBUG("output::begin_write()....");
-				
-		
 		auto view = ring().begin_write(1);
 		if(view.duration() != 1) throw std::runtime_error("output at end");
 		view_.reset(view[0]);
@@ -74,10 +72,7 @@ public:
 		MF_DEBUG("output::end_write()");
 		view_available_ = false;
 	}
-		
-	void skip(time_unit t) override {
-		ring().skip(1);
-	}
+
 
 	#ifndef NDEBUG
 	void debug_print(std::ostream&) const override;
