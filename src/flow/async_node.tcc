@@ -33,7 +33,7 @@ template<std::size_t Dim, typename Elem>
 void async_node::output<Dim, Elem>::end_write_frame(bool mark_end) {
 	MF_EXPECTS(base::view_is_available());
 	
-	ring_->end_write(1, mark_end);
+	ring_->end_write(1, !ring_->is_seekable() && mark_end);
 	base::unset_view();
 	
 	MF_ENSURES(! base::view_is_available());

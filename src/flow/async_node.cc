@@ -57,7 +57,7 @@ void async_node::frame_() {
 	bool outputs_synchronized = true;
 	for(output_base& out : outputs()) {
 		time_unit requested_t = out.begin_write_next_frame();
-		if(requested_t == -1) std::runtime_error("ended");
+		if(requested_t == -1) throw 1;//throw std::runtime_error("ended");
 		
 		if(t == -1) t = requested_t;
 		else if(requested_t != t) outputs_synchronized = false;
@@ -118,7 +118,7 @@ void async_node::frame_() {
 	}
 	
 	
-	if(reached_end) throw "end";
+	if(reached_end) throw 1;
 }
 
 

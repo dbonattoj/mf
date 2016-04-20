@@ -38,10 +38,7 @@ void sink_node::frame_() {
 		if(in.reached_end(t)) reached_end_ = true;
 	}
 	
-	if(stream_duration_is_defined()) MF_ENSURES_MSG(
-		((t == stream_duration() - 1) == reached_end_),
-		"stream duration defined: must be at last frame now iff an input indicated that end was reached"
-	);
+	if(t == stream_duration() - 1) reached_end_ = true;
 }
 
 
