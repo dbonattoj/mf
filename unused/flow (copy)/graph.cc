@@ -1,5 +1,5 @@
 #include "graph.h"
-#include "node_base.h"
+#include "node.h"
 #include "sink_node.h"
 #include "../debug.h"
 #include <limits>

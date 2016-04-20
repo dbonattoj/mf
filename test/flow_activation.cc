@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include "../src/flow/graph.h"
-#include "../src/flow/node.h"
+#include "../src/flow/async_node.h"
 #include "support/flow.h"
 #include "support/ndarray.h"
 #include "../src/utility/string.h"
@@ -13,7 +13,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 	//set_debug_mode(debug_mode::cerr);
 	
 	flow::graph gr;
-	auto shp = make_ndsize(320, 240);
+	auto shp = make_ndsize(10, 10);
 	constexpr int n = noframe;
 	
 	const std::vector<bool>& act1     { 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1,  1,  1 };
@@ -28,13 +28,12 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 	const std::vector<int>& seq_or    { 0, 1, 2, n, 4, n, 6, 7, n, 9, 10, 11, 12 };
 	const std::size_t len = seq_and.size() - 1;
 
-/*
+
 	SECTION("source -> sink") {
 		std::vector<int> seq(100, n);
 		std::vector<bool> act(100, false);
 		seq[0] = 0; act[0] = true;
 		seq[99] = 99; act[99] = true;
-		seq[98] = 98; act[98] = true;
 		std::size_t len = 99;
 		
 		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);
@@ -97,7 +96,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		/*
 		source1 --> [-3, +1]passthrough1 --> merge --> sink
 		source2 --> [-1, +2]passthrough2 --> /
-		* /
+		*/
 		
 		auto& source1 = gr.add_node<sequence_frame_source>(len, shp, true);
 		auto& source2 = gr.add_node<sequence_frame_source>(len, shp, true);
@@ -119,10 +118,9 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		gr.setup();		
 		gr.run();
 		
-		REQUIRE(! merge.failed());
 		REQUIRE(sink.check());
 	}
-*/
+
 
 	SECTION("graph 3") {
 		/*
@@ -153,23 +151,31 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == len);
 			REQUIRE(sink.check());
 		}
 		
 		SECTION("passthroughs 1, 3") {
-			passthrough2.activation = act1;
+			passthrough1.activation = act1;
 			passthrough3.activation = act2;
-			
+
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == len);
 			REQUIRE(sink.check());
 		}
+		
+		SECTION("passthroughs 2, 3") {
+			passthrough2.activation = act1;
+			passthrough3.activation = act2;
 
+			gr.setup();			
+			gr.run();
+
+			REQUIRE(gr.current_time() == len);
+			REQUIRE(sink.check());
+		}	
 	}
 }
 		

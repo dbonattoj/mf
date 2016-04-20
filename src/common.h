@@ -14,14 +14,30 @@
 
 
 #ifndef NDEBUG
-	#define MF_ASSERT(condition, caption) \
+
+	#define MF_ASSERT_MSG(condition, msg) \
 		if(!(condition)) { \
-			MF_DEBUG_BACKTRACE("assertion failed: " caption); \
+			MF_DEBUG_BACKTRACE("assertion failed: " msg); \
 			std::abort(); \
 		}
+
+	#define MF_ASSERT(condition) MF_ASSERT_MSG(condition, "`" #condition "`")
+
+	#define MF_EXPECTS_MSG(condition, msg) MF_ASSERT_MSG(condition, "precondition: " msg)
+	#define MF_EXPECTS(condition) MF_EXPECTS_MSG(condition, "`" #condition "`")
 		
+	#define MF_ENSURES_MSG(condition, msg) MF_ASSERT_MSG(condition, "postcondition: " msg)
+	#define MF_ENSURES(condition) MF_EXPECTS_MSG(condition, "`" #condition "`")
+
 #else
-	#define MF_ASSERT(condition, caption) ((void)0)
+
+	#define MF_ASSERT_MSG(condition, msg) ((void)0)
+	#define MF_ASSERT(condition) ((void)0)
+	#define MF_EXPECTS(condition) ((void)0)
+	#define MF_EXPECTS_MSG(condition, msg) ((void)0)
+	#define MF_ENSURES(condition) ((void)0)
+	#define MF_ENSURES_MSG(condition, msg) ((void)0)
+	
 #endif
 
 

@@ -35,8 +35,8 @@ std::size_t ndarray_ring<Dim, T>::adjust_padding_(const ndsize<Dim>& frame_shape
 	
 	static_assert(sizeof(T) % a == 0, "sizeof(T) is not a multiple of alignof(T)");
 	
-	MF_ASSERT(frame_size % a == 0, "frame size not multiple of alignof(T)");
-	MF_ASSERT(page_size % a == 0, "system page size not multiple of alignof(T)");
+	MF_ASSERT_MSG(frame_size % a == 0, "frame size not multiple of alignof(T)");
+	MF_ASSERT_MSG(page_size % a == 0, "system page size not multiple of alignof(T)");
 	
 	std::size_t frame_size_a = frame_size / a;
 	std::size_t page_size_a = page_size / a;

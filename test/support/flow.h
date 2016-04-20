@@ -6,73 +6,64 @@
 #include <stdexcept>
 #include "ndarray.h"
 #include "../../src/common.h"
-#include "../../src/flow/node.h"
+#include "../../src/flow/graph.h"
 #include "../../src/flow/sink_node.h"
-#include "../../src/flow/source_node.h"
-#include "../../src/flow/node_input.h"
-#include "../../src/flow/node_output.h"
+#include "../../src/flow/async_node.h"
 #include "../../src/ndarray/ndcoord.h"
 #include "../../src/utility/string.h"
 #include "ndarray.h"
 
 namespace mf { namespace test {
 
+
 constexpr int noframe = -2;
 
-
-class sequence_frame_source : public flow::source_node {
+class sequence_frame_source : public flow::async_source_node {
 private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
+	std::set<int> produced_frames_;
 
 public:
 	output_type<2, int> output;
 	
 	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		flow::source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
+		flow::async_source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
 	
 	void setup() override {
-		std::cout << "-------------"<< std::endl;
 		output.define_frame_shape(frame_shape_);
 	}
 	
 	void process() override {
-		std::cout << "source: t="  << current_time() << std::endl;
+		time_unit t = current_time();
+		produced_frames_.emplace(t);
 		output.view() = make_frame(frame_shape_, current_time());
 	}
 	
-	bool reached_end() const override {
+	bool reached_end() const noexcept override {
 		return (current_time() == last_frame_);
+	}
+	
+	bool has_produced_frame(int i) const {
+		return (produced_frames_.find(i) != produced_frames_.end());
 	}
 };
 
-// node active when 1+ output active
-// active node always produces output to all its outputs,
-// even if input(s) desactivated
 
-// node:   active/inactive
-// input:  activated/desactivated
-// output: active/inactive (still pulls/skips)
-
-class passthrough_node : public flow::node {
-public:
-	using callback_func = void(passthrough_node& self, input_type<2, int>& in, output_type<2, int>& out);
-	
+class passthrough_node : public flow::async_node {
 private:
-	std::function<callback_func> callback_;
-		
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
 	}
 	
 	void pre_process() override {
-		if(time_ < activation.size()) input.set_activated(activation[time_]);
+		if(current_time() < activation.size()) input.set_activated(activation[current_time()]);
 	}
 	
 	void process() override {
-		if(callback_) callback_(*this, input, output);
+		if(callback) callback(*this, input, output);
 		if(input.view_is_available()) {
-			if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in passthrough");
+			REQUIRE_FALSE(frame_index(input.view()) == -1);
 			output.view() = input.view();
 		} else {
 			output.view() = make_frame(input.frame_shape(), noframe);
@@ -80,20 +71,17 @@ private:
 	}
 	
 public:
+	using callback_func = void(passthrough_node& self, input_type<2, int>& in, output_type<2, int>& out);
+
 	input_type<2, int> input;
 	output_type<2, int> output;
 	
 	std::vector<bool> activation;
+	std::function<callback_func> callback;
 
 	passthrough_node(time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
-		flow::node(prefetch),
 		input(*this, past_window, future_window),
 		output(*this) { }
-
-	template<typename Function>
-	void set_callback(Function func) {
-		callback_ = func;
-	}
 };
 
 
@@ -112,9 +100,8 @@ public:
 		expected_frames(seq), input(*this) { }
 	
 	void pre_process() override {
-		if(time_ < activation.size()) {
-			input.set_activated(activation[time_]);
-		}
+		if(current_time() < activation.size())
+			input.set_activated(activation[current_time()]);
 	}
 	
 	void process() override {
@@ -138,10 +125,7 @@ public:
 
 
 
-class input_synchronize_test_node : public flow::node {
-private:
-	bool failed_ = false;
-
+class input_synchronize_test_node : public flow::async_node {
 public:
 	input_type<2, int> input1;
 	input_type<2, int> input2;
@@ -151,54 +135,51 @@ public:
 	std::vector<bool> activation2;
 	
 	input_synchronize_test_node(time_unit prefetch = 0) :
-		flow::node(prefetch),
 		input1(*this), input2(*this), output(*this) { }
+
 
 	void setup() override {
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
 	void pre_process() override {
-		if(time_ < activation1.size()) input1.set_activated(activation1[time_]);
-		if(time_ < activation2.size()) input2.set_activated(activation2[time_]);
+		time_unit t = current_time();
+		if(t < activation1.size()) input1.set_activated(activation1[t]);
+		if(t < activation2.size()) input2.set_activated(activation2[t]);
 	}
 	
 	void process() override {
-		std::cout << "time " << time_ << std::endl;
-		std::cout << "1: av:" << input1.view_is_available() << ", act:" << input1.is_activated() << std::endl;
-		std::cout << "2: av:" << input2.view_is_available() << ", act:" << input2.is_activated() << std::endl;
-		std::cout << "////////////" << std::endl;
-		
-		if(input1.view_is_available() && frame_index(input1.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 1)");
-		if(input2.view_is_available() && frame_index(input2.view()) == -1) throw std::runtime_error("invalid frame received in merge (input 2)");
-
-		if(input1.view_is_available() && input2.view_is_available()) {
-			if(input1.view() != input2.view()) {
-				std::cout << "////////////////////////////////////// " << frame_index(input1.view()) << " <--> " << frame_index(input2.view()) << std::endl;
-				failed_ = true;
-			}
-			output.view() = input1.view();
-		} else if(input1.view_is_available()) {
-			output.view() = input1.view();
-		} else if(input2.view_is_available()) {
-			output.view() = input2.view();
-		} else {
-			output.view() = make_frame(input1.frame_shape(), noframe);
+		int iout;
+		REQUIRE(input1.view_is_available() == input1.is_activated());
+		REQUIRE(input2.view_is_available() == input2.is_activated());
+		if(input1.is_activated() && input2.is_activated()) {
+			int i1 = frame_index(input1.view());
+			int i2 = frame_index(input2.view());
+			
+			REQUIRE(i1 != -1);
+			REQUIRE(i2 != -1);
+			
+			if(i1 != noframe) iout = i1;
+			else if(i2 != noframe) iout = i2;
+			
+			if(i1 != noframe && i2 != noframe) REQUIRE(i1 == i2);
+		} else if(input1.is_activated()) {
+			iout = frame_index(input1.view());
+		} else if(input2.is_activated()) {
+			iout = frame_index(input2.view());
 		}
+		output.view() = make_frame(input1.frame_shape(), iout);
 	}
-	
-	bool failed() const { return failed_; }
 };
 
 
-class multiplexer_node : public flow::node {
+class multiplexer_node : public flow::async_node {
 public:
 	input_type<2, int> input;
 	output_type<2, int> output1;
 	output_type<2, int> output2;
 	
 	multiplexer_node(time_unit prefetch = 0):
-		flow::node(prefetch),
 		input(*this), output1(*this), output2(*this) { }
 	
 	void setup() override {

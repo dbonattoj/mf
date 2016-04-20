@@ -2,118 +2,262 @@
 #define MF_FLOW_NODE_BASE_H_
 
 #include <vector>
-#include <memory>
 #include <atomic>
-#include <string>
-#include <ostream>
 #include <functional>
+#include "../ndarray/ndarray_timed_view.h"
 #include "../common.h"
-#include "node_io_base.h"
 
 namespace mf { namespace flow {
 
 /// Base class for node in flow graph.
 class node_base {
-protected:
-	std::vector<node_input_base*> inputs_; ///< Inputs of this node.
-	std::vector<node_output_base*> outputs_; ///< Outputs of this node.
-	
-	
 public:
-	bool was_setup_ = false;
+	class input_base;
+	class output_base;
+	template<std::size_t Dim, typename Elem> class input;
+	template<std::size_t Dim, typename Elem> class output;
 
+private:
+	std::vector<std::reference_wrapper<input_base>> inputs_;
+	std::vector<std::reference_wrapper<output_base>> outputs_;
+	
+	bool was_setup_ = false;
 	time_unit prefetch_duration_ = 0;
 	time_unit stream_duration_ = -1;
 	bool seekable_ = false;
 	time_unit offset_ = -1;
-
-	bool active_ = true; ///< True if any path with activated inputs connects node to graph sink.
-	std::atomic<time_unit> time_{-1}; ///< Time of last processed frame by this node.
 	
+	bool active_ = true;
+	std::atomic<time_unit> time_{-1};
 	
-	std::atomic<time_unit> time_limit_{-1};
+	void propagate_offset_(time_unit offset);
+	void propagate_output_buffer_durations_();
+	void propagate_setup_();
+	void deduce_stream_properties_();
 
-	std::vector<std::reference_wrapper<node_input_base>> activated_inputs();
-	std::vector<std::reference_wrapper<node_output_base>> all_outputs();
+	void propagate_activation_();
+
+protected:
+	const auto& inputs() const { return inputs_; }
+	const auto& outputs() const { return outputs_; }
 
 	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
+	void set_prefetch_duration(time_unit);
+	
+	void setup_sink();
 
-	/// Define offset of this node, and of preceding nodes.
-	/** Recursively also sets offsets of preceding nodes. If offset was already set, it is updated and propagated
-	 ** only when new value is larger. */
-	void propagate_offset_(time_unit offset);
-	
-	/// Define required durations of output buffers.
-	/** Sets output buffer durations of preceding nodes (not of this node's outputs). Then recurses into preceding
-	 ** nodes. */
-	void propagate_output_buffer_durations_();
-		
-	/// Set up preceding nodes, and then this node.
-	/** Defines stream properties (duration, seekable) of preceding nodes and of this node, calls `setup()`, and 
-	 ** sets up outputs. */
-	void propagate_setup_();
-	
-	
-	/// Set up the node.
-	/** Implemented in concrete subclass. Must define frame shapes of outputs. Preceding nodes are already set up
-	 ** when this is called, allowing node to define output frame shapes in function of input frame shapes. */
+	void set_current_time(time_unit t) noexcept { time_ = t; }
+
+	/// \name Concrete node functions.
+	/// Implemented by concrete subclass which implements the processing done by the node.
+	///@{
 	virtual void setup() { }
-	
-	
 	virtual void pre_process() { }
-		
-	/// Process current frame.
-	/** Implemented in concrete subclass. Input and output views are made available while in this function. Subclass
-	 ** must read frame(s) from input(s), process, and write one frame into output(s). */
 	virtual void process() = 0;
-	
-		
-private:
-	friend node_input_base::node_input_base(node_base&, time_unit, time_unit);
-	friend node_output_base::node_output_base(node_base&);
+	virtual bool reached_end() const noexcept { return false; }
+	///@}
 
-	void register_input_(node_input_base&);	
-	void register_output_(node_output_base&);
-
-	void deduce_stream_properties_();
+	node_base() = default;
+	node_base(const node_base&) = delete;
+	node_base& operator=(const node_base&) = delete;
 	
 public:
-	std::string name;
+	virtual ~node_base() { }
 	
-	bool was_setup() const { return was_setup_; }
-	
-	virtual void launch() { }
-	virtual void stop() { }
-	
-	bool is_seekable() const { return seekable_; }
-	time_unit stream_duration() const { return stream_duration_; }
-		
-	/// Time of last processed frame.
-	/** When currently processing a frame, time of that frame. */
-	time_unit current_time() const noexcept { return time_; }
-	
-	/// Absolute offset, relative to graph sink node.
-	/** Maximal number of frames that this node can be in advance relative to graph sink node. -1 when not yet defined.
-	 ** Gets computed in propagate_offset_(), during graph setup. Used to determine output buffer durations in graph. */
-	time_unit offset() const noexcept { return offset_; }
-	
-	/// Determine activation, based on succeeding nodes.
-	/** Called recursively from succeeding nodes, or from this node's outputs, when their connected input gets activated
-	 ** or desactivated. */
-	void propagate_activation();
-		
-	bool is_active() const { return active_; }
-	
-	bool is_source() const { return (inputs_.size() == 0); }
-	bool is_sink() const { return (outputs_.size() == 0); }
+	bool was_setup() const noexcept { return was_setup_; }
+	time_unit prefetch_duration() const noexcept { return prefetch_duration_; }
+	bool stream_duration_is_defined() const noexcept { return (stream_duration_ != -1); }
+	time_unit stream_duration() const noexcept { return stream_duration_; }
+	bool is_seekable() const noexcept { return seekable_; }
+
+	time_unit offset() const noexcept { MF_EXPECTS(was_setup_); return offset_; }
 
 	bool is_bounded() const;
+	bool is_source() const noexcept { return inputs_.empty(); }
+	bool is_sink() const noexcept { return outputs_.empty(); }
+	
+	bool is_active() const noexcept { MF_EXPECTS(was_setup_); return active_; }
+	time_unit current_time() const noexcept { MF_EXPECTS(was_setup_); return time_; }
+		
+	virtual void launch() { }
+	virtual void stop() { }
+};
 
-	#ifndef NDEBUG
-	void debug_print(std::ostream&) const;
-	#endif
+
+/// Base class for node output.
+class node_base::output_base {
+private:
+	node_base& node_;
+	time_unit required_buffer_duration_ = -1;
+	
+	bool input_activated_ = true;
+
+	output_base(const output_base&) = delete;
+
+protected:
+	explicit output_base(node_base&);
+
+public:
+	node_base& node() const noexcept { return node_; }
+
+	void define_required_buffer_duration(time_unit dur) { required_buffer_duration_ = dur; }
+	time_unit required_buffer_duration() const noexcept { return required_buffer_duration_; }
+	bool required_buffer_duration_is_defined() const noexcept { return (required_buffer_duration_ != -1); }
+
+	virtual bool can_setup() const noexcept = 0;
+	virtual void setup() = 0;
+	
+	void propagate_activation(bool input_activated);
+
+	bool is_active() const noexcept;
+
+	/// \name Write interface.
+	///@{
+	virtual time_unit begin_write_next_frame() = 0;
+	virtual void end_write_frame(bool mark_end = false) = 0;
+	virtual void cancel_write_frame() = 0;
+	///@}
+};
+
+
+template<std::size_t Dim, typename Elem>
+class node_base::output : public output_base {
+public:
+	using frame_view_type = ndarray_view<Dim, Elem>;
+	using full_view_type = ndarray_timed_view<Dim + 1, Elem>;
+	using frame_shape_type = typename frame_view_type::shape_type;
+
+private:
+	frame_shape_type frame_shape_;
+
+	bool view_available_ = false;
+	frame_view_type view_;
+
+protected:
+	void set_view(const frame_view_type& view);
+	void unset_view();
+	
+public:
+	explicit output(node_base& nd) : output_base(nd) { }
+
+	void define_frame_shape(const frame_shape_type& shp) { frame_shape_ = shp; }
+	const frame_shape_type& frame_shape() const noexcept { return frame_shape_; }
+	bool frame_shape_is_defined() const noexcept { return frame_shape_.size() != 0; }
+
+	bool can_setup() const noexcept override;
+
+	bool view_is_available() const noexcept { return view_available_; }
+	const frame_view_type& view() { MF_EXPECTS(view_available_); return view_; }
+	
+	/// \name Read interface, used by connected input.
+	///@{
+	/// Begin reading time span \a span from the output.
+	/** Depending on connected node type, may process frame(s) (sync) or wait for them to become available (async).
+	 ** Connected node seeks if necessary. */
+	virtual full_view_type begin_read_span(time_span span) = 0;
+
+	/// End reading from output.
+	/** If for sequential read, the next call to begin_read_span() will not include the first frame from the time span,
+	 ** of the last call, then \a consume_frame must be set. */
+	virtual void end_read(bool consume_frame) = 0;
+
+	/// Skip one frame from output.
+	virtual void skip_frame() = 0;
+
+	/// End time of output, or -1 if not known.
+	/** If the last frame of the view returned by the previous call to begin_read_span() was the last frame of the
+	 ** output stream, then end_time() must return that time. Otherwise, may return -1 when the end time is in the
+	 ** future, and the node is seekable. */
+	virtual time_unit end_time() const = 0;
+	///@}
+};
+
+
+/// Base class for node input.
+class node_base::input_base {
+private:
+	node_base& node_;
+	time_unit past_window_ = 0;
+	time_unit future_window_ = 0;
+	bool activated_ = true;
+
+	input_base(const input_base&) = delete;
+
+protected:
+	input_base(node_base& nd, time_unit past_window, time_unit future_window);
+
+public:
+	node_base& node() const noexcept { return node_; }
+
+	virtual output_base& connected_output() const = 0;
+	virtual node_base& connected_node() const = 0;
+
+	bool is_activated() const noexcept { return activated_; }
+	void set_activated(bool);
+	
+	time_unit past_window_duration() const noexcept { return past_window_; }
+	time_unit future_window_duration() const noexcept { return future_window_; }
+	
+	/// \name Read interface.
+	/// Used by node to read from input.
+	///@{
+	virtual void begin_read_frame(time_unit) = 0;
+	virtual void end_read_frame(time_unit) = 0;
+	virtual void skip_frame(time_unit) = 0;
+	virtual bool reached_end(time_unit t) const = 0;
+	///@}
+};
+
+
+template<std::size_t Dim, typename Elem>
+class node_base::input : public input_base {
+public:
+	using output_type = output<Dim, Elem>;
+
+	using frame_view_type = ndarray_view<Dim, Elem>;
+	using full_view_type = ndarray_timed_view<Dim + 1, Elem>;
+	using frame_shape_type = typename frame_view_type::shape_type;
+	
+private:
+	output_type* connected_output_ = nullptr;
+	
+	bool view_available_ = false;
+	full_view_type view_;
+
+public:
+	input(node_base& nd, time_unit past_window = 0, time_unit future_window = 0) :
+		input_base(nd, past_window, future_window) { }
+
+	const frame_shape_type& frame_shape() const noexcept { return connected_output().frame_shape(); }
+
+	void connect(output_type&);
+	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
+	
+	output_type& connected_output() const final override;
+	node_base& connected_node() const final override { return connected_output().node(); }
+
+	bool view_is_available() const noexcept { return view_available_; }
+	const full_view_type& full_view() { MF_EXPECTS(view_available_); return view_; }
+	frame_view_type view();
+	
+	std::ptrdiff_t full_view_center() const noexcept {
+		return (node().current_time() - view_.start_time());
+	}
+	
+	/// \name Read interface.
+	///@{
+	/// Begin reading at time \arg t.
+	/** Frames in time window around \arg t become available through view(). Window may be truncated near beginning
+	 ** and end of stream.  \a t must be lower than the end time of the stream. */
+	void begin_read_frame(time_unit t) final override;
+	void end_read_frame(time_unit t) final override;
+	void skip_frame(time_unit t) final override;
+	bool reached_end(time_unit t) const final override;
+	///@}
 };
 
 }}
+
+#include "node_base.tcc"
 
 #endif

@@ -70,7 +70,8 @@ public:
 	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned
-	 ** by begin_write().
+	 ** by begin_write(). For non-seekable buffer, \a mark_end is used to mark this written frame(s) as last.
+	 ** \a mark_end cannot be set when \a written_duration is zero.
 	 ** The reader cannot seek to other position inbetween begin_write() and end_write() calls of writer. */
 	void end_write(time_unit written_duration, bool mark_end = false);
 
@@ -140,7 +141,15 @@ public:
 	/// True if end of file time is known. */
 	bool end_time_is_defined() const { return (end_time_ != -1); }
 	
+	/// True if writer has written last frame.
+	/** For non-seekable buffer, true after end_write() call with mark end. begin_write() returns empty view if called
+	 ** after this returned true. (Except if seek occured inbetween). */
 	bool writer_reached_end() const;
+
+	/// True if reader has read last frame.
+	/** Unlike end_time(), the result cannot change between reader_reached_end() and begin_read() call: for non-seekable
+	 ** buffer, the writer can only mark end after writing at least one frame, and hence cannot retroactively mark
+	 ** current read start position as being the end. */
 	bool reader_reached_end() const;
 		
 	#ifndef NDEBUG

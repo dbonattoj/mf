@@ -24,7 +24,7 @@ namespace {
 	std::ptrdiff_t next_thread_color_ = 0;
 	
 	std::mutex mutex_;
-	debug_mode mode_ = debug_mode::file;
+	debug_mode mode_ = debug_mode::cerr;
 	
 	std::string filename_ = "debug.txt";
 	

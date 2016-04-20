@@ -1,68 +1,43 @@
 #include "node_base.h"
 
-#include <algorithm>
-#include <limits>
-#include "node_input.h"
-#include "node_output.h"
-
 namespace mf { namespace flow {
-	
-
-void node_base::define_source_stream_properties(bool seekable, time_unit stream_duration) {
-	assert(is_source());
-	
-	if(was_setup_) throw std::logic_error("node was already set up");
-	if(seekable && stream_duration == -1)
-		throw std::invalid_argument("seekable node must have defined stream duration");
-
-	seekable_ = seekable;
-	stream_duration_ = stream_duration;
-}
-
-
-void node_base::register_input_(node_input_base& input) {
-	inputs_.push_back(&input);
-}
-
-
-void node_base::register_output_(node_output_base& output) {
-	outputs_.push_back(&output);
-}
-
 
 void node_base::propagate_offset_(time_unit new_offset) {
+	MF_EXPECTS(! was_setup_);
+	
 	if(new_offset <= offset_) return;
 	
 	offset_ = new_offset;
 	
-	for(node_input_base* input : inputs_) {
-		node_base& connected_node = input->connected_output().node();
-		time_unit off = offset_ + connected_node.prefetch_duration_ + input->future_window_duration();
+	for(input_base& in : inputs()) {
+		node_base& connected_node = in.connected_node();
+		time_unit off = offset_ + connected_node.prefetch_duration_ + in.future_window_duration();
 		connected_node.propagate_offset_(off);
 	}		
 }
 
 
 void node_base::propagate_output_buffer_durations_() {
-	for(node_input_base* input : inputs_) {
-		auto& output = input->connected_output();
-		node_base& connected_node = output.node();
-		time_unit dur = 1 + input->past_window_duration() + (connected_node.offset_ - offset_);
-		output.define_required_buffer_duration(dur);
+	MF_EXPECTS(! was_setup_);
+	for(input_base& in : inputs()) {
+		output_base& out = in.connected_output();
+		node_base& connected_node = out.node();
+		time_unit dur = 1 + in.past_window_duration() + (connected_node.offset_ - offset_);
+		out.define_required_buffer_duration(dur);
 		connected_node.propagate_output_buffer_durations_();
 	}
 }
 
 
 void node_base::deduce_stream_properties_() {
-	assert(! is_source());
-		
+	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(! is_source());
+			
 	seekable_ = true;
 	stream_duration_ = std::numeric_limits<time_unit>::max();
 	
-	for(node_input_base* input : inputs_) {
-		auto& output = input->connected_output();
-		node_base& connected_node = output.node();
+	for(input_base& in : inputs()) {
+		node_base& connected_node = in.connected_node();
 		
 		time_unit input_node_stream_duration = connected_node.stream_duration_;
 		bool input_node_seekable = connected_node.seekable_;
@@ -71,20 +46,20 @@ void node_base::deduce_stream_properties_() {
 		seekable_ = seekable_ && input_node_seekable;
 	}
 	
-	assert(!(seekable_ && (stream_duration_ == -1)));
+	MF_ENSURES(!(seekable_ && (stream_duration_ == -1)));
 }
 
 
 void node_base::propagate_setup_() {	
-	assert(offset_ != -1); // ...was defined in prior setup phase
+	MF_EXPECTS(offset_ != -1); // ...was defined in prior setup phase
 	
 	// do nothing when was_setup_ is already set:
 	// during recursive propagation it may be called multiple times on same node
 	if(was_setup_) return;
 	
 	// first set up preceding nodes
-	for(node_input_base* input : inputs_) {
-		node_base& connected_node = input->connected_output().node();
+	for(input_base& in : inputs()) {
+		node_base& connected_node = in.connected_output().node();
 		connected_node.propagate_setup_();
 	}
 	
@@ -98,20 +73,13 @@ void node_base::propagate_setup_() {
 	// their frame shape are now defined
 	// required durations were defined in propagate_output_buffer_durations_()
 	// stream duration from node, was defined in propagate_stream_durations_()
-	for(node_output_base* output : outputs_) {
-		if(! output->frame_shape_is_defined())
-			throw std::logic_error("concrete subclass did not define output frame shapes");
-
-		assert(output->required_buffer_duration_is_defined()); // ...was defined in prior setup phase
-					
-		output->setup();
-	}
+	for(output_base& out : outputs()) out.setup();
 	
 	was_setup_ = true;
 }
 
 
-void node_base::propagate_activation() {
+void node_base::propagate_activation_() {
 	// activation of succeeding nodes (down to sink) must already have been defined
 
 	// this node is active if any of its outputs are active
@@ -119,67 +87,90 @@ void node_base::propagate_activation() {
 	
 	bool now_active = std::any_of(
 		outputs_.cbegin(), outputs_.cend(),
-		[](node_output_base* output) { return output->is_active(); }
+		[](output_base& out) { return out.is_active(); }
 	);
 
 	if(now_active != active_) {
 		active_ = now_active;
 
 		// now set activation of preceeding nodes
-		for(node_input_base* input : inputs_) {
-			node_base& connected_node = input->connected_output().node();
-			connected_node.propagate_activation();
+		for(input_base& in : inputs()) {
+			node_base& connected_node = in.connected_output().node();
+			connected_node.propagate_activation_();
 		}
+	}	
+}
+
+
+void node_base::define_source_stream_properties(bool seekable, time_unit stream_duration) {
+	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(is_source());
 	
-	}
+	if(seekable && stream_duration == -1)
+		throw std::invalid_argument("seekable node must have stream duration");
+
+	seekable_ = seekable;
+	stream_duration_ = stream_duration;
 }
 
 
-std::vector<std::reference_wrapper<node_input_base>> node_base::activated_inputs() {
-	std::vector<std::reference_wrapper<node_input_base>> activated_inputs;
-	for(node_input_base* input : inputs_) {
-		if(input->is_activated()) activated_inputs.emplace_back(*input);
-	}
-	return activated_inputs;
+void node_base::set_prefetch_duration(time_unit prefetch) {
+	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(prefetch >= 0);
+	
+	prefetch_duration_ = prefetch;
 }
 
 
-std::vector<std::reference_wrapper<node_output_base>> node_base::all_outputs() {
-	std::vector<std::reference_wrapper<node_output_base>> active_outputs;
-	for(node_output_base* output : outputs_) {
-		active_outputs.emplace_back(*output);
-	}
-	return active_outputs;
+void node_base::setup_sink() {
+	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(is_sink());
+	
+	propagate_offset_(0);
+	propagate_output_buffer_durations_();
+	propagate_setup_();
+
+	MF_ENSURES(was_setup_);
 }
 
 
 bool node_base::is_bounded() const {
 	if(stream_duration_ != -1 || is_source()) return true;
-	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](node_input_base* input) {
-		return (input->is_activated() && input->connected_node().is_bounded());
+	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](input_base& in) {
+		return (in.is_activated() && in.connected_node().is_bounded());
 	});
 }
 
 
-#ifndef NDEBUG
-void node_base::debug_print(std::ostream& str) const {
-	str << "node ";
-	if(! name.empty()) str << '"' << name << '"';
+bool node_base::output_base::is_active() const noexcept {
+	return input_activated_ && node_.is_active();
+}
 
-	str << "[offset=" << offset_ << ", prefetch=" << prefetch_duration_ << ", setup=" << was_setup_ << "]" << std::endl;
-	
-	for(std::ptrdiff_t i = 0; i < inputs_.size(); ++i) {
-		const node_input_base& input = *inputs_[i];
-		str << "   input " << i
-			<< ": [-" << input.past_window_duration() << ", +" << input.future_window_duration() << "]" << std::endl;
-	}
 
-	for(std::ptrdiff_t i = 0; i < outputs_.size(); ++i) {
-		const node_output_base& output = *outputs_[i];
-		str << "   output " << i
-			<< ": required_duration=" << output.required_buffer_duration() << std::endl;
+void node_base::input_base::set_activated(bool act) {
+	if(activated_ != act) {
+		activated_ = act;
+		connected_output().propagate_activation(act);
 	}
 }
-#endif
+
+
+void node_base::output_base::propagate_activation(bool input_activated) {
+	input_activated_ = input_activated;
+	node_.propagate_activation_();
+}
+
+
+node_base::output_base::output_base(node_base& nd) : node_(nd) {
+	nd.outputs_.emplace_back(*this);
+}
+
+
+node_base::input_base::input_base(node_base& nd, time_unit past_window, time_unit future_window) :
+node_(nd), past_window_(past_window), future_window_(future_window) {
+	nd.inputs_.emplace_back(*this);
+}
+
 
 }}
+

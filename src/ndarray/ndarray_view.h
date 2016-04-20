@@ -74,9 +74,9 @@ public:
 	void reset(pointer start, const shape_type& shape)
 		{ reset(ndarray_view(start, shape)); }
 	
-	template<typename Arg> ndarray_view& operator=(Arg&& arg)
+	template<typename Arg> const ndarray_view& operator=(Arg&& arg) const
 		{ assign(std::forward<Arg>(arg)); return *this; }
-	ndarray_view& operator=(const ndarray_view& other)
+	const ndarray_view& operator=(const ndarray_view& other) const
 		{ assign(other); return *this; }
 		
 	coordinates_type index_to_coordinates(const index_type&) const;

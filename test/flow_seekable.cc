@@ -1,6 +1,6 @@
 #include <catch.hpp>
 #include "../src/flow/graph.h"
-#include "../src/flow/node.h"
+#include "../src/flow/async_node.h"
 #include "support/flow.h"
 #include "support/ndarray.h"
 #include <iostream>
@@ -12,7 +12,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	//set_debug_mode(debug_mode::cerr);
 	
 	flow::graph gr;
-	auto shp = make_ndsize(320, 240);
+	auto shp = make_ndsize(10, 10);
 
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
@@ -51,7 +51,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			sink.input.connect(node.output);
 			gr.setup();
 				
-			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
+			node.callback = [&](passthrough_node& self, auto& in, auto& out) {
 				switch(self.current_time()) {
 				case 0:
 					REQUIRE(in.view() == make_frame(shp, 0));
@@ -89,7 +89,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 					REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
 					break;
 				}
-			});
+			};
 
 			gr.run();
 			
@@ -104,7 +104,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			sink.input.connect(node.output);
 			gr.setup();
 			
-			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
+			node.callback = [&](passthrough_node& self, auto& in, auto& out) {
 				switch(self.current_time()) {
 				case 0:
 					REQUIRE(in.view() == make_frame(shp, 0));
@@ -142,7 +142,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 					REQUIRE(compare_frames(shp, in.full_view(), { 5 }));
 					break;
 				}
-			});
+			};
 			
 			gr.run();
 			
@@ -157,7 +157,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			sink.input.connect(node.output);
 			gr.setup();
 			
-			node.set_callback([&](passthrough_node& self, auto& in, auto& out) {
+			node.callback = [&](passthrough_node& self, auto& in, auto& out) {
 				switch(self.current_time()) {
 				case 0:
 					REQUIRE(in.view() == make_frame(shp, 0));
@@ -195,7 +195,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 					REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
 					break;
 				}
-			});
+			};
 
 			gr.run();
 			REQUIRE(sink.check());
@@ -335,7 +335,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			
 			gr.run();
 			
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
@@ -372,7 +371,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			
 			gr.run();
 			
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
@@ -410,7 +408,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			
 			gr.run();
 
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());		
 		}
@@ -449,7 +446,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			
 			gr.run();
 
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
@@ -475,7 +471,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(! merge.failed());
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}

@@ -1,65 +1,62 @@
 #include "sink_node.h"
+#include <stdexcept>
 
 namespace mf { namespace flow {
 
-void sink_node::pull_frame_() {
+void sink_node::frame_() {	
+	MF_EXPECTS_MSG(! reached_end_, "end must not already have been reached");
 
-	MF_DEBUG("sink::pull().... (t=", time_, ")");
+	time_unit t = current_time();
+		
+	// the sink node controls time
+	t++;
+	set_current_time(t);
+		
+	if(stream_duration_is_defined())
+		MF_ASSERT_MSG(t < stream_duration(), "sink must not already be at end");
 	
-	// sink controlls time flow --> propagated to rest of graph
-	
-	time_++;
-	
-	if(time_ == stream_duration_) { reached_end_ = true; return; }
-
+	// allow concrete node to activate/desactivate inputs
 	this->pre_process();
-
-	for(node_input_base* input : inputs_) {
-		assert(! input->reached_end());
+	
+	// begin reading from activated inputs,
+	// skip frame in desactivated inputs
+	for(input_base& in : inputs()) {
+		MF_ASSERT_MSG(! in.reached_end(t), "input of sink must not already be at end");
 		
-		if(input->is_activated())
-			input->begin_read(time_);
-		else
-			input->skip(time_);
+		if(in.is_activated()) in.begin_read_frame(t);
+		else in.skip_frame(t);
 	}
-		
+	
+	// concrete node processes frame
 	this->process();
 	
-	for(node_input_base* input : inputs_) {
-		if(input->is_activated())
-			input->end_read(time_);
-			
-		if(input->reached_end()) reached_end_ = true;
+	// end reading from activated inputs
+	// sink has reached end if any input (including desactivated) reached end
+	for(input_base& in : inputs()) {
+		if(in.is_activated()) in.end_read_frame(t);
+		
+		if(in.reached_end(t)) reached_end_ = true;
 	}
 	
-	if(reached_end_) MF_DEBUG("sink: reached end!");
-
-	MF_DEBUG("sink::pull() (t=", time_, ")");
+	if(stream_duration_is_defined()) MF_ENSURES_MSG(
+		((t == stream_duration() - 1) == reached_end_),
+		"stream duration defined: must be at last frame now iff an input indicated that end was reached"
+	);
 }
-
-
-sink_node::sink_node() :
-	node_base() { }	
 
 
 void sink_node::setup_graph() {
-	propagate_offset_(0);
-	propagate_output_buffer_durations_();
-	propagate_setup_();
-}
-
-void sink_node::stop_graph() {
-}
-
-void sink_node::seek(time_unit t) {
-	reached_end_ = false;
-	if(is_seekable()) time_ = t - 1;
-	else throw std::logic_error("sink node is not seekable");
+	setup_sink();
 }
 
 
 void sink_node::pull_next_frame() {
-	pull_frame_();
+	if(reached_end_) throw std::logic_error("sink is already at end");
+	frame_();
+}
+
+void sink_node::seek(time_unit t) {
+	// TODO
 }
 
 }}

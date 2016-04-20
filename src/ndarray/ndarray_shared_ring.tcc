@@ -84,9 +84,9 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration) -> se
 
 template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::end_write(time_unit written_duration, bool mark_end) {
-	if(end_time_ != -1 && mark_end) throw std::invalid_argument("end already marked (or buffer is seekable)");
-	
 	if(writer_state_ == idle) throw sequencing_error("was not writing");
+	if(end_time_ != -1 && mark_end) throw std::invalid_argument("end already marked (or buffer is seekable)");	
+	if(written_duration == 0 && mark_end) throw std::invalid_argument("cannot mark end when no frame was written");
 	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
