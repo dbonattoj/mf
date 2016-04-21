@@ -129,7 +129,7 @@ namespace detail {
 	#else
 	debug_backtrace debug_get_backtrace() { return debug_backtrace(); }
 	void debug_print_backtrace(const debug_header& header, const debug_backtrace&) {
-		debug_print(header, "no support for debug backtrace print");
+		debug_print("", header, "no support for debug backtrace print");
 	}
 	#endif
 }
@@ -149,8 +149,7 @@ void set_debug_filter(const std::set<std::string>& tags) {
 }
 
 
-void initialize_debug(
-) {
+void initialize_debug() {
 	#ifdef MF_OS_LINUX
 	//std::set_terminate(&terminate_handler_);
 	::signal(SIGSEGV, &signal_handler_);
