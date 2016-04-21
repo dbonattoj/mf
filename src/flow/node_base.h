@@ -62,6 +62,8 @@ protected:
 	node_base& operator=(const node_base&) = delete;
 	
 public:
+	std::string name;
+
 	virtual ~node_base() { }
 	
 	bool was_setup() const noexcept { return was_setup_; }
@@ -113,7 +115,7 @@ public:
 
 	/// \name Write interface.
 	///@{
-	virtual time_unit begin_write_next_frame() = 0;
+	virtual bool begin_write_next_frame(time_unit&) = 0;
 	virtual void end_write_frame(bool mark_end = false) = 0;
 	virtual void cancel_write_frame() = 0;
 	///@}

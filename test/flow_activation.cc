@@ -10,7 +10,8 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph activation", "[flow_graph][activation]") {
-	//set_debug_mode(debug_mode::cerr);
+	set_debug_mode(debug_mode::file);
+	set_debug_filter({ "node" });
 	
 	flow::graph gr;
 	auto shp = make_ndsize(10, 10);
@@ -26,7 +27,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 	const std::vector<int>& seq_and   { 0, 1, n, n, n, n, 6, 7, n, n, 10, n,  n };
 
 	const std::vector<int>& seq_or    { 0, 1, 2, n, 4, n, 6, 7, n, 9, 10, 11, 12 };
-	const std::size_t len = seq_and.size() - 1;
+	const std::size_t last = seq_and.size() - 1;
 
 
 	SECTION("source -> sink") {
@@ -34,51 +35,63 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		std::vector<bool> act(100, false);
 		seq[0] = 0; act[0] = true;
 		seq[99] = 99; act[99] = true;
-		std::size_t len = 99;
+		std::size_t last = 99;
 		
-		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
 		sink.activation = act;
 		gr.setup();
 		gr.run();
 		REQUIRE(sink.check());
-		REQUIRE(gr.current_time() == len);
+		REQUIRE(gr.current_time() == last);
 	}
+	
 
 	SECTION("source -> sink") {
-		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
 		sink.input.connect(source.output);
 		sink.activation = act_and;
 		gr.setup();
 		gr.run();
 		REQUIRE(sink.check());
-		REQUIRE(gr.current_time() == len);
+		REQUIRE(gr.current_time() == last);
 	}
 
 
-
 	SECTION("source -> passthrough -> sink") {
-		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
 		auto& passthrough = gr.add_node<passthrough_node>(0, 0);
 
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
-		passthrough.activation = act1;
-		sink.activation = act2;
-		gr.setup();
-		gr.launch();
-		gr.run();
-		REQUIRE(sink.check());
-		REQUIRE(gr.current_time() == len);
+		
+		SECTION("test 1") {
+			passthrough.activation = act1;
+			sink.activation = act2;
+			gr.setup();
+			gr.launch();
+			gr.run();
+			REQUIRE(sink.check());
+			REQUIRE(gr.current_time() == last);
+		}
+		
+		SECTION("test 2") {
+			passthrough.activation = act2;
+			sink.activation = act1;
+			gr.setup();
+			gr.launch();
+			gr.run();
+			REQUIRE(sink.check());
+			REQUIRE(gr.current_time() == last);
+		}
 	}
-	return;
 
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
-		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
 		auto& passthrough = gr.add_node<passthrough_node>(3, 3);
 		passthrough.input.connect(source.output);
@@ -89,7 +102,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		gr.launch();
 		gr.run();
 		REQUIRE(sink.check());
-		REQUIRE(gr.current_time() == len);
+		REQUIRE(gr.current_time() == last);
 	}
 
 	SECTION("two inputs") {
@@ -98,8 +111,8 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		source2 --> [-1, +2]passthrough2 --> /
 		*/
 		
-		auto& source1 = gr.add_node<sequence_frame_source>(len, shp, true);
-		auto& source2 = gr.add_node<sequence_frame_source>(len, shp, true);
+		auto& source1 = gr.add_node<sequence_frame_source>(last, shp, true);
+		auto& source2 = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& passthrough1 = gr.add_node<passthrough_node>(3, 1);
 		auto& passthrough2 = gr.add_node<passthrough_node>(1, 2);
 		auto& merge = gr.add_node<input_synchronize_test_node>();
@@ -128,7 +141,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		                   \ --> [-2,+5]passthrough1 --> [-1,+3]passthrough2 --> /
 		*/
 		
-		auto& source = gr.add_node<sequence_frame_source>(len, shp, true);
+		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& merge = gr.add_node<input_synchronize_test_node>();
 		auto& multiplex = gr.add_node<multiplexer_node>();
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_or);		
@@ -151,7 +164,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(gr.current_time() == len);
+			REQUIRE(gr.current_time() == last);
 			REQUIRE(sink.check());
 		}
 		
@@ -162,7 +175,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(gr.current_time() == len);
+			REQUIRE(gr.current_time() == last);
 			REQUIRE(sink.check());
 		}
 		
@@ -173,7 +186,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(gr.current_time() == len);
+			REQUIRE(gr.current_time() == last);
 			REQUIRE(sink.check());
 		}	
 	}

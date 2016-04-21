@@ -1,4 +1,10 @@
 #include "async_node.h"
+#include <functional>
+
+#include <signal.h>
+
+#include <chrono>
+using namespace std::chrono;
 
 namespace mf { namespace flow {
 
@@ -46,19 +52,30 @@ void async_node::thread_main_() {
 	} catch(int){
 	
 	} 
+	MF_DEBUG_T("node", name, " ended");
 }
 
 
-void async_node::frame_() {
+void async_node::frame_() {	
+	MF_DEBUG_T("node", name, ": t=", current_time(), " frame...");
+	
 	// begin writing to outputs
 	// outputs determine time of this node
 	// seeks gets propagated this way
 	time_unit t = -1;
 	bool outputs_synchronized = true;
 	for(output_base& out : outputs()) {
-		time_unit requested_t = out.begin_write_next_frame();
-		if(requested_t == -1) throw 1;//throw std::runtime_error("ended");
-		
+		MF_DEBUG_T("node", name, " begin_write...");
+		time_unit requested_t;
+		bool ok = out.begin_write_next_frame(requested_t);
+		if(! ok) MF_DEBUG_T("node", name, " begin_write reported end. req_t=", requested_t);
+		if(! ok) {
+			input_base& in = inputs().front();
+			in.begin_read_frame(requested_t-1);
+			in.end_read_frame(requested_t-1);
+			throw 1;
+		}
+				
 		if(t == -1) t = requested_t;
 		else if(requested_t != t) outputs_synchronized = false;
 	}
@@ -69,8 +86,11 @@ void async_node::frame_() {
 	// async_node::output sets time_limit_ according to current time and prefetch
 	// while node is inactive, 
 	if(t > time_limit_) {
+		MF_DEBUG_T("node", name, " cancel write ", t, " > time limit", time_limit_);
 		for(output_base& out : outputs()) out.cancel_write_frame();
 		return;
+	} else {
+		MF_DEBUG_T("node", name, " ok... ", t, " <= time limit", time_limit_);
 	}
 
 	if(stream_duration() != -1) MF_ASSERT(t < stream_duration());
@@ -85,8 +105,13 @@ void async_node::frame_() {
 	for(input_base& in : inputs()) {
 		MF_ASSERT_MSG(! in.reached_end(t), "input of node must not already be at end");
 		
-		if(in.is_activated()) in.begin_read_frame(t);
-		else in.skip_frame(t);
+		if(in.is_activated()) {
+			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");
+			in.begin_read_frame(t);
+		} else {
+			MF_DEBUG_T("node", name, ": skipping frame ", t, " from input (desactivated)");
+			in.skip_frame(t);
+		}
 	}
 
 
@@ -108,12 +133,16 @@ void async_node::frame_() {
 	// also check if any input has now reached its end
 	// it this node does not have stream duration, this determines end
 	for(input_base& in : inputs()) {
-		if(in.is_activated()) in.end_read_frame(t);
+		if(in.is_activated()) {
+			MF_DEBUG_T("node", name, ": end_read(", t, ") from input");
+			in.end_read_frame(t);
+		}
 		if(in.reached_end(t)) reached_end = true;
 	}
 	
 	// end writing to outputs
 	for(output_base& out : outputs()) {
+		MF_DEBUG_T("node", name, " t=", t, " end_write... (end=", reached_end, ")");
 		out.end_write_frame(reached_end);
 	}
 	

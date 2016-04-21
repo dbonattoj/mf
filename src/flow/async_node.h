@@ -64,7 +64,7 @@ public:
 	/// \name Write interface.
 	/// Called by \ref async_node for writing to the output.
 	///@{
-	time_unit begin_write_next_frame() override;
+	bool begin_write_next_frame(time_unit&) override;
 	void end_write_frame(bool mark_end = false) override;
 	void cancel_write_frame() override;
 	///@}

@@ -9,7 +9,8 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
-	//set_debug_mode(debug_mode::cerr);
+	set_debug_mode(debug_mode::file);
+	set_debug_filter({"node"});
 	
 	flow::graph gr;
 	auto shp = make_ndsize(10, 10);
@@ -25,7 +26,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-
 		
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
@@ -376,7 +376,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		}
 	}
 	
-	
+
 	SECTION("multiple outputs") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& merge = gr.add_node<input_synchronize_test_node>();
@@ -388,7 +388,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			source --> multiplex --> merge --> sink
 			                   \ --> /
 			*/
-			
+
 			multiplex.input.connect(source.output);
 			merge.input1.connect(multiplex.output1);
 			merge.input2.connect(multiplex.output2);
@@ -411,13 +411,13 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());		
 		}
-		
+
 		SECTION("graph 2") {
 			/*
 			source --> multiplex --------------------------------------------> merge --> sink
 			                   \ --> [+5]passthrough1 --> [+3]passthrough2 --> /
 			*/
-			
+		
 			auto& passthrough1 = gr.add_node<passthrough_node>(0, 5);
 			auto& passthrough2 = gr.add_node<passthrough_node>(0, 3);
 
@@ -449,7 +449,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink.check());
 		}
-		
+
 		SECTION("graph 3") {
 			/*
 			source --> multiplex --> [-1,+1]passthrough3---------------------------> merge --> sink

@@ -61,6 +61,7 @@ template<std::size_t Dim, typename Elem>
 void node_base::input<Dim, Elem>::begin_read_frame(time_unit t) {
 	MF_EXPECTS(is_connected());
 	MF_EXPECTS(! view_available_);
+	MF_EXPECTS(! reached_end(t));
 	
 	// time span to request from connected output
 	// truncate the past window if near beginning of stream
@@ -109,6 +110,7 @@ template<std::size_t Dim, typename Elem>
 void node_base::input<Dim, Elem>::skip_frame(time_unit t) {
 	MF_EXPECTS(is_connected());
 	MF_EXPECTS(! view_available_);
+	MF_EXPECTS(! reached_end(t));
 	
 	// when past window would have been truncated begin_read_frame, first frame of the window is not skipped 
 	if(t >= past_window_duration())

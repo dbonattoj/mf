@@ -57,9 +57,12 @@ namespace detail {
 	
 	std::string debug_head(const debug_header&);
 	std::string debug_tail();
+	bool debug_test_filter(const std::string& tag);
 	
 	template<typename... Args>
-	void debug_print(const debug_header& header, const Args&... args) {		
+	void debug_print(const std::string& tag, const debug_header& header, const Args&... args) {
+		if(! debug_test_filter(tag)) return;
+		
 		std::FILE* output = debug_stream();
 		if(! output) return;
 		

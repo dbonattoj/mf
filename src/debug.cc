@@ -25,6 +25,7 @@ namespace {
 	
 	std::mutex mutex_;
 	debug_mode mode_ = debug_mode::cerr;
+	std::set<std::string> tags_;
 	
 	std::string filename_ = "debug.txt";
 	
@@ -52,7 +53,7 @@ namespace detail {
 
 		std::string header_beg, body_beg;
 
-		if(mode_ == debug_mode::cerr) {
+		if(mode_ == debug_mode::cerr||1) {
 			auto tid = std::this_thread::get_id();
 			std::string color = debug_thread_color();	
 	
@@ -66,7 +67,7 @@ namespace detail {
 	}
 	
 	std::string debug_tail() {	
-		if(mode_ == debug_mode::file) return "\n";	
+		if(mode_ == debug_mode::file&&0) return "\n";	
 		else return "\x1b[0m\n";
 	}
 
@@ -97,6 +98,12 @@ namespace detail {
 		} else {
 			return nullptr;
 		}
+	}
+	
+	bool debug_test_filter(const std::string& tag) {
+		std::lock_guard<std::mutex> lock(debug_mutex());
+		if(tags_.empty()) return true;
+		else return (tags_.find(tag) != tags_.end());
 	}
 	
 	#ifdef MF_OS_LINUX
@@ -131,6 +138,17 @@ void set_debug_mode(debug_mode mode) {
 	mode_ = mode;
 }
 
+void set_no_debug_filter() {
+	std::lock_guard<std::mutex> lock(detail::debug_mutex());
+	tags_.clear();
+}
+
+void set_debug_filter(const std::set<std::string>& tags) {
+	std::lock_guard<std::mutex> lock(detail::debug_mutex());
+	tags_ = tags;
+}
+
+
 void initialize_debug(
 ) {
 	#ifdef MF_OS_LINUX
@@ -146,6 +164,8 @@ void initialize_debug(
 
 
 void set_debug_mode(debug_mode) { }
+void set_no_debug_filter() { }
+void set_debug_filter(const std::set<std::string>&) { }
 void initialize_debug() { }
 
 

@@ -28,7 +28,8 @@ public:
 	output_type<2, int> output;
 	
 	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		flow::async_source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape), output(*this) { }
+		flow::async_source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
+		output(*this) { name = "source"; }
 	
 	void setup() override {
 		output.define_frame_shape(frame_shape_);
@@ -63,7 +64,6 @@ private:
 	void process() override {
 		if(callback) callback(*this, input, output);
 		if(input.view_is_available()) {
-			REQUIRE_FALSE(frame_index(input.view()) == -1);
 			output.view() = input.view();
 		} else {
 			output.view() = make_frame(input.frame_shape(), noframe);
@@ -81,7 +81,7 @@ public:
 
 	passthrough_node(time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
 		input(*this, past_window, future_window),
-		output(*this) { }
+		output(*this) { name = "passthrough"; }
 };
 
 
@@ -97,7 +97,7 @@ public:
 	std::vector<bool> activation;
 	
 	explicit expected_frames_sink(const std::vector<int>& seq) :
-		expected_frames(seq), input(*this) { }
+		expected_frames(seq), input(*this) { name = "sink"; }
 	
 	void pre_process() override {
 		if(current_time() < activation.size())
@@ -135,7 +135,7 @@ public:
 	std::vector<bool> activation2;
 	
 	input_synchronize_test_node(time_unit prefetch = 0) :
-		input1(*this), input2(*this), output(*this) { }
+		input1(*this), input2(*this), output(*this) { name = "merge"; }
 
 
 	void setup() override {
@@ -149,7 +149,7 @@ public:
 	}
 	
 	void process() override {
-		int iout;
+		int iout = noframe;
 		REQUIRE(input1.view_is_available() == input1.is_activated());
 		REQUIRE(input2.view_is_available() == input2.is_activated());
 		if(input1.is_activated() && input2.is_activated()) {
@@ -180,7 +180,7 @@ public:
 	output_type<2, int> output2;
 	
 	multiplexer_node(time_unit prefetch = 0):
-		input(*this), output1(*this), output2(*this) { }
+		input(*this), output1(*this), output2(*this) { name = "multiplex"; }
 	
 	void setup() override {
 		output1.define_frame_shape(input.frame_shape());

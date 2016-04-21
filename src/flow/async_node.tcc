@@ -15,16 +15,18 @@ void async_node::output<Dim, Elem>::setup() {
 
 
 template<std::size_t Dim, typename Elem>
-time_unit async_node::output<Dim, Elem>::begin_write_next_frame() {
+bool async_node::output<Dim, Elem>::begin_write_next_frame(time_unit& t) {
 	MF_EXPECTS(! base::view_is_available());
-	
+		
 	auto view = ring_->begin_write(1);
+	t = view.start_time();
 	if(view.duration() == 0) {
-		return -1;
+		MF_DEBUG_T("node", "output begin_write, ..., now at t=", t, " end.");
+		return false;
 	} else {
 		MF_ASSERT(view.duration() == 1);
 		base::set_view(view[0]);
-		return view.start_time();
+		return true;
 	}
 }
 
@@ -54,7 +56,9 @@ void async_node::output<Dim, Elem>::cancel_write_frame() {
 template<std::size_t Dim, typename Elem>
 auto async_node::output<Dim, Elem>::begin_read_span(time_span span) -> full_view_type {
 	async_node& nd = dynamic_cast<async_node&>(base::node()); // TODO change
-	nd.time_limit_ = span.end_time() + nd.prefetch_duration();
+	nd.time_limit_ = std::max(nd.time_limit_.load(), span.end_time() + nd.prefetch_duration());
+	
+	MF_DEBUG_T("node", "output of ", nd.name, " read ", span, ": setting time limit to ", nd.time_limit_);
 
 	auto view = ring_->begin_read_span(span);
 	MF_ASSERT(view.duration() <= span.duration());
@@ -70,6 +74,9 @@ void async_node::output<Dim, Elem>::end_read(bool consume_frame) {
 
 template<std::size_t Dim, typename Elem>
 void async_node::output<Dim, Elem>::skip_frame() {
+	async_node& nd = dynamic_cast<async_node&>(base::node()); // TODO change
+	nd.time_limit_ = std::max(nd.time_limit_.load(), ring_->read_start_time() + 1 + nd.prefetch_duration());
+
 	ring_->skip(1);
 }
 

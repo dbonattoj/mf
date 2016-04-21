@@ -6,6 +6,8 @@ namespace mf { namespace flow {
 void sink_node::frame_() {	
 	MF_EXPECTS_MSG(! reached_end_, "end must not already have been reached");
 
+	MF_DEBUG_T("node", name, ": t=", current_time(), " frame...");
+
 	time_unit t = current_time();
 		
 	// the sink node controls time
@@ -23,8 +25,13 @@ void sink_node::frame_() {
 	for(input_base& in : inputs()) {
 		MF_ASSERT_MSG(! in.reached_end(t), "input of sink must not already be at end");
 		
-		if(in.is_activated()) in.begin_read_frame(t);
-		else in.skip_frame(t);
+		if(in.is_activated()) {
+			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");	
+			in.begin_read_frame(t);
+		} else {
+			MF_DEBUG_T("node", name, ": skipping frame ", t, " from input (desactivated)");
+			in.skip_frame(t);
+		}
 	}
 	
 	// concrete node processes frame
@@ -33,7 +40,10 @@ void sink_node::frame_() {
 	// end reading from activated inputs
 	// sink has reached end if any input (including desactivated) reached end
 	for(input_base& in : inputs()) {
-		if(in.is_activated()) in.end_read_frame(t);
+		if(in.is_activated()) {
+			MF_DEBUG_T("node", name, ": end_read(", t, ") from input");
+			in.end_read_frame(t);
+		}
 		
 		if(in.reached_end(t)) reached_end_ = true;
 	}
