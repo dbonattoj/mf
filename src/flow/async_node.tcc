@@ -11,6 +11,9 @@ void async_node::output<Dim, Elem>::setup() {
 		base::node().is_seekable(),
 		base::node().stream_duration()
 	));
+	null_ndarray_.reset(new null_ndarray_type(
+		base::frame_shape()
+	));
 }
 
 

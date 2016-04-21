@@ -9,7 +9,7 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
-	set_debug_mode(debug_mode::file);
+	set_debug_mode(debug_mode::cerr);
 	set_debug_filter({"node"});
 	
 	flow::graph gr;

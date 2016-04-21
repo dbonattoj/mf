@@ -91,8 +91,9 @@ class node_base::output_base {
 private:
 	node_base& node_;
 	time_unit required_buffer_duration_ = -1;
+
+	bool active_ = true;
 	
-	bool input_activated_ = true;
 
 	output_base(const output_base&) = delete;
 
@@ -111,7 +112,7 @@ public:
 	
 	void propagate_activation(bool input_activated);
 
-	bool is_active() const noexcept;
+	bool is_active() const noexcept { return active_; }
 
 	/// \name Write interface.
 	///@{

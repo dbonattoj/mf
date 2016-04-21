@@ -57,14 +57,24 @@ void async_node::thread_main_() {
 
 
 void async_node::frame_() {	
+	if(! is_active()) {
+		std::this_thread::sleep_for(200ms);
+		return;
+	}
+	
 	MF_DEBUG_T("node", name, ": t=", current_time(), " frame...");
+	
+	std::vector<std::reference_wrapper<output_base>> active_outputs;
+	for(output_base& out : outputs())
+		if(out.is_active()) active_outputs.emplace_back(out);
 	
 	// begin writing to outputs
 	// outputs determine time of this node
 	// seeks gets propagated this way
 	time_unit t = -1;
 	bool outputs_synchronized = true;
-	for(output_base& out : outputs()) {
+	for(output_base& out : active_outputs) {
+		
 		MF_DEBUG_T("node", name, " begin_write...");
 		time_unit requested_t;
 		bool ok = out.begin_write_next_frame(requested_t);
@@ -79,6 +89,8 @@ void async_node::frame_() {
 		if(t == -1) t = requested_t;
 		else if(requested_t != t) outputs_synchronized = false;
 	}
+	
+	MF_ASSERT_MSG(t != -1, "node cannot be active when none of its outputs are active");
 	
 	if(! outputs_synchronized) throw std::runtime_error("not sync!");
 	
@@ -109,8 +121,8 @@ void async_node::frame_() {
 			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");
 			in.begin_read_frame(t);
 		} else {
-			MF_DEBUG_T("node", name, ": skipping frame ", t, " from input (desactivated)");
-			in.skip_frame(t);
+			MF_DEBUG_T("node", name, ": NOT skipping frame ", t, " from input (desactivated)");
+			//in.skip_frame(t);
 		}
 	}
 
@@ -141,7 +153,7 @@ void async_node::frame_() {
 	}
 	
 	// end writing to outputs
-	for(output_base& out : outputs()) {
+	for(output_base& out : active_outputs) {
 		MF_DEBUG_T("node", name, " t=", t, " end_write... (end=", reached_end, ")");
 		out.end_write_frame(reached_end);
 	}

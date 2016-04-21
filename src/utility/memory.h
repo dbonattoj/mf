@@ -1,6 +1,7 @@
 #ifndef MF_UTILITY_MEMORY_H_
 #define MF_UTILITY_MEMORY_H_
 
+#include "../common.h"
 #include <cassert>
 #include <cstddef>
 
@@ -10,10 +11,14 @@ std::size_t system_page_size();
 
 template<typename T>
 std::size_t round_up_to_fit_system_page_size(std::size_t n) {
-	assert(system_page_size() % sizeof(T) == 0);
+	MF_EXPECTS(system_page_size() % sizeof(T) == 0);
 	std::size_t page_capacity = system_page_size() / sizeof(T);
 	std::size_t remaining = page_capacity - (n % page_capacity);
 	return n + remaining;
+}
+
+inline std::size_t raw_round_up_to_fit_system_page_size(std::size_t len) {
+	return round_up_to_fit_system_page_size<unsigned char>(len);
 }
 
 enum class memory_usage_advice {
@@ -25,7 +30,7 @@ enum class memory_usage_advice {
 void set_memory_usage_advice(void*, std::size_t, memory_usage_advice);
 
 
-/// Raw allocator which allocates given number of bytes.
+/// Raw allocator, allocates given number of bytes.
 class raw_allocator {
 public:
 	void* raw_allocate(std::size_t size, std::size_t align = 1);	
@@ -33,6 +38,10 @@ public:
 };
 
 
+/// Ring allocator, allocates ring buffer memory.
+/** Allocates given segment of memory, and maps additional same sized segment immediatly after it in virtual memory,
+ ** which is mapped to the same allocated segment. In the allocated segment `seg`, `seg[i]` and `seg[i+n]` always
+ ** map to the same data. The segment length `n` must be a multiple of the system page size. */
 class raw_ring_allocator {
 public:
 	void* raw_allocate(std::size_t size, std::size_t align = 1);
@@ -40,6 +49,18 @@ public:
 };
 
 
+/// Null allocator, allocates virtual memory which is not used.
+/** Allocates segment of virtual memory which does not store data. Allocated memory may be read and written, but does
+ ** not need to retain values. Used to allocate buffers that will not be used. OS-specific implementation may map
+ ** virtual memory pages without allocating physical memory pages, when possible. */
+class raw_null_allocator {
+public:
+	void* raw_allocate(std::size_t size, std::size_t align = 1);
+	void raw_deallocate(void* ptr, std::size_t size);
+};
+
+
+/*
 template<typename T>
 class ring_allocator : private raw_ring_allocator {
 public:
@@ -59,7 +80,7 @@ public:
 	friend bool operator==(const ring_allocator&, const ring_allocator&) noexcept { return true; }
 	friend bool operator!=(const ring_allocator&, const ring_allocator&) noexcept { return false; }
 };
-
+*/
 
 
 }

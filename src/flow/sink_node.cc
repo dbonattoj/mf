@@ -29,8 +29,8 @@ void sink_node::frame_() {
 			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");	
 			in.begin_read_frame(t);
 		} else {
-			MF_DEBUG_T("node", name, ": skipping frame ", t, " from input (desactivated)");
-			in.skip_frame(t);
+			MF_DEBUG_T("node", name, ": NOT skipping frame ", t, " from input (desactivated)");
+			//in.skip_frame(t);
 		}
 	}
 	

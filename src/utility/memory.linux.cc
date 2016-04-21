@@ -76,7 +76,7 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	if(status != 0)
 		throw std::system_error(errno, std::system_category(), "ring allocator ftruncate failed");
 		
-	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0); // ...aligns to page size
+	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0); // ...aligns to page size
 	if(base == MAP_FAILED)
 		throw std::system_error(errno, std::system_category(), "ring allocator mmap failed (whole region)");
 		
@@ -100,6 +100,18 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 
 void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
 	::munmap(base, size * 2);
+}
+
+
+void* raw_null_allocator::raw_allocate(std::size_t size, std::size_t align) {
+	if(system_page_size() % align != 0) throw std::invalid_argument("requested alignment must be divisor of page size");
+	std::size_t rounded_size = raw_round_up_to_fit_system_page_size(size);
+	return ::mmap(nullptr, rounded_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+}
+
+
+void raw_null_allocator::raw_deallocate(void* base, std::size_t size) {
+	::munmap(base, size);
 }
 
 

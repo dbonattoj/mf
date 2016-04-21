@@ -11,7 +11,7 @@ namespace mf { namespace flow {
 // TODO better doc
 /// Asynchronous node base class.
 /** Processes frames in a separate thread owned by the node. Can have multiple inputs and outputs. Can process
- ** frames $t+k (k \geq 1)$, at the same time that current frame $t$ is being read or processed by suceeding nodes. */
+ ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes. */
 class async_node : public node_base {
 public:
 	template<std::size_t Dim, typename Elem> class output;
@@ -50,8 +50,10 @@ class async_node::output : public node_base::output<Dim, T> {
 
 private:
 	using ring_type = ndarray_shared_ring<Dim, T>;
+	using null_ndarray_type = ndarray<Dim, T, raw_null_allocator>;
 	
 	std::unique_ptr<ring_type> ring_;
+	std::unique_ptr<null_ndarray_type> null_ndarray_;
 
 public:
 	using base::base;

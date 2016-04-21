@@ -79,28 +79,6 @@ void node_base::propagate_setup_() {
 }
 
 
-void node_base::propagate_activation_() {
-	// activation of succeeding nodes (down to sink) must already have been defined
-
-	// this node is active if any of its outputs are active
-	// an output is active, if its connected input is activated AND the connected node is active
-	
-	bool now_active = std::any_of(
-		outputs_.cbegin(), outputs_.cend(),
-		[](output_base& out) { return out.is_active(); }
-	);
-
-	if(now_active != active_) {
-		active_ = now_active;
-
-		// now set activation of preceeding nodes
-		for(input_base& in : inputs()) {
-			node_base& connected_node = in.connected_output().node();
-			connected_node.propagate_activation_();
-		}
-	}	
-}
-
 
 void node_base::define_source_stream_properties(bool seekable, time_unit stream_duration) {
 	MF_EXPECTS(! was_setup_);
@@ -142,22 +120,42 @@ bool node_base::is_bounded() const {
 }
 
 
-bool node_base::output_base::is_active() const noexcept {
-	return input_activated_ && node_.is_active();
-}
-
-
 void node_base::input_base::set_activated(bool act) {
 	if(activated_ != act) {
 		activated_ = act;
+		
+		bool output_active = activated_ && node_.is_active();
 		connected_output().propagate_activation(act);
 	}
 }
 
 
-void node_base::output_base::propagate_activation(bool input_activated) {
-	input_activated_ = input_activated;
+void node_base::output_base::propagate_activation(bool active) {
+	active_ = active;
 	node_.propagate_activation_();
+}
+
+
+void node_base::propagate_activation_() {
+	// activation of succeeding nodes (down to sink) must already have been defined
+
+	// this node is active if any of its outputs are active
+	// an output is active, if its connected input is activated AND the connected node is active
+	
+	bool now_active = std::any_of(
+		outputs_.cbegin(), outputs_.cend(),
+		[](output_base& out) { return out.is_active(); }
+	);
+
+	if(now_active != active_) {
+		active_ = now_active;
+
+		// now set activation of preceeding nodes
+		for(input_base& in : inputs()) {
+			node_base& connected_node = in.connected_output().node();
+			connected_node.propagate_activation_();
+		}
+	}	
 }
 
 

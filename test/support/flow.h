@@ -36,6 +36,7 @@ public:
 	}
 	
 	void process() override {
+		if(! output.is_active()) return;
 		time_unit t = current_time();
 		produced_frames_.emplace(t);
 		output.view() = make_frame(frame_shape_, current_time());
@@ -62,6 +63,8 @@ private:
 	}
 	
 	void process() override {
+		if(! output.is_active()) return;
+		
 		if(callback) callback(*this, input, output);
 		if(input.view_is_available()) {
 			output.view() = input.view();
@@ -149,6 +152,8 @@ public:
 	}
 	
 	void process() override {
+		if(! output.is_active()) return;
+
 		int iout = noframe;
 		REQUIRE(input1.view_is_available() == input1.is_activated());
 		REQUIRE(input2.view_is_available() == input2.is_activated());
@@ -189,8 +194,8 @@ public:
 	
 	void process() override {
 		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in multiplexer");	
-		output1.view() = input.view();
-		output2.view() = input.view();
+		if(output1.is_active()) output1.view() = input.view();
+		if(output2.is_active()) output2.view() = input.view();
 	}
 };
 
