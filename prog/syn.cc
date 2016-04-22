@@ -7,8 +7,7 @@
 #include "../src/config/tanimoto_camera_array.h"
 #include "../src/camera/projection_image_camera.h"
 #include "../src/color.h"
-#include "../src/graph/media_graph.h"
-#include "../src/graph/media_node.h"
+#include "../src/flow/graph.h"
 #include "../src/nodes/importer.h"
 #include "../src/nodes/exporter.h"
 #include "../src/nodes/color_converter.h"
@@ -57,7 +56,7 @@ int main() {
 	cam2.flip_pixel_coordinates();
 	vcam.flip_pixel_coordinates();
 
-	media_graph graph;
+	flow::graph graph;
 	
 	auto& im1_source = graph.add_node<node::importer<yuv_importer>>(im1, shape, sampling);
 	auto& im1_converter = graph.add_node<node::color_converter<ycbcr_color, rgb_color>>();

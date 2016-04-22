@@ -21,6 +21,7 @@ public:
 	using intrinsic_matrix_result = std::pair<projection_view_frustum, Eigen_projective3>;
 
 	projection_view_frustum projection_frustum_; ///< Projection frustum, without pose and without image scale, offset.
+	Eigen_projective3 view_to_image_; ///< Transformation from view to image. Without pose, with image scale and offset.
 	Eigen_projective3 world_to_image_;
 	Eigen_projective3 image_to_world_;
 	

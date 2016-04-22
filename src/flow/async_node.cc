@@ -8,7 +8,9 @@ using namespace std::chrono;
 
 namespace mf { namespace flow {
 
-async_node::async_node() : node_base() { }
+async_node::async_node() : node_base() {
+	set_prefetch_duration(10);
+}
 
 
 async_node::~async_node() {
@@ -60,9 +62,9 @@ void async_node::thread_main_() {
 void async_node::frame_() {
 	MF_EXPECTS_MSG(outputs().size() == 1, "async_node must have exactly one output");
 		
-	MF_DEBUG_T("node", name, ": t=", current_time(), " frame...");
+	//MF_DEBUG_T("node", name, ": t=", current_time(), " frame...");
 	
-	//if(! is_active()) { std::this_thread::sleep_for(100ms); return; }
+	if(! is_active()) { std::this_thread::sleep_for(100ms); return; }
 	
 	output_base& out = outputs().front();
 	//MF_ASSERT(out.is_active());

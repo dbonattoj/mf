@@ -10,8 +10,16 @@ void warp<Color, Depth>::setup() {
 
 
 template<typename Color, typename Depth>
+void warp<Color, Depth>::pre_process() {
+	output_camera->rotate_z_axis(0.1_deg);
+	output_camera->move_z(-0.05);
+}
+
+
+template<typename Color, typename Depth>
 void warp<Color, Depth>::process() {
 	Eigen_projective3 homography = homography_transformation(*input_camera, *output_camera);
+	std::cout << "homog=\n" << homography.matrix() << std::endl;
 	
 	std::fill(output.view().begin(), output.view().end(), background_color);
 
@@ -30,8 +38,6 @@ void warp<Color, Depth>::process() {
 
 		Eigen_vec3 in(c[0], c[1], d);
 		Eigen_vec3 out = (homography * in.homogeneous()).eval().hnormalized();
-		
-		
 		
 		auto out_pix_c = output_camera->to_pixel(out.head(2));
 		

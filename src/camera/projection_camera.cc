@@ -54,7 +54,9 @@ projection_camera::projection_camera(const pose& ps, const projection_view_frust
 	mat(0, 3) += ipar.offset[0];
 	mat(1, 3) += ipar.offset[1];
 	
-	world_to_image_ = Eigen_projective3(mat) * ps.transformation_from_world();
+	view_to_image_ = Eigen_projective3(mat);
+	
+	world_to_image_ = view_to_image_ * ps.transformation_from_world();
 	image_to_world_ = world_to_image_.inverse();
 }
 
@@ -63,7 +65,9 @@ projection_camera::projection_camera(const pose& ps, const intrinsic_matrix_resu
 	depth_camera(ps),
 	projection_frustum_(par.first)
 {
-	world_to_image_ = par.second * ps.transformation_from_world();
+	view_to_image_ = par.second;
+	
+	world_to_image_ = view_to_image_ * ps.transformation_from_world();
 	image_to_world_ = world_to_image_.inverse();
 }
 	
@@ -74,7 +78,11 @@ projection_camera::projection_camera
 
 
 Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to) {
-	return to.world_to_image_ * from.image_to_world_;
+	Eigen_projective3 a = to.view_to_image_ * to.absolute_pose().transformation_from_world();
+	Eigen_projective3 b = (from.view_to_image_ * from.absolute_pose().transformation_from_world()).inverse();
+	return a*b;
+	
+	//return to.world_to_image_ * from.image_to_world_;
 }
 
 }

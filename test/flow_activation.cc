@@ -10,7 +10,7 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph activation", "[flow_graph][activation]") {
-	set_debug_mode(debug_mode::file);
+	//set_debug_mode(debug_mode::file);
 	set_debug_filter({ "node" });
 	
 	flow::graph gr;
@@ -46,7 +46,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-
+return;
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);

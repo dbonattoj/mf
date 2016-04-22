@@ -1,7 +1,8 @@
+#include "debug.h"
+
 #ifndef NDEBUG
 
 #include "utility/os.h"
-#include "debug.h"
 #include <map>
 #include <iostream>
 #include <thread>
@@ -161,11 +162,13 @@ void initialize_debug() {
 
 #else
 
+namespace mf {
 
 void set_debug_mode(debug_mode) { }
 void set_no_debug_filter() { }
 void set_debug_filter(const std::set<std::string>&) { }
 void initialize_debug() { }
 
+}
 
 #endif

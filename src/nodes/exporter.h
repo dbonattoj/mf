@@ -4,9 +4,7 @@
 #include <utility>
 #include <tuple>
 #include "../io/frame_importer.h"
-#include "../flow/node.h"
-#include "../flow/node_input.h"
-#include "../flow/node_output.h"
+#include "../flow/sink_node.h"
 
 namespace mf { namespace node {
 

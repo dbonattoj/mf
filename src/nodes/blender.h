@@ -2,15 +2,13 @@
 #define MF_NODE_BLENDER_H_
 
 #include <algorithm>
-#include "../flow/node.h"
-#include "../flow/node_input.h"
-#include "../flow/node_output.h"
+#include "../flow/async_node.h"
 #include "../color.h"
 
 namespace mf { namespace node {
 
 template<typename Color>
-class blender : public flow::node {	
+class blender : public flow::async_node {	
 public:
 	output_type<2, Color> output;
 	input_type<2, Color> input1;
