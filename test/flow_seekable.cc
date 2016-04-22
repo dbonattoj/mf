@@ -9,7 +9,7 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
-	set_debug_mode(debug_mode::cerr);
+	set_debug_mode(debug_mode::file);
 	set_debug_filter({"node"});
 	
 	flow::graph gr;
@@ -376,7 +376,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		}
 	}
 	
-
+return;
 	SECTION("multiple outputs") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& merge = gr.add_node<input_synchronize_test_node>();

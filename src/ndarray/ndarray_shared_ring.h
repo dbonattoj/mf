@@ -55,15 +55,19 @@ public:
 	time_unit capacity() const { return ring_.shape().front(); }
 
 	/// Begin writing \a duration frames at current write start time.
-	/** If span to write crosses end of buffer, it is truncated. When already at end, zero-length section is returned.
-	 ** Then end_write() must not be called.
+	/** If span to write crosses end of buffer, it is truncated.
 	 ** For seekable buffer only: returned section may have start time different to `writable_time_span().start_time()`
 	 ** when reader seeked to another time inbetween.
+	 ** When at end (already before, or following wait and seek), zero-length section is returned, and start time of
+	 ** returned time span equals `end_time()`.
+	 ** Then end_write() must not be called.
 	 ** Waits until \a duration (after truncation) frames become writable.
 	 ** Returns section for writer to write into, with time information.
 	 ** Must be called from single writer thread only, and followed by call to end_write(). */
 	section_view_type begin_write(time_unit duration);
 	
+	section_view_type begin_write(time_unit duration, event& break_event);
+
 	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned
@@ -153,6 +157,7 @@ public:
 	void debug_print(std::ostream&) const;
 	#endif
 };
+
 
 }
 

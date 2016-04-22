@@ -106,18 +106,4 @@ void node_base::input<Dim, Elem>::end_read_frame(time_unit t) {
 }
 
 
-template<std::size_t Dim, typename Elem>
-void node_base::input<Dim, Elem>::skip_frame(time_unit t) {
-	MF_EXPECTS(is_connected());
-	MF_EXPECTS(! view_available_);
-	MF_EXPECTS(! reached_end(t));
-	
-	// when past window would have been truncated begin_read_frame, first frame of the window is not skipped 
-	if(t >= past_window_duration())
-		connected_output().skip_frame();
-	
-	MF_EXPECTS(! view_available_);
-}
-
-
 }}

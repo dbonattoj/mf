@@ -5,13 +5,14 @@
 #include <atomic>
 #include "node_base.h"
 #include "../ndarray/ndarray_shared_ring.h"
+#include "../utility/event.h"
 
 namespace mf { namespace flow {
 
-// TODO better doc
 /// Asynchronous node base class.
 /** Processes frames in a separate thread owned by the node. Can have multiple inputs and outputs. Can process
- ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes. */
+ ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
+ ** in graph. */
 class async_node : public node_base {
 public:
 	template<std::size_t Dim, typename Elem> class output;
@@ -20,6 +21,7 @@ private:
 	bool running_ = false;
 	std::thread thread_;
 	std::atomic<time_unit> time_limit_{-1};
+	event stop_event_;
 	
 	void thread_main_();
 	void frame_();
@@ -53,7 +55,6 @@ private:
 	using null_ndarray_type = ndarray<Dim, T, raw_null_allocator>;
 	
 	std::unique_ptr<ring_type> ring_;
-	std::unique_ptr<null_ndarray_type> null_ndarray_;
 
 public:
 	using base::base;
@@ -76,7 +77,6 @@ public:
 	///@{
 	full_view_type begin_read_span(time_span) override;
 	void end_read(bool consume_frame) override;
-	void skip_frame() override;
 	time_unit end_time() const override;
 	///@}
 };

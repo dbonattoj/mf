@@ -29,7 +29,7 @@ void sink_node::frame_() {
 			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");	
 			in.begin_read_frame(t);
 		} else {
-			MF_DEBUG_T("node", name, ": NOT skipping frame ", t, " from input (desactivated)");
+			//MF_DEBUG_T("node", name, ": skipping frame ", t, " from input (desactivated)");
 			//in.skip_frame(t);
 		}
 	}
@@ -48,7 +48,12 @@ void sink_node::frame_() {
 		if(in.reached_end(t)) reached_end_ = true;
 	}
 	
-	if(t == stream_duration() - 1) reached_end_ = true;
+	// in case all inputs were deactivated, test against stream duration for end
+	if(stream_duration_is_defined())
+		if(t == stream_duration() - 1) reached_end_ = true;
+		
+
+	// TODO: if no active inputs, don't allow crossing end
 }
 
 

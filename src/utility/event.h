@@ -12,6 +12,11 @@
 
 namespace mf {
 
+/// Synchronization primitive representing event that a thread can wait for.
+/** Internal counter is initialized to zero. Call to notify() increases internal counter by specified amount.
+ ** When counter is non-zero, call to wait() resets counter and returns its old value. When the counter is zero
+ ** wait() blocks until it becomes non-zero and then proceeds as before.
+ ** Only one thread can wait() at the same time. It is possible to wait on multiple events using wait_any(). */
 class event {
 public:
 	using counter_type = std::size_t;
@@ -40,7 +45,7 @@ public:
 
 
 struct event_wait_result {
-	event& notified_event;
+	event& received_event;
 	event::counter_type counter;
 };
 
@@ -48,6 +53,7 @@ struct event_wait_result {
 namespace detail {
 	event_wait_result wait_any(event** begin, event** end);
 }
+
 
 
 template<typename It>

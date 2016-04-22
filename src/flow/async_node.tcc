@@ -11,17 +11,16 @@ void async_node::output<Dim, Elem>::setup() {
 		base::node().is_seekable(),
 		base::node().stream_duration()
 	));
-	null_ndarray_.reset(new null_ndarray_type(
-		base::frame_shape()
-	));
 }
 
 
 template<std::size_t Dim, typename Elem>
 bool async_node::output<Dim, Elem>::begin_write_next_frame(time_unit& t) {
+	async_node& nd = dynamic_cast<async_node&>(base::node()); // TODO change
+
 	MF_EXPECTS(! base::view_is_available());
 		
-	auto view = ring_->begin_write(1);
+	auto view = ring_->begin_write(1, nd.stop_event_);
 	t = view.start_time();
 	if(view.duration() == 0) {
 		MF_DEBUG_T("node", "output begin_write, ..., now at t=", t, " end.");
@@ -72,15 +71,6 @@ auto async_node::output<Dim, Elem>::begin_read_span(time_span span) -> full_view
 template<std::size_t Dim, typename Elem>
 void async_node::output<Dim, Elem>::end_read(bool consume_frame) {
 	ring_->end_read(consume_frame ? 1 : 0);
-}
-
-
-template<std::size_t Dim, typename Elem>
-void async_node::output<Dim, Elem>::skip_frame() {
-	async_node& nd = dynamic_cast<async_node&>(base::node()); // TODO change
-	nd.time_limit_ = std::max(nd.time_limit_.load(), ring_->read_start_time() + 1 + nd.prefetch_duration());
-
-	ring_->skip(1);
 }
 
 

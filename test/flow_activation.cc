@@ -10,8 +10,8 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph activation", "[flow_graph][activation]") {
-	set_debug_mode(debug_mode::cerr);
-	//set_debug_filter({ "node" });
+	set_debug_mode(debug_mode::file);
+	set_debug_filter({ "node" });
 	
 	flow::graph gr;
 	auto shp = make_ndsize(10, 10);
@@ -29,7 +29,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 	const std::vector<int>& seq_or    { 0, 1, 2, n, 4, n, 6, 7, n, 9, 10, 11, 12 };
 	const std::size_t last = seq_and.size() - 1;
 
-/*
+
 	SECTION("source -> sink") {
 		std::vector<int> seq(100, n);
 		std::vector<bool> act(100, false);
@@ -46,7 +46,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-*/	
+
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
@@ -58,7 +58,6 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(gr.current_time() == last);
 	}
 
-return;
 
 	SECTION("source -> passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
@@ -88,7 +87,6 @@ return;
 			REQUIRE(gr.current_time() == last);
 		}
 	}
-
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
@@ -134,7 +132,7 @@ return;
 		REQUIRE(sink.check());
 	}
 
-
+return;
 	SECTION("graph 3") {
 		/*
 		source --> multiplex --> [-1,+1]passthrough3---------------------------> merge --> sink

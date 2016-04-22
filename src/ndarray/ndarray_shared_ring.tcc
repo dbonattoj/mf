@@ -84,6 +84,73 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration) -> se
 }
 
 
+// TODO refactor
+template<std::size_t Dim, typename T>
+auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration, event& break_event) -> section_view_type {	
+	if(original_duration > capacity()) throw std::invalid_argument("write duration larger than ring capacity");
+	if(writer_state_ != idle) throw sequencing_error("writer not idle");
+
+	std::unique_lock<std::mutex> lock(mutex_);
+
+	// write start position
+	// if writer needs to wait (unlocking mutex), then reader may seek to another position
+	// and this will change...
+	time_unit write_start = ring_.write_start_time();
+
+	// truncate write span if near end
+	// if end not defined: duration will never cross end:
+	// the buffer is not seekable so writes are sequential, and writer is responsible to mark end,
+	// by setting mark_end in this function
+	time_unit duration = original_duration;
+	if(end_time_ != -1) {
+		if(write_start + duration > end_time_) duration = end_time_ - write_start;
+	}
+
+	// if duration zero (possibly because at end), return zero view
+	if(duration == 0) return section_view_type(write_start);
+
+	// prevent deadlock
+	// c.f. begin_read_span
+	if(ring_.writable_duration() < duration && ring_.readable_duration() < reader_state_)
+		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
+
+
+	while(ring_.writable_duration() < duration) {
+		// wait for more frames to become available
+		writer_state_ = duration;
+		
+		lock.unlock();
+		// reader may send notification before wait starts: it gets stored in event
+		event_wait_result res = wait_any(reader_idle_event_, reader_seek_event_, break_event);
+		
+		if(res.received_event == break_event) return section_view_type(write_start);
+		
+		lock.lock();
+		
+		// received event: 1+ frame was written, or reader seeked
+		// or neither (was notified when not waiting)
+		// will recheck if enough frames are now available.
+
+		// reader may now have seeked to other time
+		if(ring_.write_start_time() != write_start) {
+			assert(seekable_); // this cannot happen when buffer is not seekable
+			
+			// then retry with the new write position
+			// only seek() changes write position (on reader thread), so no risk of repeated recursion
+			
+			writer_state_ = idle;
+			lock.unlock(); // brief unlock: reader might seek again, or start waiting
+			return begin_write(original_duration);
+		}
+	}
+
+	// mutex_ is still locked
+	writer_state_ = accessing;
+	return ring_.begin_write(duration);
+}
+
+
+
 template<std::size_t Dim, typename T>
 void ndarray_shared_ring<Dim, T>::end_write(time_unit written_duration, bool mark_end) {
 	if(writer_state_ == idle) throw sequencing_error("was not writing");

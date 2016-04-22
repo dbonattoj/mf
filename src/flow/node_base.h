@@ -164,9 +164,6 @@ public:
 	 ** of the last call, then \a consume_frame must be set. */
 	virtual void end_read(bool consume_frame) = 0;
 
-	/// Skip one frame from output.
-	virtual void skip_frame() = 0;
-
 	/// End time of output, or -1 if not known.
 	/** If the last frame of the view returned by the previous call to begin_read_span() was the last frame of the
 	 ** output stream, then end_time() must return that time. Otherwise, may return -1 when the end time is in the
@@ -206,7 +203,6 @@ public:
 	///@{
 	virtual void begin_read_frame(time_unit) = 0;
 	virtual void end_read_frame(time_unit) = 0;
-	virtual void skip_frame(time_unit) = 0;
 	virtual bool reached_end(time_unit t) const = 0;
 	///@}
 };
@@ -254,7 +250,6 @@ public:
 	 ** and end of stream.  \a t must be lower than the end time of the stream. */
 	void begin_read_frame(time_unit t) final override;
 	void end_read_frame(time_unit t) final override;
-	void skip_frame(time_unit t) final override;
 	bool reached_end(time_unit t) const final override;
 	///@}
 };
