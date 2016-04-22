@@ -12,6 +12,7 @@
 #include "../../src/ndarray/ndcoord.h"
 #include "../../src/utility/string.h"
 #include "ndarray.h"
+#include "thread.h"
 
 namespace mf { namespace test {
 
@@ -155,19 +156,19 @@ public:
 		if(! output.is_active()) return;
 
 		int iout = noframe;
-		REQUIRE(input1.view_is_available() == input1.is_activated());
-		REQUIRE(input2.view_is_available() == input2.is_activated());
+		MF_TEST_THREAD_REQUIRE(input1.view_is_available() == input1.is_activated());
+		MF_TEST_THREAD_REQUIRE(input2.view_is_available() == input2.is_activated());
 		if(input1.is_activated() && input2.is_activated()) {
 			int i1 = frame_index(input1.view());
 			int i2 = frame_index(input2.view());
 			
-			REQUIRE(i1 != -1);
-			REQUIRE(i2 != -1);
+			MF_TEST_THREAD_REQUIRE(i1 != -1);
+			MF_TEST_THREAD_REQUIRE(i2 != -1);
 			
 			if(i1 != noframe) iout = i1;
 			else if(i2 != noframe) iout = i2;
 			
-			if(i1 != noframe && i2 != noframe) REQUIRE(i1 == i2);
+			if(i1 != noframe && i2 != noframe) MF_TEST_THREAD_REQUIRE(i1 == i2);
 		} else if(input1.is_activated()) {
 			iout = frame_index(input1.view());
 		} else if(input2.is_activated()) {

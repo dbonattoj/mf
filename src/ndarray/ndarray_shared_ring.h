@@ -2,6 +2,7 @@
 #define MF_NDARRAY_SHARED_RING_H_
 
 #include "ndarray_timed_ring.h"
+#include "../utility/event.h"
 #include <mutex>
 #include <condition_variable>
 #include <stdexcept>
@@ -31,10 +32,10 @@ private:
 	std::atomic<time_unit> end_time_{-1};
 	// TODO make non-atomic? verify
 
-	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access, and waiting for frames.
-	std::condition_variable writable_cv_; ///< Condition variable, gets notified when writable frames become available.
-	std::condition_variable readable_cv_; ///< Condition variable, gets notified when readable frames become available.
-
+	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access.
+	event reader_idle_event_; ///< Event sent by reader when is becomes idle, and received by writer.
+	event reader_seek_event_; ///< Event sent by reader after is has seeked, and changed write start time.
+	event writer_idle_event_; ///< Event sent by writer when is becomes idle, and received by reader.
 
 	std::atomic<thread_state> reader_state_{idle}; ///< Current state of reader thread. Used to prevent deadlocks.
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
@@ -63,10 +64,6 @@ public:
 	 ** Must be called from single writer thread only, and followed by call to end_write(). */
 	section_view_type begin_write(time_unit duration);
 	
-	void wait_write() {
-		std::unique_lock<std::mutex> lock(mutex_);
-		writable_cv_.wait(lock);
-	}
 	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned

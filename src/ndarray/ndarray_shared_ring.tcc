@@ -55,12 +55,14 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration) -> se
 	while(ring_.writable_duration() < duration) {
 		// wait for more frames to become available
 		writer_state_ = duration;
-		writable_cv_.wait(lock);
-		//
-		// mutex unlocked, waiting...
-		//
 		
-		// woke up: either spurious wake up, or 1+ frame was written, or reader seeked.
+		lock.unlock();
+		// reader may send notification before wait starts: it gets stored in event
+		wait_any(reader_idle_event_, reader_seek_event_);
+		lock.lock();
+		
+		// received event: 1+ frame was written, or reader seeked
+		// or neither (was notified when not waiting)
 		// will recheck if enough frames are now available.
 
 		// reader may now have seeked to other time
@@ -96,10 +98,10 @@ void ndarray_shared_ring<Dim, T>::end_write(time_unit written_duration, bool mar
 	}
 	
 	writer_state_ = idle;
-	readable_cv_.notify_one();	
+	writer_idle_event_.notify();
+	
 	// notify even if no frame was written:
 	// seek() waits for writer to finish
-	// TODO rename cv
 }
 
 
@@ -146,10 +148,10 @@ auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span) -> section_vie
 	while(ring_.readable_duration() < span.duration()) {
 		reader_state_ = span.duration();
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
-		readable_cv_.wait(lock);
-		//
-		// mutex unlocked, waiting...
-		//
+				
+		lock.unlock();
+		writer_idle_event_.wait();
+		lock.lock();
 		
 		// writer might have marked end while reader was waiting
 		if(end_time_ != -1 && span.end_time() >= end_time_)
@@ -183,23 +185,23 @@ void ndarray_shared_ring<Dim, T>::end_read(time_unit read_duration) {
 
 		std::lock_guard<std::mutex> lock(mutex_);
 
-		//if(read_start_time_ != ring_.read_start_time()) {
+		if(read_start_time_ != ring_.read_start_time()) {
 			MF_DEBUG("VBEFORE: read_start_time_ mismatch: ", ring_, " rst=", read_start_time_);
-		//	std::abort();
-		//}
+			std::abort();
+		}
+		
 
 		ring_.end_read(read_duration);
 		read_start_time_ += read_duration;
 		//assert(read_start_time_ == ring_.read_start_time());
+		
 		if(read_start_time_ != ring_.read_start_time()) {
 			MF_DEBUG("read_start_time_ mismatch: ", ring_, " rst=", read_start_time_);
 			std::abort();
 		}
 	}
 	reader_state_ = idle;
-	
-	// notify condition variable: more writable frames have become available
-	if(read_duration > 0) writable_cv_.notify_one();
+	reader_idle_event_.notify();
 }
 
 
@@ -271,7 +273,7 @@ void ndarray_shared_ring<Dim, T>::skip_available_(time_unit skip_duration) {
 		read_start_time_ += skip_duration;
 		assert(read_start_time_ == ring_.read_start_time());
 	}
-	writable_cv_.notify_one(); // ...notify condition variable: more writable frames have become available
+	reader_idle_event_.notify();
 }
 
 
@@ -304,14 +306,11 @@ void ndarray_shared_ring<Dim, T>::seek(time_unit t) {
 				
 		// allow writer to write its frames
 		// works because end_write sets writer_state_ before notifying readable_cv_
-		
-		MF_DEBUG("letting writer finish...");
-		
-		while(writer_state_ == accessing) {
-			readable_cv_.wait(lock);
-			//
-			// mutex unlocked, waiting...
-			//
+				
+		while(writer_state_ == accessing) {			
+			lock.unlock();
+			writer_idle_event_.wait();
+			lock.lock();
 		}
 		// mutex is now locked again
 		// writer now idle, or waiting if it started another begin_write() in meantime
@@ -342,7 +341,7 @@ void ndarray_shared_ring<Dim, T>::seek(time_unit t) {
 	// if it was idle, notification is ignored
 	// if it was waiting, begin_write() notices that write position has changed
 	lock.unlock();
-	writable_cv_.notify_one();
+	reader_seek_event_.notify();
 }
 
 
