@@ -124,7 +124,8 @@ void ply_exporter::write_binary_(const point_xyz& p) {
 
 
 void ply_exporter::write_ascii_(const point_xyz& p) {
-	file_ << p[0] << ' ' << p[1] << ' ' << p[2];
+	Eigen_vec3 position = p.position();	
+	file_ << position[0] << ' ' << position[1] << ' ' << position[2];
 	end_line(file_, line_delimitor_);
 }
 
@@ -143,11 +144,12 @@ void ply_exporter::write_binary_(const point_full& p) {
 
 
 void ply_exporter::write_ascii_(const point_full& p) {
+	Eigen_vec3 position = p.position();
 	Eigen_vec3 normal = p.normal();
 	Eigen_scalar weight = p.weight();
 	rgb_color col = p.color();
 
-	file_ << p[0] << ' ' << p[1] << ' ' << p[2]
+	file_ << position[0] << ' ' << position[1] << ' ' << position[2]
 		<< ' ' << normal[0] << ' ' << normal[1] << ' ' << normal[2]
 		<< ' ' << (unsigned)col.r << ' ' << (unsigned)col.g << ' ' << (unsigned)col.b
 		<< ' ' << weight;

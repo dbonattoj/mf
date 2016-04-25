@@ -1,3906 +1,666 @@
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 6 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 9 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 11 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 12 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 13 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(13) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 14 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(14) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 17 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(17) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 18 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(18) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 0 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 1 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 2 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 3 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 4 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 5 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 15 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(15) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 16 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(16) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 10 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 19 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(19) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 7 from input[0m
 
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
+[34;1m[src/flow/sink_node.cc:27, frame_]: 
 [0m[34msink: reading frame 8 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 0 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=12 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 13[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=13 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 14[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=14 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 15[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=15 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 16[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=16 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 17[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=17 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 18[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=18 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 19[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=19 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 20[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=20 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 21[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=21 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 22[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=22 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 23[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=23 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 24[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=24 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 25[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=25 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 26[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=26 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 27[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=27 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 28[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=28 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 29[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=29 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 30[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=30 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 31[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=31 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 32[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=32 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 33[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=33 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 34[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=34 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 35[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=35 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 36[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=36 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 37[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=37 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 38[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=38 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 39[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=39 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 40[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=40 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 41[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=41 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 42[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=42 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 43[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=43 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 44[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=44 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 45[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=45 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 46[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=46 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 47[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=47 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 48[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=48 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 49[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=49 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 50[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=50 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 51[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=51 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 52[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=52 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 53[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=53 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 54[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=54 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 55[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=55 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 56[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=56 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 57[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=57 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 58[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=58 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 59[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=59 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 60[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=60 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 61[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=61 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 62[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=62 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 63[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=63 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 64[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=64 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 65[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=65 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 66[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=66 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 67[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=67 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 68[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=68 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 69[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=69 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 70[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=70 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 71[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=71 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 72[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=72 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 73[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=73 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 74[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=74 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 75[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=75 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 76[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=76 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 77[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=77 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 78[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=78 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 79[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=79 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 80[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=80 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 81[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=81 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 82[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=82 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 83[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=83 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 84[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=84 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 85[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=85 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 86[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=86 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 87[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=87 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 88[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=88 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 89[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=89 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 90[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=90 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 91[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=91 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 92[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=92 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 93[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=93 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 94[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=94 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 95[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=95 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 96[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=96 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 97[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=97 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 98[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=98 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 99 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 99[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(99) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 0 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 1 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 6 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 7 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 10 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 0 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 1 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 4 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 6 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 7 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 9 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 10 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 0 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 1 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 2 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 6 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 7 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 10 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 11 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 12 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 0 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 1 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 4 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 6 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 7 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 9 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 10 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=-1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 0 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 0[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(0) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=0 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 1 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 1[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(1) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=1 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 2 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 2[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(2) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=2 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 3 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 3[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(3) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=3 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 4 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 4[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(4) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=4 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 5 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 5[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(5) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=5 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 6 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 6[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(6) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=6 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 7 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 7[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(7) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=7 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 8 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 8[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(8) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=8 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 9 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 9[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(9) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=9 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 10 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 10[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(10) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=10 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 11 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 11[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(11) from input[0m
-
-[34;1m[src/flow/sink_node.cc:9, frame_]: 
-[0m[34msink: t=11 frame...[0m
-
-[34;1m[src/flow/sink_node.cc:29, frame_]: 
-[0m[34msink: reading frame 12 from input[0m
-
-[34;1m[src/flow/sink_node.cc:35, frame_]: 
-[0m[34msink: processing frame 12[0m
-
-[34;1m[src/flow/sink_node.cc:42, frame_]: 
-[0m[34msink: end_read(12) from input[0m
 
