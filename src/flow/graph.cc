@@ -15,7 +15,7 @@ graph::~graph() {
 
 
 void graph::setup() {
-	if(was_setup_) throw std::logic_error("media graph was already set up");
+	if(was_setup_) throw std::logic_error("graph was already set up");
 	if(sink_ == nullptr) throw std::logic_error("no sink node was added to media graph");
 	sink_->setup_graph();
 	was_setup_ = true;
@@ -46,9 +46,8 @@ void graph::run_until(time_unit last_frame) {
 	
 	if(! running_) launch();
 	
-	while(sink_->current_time() < last_frame && !sink_->reached_end()) {
+	while(sink_->current_time() < last_frame && !sink_->reached_end())
 		sink_->pull_next_frame();
-	}
 
 	MF_DEBUG("graph::reached end!");
 }
@@ -66,6 +65,7 @@ void graph::run() {
 
 
 void graph::seek(time_unit target_time) {
+	if(! sink_->is_seekable()) throw std::logic_error("sink is not seekable");
 	sink_->seek(target_time);
 }
 

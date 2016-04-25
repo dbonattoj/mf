@@ -251,37 +251,33 @@ TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable]") {
 		REQUIRE(ring.readable_duration() == 3);
 		REQUIRE(ring.writable_duration() == 2);
 
+		std::atomic<bool> ready{false};
+
 		SECTION("concurrent reading") {
-			std::mutex wait_;
-			wait_.lock();
 			MF_TEST_THREAD() {
-				wait_.lock();
 				ring.begin_read(2);
-				std::this_thread::sleep_for(10ms);
-				ring.end_read(2);
+				ready = true;
+				while(ready);
 			};
 			
-			wait_.unlock(); // let other thread read for 10ms now
-			std::this_thread::sleep_for(5ms);
+			while(! ready);
 			// it should be reading now...
-			CHECK_THROWS_AS(ring.begin_read(2), sequencing_error);
+			REQUIRE_THROWS_AS(ring.begin_read(2), sequencing_error);
+			ready = false;
 		}
 		
 		SECTION("concurrent writing") {
-			std::mutex wait_;
-			wait_.lock();
 			MF_TEST_THREAD() {
-				wait_.lock();
 				ring.begin_write(2);
-				std::this_thread::sleep_for(10ms);
-				ring.end_write(2);
+				ready = true;
+				while(ready);
 			};
 			
-			wait_.unlock();
-			std::this_thread::sleep_for(5ms);
-			CHECK_THROWS_AS(ring.begin_write(2), sequencing_error);
+			while(! ready);
+			REQUIRE_THROWS_AS(ring.begin_write(2), sequencing_error);
+			ready = false;
 		}
-		
+	
 		SECTION("deadlock on read") {	
 			std::mutex mut;
 			mut.lock();

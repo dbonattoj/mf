@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 
 namespace mf { namespace flow {
 
@@ -58,7 +59,7 @@ bool node_base::input<Dim, Elem>::reached_end(time_unit t) const {
 
 
 template<std::size_t Dim, typename Elem>
-void node_base::input<Dim, Elem>::begin_read_frame(time_unit t) {
+bool node_base::input<Dim, Elem>::begin_read_frame(time_unit t) {
 	MF_EXPECTS(is_connected());
 	MF_EXPECTS(! view_available_);
 	MF_EXPECTS(! reached_end(t));
@@ -74,10 +75,13 @@ void node_base::input<Dim, Elem>::begin_read_frame(time_unit t) {
 	// depending on connected node type, may process frame(s) now (sync)
 	// or wait for them to become available (async)
 	// connected node seeks if necessary
-	auto view = connected_output().begin_read_span(requested_span);
+	full_view_type view;
+	bool status = connected_output().begin_read_span(requested_span, view);
+	if(! status) return false;
 	MF_ASSERT(view.start_time() == requested_span.start_time());
 	if(! view.span().includes(t)) {
 		connected_output().end_read(false);
+		std::cout << "req: " << requested_span << " ,  span: " << view.span() << " ,  t=" << t << std::endl;
 		throw sequencing_error("requested frame is after end of stream");
 	}
 	
@@ -85,6 +89,8 @@ void node_base::input<Dim, Elem>::begin_read_frame(time_unit t) {
 	view_available_ = true;
 	
 	MF_ENSURES(view_available_);
+	
+	return true;
 }
 
 

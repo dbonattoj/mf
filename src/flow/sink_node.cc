@@ -27,14 +27,12 @@ void sink_node::frame_() {
 		
 		if(in.is_activated()) {
 			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");	
-			in.begin_read_frame(t);
-		} else {
-			//MF_DEBUG_T("node", name, ": skipping frame ", t, " from input (desactivated)");
-			//in.skip_frame(t);
+			if(in.is_activated()) in.begin_read_frame(t);
 		}
 	}
 	
 	// concrete node processes frame
+	MF_DEBUG_T("node", name, ": processing frame ", t);	
 	this->process();
 	
 	// end reading from activated inputs
@@ -52,7 +50,6 @@ void sink_node::frame_() {
 	if(stream_duration_is_defined())
 		if(t == stream_duration() - 1) reached_end_ = true;
 		
-
 	// TODO: if no active inputs, don't allow crossing end
 }
 
@@ -68,7 +65,10 @@ void sink_node::pull_next_frame() {
 }
 
 void sink_node::seek(time_unit t) {
-	// TODO
+	if(! is_seekable()) throw std::logic_error("sink if not seekable");
+	if(t < 0 || t >= stream_duration()) throw std::out_of_range("seek out of bounds");
+	set_current_time(t - 1);
+	reached_end_ = false;
 }
 
 }}

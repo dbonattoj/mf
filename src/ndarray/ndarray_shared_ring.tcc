@@ -84,71 +84,44 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration) -> se
 }
 
 
-// TODO refactor
 template<std::size_t Dim, typename T>
-auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration, event& break_event) -> section_view_type {	
+bool ndarray_shared_ring<Dim, T>::try_begin_write(time_unit original_duration, section_view_type& section) {
 	if(original_duration > capacity()) throw std::invalid_argument("write duration larger than ring capacity");
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);
 
-	// write start position
-	// if writer needs to wait (unlocking mutex), then reader may seek to another position
-	// and this will change...
 	time_unit write_start = ring_.write_start_time();
 
-	// truncate write span if near end
-	// if end not defined: duration will never cross end:
-	// the buffer is not seekable so writes are sequential, and writer is responsible to mark end,
-	// by setting mark_end in this function
 	time_unit duration = original_duration;
-	if(end_time_ != -1) {
+	if(end_time_ != -1)
 		if(write_start + duration > end_time_) duration = end_time_ - write_start;
-	}
 
-	// if duration zero (possibly because at end), return zero view
-	if(duration == 0) return section_view_type(write_start);
+	if(ring_.writable_duration() < duration) return false;
 
-	// prevent deadlock
-	// c.f. begin_read_span
-	if(ring_.writable_duration() < duration && ring_.readable_duration() < reader_state_)
-		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
-
-
-	while(ring_.writable_duration() < duration) {
-		// wait for more frames to become available
-		writer_state_ = duration;
-		
-		lock.unlock();
-		// reader may send notification before wait starts: it gets stored in event
-		event& res = event::wait_any(reader_idle_event_, reader_seek_event_, break_event);
-		
-		if(res == break_event) return section_view_type(write_start);
-		
-		lock.lock();
-		
-		// received event: 1+ frame was written, or reader seeked
-		// or neither (was notified when not waiting)
-		// will recheck if enough frames are now available.
-
-		// reader may now have seeked to other time
-		if(ring_.write_start_time() != write_start) {
-			assert(seekable_); // this cannot happen when buffer is not seekable
-			
-			// then retry with the new write position
-			// only seek() changes write position (on reader thread), so no risk of repeated recursion
-			
-			writer_state_ = idle;
-			lock.unlock(); // brief unlock: reader might seek again, or start waiting
-			return begin_write(original_duration);
-		}
-	}
-
-	// mutex_ is still locked
+	section.reset( ring_.begin_write(duration) );
 	writer_state_ = accessing;
-	return ring_.begin_write(duration);
+	return true;
 }
 
+
+template<std::size_t Dim, typename T>
+bool ndarray_shared_ring<Dim, T>::wait_writable(event& break_event) {
+	if(writer_state_ != idle) throw sequencing_error("writer not idle");
+
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		if(ring_.writable_duration() == 0 && ring_.readable_duration() < reader_state_)
+			throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
+	}
+
+	while(writable_time_span().duration() == 0) {
+		event& ev = event::wait_any(reader_idle_event_, reader_seek_event_, break_event);
+		if(ev == break_event) return false;
+	}
+	
+	return true;
+}
 
 
 template<std::size_t Dim, typename T>
@@ -188,32 +161,37 @@ auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span) -> section_vie
 	// read_start_time_ is only affected by this reader thread
 	assert(read_start_time_ == span.start_time());
 
-	// truncate write span if near end
-	// if end time not defined: buffer is not seekable, and so end can only by marked by writer (end_write).
-	// then if span is not readable yet, will need to recheck after waiting for additional frames
-	if(end_time_ != -1) {
-		if(span.start_time() > end_time_) throw sequencing_error("read span starts after end");
-		if(span.end_time() > end_time_) span = time_span(span.start_time(), end_time_);
-	}
+	return begin_read(span.duration());
+}
 
-	// if duration zero (possibly because at end), return zero view
-	if(span.duration() == 0) return section_view_type(span.start_time());
-		
-	// read_start_time_ is only affected by this reader thread
-	assert(read_start_time_ == span.start_time());
+
+template<std::size_t Dim, typename T>
+auto ndarray_shared_ring<Dim, T>::begin_read(time_unit original_duration) -> section_view_type {
+	if(original_duration > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
+	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
 	// lock mutex for buffer state
 	std::unique_lock<std::mutex> lock(mutex_);
+
+	// truncate read duration if near end
+	// if end time not defined: buffer is not seekable, and so end can only by marked by writer (end_write).
+	// then if span is not readable yet, will need to recheck after waiting for additional frames
+	time_unit duration = original_duration;
+	if(end_time_ != -1)
+		if(read_start_time_ + duration > end_time_) duration = end_time_ - read_start_time_;
+
+	// if duration zero (possibly because at end), return zero view
+	if(duration == 0) return section_view_type(read_start_time_);
 	
 	// prevent deadlock
 	// writer_state_ may still be waiting, even after frames have become writable by end_write(),
 	// because begin_read_span() might get the lock earlier than the in-progress begin_write()
-	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() < span.duration())
+	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() < duration)
 		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
 
 	// wait until duration becomes readable
-	while(ring_.readable_duration() < span.duration()) {
-		reader_state_ = span.duration();
+	while(ring_.readable_duration() < duration) {
+		reader_state_ = duration;
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 				
 		lock.unlock();
@@ -221,27 +199,60 @@ auto ndarray_shared_ring<Dim, T>::begin_read_span(time_span span) -> section_vie
 		lock.lock();
 		
 		// writer might have marked end while reader was waiting
-		if(end_time_ != -1 && span.end_time() >= end_time_)
-			span = time_span(span.start_time(), end_time_);	
+		if(end_time_ != -1 && read_start_time_ + duration >= end_time_)
+			duration = end_time_ - read_start_time_;
 	}
 	
+	// writer cannot have called end_write(0, true) (mark end when no frame written)
+	MF_ASSERT(duration != 0);
 
-	if(span.duration() == 0) {
-		// if writer called end_write(0, true) during wait, reader knows now that no frame is readable
-		reader_state_ = idle;
-		return section_view_type(span.start_time());
-	} else {
-		reader_state_ = accessing;
-		return ring_.begin_read(span.duration());
-	}
+	reader_state_ = accessing;
+	return ring_.begin_read(duration);
 }
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_shared_ring<Dim, T>::begin_read(time_unit duration) -> section_view_type {
-	// read_start_time_ only changed by reader, so no need to block
-	return begin_read_span(time_span(read_start_time_, read_start_time_ + duration));
+bool ndarray_shared_ring<Dim, T>::try_begin_read(time_unit original_duration, section_view_type& section) {
+	if(original_duration > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
+	if(reader_state_ != idle) throw sequencing_error("reader not idle");
+
+	// lock mutex for buffer state
+	std::unique_lock<std::mutex> lock(mutex_);
+
+	// truncate read duration if near end
+	// if end time not defined: buffer is not seekable, and so end can only by marked by writer (end_write).
+	// then if span is not readable yet, will need to recheck after waiting for additional frames
+	time_unit duration = original_duration;
+	if(end_time_ != -1)
+		if(read_start_time_ + duration > end_time_) duration = end_time_ - read_start_time_;
+	
+	if(ring_.readable_duration() < duration) return false;
+	
+	section.reset( ring_.begin_read(duration) );
+	reader_state_ = accessing;
+	return true;
 }
+
+
+
+template<std::size_t Dim, typename T>
+bool ndarray_shared_ring<Dim, T>::wait_readable(event& break_event) {
+	if(reader_state_ != idle) throw sequencing_error("read not idle");
+
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() == 0)
+			throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
+	}
+
+	while(readable_time_span().duration() == 0) {
+		event& ev = event::wait_any(writer_idle_event_, break_event);
+		if(ev == break_event) return false;
+	}
+	
+	return true;	
+}
+
 
 
 template<std::size_t Dim, typename T>
@@ -249,7 +260,6 @@ void ndarray_shared_ring<Dim, T>::end_read(time_unit read_duration) {
 	if(reader_state_ == idle) throw sequencing_error("was not reading");
 	
 	{
-
 		std::lock_guard<std::mutex> lock(mutex_);
 
 		if(read_start_time_ != ring_.read_start_time()) {
@@ -359,7 +369,6 @@ void ndarray_shared_ring<Dim, T>::seek(time_unit t) {
 
 	// no need to do anything if already at time t
 	if(t == read_start_time_) return;
-
 
 	// lock the mutex
 	// writer will not start or end while locked, and readable time span will not change

@@ -50,51 +50,25 @@ void async_node::launch() {
 
 
 void async_node::thread_main_() {
-	try{
-		for(;;) frame_();
-	} catch(int){
-	
-	} 
-	MF_DEBUG_T("node", name, " ended");
+	while(frame_());
 }
 
 
-void async_node::frame_() {
+bool async_node::frame_() {
 	MF_EXPECTS_MSG(outputs().size() == 1, "async_node must have exactly one output");
 		
-	//MF_DEBUG_T("node", name, ": t=", current_time(), " frame...");
-	
-	if(! is_active()) { std::this_thread::sleep_for(100ms); return; }
-	
-	output_base& out = outputs().front();
-	//MF_ASSERT(out.is_active());
-	
+	output_base& out = outputs().front();	
 	
 	time_unit t;
-	bool ok = out.begin_write_next_frame(t);
-	if(! ok) throw 1; // at end
-
+	bool continuing = out.begin_write_next_frame(t);
+	if(! continuing) return false; // stopped
+	
 	if(stream_duration() != -1) MF_ASSERT(t < stream_duration());
-	
-	
-	
-	// don't write more frames than requested
-	// async_node::output sets time_limit_ according to current time and prefetch
-	if(t >= time_limit_) {
-		//MF_DEBUG_T("node", name, " cancel write ", t, " >= time limit", time_limit_);
-		//out.cancel_write_frame();
-		//return;
-	} else {
-		MF_DEBUG_T("node", name, " ok... ", t, " < time limit", time_limit_);
-	}
 
-	
 	// set current time,
 	// and allow concrete node to activate/desactivate inputs now
 	set_current_time(t);
 	this->pre_process();
-	
-	
 	
 	// now begin reading from inputs (if any)
 	// current time t gets propagated
@@ -102,15 +76,12 @@ void async_node::frame_() {
 		MF_ASSERT_MSG(! in.reached_end(t), "input of node must not already be at end");
 		
 		if(in.is_activated()) {
-			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");
-			in.begin_read_frame(t);
-		} else {
-			MF_DEBUG_T("node", name, ": NOT skipping frame ", t, " from input (desactivated)");
+			bool continuing = in.begin_read_frame(t);
+			if(! continuing) return false; // TODO end_read
 		}
 	}
 
 	// concrete node processed the frame
-	MF_DEBUG_T("node", name, ": processing frame ", t, " now...");
 	this->process();
 	
 	// check if this node has reached its end
@@ -127,19 +98,16 @@ void async_node::frame_() {
 	// also check if any input has now reached its end
 	// it this node does not have stream duration, this determines end
 	for(input_base& in : inputs()) {
-		if(in.is_activated()) {
-			MF_DEBUG_T("node", name, ": end_read(", t, ") from input");
-			in.end_read_frame(t);
-		}
+		if(in.is_activated()) in.end_read_frame(t);
 		if(in.reached_end(t)) reached_end = true;
 	}
 	
 	// end writing to output
-	MF_DEBUG_T("node", name, " t=", t, " end_write... (end=", reached_end, ")");
 	out.end_write_frame(reached_end);
 
-	
-	if(reached_end) throw 1;
+	return true;
+
+	//if(reached_end) throw 1;
 }
 
 }}

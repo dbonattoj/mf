@@ -9,6 +9,7 @@
 #include <exception>
 #include <stdexcept>
 #include <cstdlib>
+#include <iostream>
 
 #define MF_TEST_THREAD_RUNNER_NAME(no) __thread_runner ## no 
 

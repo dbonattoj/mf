@@ -18,6 +18,7 @@ namespace mf { namespace test {
 
 
 constexpr int noframe = -2;
+constexpr int missingframe = -3;
 
 class sequence_frame_source : public flow::async_source_node {
 private:
@@ -92,16 +93,19 @@ public:
 
 class expected_frames_sink : public flow::sink_node {
 private:
+	const std::vector<int> expected_frames_;
 	std::vector<int> got_frames_;
 	
 public:
-	std::vector<int> expected_frames;
 	input_type<2, int> input;
 
 	std::vector<bool> activation;
 	
 	explicit expected_frames_sink(const std::vector<int>& seq) :
-		expected_frames(seq), input(*this) { name = "sink"; }
+		expected_frames_(seq), got_frames_(seq.size(), missingframe), input(*this)
+	{
+		name = "sink";
+	}
 	
 	void pre_process() override {
 		if(current_time() < activation.size())
@@ -112,17 +116,21 @@ public:
 		int index;
 		if(input.view_is_available()) index = frame_index(input.view());
 		else index = noframe;
-		got_frames_.push_back(index);
+		
+		time_unit t = current_time();
+		while(t >= got_frames_.size()) got_frames_.push_back(missingframe);
+		
+		got_frames_[t] = index;
 	}
 
 	bool check() const {
-		bool ok = (expected_frames == got_frames_);
+		bool ok = (expected_frames_ == got_frames_);
 		if(! ok) print();
 		return ok;
 	}
 	
 	void print() const {
-		std::cout << "expected: {" << to_string(expected_frames.begin(), expected_frames.end()) << "}\n"
+		std::cout << "expected: {" << to_string(expected_frames_.begin(), expected_frames_.end()) << "}\n"
 		          << "     got: {" << to_string(got_frames_.begin(), got_frames_.end()) << "}" << std::endl;
 	}
 };

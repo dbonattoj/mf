@@ -152,12 +152,13 @@ public:
 	bool view_is_available() const noexcept { return view_available_; }
 	const frame_view_type& view() { MF_EXPECTS(view_available_); return view_; }
 	
-	/// \name Read interface, used by connected input.
+	/// \name Read interface.
+	/// Used by connect input \ref node_base::input.
 	///@{
 	/// Begin reading time span \a span from the output.
 	/** Depending on connected node type, may process frame(s) (sync) or wait for them to become available (async).
 	 ** Connected node seeks if necessary. */
-	virtual full_view_type begin_read_span(time_span span) = 0;
+	virtual bool begin_read_span(time_span span, full_view_type& view) = 0;
 
 	/// End reading from output.
 	/** If for sequential read, the next call to begin_read_span() will not include the first frame from the time span,
@@ -169,6 +170,8 @@ public:
 	 ** output stream, then end_time() must return that time. Otherwise, may return -1 when the end time is in the
 	 ** future, and the node is seekable. */
 	virtual time_unit end_time() const = 0;
+	
+	
 	///@}
 };
 
@@ -192,16 +195,16 @@ public:
 	virtual output_base& connected_output() const = 0;
 	virtual node_base& connected_node() const = 0;
 
-	bool is_activated() const noexcept { return activated_; }
-	void set_activated(bool);
-	
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
-	
+
+	bool is_activated() const noexcept { return activated_; }
+	void set_activated(bool);
+		
 	/// \name Read interface.
 	/// Used by node to read from input.
 	///@{
-	virtual void begin_read_frame(time_unit) = 0;
+	virtual bool begin_read_frame(time_unit) = 0;
 	virtual void end_read_frame(time_unit) = 0;
 	virtual bool reached_end(time_unit t) const = 0;
 	///@}
@@ -248,7 +251,7 @@ public:
 	/// Begin reading at time \arg t.
 	/** Frames in time window around \arg t become available through view(). Window may be truncated near beginning
 	 ** and end of stream.  \a t must be lower than the end time of the stream. */
-	void begin_read_frame(time_unit t) final override;
+	bool begin_read_frame(time_unit t) final override;
 	void end_read_frame(time_unit t) final override;
 	bool reached_end(time_unit t) const final override;
 	///@}

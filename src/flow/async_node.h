@@ -20,11 +20,10 @@ public:
 private:
 	bool running_ = false;
 	std::thread thread_;
-	std::atomic<time_unit> time_limit_{-1};
 	event stop_event_;
 	
 	void thread_main_();
-	void frame_();
+	bool frame_();
 
 public:
 	template<std::size_t Dim, typename Elem> using output_type = output<Dim, Elem>;
@@ -52,7 +51,6 @@ class async_node::output : public node_base::output<Dim, T> {
 
 private:
 	using ring_type = ndarray_shared_ring<Dim, T>;
-	using null_ndarray_type = ndarray<Dim, T, raw_null_allocator>;
 	
 	std::unique_ptr<ring_type> ring_;
 
@@ -75,7 +73,7 @@ public:
 	/// \name Read interface, used by connected input.
 	/// Called by connected \ref node_base::input for reading from the output.
 	///@{
-	full_view_type begin_read_span(time_span) override;
+	bool begin_read_span(time_span, full_view_type&) override;
 	void end_read(bool consume_frame) override;
 	time_unit end_time() const override;
 	///@}

@@ -26,7 +26,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-		
+
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& passthrough = gr.add_node<passthrough_node>(0, 0);
@@ -301,7 +301,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 	}
 	
 	
-	SECTION("input synchronize") {
+	SECTION("multiple inputs") {
 		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& source2 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq);
@@ -372,6 +372,132 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			gr.run();
 			
 			REQUIRE(gr.current_time() == seq.size()-1);
+			REQUIRE(sink.check());
+		}
+		
+		SECTION("graph 3") {
+			/*
+			source1 --> [-3, +1]passthrough1 ---------------------------> merge --> sink
+			source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2 --> /
+			*/
+			
+			auto& passthrough1 = gr.add_node<passthrough_node>(3, 1);
+			auto& passthrough2 = gr.add_node<passthrough_node>(1, 2);
+			auto& passthrough3 = gr.add_node<passthrough_node>(2, 2);
+		
+			passthrough1.input.connect(source1.output);
+			passthrough3.input.connect(source2.output);
+			passthrough2.input.connect(passthrough3.output);
+			merge.input1.connect(passthrough1.output);
+			merge.input2.connect(passthrough2.output);
+			sink.input.connect(merge.output);
+		
+			gr.setup();			
+			gr.run();
+			
+			REQUIRE(gr.current_time() == seq.size()-1);
+			REQUIRE(sink.check());
+		}
+	}
+	
+	
+	SECTION("seek") {
+		constexpr int m = missingframe;
+		std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };
+
+		SECTION("source -> sink") {			
+			auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+			auto& sink = gr.add_sink<expected_frames_sink>(seq);
+			sink.input.connect(source.output);
+			gr.setup();
+			gr.run_for(3);
+			REQUIRE(gr.current_time() == 2);
+			gr.run_until(5);
+			REQUIRE(gr.current_time() == 5);
+			
+			// seek forward, skipping frames [6,9]
+			gr.seek(15);
+			gr.run_for(2);
+			REQUIRE(gr.current_time() == 16);
+			
+			// seek backward
+			gr.seek(10);
+			gr.run_for(1);
+			REQUIRE(gr.current_time() == 10);
+			
+			// invalid seek
+			REQUIRE_THROWS(gr.seek(-1));
+			REQUIRE(gr.current_time() == 10);
+			REQUIRE_THROWS(gr.seek(20));
+			REQUIRE(gr.current_time() == 10);	
+			
+			// seek to end
+			gr.seek(19);
+			gr.run();
+			REQUIRE(sink.reached_end());
+			
+			// seek backward, after end was already reached
+			gr.seek(7);
+			gr.run_for(2);
+			
+			// stop, when not at end
+			
+			REQUIRE(sink.check());
+		}
+
+		SECTION("graph 2") {
+			/*
+			source1 --> [-3, +1]passthrough1 ---------------------------> merge --> sink
+			source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2 --> /
+			*/
+
+			auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+			auto& source2 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
+			auto& sink = gr.add_sink<expected_frames_sink>(seq);
+			auto& merge = gr.add_node<input_synchronize_test_node>();
+			auto& passthrough1 = gr.add_node<passthrough_node>(3, 1);
+			auto& passthrough2 = gr.add_node<passthrough_node>(1, 2);
+			auto& passthrough3 = gr.add_node<passthrough_node>(2, 2);
+			passthrough1.input.connect(source1.output);
+			passthrough3.input.connect(source2.output);
+			passthrough2.input.connect(passthrough3.output);
+			merge.input1.connect(passthrough1.output);
+			merge.input2.connect(passthrough2.output);
+			sink.input.connect(merge.output);
+			gr.setup();
+			
+			gr.run_for(3);
+			REQUIRE(gr.current_time() == 2);
+			gr.run_until(5);
+			REQUIRE(gr.current_time() == 5);
+			
+			// seek forward, skipping frames [6,9]
+			gr.seek(15);
+			gr.run_for(2);
+			REQUIRE(gr.current_time() == 16);
+			
+			// seek backward
+			gr.seek(10);
+			gr.run_for(1);
+			REQUIRE(gr.current_time() == 10);
+			
+			// invalid seek
+			REQUIRE_THROWS(gr.seek(-1));
+			REQUIRE(gr.current_time() == 10);
+			REQUIRE_THROWS(gr.seek(20));
+			REQUIRE(gr.current_time() == 10);	
+			
+			// seek to end
+			gr.seek(19);
+			gr.run();
+			REQUIRE(sink.reached_end());
+			
+			// seek backward, after end was already reached
+			gr.seek(7);
+			gr.run_for(2);		
+			
+			// stop, when not at end
+
 			REQUIRE(sink.check());
 		}
 	}

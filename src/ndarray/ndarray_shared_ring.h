@@ -41,7 +41,7 @@ private:
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
-	
+		
 	void skip_available_(time_unit duration);
 	void read_and_discard_(time_unit duration);
 	
@@ -54,20 +54,31 @@ public:
 	/** Maximal readable and writable frames that fit in buffer. */
 	time_unit capacity() const { return ring_.shape().front(); }
 
-	/// Begin writing \a duration frames at current write start time.
+	/// Begin writing \a write_duration frames at current write start time.
 	/** If span to write crosses end of buffer, it is truncated.
 	 ** For seekable buffer only: returned section may have start time different to `writable_time_span().start_time()`
 	 ** when reader seeked to another time inbetween.
 	 ** When at end (already before, or following wait and seek), zero-length section is returned, and start time of
 	 ** returned time span equals `end_time()`.
 	 ** Then end_write() must not be called.
-	 ** Waits until \a duration (after truncation) frames become writable.
+	 ** Waits until \a write_duration (after truncation) frames become writable.
 	 ** Returns section for writer to write into, with time information.
 	 ** Must be called from single writer thread only, and followed by call to end_write(). */
-	section_view_type begin_write(time_unit duration);
+	section_view_type begin_write(time_unit write_duration);
 	
-	section_view_type begin_write(time_unit duration, event& break_event);
+	/// Begin writing \a write_duration frames at current write start time, if possible.
+	/** For seekable buffer only: returned section may have start time different to `writable_time_span().start_time()`
+	 ** when reader seeked to another time inbetween. If span to write crosses end of buffer, it is truncated first.
+	 ** If that span is not writable because not enough writable frames are available, returns false, and does not wait.
+	 ** Otherwise returns true and puts writable section in \a section. */
+	bool try_begin_write(time_unit write_duration, section_view_type& section);
 
+	/// Wait until a frame become writable, or \a break_event occurs.
+	/** If no frame is writable (either because reader has not read enough frames from the ring buffer yet or write
+	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
+	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is writable.
+	 ** Also waits if write start position is at end time, until seek occurs or \a break_event occurs. */
+	bool wait_writable(event& break_event);
 	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned
@@ -81,22 +92,32 @@ public:
 	 ** Then behaves as `begin_read(span.duration())`.  */
 	section_view_type begin_read_span(time_span);
 	
-	/// Begin reading \a duration frames at current read start time.
+	/// Begin reading \a read_duration frames at current read start time.
 	/** If span to read crosses end of buffer, it is truncated. When already at end, zero-length section is returned.
 	 ** Then end_read() must not be called.
-	 ** Waits until \a duration (after truncation) frames become readable.
+	 ** Waits until \a read_duration (after truncation) frames become readable.
 	 ** For non-seekable buffer only: end may be marked while waiting, and so returned section may be truncated even if
 	 ** end time was not defined prior to call.
 	 ** Returns section for writer to read from, with time information. Reader may also freely write into the returned
 	 ** section.
 	 ** Must be called from single reader thread only, and followed by call to end_read(). */
 	section_view_type begin_read(time_unit read_duration);
+
+
+	bool try_begin_read(time_unit read_duration, section_view_type& section);
+
+	/// Wait until a frame become readable, or \a break_event occurs.
+	/** If no frame is readable (either because writer has not written enough frames from the ring buffer yet or read
+	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
+	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
+	 ** Also waits if write start position is at end time, until \a break_event occurs. */
+	bool wait_readable(event& break_event);
+
 	
 	/// End reading \a read_duration frames.
 	/** Must be called after begin_read() or begin_read_span(). \a read_duration must be lesser of equal to duration
 	 ** of section returned by that function. */
 	void end_read(time_unit read_duration);	
-	
 	
 	/// Skips \a duration frames.
 	/** If span to skip crosses end of buffer, it is truncated, and skips to end of file.
