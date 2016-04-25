@@ -24,13 +24,11 @@ inline T clamp(T value, T minimum, T maximum) {
 template<typename T>
 T gcd(T a, T b) {
 	if(a < b) std::swap(a, b);
-	
 	while(b > 0) {
 		T c = a % b;
 		a = b;
 		b = c;
 	}
-	
 	return a;
 }
 

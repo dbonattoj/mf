@@ -58,7 +58,7 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration) -> se
 		
 		lock.unlock();
 		// reader may send notification before wait starts: it gets stored in event
-		wait_any(reader_idle_event_, reader_seek_event_);
+		event::wait_any(reader_idle_event_, reader_seek_event_);
 		lock.lock();
 		
 		// received event: 1+ frame was written, or reader seeked
@@ -121,9 +121,9 @@ auto ndarray_shared_ring<Dim, T>::begin_write(time_unit original_duration, event
 		
 		lock.unlock();
 		// reader may send notification before wait starts: it gets stored in event
-		event_wait_result res = wait_any(reader_idle_event_, reader_seek_event_, break_event);
+		event& res = event::wait_any(reader_idle_event_, reader_seek_event_, break_event);
 		
-		if(res.received_event == break_event) return section_view_type(write_start);
+		if(res == break_event) return section_view_type(write_start);
 		
 		lock.lock();
 		
