@@ -18,6 +18,7 @@ class elem_tuple {
 	
 public:
 	using others_tuple_type = elem_tuple<Other_elems...>;
+	constexpr static bool is_nullable = elem_traits<First_elem>::is_nullable || others_tuple_type::is_nullable;
 
 	First_elem first_;
 	others_tuple_type others_;
@@ -41,6 +42,8 @@ public:
 	}
 	
 	constexpr static std::size_t size() { return 1 + sizeof...(Other_elems); }
+	
+	bool is_null() const noexcept { return is_null(first_) || is_null(others_); }
 };
 
 
@@ -51,6 +54,7 @@ class elem_tuple<First_elem> {
 
 public:
 	First_elem first_;
+	constexpr static bool is_nullable = elem_traits<First_elem>::is_nullable;
 
 public:
 	elem_tuple() = default;
@@ -71,6 +75,8 @@ public:
 	}
 	
 	constexpr static std::size_t size() { return 1; }
+	
+	bool is_null() const noexcept { return is_null(first_); }
 };
 
 
@@ -175,6 +181,7 @@ elem_tuple<Elems...> make_elem_tuple(const Elems&... elems) {
 template<typename... Elems>
 struct elem_traits<elem_tuple<Elems...>> : elem_traits_base<elem_tuple<Elems...>> {
 	constexpr static bool is_tuple = true;
+	constexpr static bool is_nullable = elem_tuple<Elems...>::is_nullable;
 };
 
 

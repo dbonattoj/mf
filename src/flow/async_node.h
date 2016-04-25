@@ -10,7 +10,7 @@
 namespace mf { namespace flow {
 
 /// Asynchronous node base class.
-/** Processes frames in a separate thread owned by the node. Can have multiple inputs and outputs. Can process
+/** Processes frames in a separate thread owned by the node. Can have multiple inputs, but only one output. Can process
  ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
  ** in graph. */
 class async_node : public node_base {

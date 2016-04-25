@@ -497,7 +497,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			gr.run_for(2);		
 			
 			// stop, when not at end
-
+			// stop, when not at end
 			REQUIRE(sink.check());
 		}
 	}

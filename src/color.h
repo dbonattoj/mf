@@ -11,7 +11,7 @@ struct mono_color {
 };
 
 
-struct rgb_color {	
+struct rgb_color {
 	std::uint8_t r; // red
 	std::uint8_t g; // green
 	std::uint8_t b; // blue

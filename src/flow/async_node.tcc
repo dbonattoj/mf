@@ -65,7 +65,12 @@ bool async_node::output<Dim, Elem>::begin_read_span(time_span span, full_view_ty
 
 	bool got_view = false;
 
-	ring_->seek(span.start_time());
+	if(span.start_time() != ring_->read_start_time()) {
+		if(ring_->is_seekable()) ring_->seek(span.start_time());
+		else if(span.start_time() > ring_->read_start_time()) ring_->skip(ring_->read_start_time() - span.start_time());
+		else throw std::logic_error("ring not seekable but attempted to seek to past");
+	}
+	
 
 	while(! got_view) {
 		bool status = ring_->wait_readable(nd.stop_event_);
