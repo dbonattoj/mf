@@ -1,10 +1,6 @@
 BASE
 - ndarray_view_cast + join finish
 - elem_tuple constructor
-- use&complete Eigen_vec2 etc
-- Eigen::Matrix & color & cv::Vec --> elem_traits
-- point types
-- elem: valid flag
 
 - ring buffer: 0 length r/w test
 - view, time_span, etc: 0 length test
@@ -21,7 +17,6 @@ CORE
 - shared object (=> also in GPU memory)
 - stateful/stateless nodes
 - thin/implicit node
-- activate/desactivate node, skip writter frames
 
 
 NODES

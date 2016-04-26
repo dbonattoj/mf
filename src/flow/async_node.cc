@@ -8,9 +8,7 @@ using namespace std::chrono;
 
 namespace mf { namespace flow {
 
-async_node::async_node() : node_base() {
-	set_prefetch_duration(0);
-}
+async_node::async_node() : node_base() { }
 
 
 async_node::~async_node() {

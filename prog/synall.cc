@@ -26,7 +26,7 @@ std::string pr = "param_cam";
 std::size_t w = 1920, h = 1080;
 int sampling = 420;
 float z_far = 100.0, z_near = 15.0;
-std::string out = "output/video3.avi";
+std::string out = "output/video4.avi";
 
 
 auto shape = make_ndsize(h, w);
