@@ -13,6 +13,9 @@ class projection_image_camera : public projection_camera, public depth_image_cam
 
 public:
 	projection_image_camera(const projection_camera& cam, ndsize<2> sz);
+	projection_image_camera(const projection_image_camera&) = default;
+	
+	projection_image_camera& operator=(const projection_image_camera&) = default;
 };
 
 }

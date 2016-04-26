@@ -19,6 +19,18 @@ parent_(nullptr), pose_(ps) { }
 space_object::space_object(const space_object& obj) :
 parent_(obj.parent_), pose_(obj.pose_) {
 	attach_to_parent_();
+	// don't copy children_ array: these children are not children of this new space_object
+}
+
+space_object& space_object::operator=(const space_object& obj) {
+	if(this == &obj) return *this;
+	detach_from_parent_();
+	detach_from_children_();
+	parent_ = obj.parent_;
+	children_.clear();
+	pose_ = obj.pose_;
+	attach_to_parent_();
+	return *this;
 }
 
 
@@ -65,7 +77,7 @@ const pose& space_object::relative_pose() const {
 
 
 pose space_object::absolute_pose() const {
-	Eigen::Affine3f trans = pose_.transformation_to_world();
+	Eigen_affine3 trans = pose_.transformation_to_world();
 	if(has_parent_space_object())
 		trans = parent_space_object().absolute_pose().transformation_to_world() * trans;
 	return pose(trans);
@@ -74,6 +86,7 @@ pose space_object::absolute_pose() const {
 
 void space_object::set_relative_pose(const pose& ps) {
 	pose_ = ps;
+	this->do_update_pose();
 }
 
 
@@ -82,12 +95,14 @@ void space_object::set_parent(space_object& par, const pose& new_relative_pose) 
 	parent_ = &par;
 	attach_to_parent_();
 	pose_ = new_relative_pose;
+	this->do_update_pose();
 }
 
 
 void space_object::set_no_parent(const pose& new_pose) {
 	detach_from_parent_();
 	pose_ = new_pose;
+	this->do_update_pose();
 }
 
 
@@ -96,13 +111,15 @@ void space_object::make_sibling(const space_object& obj, const pose& new_pose) {
 	parent_ = obj.parent_;
 	pose_ = new_pose;
 	detach_from_parent_();
+	this->do_update_pose();
 }
 
 
 void space_object::transform_(const Eigen::Affine3f& t) {
-	Eigen::Affine3f pose_transformation = pose_.transformation_to_world();
+	Eigen_affine3 pose_transformation = pose_.transformation_to_world();
 	pose_transformation = t * pose_transformation;
 	pose_ = pose(pose_transformation);
+	this->do_update_pose();
 }
 
 
@@ -113,8 +130,8 @@ bounding_box space_object::box() const {
 
 
 Eigen::Affine3f space_object::transformation_to(const space_object& obj) const {
-	Eigen::Affine3f obj_to_world = obj.absolute_pose().transformation_to_world();
-	Eigen::Affine3f world_to_this = absolute_pose().transformation_from_world();
+	Eigen_affine3 obj_to_world = obj.absolute_pose().transformation_to_world();
+	Eigen_affine3 world_to_this = absolute_pose().transformation_from_world();
 	return world_to_this * obj_to_world;
 }
 
@@ -124,28 +141,28 @@ Eigen::Affine3f space_object::transformation_from(const space_object& obj) const
 }
 
 
-void space_object::rotate_x_axis(angle a, const Eigen::Vector3f& c) {
-	Eigen::Translation3f t(c + pose_.position);
-	transform(t * Eigen::AngleAxisf(a, Eigen::Vector3f::UnitX()) * t.inverse());
+void space_object::rotate_x_axis(angle a, const Eigen_vec3& c) {
+	Eigen_translation3 t(c + pose_.position);
+	transform(t * Eigen_angleaxis(a, Eigen_vec3::UnitX()) * t.inverse());
 }
 
 
-void space_object::rotate_y_axis(angle a, const Eigen::Vector3f& c) {
-	Eigen::Translation3f t(c + pose_.position);
-	transform(t * Eigen::AngleAxisf(a, Eigen::Vector3f::UnitY()) * t.inverse());
+void space_object::rotate_y_axis(angle a, const Eigen_vec3& c) {
+	Eigen_translation3 t(c + pose_.position);
+	transform(t * Eigen_angleaxis(a, Eigen_vec3::UnitY()) * t.inverse());
 }
 
 
-void space_object::rotate_z_axis(angle a, const Eigen::Vector3f& c) {
-	Eigen::Translation3f t(c + pose_.position);
-	transform(t * Eigen::AngleAxisf(a, Eigen::Vector3f::UnitZ()) * t.inverse());
+void space_object::rotate_z_axis(angle a, const Eigen_vec3& c) {
+	Eigen_translation3 t(c + pose_.position);
+	transform(t * Eigen_angleaxis(a, Eigen_vec3::UnitZ()) * t.inverse());
 }
 
 
 
 void space_object::look_at(const space_object& obj) {
-	Eigen::Vector3f at_obj = transformation_from(obj) * Eigen::Vector3f::Zero();
-	Eigen::Vector3f at_depth(0, 0, 1);
+	Eigen_vec3 at_obj = transformation_from(obj) * Eigen_vec3::Zero();
+	Eigen_vec3 at_depth(0, 0, 1);
 	pose_.orientation.setFromTwoVectors(at_depth, at_obj);
 	pose_.orientation.normalize();
 }

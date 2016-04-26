@@ -10,21 +10,21 @@ namespace mf { namespace node {
 template<typename Input_color, typename Output_color>
 class color_converter : public flow::async_node {	
 public:
-	output_type<2, Output_color> output;
-	input_type<2, Input_color> input;
+	output_type<2, Output_color> out;
+	input_type<2, Input_color> in;
 
 	color_converter() :
-		output(*this), input(*this) { }
+		out(*this), in(*this) { }
 	
 	void setup() override {
-		output.define_frame_shape(input.frame_shape());
+		out.define_frame_shape(in.frame_shape());
 	}
 	
 	void process() override {
 		std::transform(
-			input.view().begin(),
-			input.view().end(),
-			output.view().begin(),
+			in.view().begin(),
+			in.view().end(),
+			out.view().begin(),
 			color_convert<Output_color, Input_color>
 		);
 	}

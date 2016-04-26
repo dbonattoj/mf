@@ -50,16 +50,16 @@ protected:
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	view_type view_; ///< View used to access items.
 
-	void allocate_();
+	void allocate_(std::size_t alignment);
 	void deallocate_();
 	
-	ndarray(const shape_type& shape, std::size_t padding, const Allocator& alloc);
+	ndarray(const shape_type& shape, std::size_t padding, std::size_t alignment, const Allocator& alloc);
 
 	static strides_type strides_with_padding_(const shape_type& shape, std::size_t padding);
 
 public:
 	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator()) :
-		ndarray(shp, 0, allocator) { }
+		ndarray(shp, 0, alignof(T), allocator) { }
 
 	explicit ndarray(const const_view_type&);
 	ndarray(const ndarray& arr) : ndarray(arr.cview()) { }

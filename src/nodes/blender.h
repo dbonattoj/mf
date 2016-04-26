@@ -10,23 +10,23 @@ namespace mf { namespace node {
 template<typename Color>
 class blender : public flow::async_node {	
 public:
-	output_type<2, Color> output;
-	input_type<2, Color> input1;
-	input_type<2, Color> input2;
+	output_type<2, Color> out;
+	input_type<2, Color> in1;
+	input_type<2, Color> in2;
 
 	blender() :
-		output(*this), input1(*this), input2(*this) { }
+		out(*this), in1(*this), in2(*this) { }
 	
 	void setup() override {
-		output.define_frame_shape(input1.frame_shape());
+		out.define_frame_shape(in1.frame_shape());
 	}
 	
 	void process() override {
 		std::transform(
-			input1.view().begin(),
-			input1.view().end(),
-			input2.view().begin(),
-			output.view().begin(),
+			in1.view().begin(),
+			in1.view().end(),
+			in2.view().begin(),
+			out.view().begin(),
 			[](const rgb_color& col1, const rgb_color& col2) -> rgb_color {
 				rgb_color col;
 				if(col1.r == 0 && col1.g == 0 && col1.b == 0) return col2;

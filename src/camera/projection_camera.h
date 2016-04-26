@@ -17,7 +17,7 @@ public:
 		Eigen_vec2 offset; ///< After scaling, maps coordinates to `[-scale+offset, +scale+offset]`.
 	};
 	
-public:
+private:
 	using intrinsic_matrix_result = std::pair<projection_view_frustum, Eigen_projective3>;
 
 	projection_view_frustum projection_frustum_; ///< Projection frustum, without pose and without image scale, offset.
@@ -29,11 +29,16 @@ public:
 		(const Eigen_mat3& intrinsic_matrix, const depth_projection_parameters&, const ndsize<2>&);
 
 	projection_camera(const pose&, const intrinsic_matrix_result&);
-	
+
+protected:
+	void do_update_pose() override;
+
 public:		
 	projection_camera(const pose&, const projection_view_frustum&, const image_parameters&);
-	
 	projection_camera(const pose&, const Eigen_mat3& intrinsic, const depth_projection_parameters&, const ndsize<2>&);
+	
+	projection_camera(const projection_camera&) = default;
+	projection_camera& operator=(const projection_camera&) = default;
 	
 	const projection_view_frustum& relative_frustum() const { return projection_frustum_; }
 	const depth_projection_parameters& depth_parameters() const { return projection_frustum_.depth_parameters(); }
@@ -56,10 +61,10 @@ public:
 		Eigen_vec3 p(c[0], c[1], depth);
 		return (image_to_world_ * p.homogeneous()).eval().hnormalized();
 	}
+	
+	friend Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to);
 };
 
-
-Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to);
 
 }
 

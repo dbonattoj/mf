@@ -44,6 +44,12 @@ auto projection_camera::read_intrinsic_matrix_
 }
 
 
+void projection_camera::do_update_pose() {
+	world_to_image_ = view_to_image_ * absolute_pose().transformation_from_world();
+	image_to_world_ = world_to_image_.inverse();
+}
+
+
 projection_camera::projection_camera(const pose& ps, const projection_view_frustum& fr, const image_parameters& ipar) :
 	depth_camera(ps),
 	projection_frustum_(fr)
@@ -78,11 +84,7 @@ projection_camera::projection_camera
 
 
 Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to) {
-	Eigen_projective3 a = to.view_to_image_ * to.absolute_pose().transformation_from_world();
-	Eigen_projective3 b = (from.view_to_image_ * from.absolute_pose().transformation_from_world()).inverse();
-	return a*b;
-	
-	//return to.world_to_image_ * from.image_to_world_;
+	return to.world_to_image_ * from.image_to_world_;
 }
 
 }

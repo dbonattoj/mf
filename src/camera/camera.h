@@ -16,10 +16,12 @@ namespace mf {
 class camera : public space_object {
 protected:
 	camera() = default;
-	camera(const camera&) = default;
 	explicit camera(const pose&);
 
 public:
+	camera(const camera&) = default;
+	camera& operator=(const camera&) = default;
+
 	using image_coordinates_type = Eigen_vec2; ///< 2D image coordinates, range and scale defined by subclass.
 
 	virtual ~camera() = default;

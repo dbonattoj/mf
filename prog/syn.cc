@@ -61,34 +61,30 @@ int main() {
 	auto& im1_source = graph.add_node<node::importer<yuv_importer>>(im1, shape, sampling);
 	auto& im1_converter = graph.add_node<node::color_converter<ycbcr_color, rgb_color>>();
 	auto& di1_source = graph.add_node<node::importer<yuv_importer>>(di1, shape, sampling);
-	auto& di1_converter = graph.add_node<node::color_converter<ycbcr_color, mono_color>>();
-	auto& warp1 = graph.add_node<node::warp<rgb_color, std::uint8_t>>();
-	im1_converter.input.connect(im1_source.output);
-	di1_converter.input.connect(di1_source.output);
-	warp1.image_input.connect(im1_converter.output);
-	warp1.depth_input.connect(di1_converter.output);
-	warp1.input_camera = &cam1;
-	warp1.output_camera = &vcam;
+	auto& di1_converter = graph.add_node<node::color_converter<ycbcr_color, std::uint8_t>>();
+	auto& warp1 = graph.add_node<node::warp<rgb_color, std::uint8_t>>(cam1, vcam);
+	im1_converter.in.connect(im1_source.out);
+	di1_converter.in.connect(di1_source.out);
+	warp1.image_in.connect(im1_converter.out);
+	warp1.depth_in.connect(di1_converter.out);
 	
 
 	auto& im2_source = graph.add_node<node::importer<yuv_importer>>(im2, shape, sampling);
 	auto& im2_converter = graph.add_node<node::color_converter<ycbcr_color, rgb_color>>();
 	auto& di2_source = graph.add_node<node::importer<yuv_importer>>(di2, shape, sampling);
-	auto& di2_converter = graph.add_node<node::color_converter<ycbcr_color, mono_color>>();
-	auto& warp2 = graph.add_node<node::warp<rgb_color, std::uint8_t>>();
-	im2_converter.input.connect(im2_source.output);
-	di2_converter.input.connect(di2_source.output);
-	warp2.image_input.connect(im2_converter.output);
-	warp2.depth_input.connect(di2_converter.output);
-	warp2.input_camera = &cam2;
-	warp2.output_camera = &vcam;
+	auto& di2_converter = graph.add_node<node::color_converter<ycbcr_color, std::uint8_t>>();
+	auto& warp2 = graph.add_node<node::warp<rgb_color, std::uint8_t>>(cam2, vcam);
+	im2_converter.in.connect(im2_source.out);
+	di2_converter.in.connect(di2_source.out);
+	warp2.image_in.connect(im2_converter.out);
+	warp2.depth_in.connect(di2_converter.out);
 
 
 	auto& blender = graph.add_node<node::blender<rgb_color>>();
 	auto& sink = graph.add_sink<node::exporter<video_exporter>>(out, shape);
-	blender.input1.connect(warp1.output);
-	blender.input2.connect(warp2.output);
-	sink.input.connect(blender.output);
+	blender.in1.connect(warp1.out);
+	blender.in2.connect(warp2.out);
+	sink.in.connect(blender.out);
 /*
 	auto& sink = graph.add_sink<node::exporter<video_exporter>>(out, shape);
 	sink.input.connect(warp1.output);

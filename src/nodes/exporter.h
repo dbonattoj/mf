@@ -14,18 +14,18 @@ private:
 	Exporter exporter_;
 
 public:
-	input_type<Exporter::dimension, typename Exporter::elem_type> input;
+	input_type<Exporter::dimension, typename Exporter::elem_type> in;
 
 	template<typename... Args>
 	explicit exporter(Args&&... args) :
-		exporter_(std::forward<Args>(args)...), input(*this) { }
+		exporter_(std::forward<Args>(args)...), in(*this) { }
 	
 	void setup() override {
 		// TODO define frame shape after exporter construction
 	}
 	
 	void process() override {
-		exporter_.write_frame(input.view());
+		exporter_.write_frame(in.view());
 	}
 };
 

@@ -7,8 +7,6 @@ CXXFLAGS := -std=c++14 -fPIC -I./external/include
 LDFLAGS := 
 LDLIBS := -lpthread -lm
 
-
-
 # OpenCV
 PACKAGES := opencv eigen3
 CXXFLAGS += $(shell pkg-config --cflags $(PACKAGES))
@@ -41,13 +39,14 @@ PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,$(BUILD_DIR)/prog/support/%.o,$
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
-all : $(TARGET)
+all : $(TARGET) $(NODE)
 	
 
 test : $(TEST_TARGET)
 	$(TEST_TARGET)
 
 prog : $(PROG)
+	
 
 $(TARGET) : $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -fPIC -shared -o $@ $(LIB_OBJ) $(LDLIBS)
@@ -55,7 +54,7 @@ $(TARGET) : $(LIB_OBJ)
 $(TEST_TARGET) : $(TEST_OBJ) $(TEST_SUPPORT_OBJ) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
 
-$(DIST_DIR)/prog/% : $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(TARGET)
+$(DIST_DIR)/prog/% : $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(TARGET) $(NODES)
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 

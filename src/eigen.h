@@ -28,6 +28,10 @@ using Eigen_mat2 = Eigen_mat<2, 2>;
 using Eigen_mat3 = Eigen_mat<3, 3>;
 using Eigen_mat4 = Eigen_mat<4, 4>;
 
+using Eigen_translation2 = Eigen::Translation<Eigen_scalar, 2>;
+using Eigen_translation3 = Eigen::Translation<Eigen_scalar, 3>;
+using Eigen_angleaxis = Eigen::AngleAxis<Eigen_scalar>;
+
 using Eigen_affine2 = Eigen::Transform<Eigen_scalar, 2, Eigen::Affine>;
 using Eigen_affine3 = Eigen::Transform<Eigen_scalar, 3, Eigen::Affine>;
 
@@ -37,13 +41,16 @@ using Eigen_projective3 = Eigen::Transform<Eigen_scalar, 3, Eigen::Projective>;
 using Eigen_hyperplane2 = Eigen::Hyperplane<Eigen_scalar, 2>;
 using Eigen_hyperplane3 = Eigen::Hyperplane<Eigen_scalar, 3>;
 
+using Eigen_quaternion = Eigen::Quaternion<Eigen_scalar>;
+
 
 template<typename Scalar, std::size_t Rows, std::size_t Columns>
 struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> :
 	elem_traits_base<
 		Eigen::Matrix<Scalar, Rows, Columns>,
 		Scalar,
-		Rows * Columns
+		Rows * Columns,
+		false
 	> { };
 
 

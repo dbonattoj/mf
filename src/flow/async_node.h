@@ -39,6 +39,7 @@ public:
 
 class async_source_node : public async_node {
 public:
+	async_source_node() = default;
 	async_source_node(bool seekable, time_unit stream_duration = -1);
 	
 	bool reached_end() const noexcept override;

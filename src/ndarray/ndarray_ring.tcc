@@ -11,6 +11,7 @@ ndarray_ring<Dim, T>::ndarray_ring(const ndsize<Dim>& frame_shape, time_unit dur
 	base(	
 		ndcoord_cat(ndsize<1>(duration), frame_shape),
 		adjust_padding_(frame_shape, duration),
+		alignof(T),
 		raw_ring_allocator()
 	) { }
 

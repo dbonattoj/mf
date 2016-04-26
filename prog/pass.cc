@@ -33,8 +33,8 @@ int main() {
 	auto& im1_converter = graph.add_node<node::color_converter<ycbcr_color, rgb_color>>();
 	auto& sink = graph.add_sink<node::exporter<video_exporter>>(out, shape);
 	
-	im1_converter.input.connect(im1_source.output);
-	sink.input.connect(im1_converter.output);
+	im1_converter.in.connect(im1_source.out);
+	sink.in.connect(im1_converter.out);
 		
 	graph.setup();
 	graph.run();

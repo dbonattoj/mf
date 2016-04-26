@@ -14,9 +14,9 @@ namespace mf {
  ** A pose also defines an orthonormal coordinate system, aka the world as seen from a camera at that pose. */
 class pose {
 public:
-	Eigen::Vector3f position; ///< Position vector.
-	Eigen::Quaternionf orientation; ///< Orientation quaternion. Must be kept normalized.
-	// TODO make private, enforce normalization
+	Eigen_vec3 position; ///< Position vector.
+	Eigen_quaternion orientation; ///< Orientation quaternion. Must be kept normalized.
+	// TODO make private, enforce normalization, change to matrix?
 
 	/// Create identity pose.
 	pose();
@@ -27,7 +27,7 @@ public:
 	/// Construct pose from affine transformation.
 	/** Transformation is transformation to world.
 	 ** Assumes that the transformation consists only of translation and rotation. */
-	pose(const Eigen::Affine3f&);
+	pose(const Eigen_affine3&);
 	
 	/// Construct pose with given translation and rotation.
 	template<typename Translation, typename Rotation>
@@ -36,35 +36,35 @@ public:
 		orientation(r) { orientation.normalize(); }	
 	
 	/// Affine transformation from world space to pose coordinate system.
-	Eigen::Affine3f transformation_from_world() const;
+	Eigen_affine3 transformation_from_world() const;
 
 	/// Affine transformation from pose coordinate system to world space.
-	Eigen::Affine3f transformation_to_world() const;
+	Eigen_affine3 transformation_to_world() const;
 	
-	Eigen::Affine3f transformation_from(const pose& ps) const {
+	Eigen_affine3 transformation_from(const pose& ps) const {
 		return transformation_from_world() * ps.transformation_to_world();
 	}
 	
-	Eigen::Affine3f transformation_to(const pose& ps) const {
+	Eigen_affine3 transformation_to(const pose& ps) const {
 		return ps.transformation_from_world() * transformation_to_world();
 	}
 		
-	Eigen::Vector3f euler_angles(std::ptrdiff_t a0 = 0, std::ptrdiff_t a1 = 1, std::ptrdiff_t a2 = 2) const;
+	Eigen_vec3 euler_angles(std::ptrdiff_t a0 = 0, std::ptrdiff_t a1 = 1, std::ptrdiff_t a2 = 2) const;
 	
 	std::string to_string() const;
 	static pose from_string(const std::string&);
 		
-	Eigen::Vector3f transform_from_world(const Eigen::Vector3f& p) const {
+	Eigen_vec3 transform_from_world(const Eigen::Vector3f& p) const {
 		return transformation_from_world() * p;
 	}
 	
-	Eigen::Vector3f transform_to_world(const Eigen::Vector3f& p) const {
+	Eigen_vec3 transform_to_world(const Eigen::Vector3f& p) const {
 		return transformation_to_world() * p;
 	}
 	
-	void look_at(const Eigen::Vector3f&);
+	void look_at(const Eigen_vec3&);
 	
-	void flip(const Eigen::Vector3f& axis = Eigen::Vector3f::UnitY());
+	void flip(const Eigen_vec3& axis = Eigen_vec3::UnitY());
 	void invert_orientation();
 };
 
