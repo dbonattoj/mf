@@ -1,5 +1,6 @@
 #include "sink_node.h"
 #include <stdexcept>
+#include <iostream>
 
 namespace mf { namespace flow {
 
@@ -62,6 +63,7 @@ void sink_node::setup_graph() {
 void sink_node::pull_next_frame() {
 	if(reached_end_) throw std::logic_error("sink is already at end");
 	frame_();
+	std::cout << "frame " << current_time() << std::endl;
 }
 
 void sink_node::seek(time_unit t) {

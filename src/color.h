@@ -6,7 +6,7 @@
 
 namespace mf {
 
-struct alignas(4) mono_color {
+struct mono_color {
 	mono_color() = default;
 	mono_color(std::uint8_t nint) : intensity(nint) { }
 	
@@ -23,7 +23,7 @@ bool operator==(const mono_color& a, const mono_color& b);
 bool operator!=(const mono_color& a, const mono_color& b);
 
 
-struct alignas(4) rgb_color {
+struct rgb_color {
 	rgb_color() = default;
 	rgb_color(std::uint8_t nr, std::uint8_t ng, std::uint8_t nb) :
 		r(nr), g(ng), b(nb) { }
@@ -45,7 +45,7 @@ bool operator!=(const rgb_color& a, const rgb_color& b);
 
 
 
-struct alignas(4) rgba_color {
+struct rgba_color {
 	rgba_color() = default;
 	rgba_color(std::uint8_t nr, std::uint8_t ng, std::uint8_t nb, std::uint8_t na = 255) :
 		r(nr), g(ng), b(nb), a(na) { }
@@ -69,7 +69,7 @@ bool operator==(const rgba_color& a, const rgba_color& b);
 bool operator!=(const rgba_color& a, const rgba_color& b);
 
 
-struct alignas(4) ycbcr_color {
+struct ycbcr_color {
 	ycbcr_color() = default;
 	ycbcr_color(std::uint8_t ny, std::uint8_t ncr, std::uint8_t ncb) :
 		y(ny), cr(ncr), cb(ncb) { }

@@ -9,9 +9,11 @@ namespace mf { namespace node {
 
 template<typename Input_color, typename Output_color>
 class color_converter : public flow::thin_node<2, Input_color, Output_color> {	
+	using base = flow::thin_node<2, Input_color, Output_color>;
+	
 public:
-	output_type<2, Output_color> out;
-	input_type<2, Input_color> in;
+	typename base::output_type out;
+	typename base::input_type in;
 
 	color_converter() :
 		out(*this), in(*this) { }

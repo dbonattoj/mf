@@ -192,14 +192,14 @@ ndcoord<Dim1 + Dim2, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, const ndcoor
 }
 
 
-template<std::size_t Dim1, typename T>
-ndcoord<Dim1 + 1, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, T c2) {
+template<std::size_t Dim1, typename T, typename Int>
+ndcoord<Dim1 + 1, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, Int c2) {
 	return ndcoord_cat(coord1, make_ndcoord<T>(c2));
 }
 
 
-template<std::size_t Dim2, typename T>
-ndcoord<1 + Dim2, T> ndcoord_cat(T c1, const ndcoord<Dim2, T>& coord2) {
+template<std::size_t Dim2, typename T, typename Int>
+ndcoord<1 + Dim2, T> ndcoord_cat(Int c1, const ndcoord<Dim2, T>& coord2) {
 	return ndcoord_cat(make_ndcoord<T>(c1), coord2);
 }
 

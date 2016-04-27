@@ -27,17 +27,19 @@ private:
 		MF_ASSERT(outputs().size() == 1);
 		
 		// TODO refactor
-		output_type& out = dynamic_cast<output_type&>(outputs().front());
-		input_type& in = dynamic_cast<input_type&>(inputs().front());
+		output_type& out = dynamic_cast<output_type&>(outputs().front().get());
+		input_type& in = dynamic_cast<input_type&>(inputs().front().get());
+		
+		set_current_time(t);
 		
 		this->pre_process();
 		
-		if(in.is_activated()) {
-			in.begin_read_frame(1);
+		//if(in.is_activated()) {
+			in.begin_read_frame(t);
 			
 			output_frame_view_type out_view = ndarray_view_reinterpret_cast<output_frame_view_type>(in.view());
 			out.set_view(out_view);
-		}
+		//}
 		
 		this->process();
 		
@@ -48,12 +50,12 @@ private:
 	
 	void end_pull_frame_(bool& was_last) {
 		input_base& in = inputs().front();
-		if(in.is_activated()) inputs().front().end_read_frame();
-		was_last = in.reached_end(t);
+		if(in.is_activated()) inputs().front().get().end_read_frame(current_time());
+		was_last = in.reached_end(current_time());
 	}
 
 public:
-	thin_node();
+	thin_node() = default;
 };
 
 
@@ -73,20 +75,20 @@ private:
 public:
 	using base::base;
 
-	void setup() override;
+	void setup() override{}
 
 	/// \name Write interface.
 	// TODO remove? (interface not same for all node types)
 	///@{
-	bool begin_write_next_frame(time_unit&) override;
-	void end_write_frame(bool mark_end = false) override;
-	void cancel_write_frame() override;
+	bool begin_write_next_frame(time_unit&) override {return false;}
+	void end_write_frame(bool mark_end = false) override {}
+	void cancel_write_frame() override {}
 	///@}
 	
 	/// \name Read interface, used by connected input.
 	///@{
 	bool begin_read_span(time_span span, full_view_type& view) override {
-		async_node& nd = dynamic_cast<thin_node&>(base::node()); // TODO change
+		thin_node& nd = dynamic_cast<thin_node&>(base::node()); // TODO change
 		MF_ASSERT(span.duration() == 1);
 		time_unit t = span.start_time();
 		last_time_ = t;
@@ -98,10 +100,10 @@ public:
 	}
 	
 	void end_read(bool consume_frame) override  {
-		async_node& nd = dynamic_cast<thin_node&>(base::node());
+		thin_node& nd = dynamic_cast<thin_node&>(base::node());
 		bool was_last;
 		nd.end_pull_frame_(was_last);
-		if(was_last) end_time_ = last_time_;
+		if(was_last) end_time_ = last_time_+1;
 	}
 	
 	time_unit end_time() const override {

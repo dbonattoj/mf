@@ -134,8 +134,8 @@ public:
 	template<std::size_t New_dim>
 	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
 	
-	ndarray_view<1 + Dim, T> add_front_axis() const { return reshape(ndarray_cat(1, shape())); }
-	ndarray_view<Dim + 1, T> add_back_axis() const { return reshape(ndarray_cat(shape(), 1)); }
+	ndarray_view<1 + Dim, T> add_front_axis() const { return reshape(ndcoord_cat(1, shape())); }
+	ndarray_view<Dim + 1, T> add_back_axis() const { return reshape(ndcoord_cat(shape(), 1)); }
 	
 	ndarray_view swapaxis(std::size_t axis1, std::size_t axis2) const;
 };
