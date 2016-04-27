@@ -4,7 +4,7 @@
 #include <thread>
 #include <atomic>
 #include "node_base.h"
-#include "../ndarray/ndarray_shared_ring.h"
+#include "../queue/ndarray_ring.h"
 #include "../utility/event.h"
 
 namespace mf { namespace flow {

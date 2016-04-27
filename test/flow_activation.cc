@@ -29,7 +29,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 	const std::vector<int>& seq_or    { 0, 1, 2, n, 4, n, 6, 7, n, 9, 10, 11, 12 };
 	const std::size_t last = seq_and.size() - 1;
 
-
+/*
 	SECTION("source -> sink") {
 		std::vector<int> seq(100, n);
 		std::vector<bool> act(100, false);
@@ -47,7 +47,6 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(gr.current_time() == last);
 	}
 
-
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
@@ -58,7 +57,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-
+*/
 
 	SECTION("source -> passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
@@ -77,7 +76,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			REQUIRE(sink.check());
 			REQUIRE(gr.current_time() == last);
 		}
-		
+		/*
 		SECTION("test 2") {
 			passthrough.activation = act2;
 			sink.activation = act1;
@@ -87,8 +86,9 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			REQUIRE(sink.check());
 			REQUIRE(gr.current_time() == last);
 		}
+		*/
 	}
-
+return;
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
@@ -133,6 +133,8 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		
 		REQUIRE(sink.check());
 	}
+
+
 
 return;
 	SECTION("graph 3") {

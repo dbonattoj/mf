@@ -18,7 +18,7 @@ namespace mf {
  ** wait() blocks until it becomes non-zero and then proceeds as before.
  ** Only one thread can wait() at the same time. It is possible to wait on multiple events using wait_any(). */
 class event {
-private:
+public:
 	std::uintptr_t handle_;
 
 	static event* wait_any_(event** begin, event** end);

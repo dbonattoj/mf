@@ -30,6 +30,7 @@ bool async_source_node::reached_end() const noexcept {
 void async_node::stop() {
 	MF_EXPECTS(running_);
 	MF_EXPECTS(thread_.joinable());
+	MF_DEBUG_T("node", "notify stop event ", stop_event_.handle_);
 	stop_event_.notify();
 	thread_.join();
 	running_ = false;
@@ -75,7 +76,10 @@ bool async_node::frame_() {
 		
 		if(in.is_activated()) {
 			bool continuing = in.begin_read_frame(t);
-			if(! continuing) return false; // TODO end_read
+			if(! continuing) {
+				MF_DEBUG_T("node", "stop from input");
+				return false; // TODO end_read
+				}
 		}
 	}
 

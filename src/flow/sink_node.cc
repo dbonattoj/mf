@@ -25,7 +25,11 @@ void sink_node::frame_() {
 		
 		if(in.is_activated()) {
 			MF_DEBUG_T("node", name, ": reading frame ", t, " from input");	
-			if(in.is_activated()) in.begin_read_frame(t);
+			bool continuing = in.begin_read_frame(t);
+			if(! continuing) {
+				MF_DEBUG_T("node", "stop from input");
+				return;
+			}
 		}
 	}
 	

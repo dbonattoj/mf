@@ -2,7 +2,7 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include "../src/ndarray/ndarray_shared_ring.h"
+#include "../src/queue/ndarray_ring.h"
 #include "support/ndarray.h"
 #include "support/thread.h"
 

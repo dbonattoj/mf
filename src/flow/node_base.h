@@ -4,7 +4,7 @@
 #include <vector>
 #include <atomic>
 #include <functional>
-#include "../ndarray/ndarray_timed_view.h"
+#include "../queue/ndarray_ring.h"
 #include "../common.h"
 
 namespace mf { namespace flow {
