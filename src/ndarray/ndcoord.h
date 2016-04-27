@@ -158,17 +158,6 @@ std::ostream& operator<<(std::ostream& str, const ndcoord<0, T>& coord) {
 }
 
 
-template<std::size_t Dim1, std::size_t Dim2, typename T>
-ndcoord<Dim1 + Dim2, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, const ndcoord<Dim2, T>& coord2) {
-	ndcoord<Dim1 + Dim2, T> coord;
-	if(Dim1 + Dim2 == 0) return coord;
-	auto it = coord.begin();
-	if(Dim1 > 0) for(T c : coord1) *(it++) = c;
-	if(Dim2 > 0) for(T c : coord2) *(it++) = c;
-	return coord;
-}
-
-
 template<std::size_t Dim>
 using ndsize = ndcoord<Dim, std::size_t>;
 
@@ -189,6 +178,29 @@ auto make_ndsize(Components... c) {
 template<typename... Components>
 auto make_ndptrdiff(Components... c) {
 	return make_ndcoord<std::ptrdiff_t>(c...);
+}
+
+
+template<std::size_t Dim1, std::size_t Dim2, typename T>
+ndcoord<Dim1 + Dim2, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, const ndcoord<Dim2, T>& coord2) {
+	ndcoord<Dim1 + Dim2, T> coord;
+	if(Dim1 + Dim2 == 0) return coord;
+	auto it = coord.begin();
+	if(Dim1 > 0) for(T c : coord1) *(it++) = c;
+	if(Dim2 > 0) for(T c : coord2) *(it++) = c;
+	return coord;
+}
+
+
+template<std::size_t Dim1, typename T>
+ndcoord<Dim1 + 1, T> ndcoord_cat(const ndcoord<Dim1, T>& coord1, T c2) {
+	return ndcoord_cat(coord1, make_ndcoord<T>(c2));
+}
+
+
+template<std::size_t Dim2, typename T>
+ndcoord<1 + Dim2, T> ndcoord_cat(T c1, const ndcoord<Dim2, T>& coord2) {
+	return ndcoord_cat(make_ndcoord<T>(c1), coord2);
 }
 
 

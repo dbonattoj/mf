@@ -17,7 +17,6 @@ struct elem_traits_base {
 	constexpr static bool is_tuple = false;
 	constexpr static std::size_t components = Components;
 	constexpr static std::size_t stride = sizeof(Scalar);
-	constexpr static std::size_t offset = 0;
 	
 	constexpr static bool is_nullable = Nullable;
 };

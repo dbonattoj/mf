@@ -58,7 +58,7 @@ protected:
 	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dim) const;
 			
 public:
-	static strides_type default_strides(const shape_type&);
+	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
 
 	ndarray_view() :
 		ndarray_view(nullptr, shape_type()) { }
@@ -133,6 +133,9 @@ public:
 	
 	template<std::size_t New_dim>
 	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
+	
+	ndarray_view<1 + Dim, T> add_front_axis() const { return reshape(ndarray_cat(1, shape())); }
+	ndarray_view<Dim + 1, T> add_back_axis() const { return reshape(ndarray_cat(shape(), 1)); }
 	
 	ndarray_view swapaxis(std::size_t axis1, std::size_t axis2) const;
 };

@@ -34,10 +34,12 @@ namespace detail {
 template<std::size_t Dim, typename T>
 constexpr std::size_t ndarray_view<Dim, T>::dimension;
 
+
 template<std::size_t Dim, typename T>
-auto ndarray_view<Dim, T>::default_strides(const shape_type& shape) -> strides_type {
+auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t padding) -> strides_type {
+	if(padding % alignof(T) != 0) throw std::invalid_argument("padding does not satisfy alignment requirement");
 	strides_type strides;
-	strides[Dim - 1] = sizeof(T);
+	strides[Dim - 1] = sizeof(T) + padding;
 	for(std::ptrdiff_t i = Dim - 1; i > 0; --i)
 		strides[i - 1] = strides[i] * shape[i];
 	return strides;

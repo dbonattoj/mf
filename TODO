@@ -1,3 +1,14 @@
+ACMMM
+=====
+- node refactor (process() gets views through intermed)
+- thin node
+- cleanup
+- vsrs demo
+
+
+
+
+
 BASE
 - ndarray_view_cast + join finish
 - elem_tuple constructor

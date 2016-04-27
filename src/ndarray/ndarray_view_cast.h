@@ -2,6 +2,7 @@
 #define MF_NDARRAY_VIEW_CAST_H_
 
 #include "ndarray_view.h"
+#include "../common.h"
 #include "../elem.h"
 #include "../elem_tuple.h"
 #include "../utility/misc.h"
@@ -64,13 +65,26 @@ namespace detail {
 
 
 template<typename Output_view, typename Input_view>
-Output_view ndarray_view_cast(const Input_view& arr) {
+Output_view ndarray_view_cast(const Input_view& view) {
 	detail::ndarray_view_caster<Output_view, Input_view> caster;
-	return caster(arr);
+	return caster(view);
 }
 
 
-
+template<typename Output_view, typename Input_view>
+Output_view ndarray_view_reinterpret_cast(const Input_view& in_view) {
+	using in_elem_type = typename Input_view::value_type;
+	using out_elem_type = typename Output_view::value_type;
+	static_assert(Output_view::dimension == Input_view::dimension, "output and input view must have same dimension");
+	std::ptrdiff_t in_stride = in_view.strides().back();
+	if(in_stride < sizeof(out_elem_type))
+		throw std::invalid_argument("output ndarray_view elem type is too large");
+	if(in_stride % alignof(out_elem_type) != 0)
+		throw std::invalid_argument("output ndarray_view elem type has incompatible alignment");
+	
+	auto new_start = reinterpret_cast<out_elem_type*>(in_view.start());
+	return Output_view(new_start, in_view.shape(), in_view.strides());
+}
 
 
 
