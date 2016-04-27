@@ -136,7 +136,7 @@ private:
 	bool view_available_ = false;
 	frame_view_type view_;
 
-protected:
+public:
 	void set_view(const frame_view_type& view);
 	void unset_view();
 	

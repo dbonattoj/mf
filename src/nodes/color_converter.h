@@ -2,13 +2,13 @@
 #define MF_COLOR_CONVERTER_NODE_H_
 
 #include <algorithm>
-#include "../flow/async_node.h"
+#include "../flow/thin_node.h"
 #include "../color.h"
 
 namespace mf { namespace node {
 
 template<typename Input_color, typename Output_color>
-class color_converter : public flow::async_node {	
+class color_converter : public flow::thin_node<2, Input_color, Output_color> {	
 public:
 	output_type<2, Output_color> out;
 	input_type<2, Input_color> in;
