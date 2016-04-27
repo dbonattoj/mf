@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cstdint>
 #include "../src/utility/memory.h"
-#include "../src/ndarray/ndarray_ring.h"
+#include "../src/queue/ndarray_ring.h"
 #include "support/ndarray.h"
 
 using namespace mf;

@@ -1,7 +1,7 @@
-#ifndef MF_SHARED_RING_H_
-#define MF_SHARED_RING_H_
+#ifndef MF_NDARRAY_SHARED_RING_H_
+#define MF_NDARRAY_SHARED_RING_H_
 
-#include "timed_ring.h"
+#include "ndarray_timed_ring.h"
 #include "../utility/event.h"
 #include <mutex>
 #include <condition_variable>
@@ -11,10 +11,8 @@
 
 namespace mf {
 
-class shared_ring {
-public:
-	using section_view_type = timed_ring::section_view_type;
-
+template<std::size_t Dim, typename T>
+class ndarray_shared_ring {
 private:
 	/// Indicates current state of reader and writer.
 	/** May be `idle` or `accessing`, or a positive integer if thread is waiting for that number of frames. */
@@ -24,9 +22,12 @@ private:
 		accessing = -1
 	};
 
-	timed_ring ring_; ///< Underlying, non thread-safe timed ring buffer.
+	using ring_type = ndarray_timed_ring<Dim, T>;
+	using section_view_type = typename ring_type::section_view_type;
+	
+	const bool seekable_; ///< Whether buffer is seekable or non-seekable, set on construction.
 
-	const bool seekable_;
+	ring_type ring_; ///< Underlying, non thread-safe timed ring buffer.
 
 	std::atomic<time_unit> end_time_{-1};
 	// TODO make non-atomic? verify
@@ -45,7 +46,7 @@ private:
 	void read_and_discard_(time_unit duration);
 	
 public:
-	shared_ring(const frame_properties&, std::size_t capacity, bool seekable, time_unit end_time = -1);
+	ndarray_shared_ring(const ndsize<Dim>& frames_shape, std::size_t capacity, bool seekable, time_unit end_time_ = -1);
 		
 	void initialize();
 
@@ -172,9 +173,15 @@ public:
 	 ** buffer, the writer can only mark end after writing at least one frame, and hence cannot retroactively mark
 	 ** current read start position as being the end. */
 	bool reader_reached_end() const;
+		
+	#ifndef NDEBUG
+	void debug_print(std::ostream&) const;
+	#endif
 };
 
 
 }
+
+#include "ndarray_shared_ring.tcc"
 
 #endif

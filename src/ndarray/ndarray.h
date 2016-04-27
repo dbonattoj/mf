@@ -46,11 +46,13 @@ public:
 
 protected:
 	Allocator allocator_; ///< Raw allocator used to allocate memory, in bytes.
+	std::size_t alignment_; ///< Alignment for allocated memory. Always multiple of alignof(T).
 	std::size_t padding_; ///< Padding between frames, in bytes.
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	view_type view_; ///< View used to access items.
 
-	void allocate_(std::size_t alignment);
+
+	void allocate_();
 	void deallocate_();
 	
 	ndarray(const shape_type& shape, std::size_t padding, std::size_t alignment, const Allocator& alloc);

@@ -1,15 +1,18 @@
-#ifndef MF_TIMED_RING_H_
-#define MF_TIMED_RING_H_
+#ifndef MF_NDARRAY_TIMED_RING_H_
+#define MF_NDARRAY_TIMED_RING_H_
 
 #include <atomic>
 #include <ostream>
 #include <stdexcept>
-#include "ring.h"
+#include "ndarray_ring.h"
+#include "ndarray_timed_view.h"
 
 namespace mf {
 
-class timed_ring : public ring {
-	using base = ring;
+/// Ndarray ring which keeps track of absolute time.
+template<std::size_t Dim, typename T>
+class ndarray_timed_ring : public ndarray_ring<Dim, T> {
+	using base = ndarray_ring<Dim, T>;
 
 private:
 	/// Time of last written frame.
@@ -18,10 +21,10 @@ private:
 	// TODO remove atomic
 
 public:
-	using section_view_type = ndarray_timed_view_generic;
+	using section_view_type = ndarray_timed_view<Dim + 1, T>;
 
-	timed_ring(const frame_properties& frame_prop, time_unit duration) :
-		base(frame_prop, duration) { }
+	ndarray_timed_ring(const ndsize<Dim>& frames_shape, time_unit duration) :
+		base(frames_shape, duration) { }
 	
 	void initialize();
 	
@@ -46,9 +49,15 @@ public:
 	void skip_span(time_span);
 	
 	void seek(time_unit);
+	
+	#ifndef NDEBUG
+	void debug_print(std::ostream&) const;
+	#endif
 };
 
 
 }
+
+#include "ndarray_timed_ring.tcc"
 
 #endif
