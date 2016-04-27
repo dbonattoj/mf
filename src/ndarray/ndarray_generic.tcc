@@ -1,7 +1,8 @@
 namespace mf {
 
 template<typename Allocator>
-ndarray_generic::ndarray_generic(const frame_properties& frame_prop, std::size_t frame_count, std::size_t padding, const Allocator& allocator) :
+ndarray_generic<Allocator>::ndarray_generic
+(const frame_properties& frame_prop, std::size_t frame_count, std::size_t padding, const Allocator& allocator) :
 base(
 	make_ndsize(frame_count, frame_prop.length),
 	padding,

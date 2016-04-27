@@ -65,8 +65,8 @@ struct frame_properties {
 
 
 template<typename Allocator = raw_allocator>
-class ndarray_generic : public ndarray<2, byte> {
-	using base = ndarray<2, byte>;
+class ndarray_generic : public ndarray<2, byte, Allocator> {
+	using base = ndarray<2, byte, Allocator>;
 	
 public:
 	ndarray_generic(const frame_properties&, std::size_t n, std::size_t padding = 0, const Allocator& = Allocator());

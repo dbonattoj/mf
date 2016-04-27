@@ -55,12 +55,11 @@ void ring::initialize() {
 
 
 auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
-	if(duration > shape().front()) throw std::invalid_argument("ring section duration too large");
+	if(duration > total_duration()) throw std::invalid_argument("ring section duration too large");
 	
-	auto new_start = base::start() + (strides().front() * start);
-	auto new_shape = shape();
-	new_shape[0] = duration;
-	auto new_strides = strides();
+	auto new_start = base::start() + (base::strides().front() * start);
+	auto new_shape = make_ndsize(duration, frame_length());
+	auto new_strides = base::strides();
 	
 	return section_view_type(new_start, new_shape, new_strides);
 }

@@ -25,6 +25,7 @@ public:
 	void initialize();
 	
 	time_unit total_duration() const noexcept { return base::shape().front(); }
+	time_unit frame_length() const noexcept { return base::shape().back(); }
 	
 	time_unit writable_duration() const;
 	time_unit readable_duration() const;
