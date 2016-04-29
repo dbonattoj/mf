@@ -15,7 +15,6 @@ public:
 private:
 	camera_type input_camera_;
 	camera_type output_camera_;
-	Color background_color_;
 
 public:
 	input_type<2, Color> image_in;
@@ -23,7 +22,7 @@ public:
 	output_type<2, Color> out;
 		
 	warp(const camera_type& cam_in, const camera_type& cam_out, const Color& background = Color::black) :
-		input_camera_(cam_in), output_camera_(cam_out), background_color_(background),
+		input_camera_(cam_in), output_camera_(cam_out),
 		image_in(*this), depth_in(*this), out(*this) { }
 
 protected:

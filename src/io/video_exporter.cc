@@ -1,7 +1,8 @@
 #include "video_exporter.h"
 #include "../image/image.h"
-#include "../opencv_ndarray.h"
+#include "../opencv.h"
 #include <iostream>
+#include "../ndarray/ndarray.h"
 
 namespace mf {
 
@@ -19,8 +20,11 @@ video_exporter::video_exporter
 }
 
 void video_exporter::write_frame(const ndarray_view<2, rgb_color>& vw) {
-	image<rgb_color> img(vw);
-	writer_.write(img.cv_mat());
+	ndarray<2, rgb_color> arr (vw);
+	image<rgb_color> img(arr);
+	auto mat = img.cv_mat();
+	cv::cvtColor(mat, mat, CV_RGB2BGR);
+	writer_.write(mat);
 }
 
 void video_exporter::close() {

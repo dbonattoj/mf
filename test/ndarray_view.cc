@@ -56,6 +56,19 @@ TEST_CASE("ndarray_view", "[ndarray_view]") {
 		REQUIRE(same(a1c, a1));
 		REQUIRE(same(a1, a1c));
 		a1c.reset(a1);
+		
+		// null view
+		REQUIRE_FALSE(a1.is_null());
+		a1.reset();
+		REQUIRE(a1.is_null());
+		ndarray_view<3, int> null_vw;
+		REQUIRE(null_vw.is_null());
+		null_vw.reset(a3);
+		REQUIRE_FALSE(null_vw.is_null());
+		null_vw.reset();
+		ndarray_view<3, int> null_vw2;
+		REQUIRE_FALSE(same(a3, null_vw2));
+		REQUIRE(same(null_vw, null_vw2));
 	}
 
 

@@ -32,7 +32,7 @@ private:
 	) const;
 
 public:
-	output_type<2, rgba_color> out;
+	output_type<2, rgb_color> out;
 	std::vector<std::unique_ptr<input_prop>> ins;
 		
 	explicit multiwarp(const camera_type& cam_out) :

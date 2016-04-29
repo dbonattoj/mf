@@ -30,7 +30,7 @@ void multiwarp::pre_process() {
 	output_camera_.set_relative_pose(ps);
 	
 	
-	std::size_t n = 7;
+	std::size_t n = 3;
 	std::vector<std::pair<real, input_prop*>> closest;
 	for(const auto& in : ins)
 		closest.emplace_back((in->cam.absolute_pose().position - output_camera_.absolute_pose().position).norm(), in.get());
@@ -119,12 +119,12 @@ void multiwarp::process() {
 		}
 		
 		if(null) {
-			out.view()[y][x] = rgba_color::null();
+			out.view()[y][x] = rgb_color::black;
 		} else {
 			sr /= total;
 			sg /= total;
 			sb /= total;
-			out.view()[y][x] = rgba_color(sr, sg, sb);
+			out.view()[y][x] = rgb_color(sr, sg, sb);
 		}
 	}
 }

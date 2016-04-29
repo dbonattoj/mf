@@ -218,6 +218,13 @@ ndarray_view<New_dim, T> ndarray_view<Dim, T>::reshape(const ndsize<New_dim>& ne
 
 
 template<std::size_t Dim, typename T>
+ndarray_view<1 + Dim, T> ndarray_view<Dim, T>::add_front_axis() const {
+	auto new_shape = ndcoord_cat(1, shape());
+	auto new_strides = ndcoord_cat(0, strides());
+	return ndarray_view<1 + Dim, T>(start(), new_shape, new_strides);
+}
+
+template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::swapaxis(std::size_t axis1, std::size_t axis2) const -> ndarray_view {
 	if(axis1 >= Dim || axis2 >= Dim) throw std::invalid_argument("axis index out of range");
 	auto new_strides = strides_;

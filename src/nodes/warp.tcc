@@ -13,7 +13,7 @@ template<typename Color, typename Depth>
 void warp<Color, Depth>::process() {
 	Eigen_projective3 homography = homography_transformation(input_camera_, output_camera_);
 	
-	std::fill(out.view().begin(), out.view().end(), background_color_);
+	std::fill(out.view().begin(), out.view().end(), Color::null());
 
 	ndarray<2, real> d_buffer(image_in.view().shape());
 	for(real& d : d_buffer) d = 0.0;

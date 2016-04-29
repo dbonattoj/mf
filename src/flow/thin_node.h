@@ -8,6 +8,9 @@
 #include "../ndarray/ndarray_view_cast.h"
 #include "../utility/event.h"
 
+#include <iostream>
+// TODO rewrite
+
 namespace mf { namespace flow {
 
 template<std::size_t Dim, typename In_elem, typename Out_elem>
@@ -41,6 +44,7 @@ private:
 			out.set_view(out_view);
 		//}
 		
+		std::cout << "thin" << std::endl;
 		this->process();
 		
 		out.unset_view();

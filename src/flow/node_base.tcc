@@ -26,7 +26,7 @@ template<std::size_t Dim, typename Elem>
 auto node_base::input<Dim, Elem>::view() -> frame_view_type {
 	MF_EXPECTS(view_available_);
 	time_unit t = node().current_time();
-	return view_.time(node().current_time());
+	return view_.at_time(node().current_time());
 }
 
 

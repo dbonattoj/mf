@@ -29,11 +29,11 @@ public:
 	time_unit duration() const { return base::shape().front(); }
 	time_unit time_at(std::ptrdiff_t i) const { return start_time_ + base::fix_coordinate_(i, 0); }
 	
-	decltype(auto) time(time_unit t) const {
+	decltype(auto) at_time(time_unit t) const {
 		if(span().includes(t)) return base::operator[](t - start_time_);
 		else throw std::out_of_range("time out of bounds");
 	}
-	decltype(auto) time(time_unit t) {
+	decltype(auto) at_time(time_unit t) {
 		if(span().includes(t)) return base::operator[](t - start_time_);
 		else throw std::out_of_range("time out of bounds");
 	}

@@ -60,19 +60,22 @@ protected:
 public:
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
 
-	ndarray_view() :
-		ndarray_view(nullptr, shape_type()) { }
+	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
 	ndarray_view(pointer start, const shape_type&, const strides_type&);
 	ndarray_view(pointer start, const shape_type& shape);
 	
 	ndarray_view(const ndarray_view<Dim, std::remove_const_t<T>>& arr) :
 		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
-		
+	
 	void reset(const ndarray_view& other) noexcept;
+	void reset() noexcept { reset(ndarray_view()); }
 	void reset(pointer start, const shape_type& shape, const strides_type& strides)
 		{ reset(ndarray_view(start, shape, strides)); }
 	void reset(pointer start, const shape_type& shape)
 		{ reset(ndarray_view(start, shape)); }
+	
+	bool is_null() const noexcept { return (start_ == nullptr); }
+	explicit operator bool () const noexcept { return ! is_null(); }
 	
 	template<typename Arg> const ndarray_view& operator=(Arg&& arg) const
 		{ assign(std::forward<Arg>(arg)); return *this; }
@@ -120,8 +123,9 @@ public:
 	template<typename Arg> bool operator!=(Arg&& arg) const { return ! compare(std::forward<Arg>(arg)); }
 		
 	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
-		return (a.start_ == b.start_) && (a.shape_ == b.shape_)
-		    && (a.strides_ == b.strides_);
+		if(a.is_null() && b.is_null()) return true;
+		else return (a.start_ == b.start_) && (a.shape_ == b.shape_)
+		         && (a.strides_ == b.strides_);
 	}
 	
 	std::size_t size() const { return shape().product(); }
@@ -134,8 +138,7 @@ public:
 	template<std::size_t New_dim>
 	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
 	
-	ndarray_view<1 + Dim, T> add_front_axis() const { return reshape(ndcoord_cat(1, shape())); }
-	ndarray_view<Dim + 1, T> add_back_axis() const { return reshape(ndcoord_cat(shape(), 1)); }
+	ndarray_view<1 + Dim, T> add_front_axis() const;
 	
 	ndarray_view swapaxis(std::size_t axis1, std::size_t axis2) const;
 };

@@ -3,7 +3,6 @@
 
 #include "../ndarray/ndarray_view.h"
 #include "../opencv.h"
-#include "../opencv_ndarray.h"
 
 namespace mf {
 
