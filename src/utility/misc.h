@@ -20,6 +20,11 @@ T clamp(T value, T minimum, T maximum);
 template<typename T>
 T gcd(T a, T b);
 
+template<typename T>
+bool is_power_of_two(T x) {
+	return (x != 0) && !(x & (x - 1));
+}
+
 }
 
 #include "misc.tcc"

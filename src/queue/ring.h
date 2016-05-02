@@ -16,11 +16,11 @@ private:
 	time_unit write_position_ = 0;
 	bool full_ = false;
 		
-	static std::size_t adjust_padding_(const frame_properties&, std::size_t duration); 
+	static std::size_t adjust_padding_(const frame_array_properties&); 
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:
-	ring(const frame_properties&, time_unit duration);
+	explicit ring(const frame_array_properties&);
 	
 	void initialize();
 	

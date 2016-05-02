@@ -7,15 +7,15 @@
 namespace mf {
 	
 
-ring::ring(const frame_properties& frame_prop, time_unit duration) :
-	base(frame_prop, duration, adjust_padding_(frame_prop, duration), raw_ring_allocator()) { }
+ring::ring(const frame_array_properties& prop) :
+	base(frame_prop, duration, adjust_padding_(prop), raw_ring_allocator()) { }
 
 
-std::size_t ring::adjust_padding_(const frame_properties& frame_prop, std::size_t duration) {
-	std::size_t frame_size = frame_prop.length;
+std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
+	std::size_t frame_size = prop.frame_size();
 	std::size_t page_size = system_page_size();
 
-	std::size_t a = frame_prop.alignment;
+	std::size_t a = prop.alignment();
 
 	// will compute minimal padding frame_padding (bytes to insert between frames)
 	// such that duration * (frame_size + frame_padding) is a multiple of page_size
@@ -35,7 +35,7 @@ std::size_t ring::adjust_padding_(const frame_properties& frame_prop, std::size_
 	std::size_t page_size_a = page_size / a;
 	// duration * (frame_size_a + frame_padding_a) must be multiple of page_size_a
 	
-	std::size_t d = page_size_a / gcd(page_size_a, duration);	
+	std::size_t d = page_size_a / gcd(page_size_a, prop.array_length);	
 	// --> (frame_size_a + frame_padding_a) must be multiple of d
 	// d is a power of 2
 	// d = factors 2 that are missing in duration for it to be multiple of page_size_a

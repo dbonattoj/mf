@@ -20,8 +20,7 @@ private:
 public:
 	using section_view_type = ndarray_timed_view_generic;
 
-	timed_ring(const frame_properties& frame_prop, time_unit duration) :
-		base(frame_prop, duration) { }
+	timed_ring(const frame_array_properties& prop) : base(prop) { }
 	
 	void initialize();
 	

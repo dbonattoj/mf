@@ -5,8 +5,8 @@
 namespace mf {
 
 shared_ring::shared_ring
-(const frame_properties& frames_prop, std::size_t duration, bool seekable, time_unit end_time) :
-	ring_(frames_prop, duration), seekable_(seekable), end_time_(end_time)
+(const frame_array_properties& prop, bool seekable, time_unit end_time) :
+	ring_(prop), seekable_(seekable), end_time_(end_time)
 {
 	if(seekable && end_time == -1) throw std::invalid_argument("end time must be defined when seekable");
 }
