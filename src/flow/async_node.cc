@@ -1,14 +1,92 @@
 #include "async_node.h"
-#include <functional>
-
-#include <signal.h>
-
-#include <chrono>
-using namespace std::chrono;
 
 namespace mf { namespace flow {
 
-async_node::async_node() : node_base() { }
+bool async_node::frame_() {
+	node_job job = make_job();
+	time_unit t;
+	
+	// begin writing frame to output
+	// output determines time t of frame to write
+	node_output& out = outputs().front();
+	auto out_view = out.begin_write_frame(t);
+	if(out_view.is_null()) return false; // stopped
+	
+	set_current_time(t);
+	
+	// with time defined, run preprocess
+	// concrete node may activate/desactivate inputs now
+	this->pre_process(t);
+
+	// add output view to job
+	job.define_time(t);
+	job.push_output(out, out_view);
+	
+	// pull & begin reading from activated inputs
+	bool stopped = false;
+	for(node_input& in : inputs()) {
+		MF_ASSERT_MSG(! in.reached_end(t), "input of node must not already be at end");
+
+		if(in.is_activated()) {
+			// pull frame t from input
+			// for sequential node: frame is now processed
+			in.pull(t);
+			
+			// begin reading frame 
+			timed_frames_view in_view = in.begin_read_frame(t);
+			MF_ASSERT(in_view.start_time() == t);
+			if(in_view.is_null()) { stopped = true; break; }
+			
+			// add to job
+			job.push_input(in, in_view);
+		}
+	}
+	// TODO split pull/begin_read, and begin_read (wait) simultaneously if possible (async_node inputs)
+	
+	if(stopped) {
+		// stopped while reading from input:
+		// need to cancel output and already-opened inputs, and then quit
+		cancel_job(job);
+		return false;
+	}
+	
+	// process frame in concrete subclass
+	this->process(job);
+	
+	// check if node reached end
+	// determined by stream duration or reached_end() for source
+	// when stream duration undefined, end is reached when an input reached it
+	bool reached_end = false;
+	if(stream_duration_is_defined()) {
+		if(t == stream_duration() - 1) reached_end = true;
+		MF_ASSERT(t < stream_duration());
+	} else if(is_source()) {
+		reached_end = this->reached_end(t);
+	}
+
+	// end reading from inputs
+	while(node_input* in = job.pop_input()) {
+		in->end_read_frame(t);
+		if(in->reached_end(t)) reached_end = true;
+	}
+	
+	// end writing to output,
+	// indicate if last frame was reached
+	job.pop_output()->end_write_frame(reached_end);
+		
+	return ! stopped_;
+}
+
+
+void async_node::thread_main_() {
+	bool continuing = true;
+	while(continuing) {
+		continuing = frame_();
+	}
+}
+
+
+async_node::async_node(graph& gr) : node(gr) { }
 
 
 async_node::~async_node() {
@@ -16,27 +94,12 @@ async_node::~async_node() {
 }
 
 
-async_source_node::async_source_node(bool seekable, time_unit stream_duration) {
-	define_source_stream_properties(seekable, stream_duration);
+void async_node::internal_setup() {
+	if(outputs().size() != 1) throw invalid_flow_graph("async_node must have exactly 1 output");
+	if(inputs().size() == 0) throw invalid_flow_graph("async_node must have at least 1 input");
+	this->setup();
 }
-
-
-bool async_source_node::reached_end() const noexcept {
-	MF_ASSERT_MSG(false, "async_source_node::reached_end() must be implemented when stream_duration is not defined.");
-	return true;
-}
-
-
-void async_node::stop() {
-	MF_EXPECTS(running_);
-	MF_EXPECTS(thread_.joinable());
-	MF_DEBUG_T("node", "notify stop event ", stop_event_.handle_);
-	stop_event_.notify();
-	thread_.join();
-	running_ = false;
-	MF_ENSURES(! running_);
-}
-
+	
 
 void async_node::launch() {
 	MF_EXPECTS(! running_);
@@ -44,73 +107,92 @@ void async_node::launch() {
 		std::bind(&async_node::thread_main_, this)
 	));
 	running_ = true;
-	MF_ENSURES(running_);
 }
 
 
-void async_node::thread_main_() {
-	while(frame_());
+void async_node::stop() {
+	MF_EXPECTS(running_);
+	MF_EXPECTS(thread_.joinable());
+	thread_.join();
+	running_ = false;
 }
 
 
-bool async_node::frame_() {
-	MF_EXPECTS_MSG(outputs().size() == 1, "async_node must have exactly one output");
+void async_node_output::setup() {
+	node_input& connected_input = connected_input();
+	node& connected_node = connected_input.this_node();
+	
+	time_unit offset_diff = connected_node.offset() - this_node().offset();
+	time_unit required_capacity = 1 + connected_input.past_window_duration() + offset_diff;
+	
+	frame_array_properties prop(format(), frame_length(), required_capacity);
+	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
+}	
+
+
+void async_node_output::pull(time_span span) { }
+
+
+timed_frames_view async_node_output::begin_read(time_unit duration) {
+	event& stop_event = this_node().this_graph().stop_event();
+
+	time_unit ring_read_t = ring_->read_start_time();
+	if(t != ring_read_t) {
+		if(ring_->is_seekable()) ring_->seek(t);
+		else if(t > ring_read_t) ring_->skip(ring_read_t - t);
+		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
+	}
+
+	timed_frames_view view = timed_frames_view::null();
+	bool got_view = false;
+	do {
+		bool status = ring_->wait_readable(stop_event);
+		if(! status) break;
 		
-	output_base& out = outputs().front();	
+		got_view = ring_->try_begin_read(duration, view); // TODO try_begin_read: return view? instead
+	} while(! got_view);
 	
-	time_unit t;
-	bool continuing = out.begin_write_next_frame(t);
-	if(! continuing) return false; // stopped
-	
-	if(stream_duration() != -1) MF_ASSERT(t < stream_duration());
+	return view;
+}
 
-	// set current time,
-	// and allow concrete node to activate/desactivate inputs now
-	set_current_time(t);
-	this->pre_process();
+
+void async_node_output::end_read(time_unit duration) {
+	ring_->end_read(duration);
+}
+
+
+time_unit async_node_output::end_time() const {
+	return ring->end_time();
+}
+
+
+frame_view async_node_output::begin_write_frame(time_unit& t) {
+	event& stop_event = this_node().this_graph().stop_event()
+
+	timed_frames_view view = timed_frames_view::null();
+	bool got_view = false;
 	
-	// now begin reading from inputs (if any)
-	// current time t gets propagated
-	for(input_base& in : inputs()) {
-		MF_ASSERT_MSG(! in.reached_end(t), "input of node must not already be at end");
+	do {
+		bool status = ring_->wait_writable(stop_event);
+		if(! status) return frame_view::null();
 		
-		if(in.is_activated()) {
-			bool continuing = in.begin_read_frame(t);
-			if(! continuing) {
-				MF_DEBUG_T("node", "stop from input");
-				return false; // TODO end_read
-				}
-		}
-	}
-
-	// concrete node processed the frame
-	this->process();
+		got_view = ring_->try_begin_write(1, view);
+	};
 	
-	// check if this node has reached its end
-	// the node's end may occur earlier than the end from any of its input
-	bool reached_end = false;
-	if(stream_duration_is_defined()) {
-		if(t == stream_duration() - 1) reached_end = true;
-		MF_ASSERT(t < stream_duration());
-	} else if(is_source()) {
-		reached_end = this->reached_end();
-	}
+	MF_ASSERT(view.duration() == 1);
+	t = view.start_time();
+	return view[0];
+}
 
-	// end reading from activated inputs
-	// also check if any input has now reached its end
-	// it this node does not have stream duration, this determines end
-	for(input_base& in : inputs()) {
-		if(in.is_activated()) in.end_read_frame(t);
-		if(in.reached_end(t)) reached_end = true;
-	}
-	
-	// end writing to output
-	out.end_write_frame(reached_end);
 
-	return true;
+void async_node_output::end_write_frame(bool was_last_frame) {
+	bool mark_end = was_last_frame && !ring_->is_seekable();
+	ring_->end_write(1, mark_end);
+}
 
-	//if(reached_end) throw 1;
+
+void async_node_output::cancel_write_frame() {
+	ring_->end_write(0, false);
 }
 
 }}
-

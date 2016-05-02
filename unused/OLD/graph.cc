@@ -1,8 +1,10 @@
 #include "graph.h"
-#include "node.h"
+#include "node_base.h"
 #include "sink_node.h"
+#include "../debug.h"
 #include <limits>
 
+#include <iostream>
 
 namespace mf { namespace flow {
 
@@ -29,7 +31,6 @@ void graph::launch() {
 
 void graph::stop() {
 	if(! running_) throw std::logic_error("graph is not running");
-	stop_event_.notify();
 	for(const auto& nd : nodes_) nd->stop();
 	running_ = false;
 }

@@ -13,9 +13,14 @@
 
 
 namespace mf {
+	
+/// \addtogroup Exceptions.
+///@{
+MF_DEFINE_EXCEPTION_(invalid_flow_graph, std::logic_error);
 
 MF_DEFINE_EXCEPTION_(sequencing_error, std::runtime_error);
 MF_DEFINE_EXCEPTION_(ply_importer_error, std::runtime_error);
+///@}
 
 }
 

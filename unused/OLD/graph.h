@@ -1,36 +1,34 @@
 #ifndef MF_FLOW_GRAPH_H_
 #define MF_FLOW_GRAPH_H_
 
-#include "../common.h"
-#include "../utility/event.h"
-#include <utility>
 #include <vector>
 #include <memory>
+#include <utility>
 #include <stdexcept>
 #include <type_traits>
+#include "../common.h"
 
 namespace mf { namespace flow {
 
-class node;
+class node_base;
 class sink_node;
 
 /// Graph containing interconnected nodes through which media frames flow.
 class graph {
 private:
-	std::vector<std::unique_ptr<node>> nodes_;
-	sink_node* sink_ = nullptr;
+	std::vector<std::unique_ptr<node_base>> nodes_; ///< Nodes in the graph, including sink.
+	sink_node* sink_ = nullptr; ///< Sink node.
 	bool was_setup_ = false;
 	bool running_ = false;
-	event stop_event_;
 
 public:
 	~graph();
 
 	template<typename Node, typename... Args>
 	Node& add_node(Args&&... args) {
-		static_assert(std::is_base_of<node, Node>::value, "sink node must be subclass of media_node");
+		static_assert(std::is_base_of<node_base, Node>::value, "sink node must be subclass of media_node");
 		if(was_setup_) throw std::logic_error("cannot add node after graph already set up");
-		Node* node = new Node(*this, std::forward<Args>(args)...);
+		Node* node = new Node(std::forward<Args>(args)...);
 		nodes_.emplace_back(node);
 		return *node;
 	}
@@ -45,8 +43,6 @@ public:
 	
 	bool was_setup() const { return was_setup_; }
 	bool is_running() const { return running_; }
-	
-	event& stop_event() { return stop_event_; }
 	
 	void setup();
 	

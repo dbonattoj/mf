@@ -126,45 +126,81 @@ void node::update_activation() {
 }
 
 
+std::ptrdiff_t node::register_input(node_input& in) {
+	inputs_.push_back(std::ref(in));
+	return input_.size() - 1;
+}
+
+
+std::ptrdiff_t node::register_output(node_output& out) {
+	outputs_.push_back(std::ref(out));
+	return outputs_.size() - 1;	
+}
+
+
+node_job node::make_job() {
+	return node_job(*this);
+}
+
+
+void node::cancel_job(node_job&) {
+	while(node_input* in = job.pop_input()) in->cancel_read_frame(t);
+	while(node_output* out = job.pop_output()) out->cancel_read_frame();
+}
+
+
 
 /////
 
-node::job::job(node& nd, time_unit t) : 
-	node_(nd),
-	time_(t),
-	input_views_(nd.inputs_.size()),
-	output_views_(nd.outputs_.size()) { }
 
-
-node::job::~job() {
-	close_all();
+node_job::node_job(node& nd) :
+	node_(nd)
+{
+	input_views_.c.reserve(nd.inputs().size());
+	output_views_.reserve(nd.outputs().size());
 }
 
 
-void node::job::open(const node_input& port) {
-	timed_frames_view view = port.begin_read_frame(time_);
-	input_views_[port.index()].reset(view);
+node_job::~node_job() {
+	MF_ASSERT(input_views_.size() == 0);
+	MF_ASSERT(output_views_.size() == 0);
+}
+	
+
+void node_job::push_input(node_input& in, const timed_frames_view& vw) {
+	std::ptrdiff_t index = in.index();
+	while(input_views_.size() <= index) input_views_.emplace();
+	input_views_[index].reset(vw);
 }
 
 
-void node::job::open(const node_output& port) {
-	std::ptrdiff_t index = port.index();
-	time_unit t = -1;
-	frame_view view = port.begin_write_frame(t);
-	if(t != time_) throw sequencing_error("time mismatch between node job time, and node output write frame time");
-	output_views_[port.index()].reset(view);
+void node_job::push_output(node_output& out, const frame_view& vw) {
+	std::ptrdiff_t index = in.index();
+	while(output_views_.size() <= index) output_views_.emplace();
+	output_views_[index].reset(vw);
 }
 
 
-void node::job::close_all() {
-	for(const timed_frames_view& input_view : input_views_) if(input_view) {
-		node_.inputs_[input_view.index()].end_read_frame(time_);
-		input_view.reset();
-	}
-	for(const frame_view& output_view : output_view_) if(output_view) {
-		node_.outputs_[output_view.index()].end_write_frame(end_marked_);
-		output_view.reset();
-	}
+node_input* node_job::pop_input() {
+	if(input_views_.size() == 0) return nullptr;
+	timed_frames_view& back = input_views_.back();
+	input_views_.pop_back();
+	if(back.is_null()) return pop_input();
+	else return &back;
+}
+
+
+node_output* node_job::pop_output() {
+	if(output_views_.size() == 0) return nullptr;
+	frame_view& back = output_views_.back();
+	output_views_.pop_back();
+	if(back.is_null()) return pop_output();
+	else return &back;
+}
+	
+	
+void define_time(time_unit t) {
+	time_ = -1;
 }
 
 
@@ -175,6 +211,12 @@ void node::job::mark_end() {
 
 /////
 
+
+node_output::node_output(node& nd, const frame_format& format) :
+	node_(nd),
+	index_(nd.register_output(*this)),
+	format_(format) { }
+	
 
 void node_output::input_has_connected(node_input& in) {
 	connected_input_ = &in;
@@ -190,18 +232,26 @@ void node_output::propagate_activation(bool active) {
 /////
 
 
+node_input::node_input(node& nd) :
+	node_(nd),
+	index_(nd.register_input(*this)) { }
+
+
 void node_input::connect(node_output& output) {
 	connected_output_ = &output;
 	connected_output_->input_has_connected(*this);
 }
 
+
 void node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
 
 	time_unit start_time = std::max(0, t - past_window_);
-	connected_output().pull(start_time);
-	MF_ASSERT(connected_node().pull_time() == start_time);
+	time_unit end_time = t + future_window_ + 1;
+	
+	connected_output().pull(time_span(start_time, end_time));
 }
+
 
 timed_frames_view node_input::begin_read_frame(time_unit t) {
 	time_unit duration = std::min(t, past_window_) + 1 + future_window_;
@@ -210,10 +260,24 @@ timed_frames_view node_input::begin_read_frame(time_unit t) {
 	return view;
 }
 
+
 void node_input::end_read_frame(time_unit t) {
 	time_unit duration = (t < past_window_) ? 0 : 1;
 	connected_output().end_read(duration);
 }
+
+
+void node_input::cancel_read_frame(time_unit t) {
+	connected_output().end_read(0);
+}
+
+
+bool node_input::reached_end(time_unit t) {
+	time_unit output_end_time = connected_output().end_time();
+	if(output_end_time == -1) return false;
+	else return (t - past_window_duration() >= output_end_time);
+}
+
 
 void node_input::set_activated(bool activated) {
 	if(activated_ != activated) {

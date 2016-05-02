@@ -1,8 +1,16 @@
 initialize() = put object into initial state, as on construction
 setup() = make object ready to use. needs to be called before use.
 
-class names:
-***_node (converter / multiplexer) = media node
-***_source = media source
-***_sink = media sink
+a& this_a() { return a_; }
 
+define_i()
+i_is_defined() --> value to set between contruction and setup
+
+interal_do()  --> virtual function overriden by subbase (Base --> Subbase --> Concrete)
+
+
+nodes:
+- async (async_source)
+- sync (sync_source)
+- sink
+- thin

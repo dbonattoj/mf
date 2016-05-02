@@ -60,6 +60,8 @@ protected:
 public:
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
 
+	static ndarray_view null() { return ndarray_view(); }
+
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
 	ndarray_view(pointer start, const shape_type&, const strides_type&);
 	ndarray_view(pointer start, const shape_type& shape);

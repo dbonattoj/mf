@@ -13,18 +13,21 @@
 namespace mf {
 
 /// Synchronization primitive representing event that a thread can wait for.
-/** Internal counter is initialized to zero. Call to notify() increases internal counter by specified amount.
- ** When counter is non-zero, call to wait() resets counter and returns its old value. When the counter is zero
- ** wait() blocks until it becomes non-zero and then proceeds as before.
- ** Only one thread can wait() at the same time. It is possible to wait on multiple events using wait_any(). */
+/** Call to wait() blocks until event has been _notified_ from another thread via notify(). That is, until the event
+ ** is _received_. wait_any() waits for multiple events, until any one has been notified. If multiple threads wait on
+ ** the same event, one (undefined which) receives it.
+ ** Event can be _sticky_ or _non-sticky_ (default). For non-sticky event, event is received once after one or multiple
+ ** calls to notify(). Next call to wait() blocks again, multiple notify() calls are not accumulated.
+ ** For sticky event, it is received repeatedly after having been notified once. */
 class event {
 public:
 	std::uintptr_t handle_;
+	bool sticky_;
 
 	static event* wait_any_(event** begin, event** end);
 
 public:
-	event();
+	explicit event(bool sticky = false);
 	event(const event&) = delete;
 	event(event&&);
 	~event();

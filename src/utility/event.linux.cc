@@ -16,15 +16,21 @@
 #include <chrono>
 
 namespace mf {
+	
+namespace {
+	std::uint64_t sticky_write_value_ = 0xfffffffffffffffe;  // TODO better sticky event implementation
+}
 
-event::event() : handle_(0) {
-	int fd = ::eventfd(0, 0);
+event::event(bool sticky) : handle_(0), sticky_(sticky) {
+	int flags = 0;
+	if(sticky_) flags = EFD_SEMAPHORE;
+	int fd = ::eventfd(0, flags);
 	if(fd != -1) handle_ = fd;
 	else throw std::system_error(errno, std::system_category(), "eventfd failed");
 }
 
 
-event::event(event&& ev) : handle_(ev.handle_) {
+event::event(event&& ev) : handle_(ev.handle_), sticky_(ev.sticky_) {
 	ev.handle_ = 0;
 }
 
@@ -48,8 +54,9 @@ bool operator==(const event& a, const event& b) {
 
 void event::notify() {
 	int fd = static_cast<int>(handle_);
-MF_DEBUG_T("node", "event ", fd, " notify");
-	std::uint64_t cnt = 1;
+	std::uint64_t cnt;
+	if(sticky_) cnt = 1;
+	else cnt = sticky_write_value_;
 	auto len = ::write(fd, static_cast<const void*>(&cnt), sizeof(std::uint64_t));
 	if(len != sizeof(std::uint64_t)) throw std::system_error(errno, std::system_category(), "eventfd: write failed");
 }
@@ -66,10 +73,7 @@ void event::wait() {
 event* event::wait_any_(event** begin, event** end) {
 	// prepare array of pollfd for poll function
 	std::size_t n = end - begin;
-	std::vector<::pollfd> fds(n);
-	
-	std::string str = "wait any, events ";
-	
+	std::vector<::pollfd> fds(n);	
 		
 	std::transform(begin, end, fds.begin(), [&](event* ev) -> ::pollfd {
 		::pollfd fd;
@@ -80,8 +84,6 @@ event* event::wait_any_(event** begin, event** end) {
 		return fd;	
 	});
 
-MF_DEBUG_T("node", str);
-
 	// poll the eventfd's
 	int result = ::poll(fds.data(), n, -1);
 	if(result < 1) throw std::system_error(errno, std::system_category(), "eventfd: poll failed");
@@ -91,9 +93,6 @@ MF_DEBUG_T("node", str);
 	for(std::ptrdiff_t i = 0; i < fds.size(); ++i) {
 		if((fds[i].revents & POLLIN) != 0) {
 			received_event = *(begin + i);
-			
-			MF_DEBUG_T("node", "received event ", fds[i].fd);
-			
 			break;
 		}
 	}

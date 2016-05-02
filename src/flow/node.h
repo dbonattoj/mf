@@ -3,18 +3,21 @@
 
 #include "../common.h"
 #include "../queue/frame.h"
-#include <atomic>
 #include <vector>
 #include <functional>
+#include <atomic>
 
 namespace mf { namespace flow {
 
+class graph;
 class node_output;
 class node_input;
+class node_job;
 
 /// Node in flow graph, base class.
 class node {
 private:
+	graph& graph_; ///< Graph to which this node belongs.
 	std::vector<std::reference_wrapper<node_output>> outputs_; ///< Outputs, by reference.
 	std::vector<std::reference_wrapper<node_input>> inputs_; ///< Inputs, by reference.
 
@@ -26,37 +29,37 @@ private:
 	
 	bool active_ = true;
 	std::atomic<time_unit> current_time_ = -1; ///<  Time of last/current frame processed by node.
-	time_unit pull_time_ = -1; ///< Time of last frame pulled on node's output(s).
 	
 	void propagate_offset_(time_unit offset); ///< Define this node's offset and then recursively preceding node's.
 	void propagate_setup_(); ///< Recursively set up outputs and node of preceding nodes, and then this node.
 	void deduce_stream_properties_(); ///< Define stream properties of non-source node based on input nodes.
 
 protected:	
-	node() = default;
+	explicit node(graph& gr) : graph_(gr) { }
 	node(const node&) = delete;
 	node& operator=(const node&) = delete;
-	
-	const auto& inputs() const noexcept { return inputs_; }
-	const auto& outputs() const noexcept { return outputs_; }
-	
+		
 	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
 	void set_prefetch_duration(time_unit);
 	void setup_sink(); ///< Called by sink node, runs set up procedure for all node in graph.
 
-	void set_pull_time(time_unit t) noexcept { pull_time_ = t; }
 	void set_current_time(time_unit t) noexcept { current_time_ = t; }
+	node_job make_job();
+	void cancel_job(node_job&);
 
-public:
-	class job;
-	template<typename Port, std::size_t Dim, typename Elem> class port_wrapper;
-	
+public:	
 	virtual ~node() { }
+	
+	graph& this_graph() noexcept { return graph_; }
+	std::ptrdiff_t register_input(node_input&);
+	std::ptrdiff_t register_output(node_output&);
+	
+	const auto& inputs() noexcept { return inputs_; }
+	const auto& outputs() noexcept { return outputs_; }
 	
 	virtual void internal_setup() = 0; ///< Called by propagate_setup_.
 	virtual void launch() = 0; ///< Called by graph for all nodes, before any frame is pulled from sink.
 	virtual void stop() = 0; ///< Called by graph for all node, before destruction of any node.
-	virtual void pull(time_unit t) = 0;
 
 	bool was_setup() const noexcept { return was_setup_; }
 
@@ -74,40 +77,34 @@ public:
 	void update_activation(); ///< Called by output, propagates to preceding nodes.
 
 	time_unit current_time() const noexcept { return current_time_; }
-	time_unit pull_time() const noexcept { return pull_time_; }	
-};
-
-
-template<typename Port, std::size_t Dim, typename Elem>
-class node::port_wrapper : public Port {
-public:
-	using elem_type = Elem;
-	constexpr static std::size_t dimension = Dim;
-	
-	using Port::Port;
 };
 
 
 /// Work unit of flow graph node.
 /** Contains input and output views for concrete node to read/write a frame to. */
-class node::job {
+class node_job {
 private:
 	node& node_;
-	time_unit time_;
+	time_unit time_ = -1;
 	bool end_marked_ = false;
 	std::vector<timed_frames_view> input_views_;
 	std::vector<frame_view> output_views_;
 
 public:
-	job(node&, time_unit t);
-	~job();
+	node_job(node&);
+	~node_job();
 	
-	void open(const node_input&);
-	void open(const node_output&);
-	void close_all();
+	/// \name Set up interface.
+	///@{
+	void push_input(node_input&, const timed_frames_view&);
+	void push_output(node_output&, const frame_view&);
+	node_input* pop_input();
+	node_output* pop_output();
+	
+	void define_time(time_unit t) { time_ = -1; }
+	///@}
 	
 	time_unit time() const noexcept { return time_; }
-	
 	void mark_end();
 
 	template<typename Input>
@@ -137,7 +134,7 @@ public:
 class node_output {
 private:
 	node& node_;
-	const std::ptrdiff_t index_;
+	std::ptrdiff_t index_ = -1;
 	
 	node_input* connected_input_ = nullptr;
 	frame_format format_;
@@ -146,8 +143,7 @@ private:
 	bool active_ = true;
 
 protected:
-	node_output(node& nd, std::ptrdiff_t i) :
-		node_(nd), index_(i) { }
+	node_output(node& nd, const frame_format&);
 	node_output(const node_output&) = delete;
 
 public:
@@ -160,11 +156,11 @@ public:
 	void define_format(const frame_format&);
 	const frame_format& format() const noexcept { return format_; }
 
-
 	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
 	node_input& connected_input() const noexcept { return *connected_input_; }
 	void input_has_connected(node_input&);
 	
+	// TODO adjust format for thin node series
 	virtual void setup() = 0;
 	
 	bool is_active() const noexcept { return active_; }
@@ -173,7 +169,7 @@ public:
 	/// \name Read interface, used by connected input.
 	/// Constitutes access point to the node from other nodes in graph.
 	///@{
-	virtual void pull(time_unit t) = 0;
+	virtual void pull(time_span span) = 0;
 	virtual timed_frames_view begin_read(time_unit duration) = 0;
 	virtual void end_read(time_unit duration) = 0;
 	virtual time_unit end_time() const = 0;
@@ -184,6 +180,7 @@ public:
 	///@{
 	virtual frame_view begin_write_frame(time_unit& t) = 0;
 	virtual void end_write_frame(bool was_last_frame) = 0;
+	virtual void cancel_write_frame() = 0;
 	///@}
 };
 
@@ -192,7 +189,7 @@ public:
 class node_input {
 private:
 	node& node_;
-	const std::ptrdiff_t index_;
+	std::ptrdiff_t index_ = -1;
 
 	node_output* connected_output_ = nullptr;
 	time_unit past_window_ = 0;
@@ -201,8 +198,7 @@ private:
 	bool activated_ = true;
 	
 protected:
-	node_input(node& nd, std::ptrdiff_t i) :
-		node_(nd), index_(i) { }
+	explicit node_input(node& nd);
 	node_input(const node_input&) = delete;
 
 public:
@@ -225,6 +221,8 @@ public:
 	void pull(time_unit t);
 	timed_frames_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
+	void cancel_read_frame(time_unit t);
+	void reached_end(time_unit t);
 	///@}
 };
 
