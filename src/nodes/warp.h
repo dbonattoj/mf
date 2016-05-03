@@ -17,17 +17,17 @@ private:
 	camera_type output_camera_;
 
 public:
-	input_type<2, Color> image_in;
-	input_type<2, Depth> depth_in;
-	output_type<2, Color> out;
+	input_type<2, Color> image_input;
+	input_type<2, Depth> depth_input;
+	output_type<2, Color> output;
 		
 	warp(const camera_type& cam_in, const camera_type& cam_out, const Color& background = Color::black) :
 		input_camera_(cam_in), output_camera_(cam_out),
-		image_in(*this), depth_in(*this), out(*this) { }
+		image_input(*this), depth_input(*this), output(*this) { }
 
 protected:
 	void setup() override;
-	void process() override;
+	void process(node_job&) override;
 };
 
 }}

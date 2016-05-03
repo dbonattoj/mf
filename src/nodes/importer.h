@@ -11,27 +11,28 @@ namespace mf { namespace node {
 
 /// Source node which reads frames from frame importer object.
 template<typename Importer>
-class importer : public flow::async_source_node {
+class importer : public flow::sync_source_node {
 private:
 	Importer importer_;
 
 public:
-	output_type<Importer::dimension, typename Importer::elem_type> out;
+	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
 	explicit importer(Args&&... args) :
 		flow::async_source_node(false),
-		importer_(std::forward<Args>(args)...), out(*this) { }
+		importer_(std::forward<Args>(args)...), output(*this) { }
 	
 	void setup() override {
-		out.define_frame_shape(importer_.frame_shape());
+		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void process() override {
-		return importer_.read_frame(out.view());
+	void process(node_job& job) override {
+		auto out = job.out(output);
+		return importer_.read_frame(out);
 	}
 	
-	bool reached_end() const noexcept override {
+	bool reached_end(time_unit t) const noexcept override {
 		return importer_.reached_end();
 	}
 };
@@ -40,16 +41,16 @@ public:
 /// Source node which reads frames from seekable frame importer object.
 /** Leverages the seek ability of the frame importer to the node. */
 template<typename Seekable_importer>
-class seekable_importer : public flow::async_source_node {
+class seekable_importer : public flow::sync_source_node {
 private:
 	Seekable_importer importer_;
 
 public:
-	output_type<Seekable_importer::dimension, typename Seekable_importer::elem_type> out;
+	output_type<Seekable_importer::dimension, typename Seekable_importer::elem_type> output;
 	
 	template<typename... Args>
 	explicit seekable_importer(Args&&... args) :
-		importer_(std::forward<Args>(args)...), out(*this)
+		importer_(std::forward<Args>(args)...), output(*this)
 	{
 		define_source_stream_properties(true, importer_.total_duration());
 	}
@@ -58,14 +59,14 @@ public:
 		out.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void pre_process() override {
-		time_unit t = current_time();
+	void pre_process(time_unit t) override {
 		if(importer_.current_time() != t) importer_.seek(t);
 	}
 	
-	void process() override {
-		MF_ASSERT(importer_.current_time() == current_time());
-		return importer_.read_frame(out.view());
+	void process(node_job& job) override {
+		MF_ASSERT(importer_.current_time() == job.time());
+		auto out = job.out(output);
+		return importer_.read_frame(out);
 	}
 };
 

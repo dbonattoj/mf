@@ -1,3 +1,4 @@
+/*
 #ifndef MF_FLOW_THIN_NODE_H_
 #define MF_FLOW_THIN_NODE_H_
 
@@ -9,7 +10,7 @@ namespace mf { namespace flow {
 /// Thin node base class.
 /** Has one input and one output, and input has no time window. Allocates no buffer for output, but concrete subclass
  ** must instead do element-wise in-place processing of data. Frame format (i.e. element stride and alignment) of input
- ** and output are adjusted to enable this. */
+ ** and output are adjusted to enable this. * /
 class thin_node : public node {
 private:
 	node_input& input_() const { return inputs().front().get(); }
@@ -46,7 +47,7 @@ public:
 
 	/// \name Read interface, used by connected input.
 	///@{
-	void pull(time_span t) override;
+	void pull(time_span span) override;
 	timed_frames_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
@@ -64,3 +65,4 @@ public:
 }}
 
 #endif
+*/

@@ -1,3 +1,4 @@
+/*
 #include "thin_node.h"
 
 namespace mf { namespace flow {
@@ -16,40 +17,13 @@ void thin_node::launch() { }
 void thin_node::stop() { }
 
 
-void thin_node::pull(time_unit t) {
-	// pull frame from input
-	input_().pull(t);
-	
-	
-	
-	// read frame, get view
-	auto vw = input_().begin_read(1);
-	
-	node_job job = make_job();
-	job.define_time(t);
-	job.push_output(output_(), vw[0]);
-	job.push_input(input_(), vw);
-	// TODO verify format compatibility
 
-	this->process(job);
-	
-	job.pop_input();
-	job.pop_output();
-	bool reached_end = input_().reached_end(t);
-	
-	
-	
-	job.pop_input(reached_end);
-}
-
-void thin_node_output::pull(time_unit t) {
-	this_node().pull(t);
+void thin_node_output::pull(time_span span) {
 }
 
 
 timed_frames_view thin_node_output::begin_read(time_unit duration) {
-	MF_ASSERT(duration == 1);
-	return thin_node().
+
 }
 
 
@@ -78,3 +52,4 @@ void thin_node_output::cancel_write_frame() {
 }
 
 }}
+*/

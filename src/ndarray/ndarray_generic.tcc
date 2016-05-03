@@ -63,7 +63,7 @@ base(
 	frame_properties.alignment(),
 	allocator
 ) {
-	MF_EXPECTS(padding % frame_properties.alignment() == 0);
+	MF_EXPECTS(frame_padding % frame_properties.alignment() == 0);
 }
 
 

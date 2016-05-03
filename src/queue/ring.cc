@@ -8,7 +8,7 @@ namespace mf {
 	
 
 ring::ring(const frame_array_properties& prop) :
-	base(frame_prop, duration, adjust_padding_(prop), raw_ring_allocator()) { }
+	base(prop, adjust_padding_(prop), raw_ring_allocator()) { }
 
 
 std::size_t ring::adjust_padding_(const frame_array_properties& prop) {

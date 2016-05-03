@@ -10,7 +10,7 @@ void node::propagate_offset_(time_unit new_offset) {
 	offset_ = new_offset;
 	
 	for(node_input& in : inputs()) {
-		node_base& connected_node = in.connected_node();
+		node& connected_node = in.connected_node();
 		time_unit off = offset_ + connected_node.prefetch_duration_ + in.future_window_duration();
 		connected_node.propagate_offset_(off);
 	}		
@@ -25,7 +25,7 @@ void node::deduce_stream_properties_() {
 	stream_duration_ = std::numeric_limits<time_unit>::max();
 	
 	for(node_input& in : inputs()) {
-		node_base& connected_node = in.connected_node();
+		node& connected_node = in.connected_node();
 		
 		time_unit input_node_stream_duration = connected_node.stream_duration_;
 		bool input_node_seekable = connected_node.seekable_;
@@ -47,7 +47,7 @@ void node::propagate_setup_() {
 	
 	// first set up preceding nodes
 	for(node_input& in : inputs()) {
-		node_base& connected_node = in.connected_output().node();
+		node& connected_node = in.connected_output().this_node();
 		connected_node.propagate_setup_();
 	}
 	
@@ -59,7 +59,7 @@ void node::propagate_setup_() {
 	
 	// set up outputs
 	// their frame lengths are now defined
-	for(output_base& out : outputs()) out.setup();
+	for(node_output& out : outputs()) out.setup();
 	
 	was_setup_ = true;
 }
@@ -75,6 +75,7 @@ void node::define_source_stream_properties(bool seekable, time_unit stream_durat
 
 	seekable_ = seekable;
 	stream_duration_ = stream_duration;
+	end_time_ = stream_duration; // TODO combine end_time / stream_duration
 }
 
 
@@ -91,7 +92,6 @@ void node::setup_sink() {
 	MF_EXPECTS(is_sink());
 	
 	propagate_offset_(0);
-	propagate_output_buffer_durations_();
 	propagate_setup_();
 
 	MF_ENSURES(was_setup_);
@@ -128,7 +128,7 @@ void node::update_activation() {
 
 std::ptrdiff_t node::register_input(node_input& in) {
 	inputs_.push_back(std::ref(in));
-	return input_.size() - 1;
+	return inputs_.size() - 1;
 }
 
 
@@ -143,9 +143,9 @@ node_job node::make_job() {
 }
 
 
-void node::cancel_job(node_job&) {
-	while(node_input* in = job.pop_input()) in->cancel_read_frame(t);
-	while(node_output* out = job.pop_output()) out->cancel_read_frame();
+void node::cancel_job(node_job& job) {
+	while(node_input* in = job.pop_input()) in->cancel_read_frame();
+	while(node_output* out = job.pop_output()) out->cancel_write_frame();
 }
 
 
@@ -156,7 +156,7 @@ void node::cancel_job(node_job&) {
 node_job::node_job(node& nd) :
 	node_(nd)
 {
-	input_views_.c.reserve(nd.inputs().size());
+	input_views_.reserve(nd.inputs().size());
 	output_views_.reserve(nd.outputs().size());
 }
 
@@ -169,14 +169,14 @@ node_job::~node_job() {
 
 void node_job::push_input(node_input& in, const timed_frames_view& vw) {
 	std::ptrdiff_t index = in.index();
-	while(input_views_.size() <= index) input_views_.emplace();
+	while(input_views_.size() <= index) input_views_.emplace_back();
 	input_views_[index].reset(vw);
 }
 
 
 void node_job::push_output(node_output& out, const frame_view& vw) {
-	std::ptrdiff_t index = in.index();
-	while(output_views_.size() <= index) output_views_.emplace();
+	std::ptrdiff_t index = out.index();
+	while(output_views_.size() <= index) output_views_.emplace_back();
 	output_views_[index].reset(vw);
 }
 
@@ -186,7 +186,7 @@ node_input* node_job::pop_input() {
 	timed_frames_view& back = input_views_.back();
 	input_views_.pop_back();
 	if(back.is_null()) return pop_input();
-	else return &back;
+	else return &node_.inputs()[input_views_.size()].get();
 }
 
 
@@ -195,17 +195,12 @@ node_output* node_job::pop_output() {
 	frame_view& back = output_views_.back();
 	output_views_.pop_back();
 	if(back.is_null()) return pop_output();
-	else return &back;
+	else return &node_.outputs()[output_views_.size()].get(); // TODO simplify
 }
 	
 	
-void define_time(time_unit t) {
-	time_ = -1;
-}
-
-
-void node::job::mark_end() {
-	end_marked_ = true;
+void node_job::define_time(time_unit t) {
+	time_ = t;
 }
 
 
@@ -232,9 +227,11 @@ void node_output::propagate_activation(bool active) {
 /////
 
 
-node_input::node_input(node& nd) :
+node_input::node_input(node& nd, time_unit past_window, time_unit future_window) :
 	node_(nd),
-	index_(nd.register_input(*this)) { }
+	index_(nd.register_input(*this)),
+	past_window_(past_window),
+	future_window_(future_window) { }
 
 
 void node_input::connect(node_output& output) {
@@ -246,7 +243,7 @@ void node_input::connect(node_output& output) {
 void node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
 
-	time_unit start_time = std::max(0, t - past_window_);
+	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 	
 	connected_output().pull(time_span(start_time, end_time));
@@ -256,7 +253,6 @@ void node_input::pull(time_unit t) {
 timed_frames_view node_input::begin_read_frame(time_unit t) {
 	time_unit duration = std::min(t, past_window_) + 1 + future_window_;
 	timed_frames_view view = connected_output().begin_read(duration);
-	if(view) MF_ASSERT(view.start_time() == connected_node().pull_time());
 	return view;
 }
 
@@ -267,12 +263,12 @@ void node_input::end_read_frame(time_unit t) {
 }
 
 
-void node_input::cancel_read_frame(time_unit t) {
+void node_input::cancel_read_frame() {
 	connected_output().end_read(0);
 }
 
 
-bool node_input::reached_end(time_unit t) {
+bool node_input::reached_end(time_unit t) const {
 	time_unit output_end_time = connected_output().end_time();
 	if(output_end_time == -1) return false;
 	else return (t - past_window_duration() >= output_end_time);

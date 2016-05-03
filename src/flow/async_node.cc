@@ -1,4 +1,5 @@
 #include "async_node.h"
+#include "graph.h"
 
 namespace mf { namespace flow {
 
@@ -34,7 +35,7 @@ bool async_node::frame_() {
 			
 			// begin reading frame 
 			timed_frames_view in_view = in.begin_read_frame(t);
-			MF_ASSERT(in_view.start_time() == t);
+			MF_ASSERT(in_view.span().includes(t));
 			if(in_view.is_null()) { stopped = true; break; }
 			
 			// add to job
@@ -61,7 +62,7 @@ bool async_node::frame_() {
 		if(t == stream_duration() - 1) reached_end = true;
 		MF_ASSERT(t < stream_duration());
 	} else if(is_source()) {
-		reached_end = this->reached_end(t);
+		reached_end = job.end_was_marked();
 	}
 
 	// end reading from inputs
@@ -73,8 +74,10 @@ bool async_node::frame_() {
 	// end writing to output,
 	// indicate if last frame was reached
 	job.pop_output()->end_write_frame(reached_end);
+	
+	if(reached_end) mark_end();
 		
-	return ! stopped_;
+	return true;
 }
 
 
@@ -119,31 +122,31 @@ void async_node::stop() {
 
 
 void async_node_output::setup() {
-	node_input& connected_input = connected_input();
-	node& connected_node = connected_input.this_node();
+	node& connected_node = connected_input().this_node();
 	
 	time_unit offset_diff = connected_node.offset() - this_node().offset();
-	time_unit required_capacity = 1 + connected_input.past_window_duration() + offset_diff;
+	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 	
 	frame_array_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	
 
 
-void async_node_output::pull(time_span span) { }
-
-
-timed_frames_view async_node_output::begin_read(time_unit duration) {
-	event& stop_event = this_node().this_graph().stop_event();
-
+void async_node_output::pull(time_span span) {
+	time_unit t = span.start_time();
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {
 		if(ring_->is_seekable()) ring_->seek(t);
 		else if(t > ring_read_t) ring_->skip(ring_read_t - t);
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
-	}
+	}	
+}
 
-	timed_frames_view view = timed_frames_view::null();
+
+timed_frames_view async_node_output::begin_read(time_unit duration) {
+	event& stop_event = this_node().this_graph().stop_event();
+
+	timed_frames_view view;
 	bool got_view = false;
 	do {
 		bool status = ring_->wait_readable(stop_event);
@@ -162,14 +165,14 @@ void async_node_output::end_read(time_unit duration) {
 
 
 time_unit async_node_output::end_time() const {
-	return ring->end_time();
+	return ring_->end_time();
 }
 
 
 frame_view async_node_output::begin_write_frame(time_unit& t) {
-	event& stop_event = this_node().this_graph().stop_event()
+	event& stop_event = this_node().this_graph().stop_event();
 
-	timed_frames_view view = timed_frames_view::null();
+	timed_frames_view view;
 	bool got_view = false;
 	
 	do {
@@ -177,7 +180,7 @@ frame_view async_node_output::begin_write_frame(time_unit& t) {
 		if(! status) return frame_view::null();
 		
 		got_view = ring_->try_begin_write(1, view);
-	};
+	} while(! got_view);
 	
 	MF_ASSERT(view.duration() == 1);
 	t = view.start_time();

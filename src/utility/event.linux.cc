@@ -80,7 +80,6 @@ event* event::wait_any_(event** begin, event** end) {
 		fd.fd = static_cast<int>(ev->handle_);
 		fd.events = POLLIN;
 		fd.revents = 0;
-		str = str + std::to_string(fd.fd) + ", ";
 		return fd;	
 	});
 

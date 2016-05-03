@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include <atomic>
+#include <string>
 
 namespace mf { namespace flow {
 
@@ -28,7 +29,8 @@ private:
 	bool seekable_ = false; ///< Whether this node can handle seek request from input.
 	
 	bool active_ = true;
-	std::atomic<time_unit> current_time_ = -1; ///<  Time of last/current frame processed by node.
+	std::atomic<time_unit> current_time_ {-1}; ///<  Time of last/current frame processed by node.
+	std::atomic<time_unit> end_time_ {-1}; ///< End time of stream, or -1. Always defined when end reached.
 	
 	void propagate_offset_(time_unit offset); ///< Define this node's offset and then recursively preceding node's.
 	void propagate_setup_(); ///< Recursively set up outputs and node of preceding nodes, and then this node.
@@ -44,10 +46,14 @@ protected:
 	void setup_sink(); ///< Called by sink node, runs set up procedure for all node in graph.
 
 	void set_current_time(time_unit t) noexcept { current_time_ = t; }
+	void mark_end() { end_time_ = current_time_ + 1; }
+	
 	node_job make_job();
 	void cancel_job(node_job&);
 
-public:	
+public:
+	std::string name;
+
 	virtual ~node() { }
 	
 	graph& this_graph() noexcept { return graph_; }
@@ -56,18 +62,23 @@ public:
 	
 	const auto& inputs() noexcept { return inputs_; }
 	const auto& outputs() noexcept { return outputs_; }
+
+	bool is_source() const noexcept { return inputs_.empty(); }
+	bool is_sink() const noexcept { return outputs_.empty(); }
 	
 	virtual void internal_setup() = 0; ///< Called by propagate_setup_.
 	virtual void launch() = 0; ///< Called by graph for all nodes, before any frame is pulled from sink.
 	virtual void stop() = 0; ///< Called by graph for all node, before destruction of any node.
+	
+	virtual void pull() { }
+	
+	time_unit end_time() const noexcept { return end_time_; }
+	bool reached_end() const noexcept { return (current_time_ >= end_time_ - 1); }
 
 	bool was_setup() const noexcept { return was_setup_; }
 
-	bool is_source() const noexcept { return inputs_.empty(); }
-	bool is_sink() const noexcept { return outputs_.empty(); }
-
 	time_unit prefetch_duration() const noexcept { return prefetch_duration_; }
-
+	time_unit offset() const noexcept { return offset_; }
 	bool stream_duration_is_defined() const noexcept { return (stream_duration_ != -1); }
 	time_unit stream_duration() const noexcept { return stream_duration_; }
 	bool is_seekable() const noexcept { return seekable_; }
@@ -81,7 +92,8 @@ public:
 
 
 /// Work unit of flow graph node.
-/** Contains input and output views for concrete node to read/write a frame to. */
+/** Contains input and output views for concrete node to read/write a frame to. Handles cast from internel genetic views
+ ** to ndarray views of specified dimension and element type. */
 class node_job {
 private:
 	node& node_;
@@ -96,19 +108,19 @@ public:
 	
 	/// \name Set up interface.
 	///@{
+	void define_time(time_unit t);
 	void push_input(node_input&, const timed_frames_view&);
 	void push_output(node_output&, const frame_view&);
 	node_input* pop_input();
 	node_output* pop_output();
-	
-	void define_time(time_unit t) { time_ = -1; }
+	bool end_was_marked() const noexcept { return end_marked_; }
 	///@}
 	
 	time_unit time() const noexcept { return time_; }
-	void mark_end();
+	void mark_end() { end_marked_ = true; }
 
 	template<typename Input>
-	auto in_full(Input& port) {
+	decltype(auto) in_full(Input& port) {
 		return from_generic_timed<Input::dimension, typename Input::elem_type>(
 			input_views_.at(port.index()),
 			port.frame_shape()
@@ -116,13 +128,13 @@ public:
 	}
 
 	template<typename Input>
-	auto in(Input& port) {
+	decltype(auto) in(Input& port) {
 		return in_full(port).at_time(time_);
 	}	
 
 	template<typename Output>
-	auto out(Output& port) {
-		return from_generic_frame<Input::dimension, typename Input::elem_type>(
+	decltype(auto) out(Output& port) {
+		return from_generic_frame<Output::dimension, typename Output::elem_type>(
 			output_views_.at(port.index()),
 			port.frame_shape()
 		);
@@ -147,13 +159,15 @@ protected:
 	node_output(const node_output&) = delete;
 
 public:
+	virtual ~node_output() { }
+
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
 	
-	void define_frame_length(std::size_t);
+	void define_frame_length(std::size_t len) { frame_length_ = len; }
 	std::size_t frame_length() const noexcept { return frame_length_; }
 
-	void define_format(const frame_format&);
+	void define_format(const frame_format& format) { format_ = format; }
 	const frame_format& format() const noexcept { return format_; }
 
 	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
@@ -191,24 +205,28 @@ private:
 	node& node_;
 	std::ptrdiff_t index_ = -1;
 
-	node_output* connected_output_ = nullptr;
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
+	node_output* connected_output_ = nullptr;
 	
 	bool activated_ = true;
 	
 protected:
-	explicit node_input(node& nd);
+	node_input(node& nd, time_unit past_window, time_unit future_window);
 	node_input(const node_input&) = delete;
+
+	void connect(node_output&);
 
 public:
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
 	
+	std::size_t frame_length() const noexcept { return connected_output().frame_length(); }
+	const frame_format& format() const noexcept { return connected_output().format(); }
+	
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
-	void connect(node_output&);
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
 	node_output& connected_output() const noexcept { return *connected_output_; }
 	node& connected_node() const noexcept { return connected_output().this_node(); }
@@ -221,8 +239,8 @@ public:
 	void pull(time_unit t);
 	timed_frames_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
-	void cancel_read_frame(time_unit t);
-	void reached_end(time_unit t);
+	void cancel_read_frame();
+	bool reached_end(time_unit t) const;
 	///@}
 };
 

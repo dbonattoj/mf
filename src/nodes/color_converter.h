@@ -2,31 +2,31 @@
 #define MF_COLOR_CONVERTER_NODE_H_
 
 #include <algorithm>
-#include "../flow/thin_node.h"
+#include "../flow/sync_node.h"
 #include "../color.h"
 
 namespace mf { namespace node {
 
 template<typename Input_color, typename Output_color>
-class color_converter : public flow::thin_node<2, Input_color, Output_color> {	
-	using base = flow::thin_node<2, Input_color, Output_color>;
-	
+class color_converter : public flow::sync_node {	
 public:
-	typename base::output_type out;
-	typename base::input_type in;
+	output_type<2, Output_color> output;
+	input_type<2, Input_color> input;
 
 	color_converter() :
-		out(*this), in(*this) { }
+		output(*this), input(*this) { }
 	
 	void setup() override {
-		out.define_frame_shape(in.frame_shape());
+		output.define_frame_shape(input.frame_shape());
 	}
 	
-	void process() override {
+	void process(node_job& job) override {
+		auto in = job.in(input);
+		auto out = job.out(output);
 		std::transform(
-			in.view().begin(),
-			in.view().end(),
-			out.view().begin(),
+			in.begin(),
+			in.end(),
+			out.begin(),
 			color_convert<Output_color, Input_color>
 		);
 	}

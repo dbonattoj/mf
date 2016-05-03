@@ -7,6 +7,7 @@
 #include "ndarray.h"
 #include "../../src/common.h"
 #include "../../src/flow/graph.h"
+#include "../../src/flow/node.h"
 #include "../../src/flow/sink_node.h"
 #include "../../src/flow/async_node.h"
 #include "../../src/ndarray/ndcoord.h"
@@ -29,23 +30,20 @@ private:
 public:
 	output_type<2, int> output;
 	
-	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		flow::async_source_node(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
+	explicit sequence_frame_source(flow::graph& gr, time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
+		flow::async_source_node(gr, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
 		output(*this) { name = "source"; }
 	
 	void setup() override {
 		output.define_frame_shape(frame_shape_);
 	}
 	
-	void process() override {
+	void process(flow::node_job& job) override {
 		if(! output.is_active()) return;
-		time_unit t = current_time();
+		time_unit t = job.time();
 		produced_frames_.emplace(t);
-		output.view() = make_frame(frame_shape_, current_time());
-	}
-	
-	bool reached_end() const noexcept override {
-		return (current_time() == last_frame_);
+		job.out(output) = make_frame(frame_shape_, current_time());
+		if(t == last_frame_) job.mark_end();
 	}
 	
 	bool has_produced_frame(int i) const {
@@ -60,23 +58,21 @@ private:
 		output.define_frame_shape(input.frame_shape());	
 	}
 	
-	void pre_process() override {
-		if(current_time() < activation.size()) input.set_activated(activation[current_time()]);
+	void pre_process(time_unit t) override {
+		if(t < activation.size()) input.set_activated(activation[t]);
 	}
 	
-	void process() override {
-		if(! output.is_active()) return;
+	void process(flow::node_job& job) override {
+		auto out = job.out(output);
+		auto in = job.in(input);
 		
-		if(callback) callback(*this, input, output);
-		if(input.view_is_available()) {
-			output.view() = input.view();
-		} else {
-			output.view() = make_frame(input.frame_shape(), noframe);
-		}
+		if(callback) callback(*this, in, out);
+		if(in) out = in;
+		else out = make_frame(in.shape(), noframe);
 	}
 	
 public:
-	using callback_func = void(passthrough_node& self, input_type<2, int>& in, output_type<2, int>& out);
+	using callback_func = void(passthrough_node& self, ndarray_view<2, int>& in, ndarray_view<2, int>& out);
 
 	input_type<2, int> input;
 	output_type<2, int> output;
@@ -84,7 +80,8 @@ public:
 	std::vector<bool> activation;
 	std::function<callback_func> callback;
 
-	passthrough_node(time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
+	passthrough_node(flow::graph& gr, time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
+		flow::async_node(gr),
 		input(*this, past_window, future_window),
 		output(*this) { name = "passthrough"; }
 };
@@ -101,20 +98,25 @@ public:
 
 	std::vector<bool> activation;
 	
-	explicit expected_frames_sink(const std::vector<int>& seq) :
-		expected_frames_(seq), got_frames_(seq.size(), missingframe), input(*this)
+	explicit expected_frames_sink(flow::graph& gr, const std::vector<int>& seq) :
+		flow::sink_node(gr),
+		expected_frames_(seq),
+		got_frames_(seq.size(), missingframe),
+		input(*this)
 	{
 		name = "sink";
 	}
 	
-	void pre_process() override {
-		if(current_time() < activation.size())
-			input.set_activated(activation[current_time()]);
+	void pre_process(time_unit t) override {
+		if(t < activation.size())
+			input.set_activated(activation[t]);
 	}
 	
-	void process() override {
+	void process(flow::node_job& job) override {
+		auto in = job.in(input);
+		
 		int index;
-		if(input.view_is_available()) index = frame_index(input.view());
+		if(in) index = frame_index(in);
 		else index = noframe;
 		
 		time_unit t = current_time();
@@ -146,29 +148,31 @@ public:
 	std::vector<bool> activation1;
 	std::vector<bool> activation2;
 	
-	input_synchronize_test_node(time_unit prefetch = 0) :
-		input1(*this), input2(*this), output(*this) { name = "merge"; }
+	input_synchronize_test_node(flow::graph& gr, time_unit prefetch = 0) :
+		flow::async_node(gr),
+		input1(*this),
+		input2(*this),
+		output(*this) { name = "merge"; }
 
 
 	void setup() override {
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
-	void pre_process() override {
-		time_unit t = current_time();
+	void pre_process(time_unit t) override {
 		if(t < activation1.size()) input1.set_activated(activation1[t]);
 		if(t < activation2.size()) input2.set_activated(activation2[t]);
 	}
 	
-	void process() override {
-		if(! output.is_active()) return;
+	void process(flow::node_job& job) override {
+		auto in1 = job.in(input1);
+		auto in2 = job.in(input2);
+		auto out = job.out(output);
 
 		int iout = noframe;
-		MF_TEST_THREAD_REQUIRE(input1.view_is_available() == input1.is_activated());
-		MF_TEST_THREAD_REQUIRE(input2.view_is_available() == input2.is_activated());
-		if(input1.is_activated() && input2.is_activated()) {
-			int i1 = frame_index(input1.view());
-			int i2 = frame_index(input2.view());
+		if(in1 && in2) {
+			int i1 = frame_index(in1);
+			int i2 = frame_index(in2);
 			
 			MF_TEST_THREAD_REQUIRE(i1 != -1);
 			MF_TEST_THREAD_REQUIRE(i2 != -1);
@@ -177,34 +181,12 @@ public:
 			else if(i2 != noframe) iout = i2;
 			
 			if(i1 != noframe && i2 != noframe) MF_TEST_THREAD_REQUIRE(i1 == i2);
-		} else if(input1.is_activated()) {
-			iout = frame_index(input1.view());
-		} else if(input2.is_activated()) {
-			iout = frame_index(input2.view());
+		} else if(in1) {
+			iout = frame_index(in1);
+		} else if(in2) {
+			iout = frame_index(in2);
 		}
-		output.view() = make_frame(input1.frame_shape(), iout);
-	}
-};
-
-
-class multiplexer_node : public flow::async_node {
-public:
-	input_type<2, int> input;
-	output_type<2, int> output1;
-	output_type<2, int> output2;
-	
-	multiplexer_node(time_unit prefetch = 0):
-		input(*this), output1(*this), output2(*this) { name = "multiplex"; }
-	
-	void setup() override {
-		output1.define_frame_shape(input.frame_shape());
-		output2.define_frame_shape(input.frame_shape());
-	}
-	
-	void process() override {
-		if(frame_index(input.view()) == -1) throw std::runtime_error("invalid frame received in multiplexer");	
-		if(output1.is_active()) output1.view() = input.view();
-		if(output2.is_active()) output2.view() = input.view();
+		out = make_frame(in1.shape(), iout);
 	}
 };
 

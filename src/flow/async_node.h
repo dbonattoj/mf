@@ -27,8 +27,7 @@ private:
 protected:
 	virtual void setup() { }
 	virtual void pre_process(time_unit t) { }
-	virtual void process(job&) = 0;
-	virtual bool reached_end(time_unit t) const noexcept { return false; }
+	virtual void process(node_job&) = 0;
 
 public:
 	template<std::size_t Dim, typename Elem>
@@ -46,17 +45,13 @@ public:
 };
 
 
+/// Asynchronous source node base class.
 class async_source_node : public async_node {
 public:
-	explicit async_node(graph& gr, bool seekable = false, time_unit stream_duration = -1) :
+	explicit async_source_node(graph& gr, bool seekable = false, time_unit stream_duration = -1) :
 		async_node(gr)
 	{
 		define_source_stream_properties(seekable, stream_duration);
-	}
-	
-	bool reached_end() const noexcept override {
-		// must be implemented by concrete subclass when stream duration undefined
-		return true;
 	}
 };
 
@@ -66,7 +61,10 @@ private:
 	std::unique_ptr<shared_ring> ring_;
 
 public:
-	async_node_output(async_node& nd) : node_output(nd) { }
+	using node_type = async_node;
+
+	async_node_output(async_node& nd, const frame_format& format) :
+		node_output(nd, format) { }
 
 	void setup() override;
 

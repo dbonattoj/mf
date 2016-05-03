@@ -52,7 +52,7 @@ public:
 	{
 		MF_EXPECTS(elem_size > 0);
 		MF_EXPECTS(alignment > 0 && is_power_of_two(alignment));
-		MF_EXPECTS_MSG(elem_size != 0 && (elem_size % alignment == 0));
+		MF_EXPECTS(elem_size != 0 && (elem_size % alignment == 0));
 	}
 	
 	template<typename Elem>

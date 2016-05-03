@@ -1,7 +1,11 @@
 #ifndef MF_FLOW_SYNC_NODE_H_
 #define MF_FLOW_SYNC_NODE_H_
 
+#include <memory>
 #include "node.h"
+#include "node_io_wrapper.h"
+#include "../queue/frame.h"
+#include "../queue/timed_ring.h"
 
 namespace mf { namespace flow {
 
@@ -9,15 +13,11 @@ class sync_node_output;
 
 /// Synchronous node base class.
 /** Processes frames synchronously when pulled from output. Can have multiple inputs, but only one output. */
-class sync_node : public flow {
-private:
-	time_unit end_time = -1;
-
+class sync_node : public node {
 protected:
 	virtual void setup() { }
 	virtual void pre_process(time_unit t) { }
-	virtual void process(job&) = 0;
-	virtual bool reached_end(time_unit t) const { return false; }
+	virtual void process(node_job&) = 0;
 
 public:
 	explicit sync_node(graph& gr) : node(gr) { }
@@ -32,8 +32,17 @@ public:
 	void launch() final override;
 	void stop() final override;
 	
-	void pull(time_unit t);
-	time_unit end_time() const noexcept { return end_time_; }
+	void pull();
+};
+
+/// Synchronous source node base class.
+class sync_source_node : public sync_node {
+public:
+	explicit sync_source_node(graph& gr, bool seekable = false, time_unit stream_duration = -1) :
+		sync_node(gr)
+	{
+		define_source_stream_properties(seekable, stream_duration);
+	}
 };
 
 
@@ -42,7 +51,10 @@ private:
 	std::unique_ptr<timed_ring> ring_;
 
 public:
-	sync_node_output(sync_node& nd) : node_output(nd) { }
+	using node_type = sync_node;
+
+	sync_node_output(sync_node& nd, const frame_format& format) :
+		node_output(nd, format) { }
 	
 	void setup() override;
 	
@@ -58,6 +70,7 @@ public:
 	///@{
 	frame_view begin_write_frame(time_unit& t) override;
 	void end_write_frame(bool was_last_frame) override;
+	void cancel_write_frame() override;
 	///@}
 };
 
