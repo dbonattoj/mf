@@ -73,7 +73,7 @@ public:
 	virtual void pull() { }
 	
 	time_unit end_time() const noexcept { return end_time_; }
-	bool reached_end() const noexcept { return (current_time_ >= end_time_ - 1); }
+	bool reached_end() const noexcept;
 
 	bool was_setup() const noexcept { return was_setup_; }
 

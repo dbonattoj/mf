@@ -4,7 +4,6 @@ namespace mf { namespace flow {
 
 void sync_node::internal_setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("sync_node must have exactly 1 output");
-	if(inputs().size() == 0) throw invalid_flow_graph("sync_node must have at least 1 input");
 	this->setup();
 }
 

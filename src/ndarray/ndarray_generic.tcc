@@ -56,14 +56,18 @@ ndarray_timed_view<Dim + 1, Elem> from_generic_timed(const ndarray_timed_view_ge
 
 template<typename Allocator>
 ndarray_generic<Allocator>::ndarray_generic
-(const frame_array_properties& frame_properties, std::size_t frame_padding, const Allocator& allocator) :
+(const frame_array_properties& prop, std::size_t frame_padding, const Allocator& allocator) :
 base(
-	make_ndsize(frame_properties.array_length, frame_properties.frame_size()),
+	make_ndsize(prop.array_length, prop.frame_size()),
 	frame_padding,
-	frame_properties.alignment(),
+	prop.alignment(),
 	allocator
 ) {
-	MF_EXPECTS(frame_padding % frame_properties.alignment() == 0);
+		MF_DEBUG_T("node", make_ndsize(prop.array_length, prop.frame_size()), "  ring prop:\narr_len=", prop.array_length, "\nframe_len=", prop.frame_length, "\nelem_size=", prop.elem_size(), "\nalign: ", prop.alignment() );		
+
+
+	MF_EXPECTS(prop.array_length > 0);
+	MF_EXPECTS(frame_padding % prop.alignment() == 0);
 }
 
 

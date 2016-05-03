@@ -149,6 +149,12 @@ void node::cancel_job(node_job& job) {
 }
 
 
+bool node::reached_end() const noexcept {
+	return (end_time_ != -1) && (current_time_ >= end_time_ - 1);
+}
+
+
+
 
 /////
 
@@ -162,8 +168,8 @@ node_job::node_job(node& nd) :
 
 
 node_job::~node_job() {
-	MF_ASSERT(input_views_.size() == 0);
-	MF_ASSERT(output_views_.size() == 0);
+	//MF_ASSERT(input_views_.size() == 0);
+	//MF_ASSERT(output_views_.size() == 0);
 }
 	
 

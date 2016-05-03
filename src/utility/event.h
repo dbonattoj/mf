@@ -16,21 +16,19 @@ namespace mf {
 /** Call to wait() blocks until event has been _notified_ from another thread via notify(). That is, until the event
  ** is _received_. wait_any() waits for multiple events, until any one has been notified. If multiple threads wait on
  ** the same event, one (undefined which) receives it.
- ** Event can be _sticky_ or _non-sticky_ (default). For non-sticky event, event is received once after one or multiple
- ** calls to notify(). Next call to wait() blocks again, multiple notify() calls are not accumulated.
- ** For sticky event, it is received repeatedly after having been notified once. */
+ ** Event is received once after one or multiple calls to notify(). Next call to wait() blocks again, multiple notify()
+ ** calls are not accumulated. */
 class event {
 public:
 	std::uintptr_t handle_;
-	bool sticky_;
 
 	static event* wait_any_(event** begin, event** end);
 
 public:
-	explicit event(bool sticky = false);
+	event();
 	event(const event&) = delete;
 	event(event&&);
-	~event();
+	virtual ~event();
 	
 	event& operator=(const event&) = delete;
 	event& operator=(event&&);
@@ -38,9 +36,8 @@ public:
 	friend bool operator==(const event& a, const event& b);
 	friend bool operator!=(const event& a, const event& b) { return !(a == b); }
 	
-	void notify();
-	void wait();
-	
+	virtual void notify();
+	virtual void wait();
 	
 	template<typename It>
 	static event& wait_any_list(It begin_it, It end_it) {
@@ -58,6 +55,30 @@ public:
 	static event& wait_any(Events&&... events) {
 		std::array<event*, sizeof...(Events)> evs { &events... };
 		return wait_any_list(evs.begin(), evs.end());
+	}
+};
+
+
+class sticky_event : public event {
+private:
+	bool notified_ = false;
+	
+public:
+	sticky_event() = default;
+
+	void notify() override {
+		notified_ = true;
+		event::notify();
+	}
+	
+	void wait() override {
+		event::wait();
+		event::notify();
+	}
+	
+	void reset() {
+		if(notified_) event::wait();
+		notified_ = false;
 	}
 };
 

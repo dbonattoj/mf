@@ -51,7 +51,6 @@ protected:
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	view_type view_; ///< View used to access items.
 
-
 	void allocate_();
 	void deallocate_();
 	

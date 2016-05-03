@@ -79,8 +79,12 @@ struct frame_array_properties {
 	
 	frame_array_properties() = default;
 	frame_array_properties(const frame_format& form, std::size_t fr_len, std::size_t arr_len) :
-		format(form), frame_length(fr_len), array_length(arr_len) { }
-		
+		format(form), frame_length(fr_len), array_length(arr_len)
+	{
+		MF_EXPECTS(array_length > 0);
+	}
+
+
 	frame_array_properties(const frame_array_properties&) = default;
 	frame_array_properties& operator=(const frame_array_properties&) = default;
 	

@@ -42,7 +42,7 @@ public:
 		if(! output.is_active()) return;
 		time_unit t = job.time();
 		produced_frames_.emplace(t);
-		job.out(output) = make_frame(frame_shape_, current_time());
+		job.out(output) = make_frame(frame_shape_, t);
 		if(t == last_frame_) job.mark_end();
 	}
 	
@@ -80,7 +80,7 @@ public:
 	std::vector<bool> activation;
 	std::function<callback_func> callback;
 
-	passthrough_node(flow::graph& gr, time_unit past_window, time_unit future_window, time_unit prefetch = 0) :
+	passthrough_node(flow::graph& gr, time_unit past_window, time_unit future_window) :
 		flow::async_node(gr),
 		input(*this, past_window, future_window),
 		output(*this) { name = "passthrough"; }

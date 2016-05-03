@@ -21,7 +21,7 @@ private:
 	sink_node* sink_ = nullptr;
 	bool was_setup_ = false;
 	bool running_ = false;
-	event stop_event_;
+	sticky_event stop_event_;
 
 public:
 	~graph();

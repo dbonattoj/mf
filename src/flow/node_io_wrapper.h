@@ -23,6 +23,7 @@ public:
 		Output(nd, frame_format::default_format<Elem>()) { }
 	
 	void define_frame_shape(const frame_shape_type& shp) {
+		frame_shape_ = shp;
 		Output::define_frame_length(shp.product());
 	}
 	
@@ -39,18 +40,21 @@ public:
 	constexpr static std::size_t dimension = Dim;
 
 private:
-	frame_shape_type frame_shape_;
+	const frame_shape_type* output_frame_shape_ = nullptr;
 
 public:
 	node_input_wrapper(node& nd, time_unit past_window = 0, time_unit future_window = 0) :
 		Input(nd, past_window, future_window) { }
 	
-	const frame_shape_type& frame_shape() { return frame_shape_; }
+	const frame_shape_type& frame_shape() {
+		MF_EXPECTS(Input::is_connected());
+		return *output_frame_shape_;
+	}
 	
 	template<typename Output>
 	void connect(node_output_wrapper<Output, Dim, Elem>& output) {
 		Input::connect(output);
-		frame_shape_ = output.frame_shape();
+		output_frame_shape_ = &output.frame_shape();
 	}
 };
 

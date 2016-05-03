@@ -99,7 +99,6 @@ async_node::~async_node() {
 
 void async_node::internal_setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("async_node must have exactly 1 output");
-	if(inputs().size() == 0) throw invalid_flow_graph("async_node must have at least 1 input");
 	this->setup();
 }
 	
@@ -124,9 +123,10 @@ void async_node::stop() {
 void async_node_output::setup() {
 	node& connected_node = connected_input().this_node();
 	
-	time_unit offset_diff = connected_node.offset() - this_node().offset();
+	time_unit offset_diff = this_node().offset() - connected_node.offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
-	
+
+
 	frame_array_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	

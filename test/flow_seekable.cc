@@ -9,7 +9,7 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
-	set_debug_mode(debug_mode::file);
+	set_debug_mode(debug_mode::cerr);
 	set_debug_filter({"node"});
 	
 	flow::graph gr;
@@ -17,6 +17,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;	
+
 
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
@@ -37,6 +38,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
+
 	/*
 	SECTION("detailled time window test") { 
  		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
@@ -212,13 +214,12 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		sink.input.connect(passthrough1.output);
 		
 		gr.setup();
-
 		gr.run();
 		
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-	
+
 	
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
 		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
@@ -229,13 +230,12 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		sink.input.connect(passthrough1.output);
 		
 		gr.setup();
-
 		gr.run();
 				
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-	
+
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
 		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& passthrough1 = gr.add_node<passthrough_node>(3, 3);
@@ -269,7 +269,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-	
 	
 	SECTION("multiple inputs") {
 		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
@@ -346,7 +345,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		}
 	}
 	
-	
+
 	SECTION("seek") {
 		constexpr int m = missingframe;
 		std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };

@@ -11,6 +11,8 @@ ring::ring(const frame_array_properties& prop) :
 	base(prop, adjust_padding_(prop), raw_ring_allocator()) { }
 
 
+
+
 std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
 	std::size_t frame_size = prop.frame_size();
 	std::size_t page_size = system_page_size();

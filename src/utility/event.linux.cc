@@ -17,20 +17,16 @@
 
 namespace mf {
 	
-namespace {
-	std::uint64_t sticky_write_value_ = 0xfffffffffffffffe;  // TODO better sticky event implementation
-}
 
-event::event(bool sticky) : handle_(0), sticky_(sticky) {
+event::event() : handle_(0) {
 	int flags = 0;
-	if(sticky_) flags = EFD_SEMAPHORE;
-	int fd = ::eventfd(0, flags);
+	int fd = ::eventfd(0, 0);
 	if(fd != -1) handle_ = fd;
 	else throw std::system_error(errno, std::system_category(), "eventfd failed");
 }
 
 
-event::event(event&& ev) : handle_(ev.handle_), sticky_(ev.sticky_) {
+event::event(event&& ev) : handle_(ev.handle_) {
 	ev.handle_ = 0;
 }
 
@@ -54,9 +50,7 @@ bool operator==(const event& a, const event& b) {
 
 void event::notify() {
 	int fd = static_cast<int>(handle_);
-	std::uint64_t cnt;
-	if(sticky_) cnt = 1;
-	else cnt = sticky_write_value_;
+	std::uint64_t cnt = 1;
 	auto len = ::write(fd, static_cast<const void*>(&cnt), sizeof(std::uint64_t));
 	if(len != sizeof(std::uint64_t)) throw std::system_error(errno, std::system_category(), "eventfd: write failed");
 }
@@ -101,6 +95,7 @@ event* event::wait_any_(event** begin, event** end) {
 	received_event->wait();
 	return received_event;
 }
+
 
 }
 
