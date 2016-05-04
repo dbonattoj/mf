@@ -57,16 +57,16 @@ int main() {
 		auto& im_converter = graph.add_node<node::color_converter<ycbcr_color, rgba_color>>();
 		auto& di_source = graph.add_node<node::seekable_importer<yuv_importer>>(di_file, shape, sampling);
 		auto& di_converter = graph.add_node<node::color_converter<ycbcr_color, std::uint8_t>>();
-		im_converter.in.connect(im_source.out);
-		di_converter.in.connect(di_source.out);
+		im_converter.in.connect(im_source.output);
+		di_converter.in.connect(di_source.output);
 		
 		auto& wr_in = wrapper.add_input_view(cam);
-		wr_in.im.connect(im_converter.out);
-		wr_in.di.connect(di_converter.out);
+		wr_in.im.connect(im_converter.output);
+		wr_in.di.connect(di_converter.output);
 	}
 
 	auto& sink = graph.add_sink<node::exporter<video_exporter>>(out, shape);
-	sink.in.connect(wrapper.out);
+	sink.input.connect(wrapper.output);
 	
 	graph.setup();
 	graph.run();

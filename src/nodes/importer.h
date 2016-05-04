@@ -5,7 +5,7 @@
 #include <type_traits>
 #include "../io/frame_importer.h"
 #include "../io/seekable_frame_importer.h"
-#include "../flow/async_node.h"
+#include "../flow/sync_node.h"
 
 namespace mf { namespace node {
 
@@ -19,21 +19,17 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit importer(Args&&... args) :
-		flow::async_source_node(false),
-		importer_(std::forward<Args>(args)...), output(*this) { }
+	explicit importer(flow::graph& gr, Args&&... args) :
+		flow::sync_source_node(gr, false), importer_(std::forward<Args>(args)...), output(*this) { }
 	
 	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void process(node_job& job) override {
+	void process(flow::node_job& job) override {
 		auto out = job.out(output);
 		return importer_.read_frame(out);
-	}
-	
-	bool reached_end(time_unit t) const noexcept override {
-		return importer_.reached_end();
+		if(importer_.reached_end()) job.mark_end();
 	}
 };
 
@@ -49,21 +45,21 @@ public:
 	output_type<Seekable_importer::dimension, typename Seekable_importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit seekable_importer(Args&&... args) :
-		importer_(std::forward<Args>(args)...), output(*this)
+	explicit seekable_importer(flow::graph& gr, Args&&... args) :
+		flow::sync_source_node(gr), importer_(std::forward<Args>(args)...), output(*this)
 	{
 		define_source_stream_properties(true, importer_.total_duration());
 	}
 	
 	void setup() override {
-		out.define_frame_shape(importer_.frame_shape());
+		output.define_frame_shape(importer_.frame_shape());
 	}
 	
 	void pre_process(time_unit t) override {
 		if(importer_.current_time() != t) importer_.seek(t);
 	}
 	
-	void process(node_job& job) override {
+	void process(flow::node_job& job) override {
 		MF_ASSERT(importer_.current_time() == job.time());
 		auto out = job.out(output);
 		return importer_.read_frame(out);

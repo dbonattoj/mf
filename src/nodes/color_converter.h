@@ -13,14 +13,14 @@ public:
 	output_type<2, Output_color> output;
 	input_type<2, Input_color> input;
 
-	color_converter() :
-		output(*this), input(*this) { }
+	color_converter(flow::graph& gr) :
+		flow::sync_node(gr), output(*this), input(*this) { }
 	
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());
 	}
 	
-	void process(node_job& job) override {
+	void process(flow::node_job& job) override {
 		auto in = job.in(input);
 		auto out = job.out(output);
 		std::transform(

@@ -10,7 +10,7 @@ void warp<Color, Depth>::setup() {
 
 
 template<typename Color, typename Depth>
-void warp<Color, Depth>::process(node_job& job) {
+void warp<Color, Depth>::process(flow::node_job& job) {
 	Eigen_projective3 homography = homography_transformation(input_camera_, output_camera_);
 	
 	auto out = job.out(output);

@@ -9,9 +9,8 @@ using namespace mf::test;
 
 using source_node_type = flow::sync_source_node;
 using node_type = flow::sync_node;
-constexpr bool seekable = true;
+constexpr bool seekable = false;
 
-TEST_CASE("flow graph test: seekable, sync", "[flow_graph]" "[sync][seekable]") {
+TEST_CASE("flow graph test: non-seekable, sync", "[flow_graph]" "[sync][nonseekable]") {
 	#include "flow_tests_basic.icc"
-	#include "flow_tests_seek.icc"
 }

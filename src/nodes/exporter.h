@@ -17,14 +17,14 @@ public:
 	input_type<Exporter::dimension, typename Exporter::elem_type> input;
 
 	template<typename... Args>
-	explicit exporter(Args&&... args) :
-		exporter_(std::forward<Args>(args)...), input(*this) { }
+	explicit exporter(flow::graph& gr, Args&&... args) :
+		flow::sink_node(gr), exporter_(std::forward<Args>(args)...), input(*this) { }
 	
 	void setup() override {
 		// TODO define frame shape after exporter construction
 	}
 	
-	void process(node_job& job) override {
+	void process(flow::node_job& job) override {
 		auto in = job.in(input);
 		exporter_.write_frame(in);
 	}

@@ -9,9 +9,8 @@ using namespace mf::test;
 
 using source_node_type = flow::async_source_node;
 using node_type = flow::async_node;
-constexpr bool seekable = true;
+constexpr bool seekable = false;
 
-TEST_CASE("flow graph test: seekable, async", "[flow_graph]" "[async][seekable]") {
+TEST_CASE("flow graph test: non-seekable, async", "[flow_graph]" "[async][nonseekable]") {
 	#include "flow_tests_basic.icc"
-	#include "flow_tests_seek.icc"
 }

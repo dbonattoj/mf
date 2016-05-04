@@ -38,12 +38,12 @@ auto shape = make_ndsize(h, w);
 int main() {
 	flow::graph graph;
 	
-	auto& im1_source = graph.add_node<node::importer<yuv_importer>>(im1, shape, sampling);
+	auto& im1_source = graph.add_node<node::seekable_importer<yuv_importer>>(im1, shape, sampling);
 	auto& im1_converter = graph.add_node<node::color_converter<ycbcr_color, rgb_color>>();
 	auto& sink = graph.add_sink<node::exporter<video_exporter>>(out, shape);
 	
-	im1_converter.in.connect(im1_source.out);
-	sink.in.connect(im1_converter.out);
+	im1_converter.input.connect(im1_source.output);
+	sink.input.connect(im1_converter.output);
 		
 	graph.setup();
 	graph.run();

@@ -89,7 +89,9 @@ void async_node::thread_main_() {
 }
 
 
-async_node::async_node(graph& gr) : node(gr) { }
+async_node::async_node(graph& gr) : node(gr) {
+	set_prefetch_duration(3);
+}
 
 
 async_node::~async_node() {
