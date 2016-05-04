@@ -2,7 +2,7 @@
 #ifdef MF_OS_WINDOWS
 
 #include "memory.h"
-#include <windows.h.h>
+#include <windows.h>
 
 namespace mf {
 

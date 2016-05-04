@@ -63,16 +63,16 @@ private:
 	}
 	
 	void process(flow::node_job& job) override {
-		auto out = job.out(output);
 		auto in = job.in(input);
-		
-		if(callback) callback(*this, in, out);
+		auto out = job.out(input);
+	
+		if(callback) callback(*this, job);
 		if(in) out = in;
 		else out = make_frame(in.shape(), noframe);
 	}
 	
 public:
-	using callback_func = void(passthrough_node& self, ndarray_view<2, int>& in, ndarray_view<2, int>& out);
+	using callback_func = void(passthrough_node& self, flow::node_job& job);
 
 	input_type<2, int> input;
 	output_type<2, int> output;

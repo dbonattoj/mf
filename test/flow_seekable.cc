@@ -39,7 +39,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		REQUIRE(sink.check());
 	}
 
-	/*
+	
 	SECTION("detailled time window test") { 
  		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
 		auto& source = gr.add_node<sequence_frame_source>(5, shp, true);		
@@ -53,42 +53,46 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			sink.input.connect(node.output);
 			gr.setup();
 				
-			node.callback = [&](passthrough_node& self, auto& in, auto& out) {
+			node.callback = [&](passthrough_node& self, flow::node_job& job) {
+				auto in = job.in(self.input);
+				auto in_full = job.in_full(self.input);
+				std::ptrdiff_t center = in_full.time_index(job.time());
+			
 				switch(self.current_time()) {
 				case 0:
-					REQUIRE(in.view() == make_frame(shp, 0));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0 }));
+					REQUIRE(in == make_frame(shp, 0));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 0 }));
 					break;
 
 				case 1:
-					REQUIRE(in.view() == make_frame(shp, 1));
-					REQUIRE(in.full_view_center() == 1);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1 }));
+					REQUIRE(in == make_frame(shp, 1));
+					REQUIRE(center == 1);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1 }));
 					break;
 
 				case 2:
-					REQUIRE(in.view() == make_frame(shp, 2));
-					REQUIRE(in.full_view_center() == 2);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2 }));
+					REQUIRE(in == make_frame(shp, 2));
+					REQUIRE(center == 2);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2 }));
 					break;
 		
 				case 3:
-					REQUIRE(in.view() == make_frame(shp, 3));
-					REQUIRE(in.full_view_center() == 3);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2, 3 }));
+					REQUIRE(in == make_frame(shp, 3));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
 					break;
 					
 				case 4:
-					REQUIRE(in.view() == make_frame(shp, 4));
-					REQUIRE(in.full_view_center() == 3);
-					REQUIRE(compare_frames(shp, in.full_view(), { 1, 2, 3, 4 }));
+					REQUIRE(in == make_frame(shp, 4));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4 }));
 					break;
 				
 				case 5:
-					REQUIRE(in.view() == make_frame(shp, 5));
-					REQUIRE(in.full_view_center() == 3);
-					REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 5));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
 					break;
 				}
 			};
@@ -97,7 +101,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			
 			REQUIRE(sink.check());	
 		}
-	
 
 		SECTION("source --> [+3]pass --> sink") {
 			auto& node = gr.add_node<passthrough_node>(0, 3);
@@ -106,42 +109,46 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			sink.input.connect(node.output);
 			gr.setup();
 			
-			node.callback = [&](passthrough_node& self, auto& in, auto& out) {
+			node.callback = [&](passthrough_node& self, flow::node_job& job) {
+				auto in = job.in(self.input);
+				auto in_full = job.in_full(self.input);
+				std::ptrdiff_t center = in_full.time_index(job.time());
+			
 				switch(self.current_time()) {
 				case 0:
-					REQUIRE(in.view() == make_frame(shp, 0));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2, 3 }));
+					REQUIRE(in == make_frame(shp, 0));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
 					break;
 
 				case 1:
-					REQUIRE(in.view() == make_frame(shp, 1));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 1, 2, 3, 4 }));
+					REQUIRE(in == make_frame(shp, 1));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4 }));
 					break;
 
 				case 2:
-					REQUIRE(in.view() == make_frame(shp, 2));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 2));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
 					break;
 		
 				case 3:
-					REQUIRE(in.view() == make_frame(shp, 3));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 3));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 3, 4, 5 }));
 					break;
 					
 				case 4:
-					REQUIRE(in.view() == make_frame(shp, 4));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 4, 5 }));
+					REQUIRE(in == make_frame(shp, 4));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 4, 5 }));
 					break;
 				
 				case 5:
-					REQUIRE(in.view() == make_frame(shp, 5));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 5 }));
+					REQUIRE(in == make_frame(shp, 5));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 5 }));
 					break;
 				}
 			};
@@ -159,42 +166,46 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			sink.input.connect(node.output);
 			gr.setup();
 			
-			node.callback = [&](passthrough_node& self, auto& in, auto& out) {
+			node.callback = [&](passthrough_node& self, flow::node_job& job) {
+				auto in = job.in(self.input);
+				auto in_full = job.in_full(self.input);
+				std::ptrdiff_t center = in_full.time_index(job.time());
+			
 				switch(self.current_time()) {
 				case 0:
-					REQUIRE(in.view() == make_frame(shp, 0));
-					REQUIRE(in.full_view_center() == 0);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2, 3 }));
+					REQUIRE(in == make_frame(shp, 0));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
 					break;
 	
 				case 1:
-					REQUIRE(in.view() == make_frame(shp, 1));
-					REQUIRE(in.full_view_center() == 1);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2, 3, 4 }));
+					REQUIRE(in == make_frame(shp, 1));
+					REQUIRE(center == 1);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4 }));
 					break;
 	
 				case 2:
-					REQUIRE(in.view() == make_frame(shp, 2));
-					REQUIRE(in.full_view_center() == 2);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2, 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 2));
+					REQUIRE(center == 2);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4, 5 }));
 					break;
 		
 				case 3:
-					REQUIRE(in.view() == make_frame(shp, 3));
-					REQUIRE(in.full_view_center() == 3);
-					REQUIRE(compare_frames(shp, in.full_view(), { 0, 1, 2, 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 3));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4, 5 }));
 					break;
 					
 				case 4:
-					REQUIRE(in.view() == make_frame(shp, 4));
-					REQUIRE(in.full_view_center() == 3);
-					REQUIRE(compare_frames(shp, in.full_view(), { 1, 2, 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 4));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4, 5 }));
 					break;
 				
 				case 5:
-					REQUIRE(in.view() == make_frame(shp, 5));
-					REQUIRE(in.full_view_center() == 3);
-					REQUIRE(compare_frames(shp, in.full_view(), { 2, 3, 4, 5 }));
+					REQUIRE(in == make_frame(shp, 5));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
 					break;
 				}
 			};
@@ -203,7 +214,6 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 			REQUIRE(sink.check());
 		}
 	}
-	*/
 
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
 		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
@@ -269,7 +279,7 @@ TEST_CASE("flow graph seekable", "[flow_graph][seek]") {
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-	
+
 	SECTION("multiple inputs") {
 		auto& source1 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& source2 = gr.add_node<sequence_frame_source>(seq.size()-1, shp, true);

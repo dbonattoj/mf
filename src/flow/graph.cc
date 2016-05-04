@@ -31,6 +31,7 @@ void graph::stop() {
 	if(! running_) throw std::logic_error("graph is not running");
 	stop_event_.notify();
 	for(const auto& nd : nodes_) nd->stop();
+	stop_event_.reset();
 	running_ = false;
 }
 

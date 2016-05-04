@@ -51,10 +51,7 @@ ndarray<Dim, T, Allocator>::ndarray(const shape_type& shp, std::size_t padding, 
 	alignment_(alignment),
 	padding_(padding),
 	view_(nullptr, shp, strides_with_padding_(shp, padding)) // TODO stub ndarray_view instead
-{
-MF_DEBUG_T("node", "shp= ", shp);
-	
-	
+{		
 	if(alignment_ % alignof(T) != 0) throw std::invalid_argument("specified alignment must be multiple of alignof(T)");
 	allocate_();
 }

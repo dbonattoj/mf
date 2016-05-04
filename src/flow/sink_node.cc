@@ -80,6 +80,8 @@ void sink_node::pull_next_frame() {
 }
 
 void sink_node::seek(time_unit t) {
+	MF_EXPECTS(is_seekable() && stream_duration_is_defined());
+	if(t < 0 || t >= stream_duration()) throw std::invalid_argument("seek target time out of bounds");
 	set_current_time(t - 1);
 }
 

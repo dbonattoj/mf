@@ -20,7 +20,7 @@ namespace mf {
  ** calls are not accumulated. */
 class event {
 public:
-	std::uintptr_t handle_;
+	std::uintptr_t handle_; ///< OS-specific handle.
 
 	static event* wait_any_(event** begin, event** end);
 
@@ -59,6 +59,9 @@ public:
 };
 
 
+/// Event which is repeatedly received after having been notified once.
+/** Altered version of \ref event. After notified(), all subsequent wait() or wait_any() calls receive the event without
+ ** waiting, until the event is reset using reset(). */
 class sticky_event : public event {
 private:
 	bool notified_ = false;

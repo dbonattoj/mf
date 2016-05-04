@@ -10,16 +10,16 @@
 
 namespace mf {
 
-
-static bool check_host_little_endian_() {
-	union {
-		std::uint16_t s;
-		std::uint8_t c[2];
-	} d;
-	d.s = 1;
-	return d.c[0] == 1;
+namespace {
+	bool check_host_little_endian_() {
+		union {
+			std::uint16_t s;
+			std::uint8_t c[2];
+		} d;
+		d.s = 1;
+		return d.c[0] == 1;
+	}
 }
-
 
 
 const line_delimitor default_line_delimitor = line_delimitor::LF;
