@@ -13,8 +13,8 @@ node_job::node_job(node& nd) :
 
 
 node_job::~node_job() {
-	MF_ASSERT(inputs_stack_.empty());
-	MF_ASSERT(outputs_stack_.empty());
+	//MF_ASSERT(inputs_stack_.empty());
+	//MF_ASSERT(outputs_stack_.empty());
 }
 	
 

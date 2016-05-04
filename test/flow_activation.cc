@@ -46,7 +46,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-/*
+
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
 		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
@@ -57,7 +57,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-*/
+
 
 	SECTION("source -> passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
@@ -76,7 +76,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			REQUIRE(sink.check());
 			REQUIRE(gr.current_time() == last);
 		}
-		/*
+		
 		SECTION("test 2") {
 			passthrough.activation = act2;
 			sink.activation = act1;
@@ -86,9 +86,7 @@ TEST_CASE("flow graph activation", "[flow_graph][activation]") {
 			REQUIRE(sink.check());
 			REQUIRE(gr.current_time() == last);
 		}
-		*/
 	}
-return;
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source>(last, shp, true);
@@ -104,7 +102,6 @@ return;
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-
 
 	SECTION("two inputs") {
 		/*

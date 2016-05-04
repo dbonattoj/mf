@@ -39,7 +39,6 @@ public:
 	}
 	
 	void process(flow::node_job& job) override {
-		if(! output.is_active()) return;
 		time_unit t = job.time();
 		produced_frames_.emplace(t);
 		job.out(output) = make_frame(frame_shape_, t);
@@ -68,7 +67,7 @@ private:
 	
 		if(callback) callback(*this, job);
 		if(in) out = in;
-		else out = make_frame(in.shape(), noframe);
+		else out = make_frame(input.frame_shape(), noframe);
 	}
 	
 public:
@@ -186,7 +185,7 @@ public:
 		} else if(in2) {
 			iout = frame_index(in2);
 		}
-		out = make_frame(in1.shape(), iout);
+		out = make_frame(input1.frame_shape(), iout);
 	}
 };
 
