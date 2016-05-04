@@ -98,6 +98,8 @@ timed_frames_view sync_node_output::begin_read(time_unit duration) {
 	if(end_time != -1 && ring_->read_start_time() + duration > end_time)
 		duration = ring_->readable_duration();
 
+	MF_ASSERT(duration <= ring_->readable_duration());
+
 	return ring_->begin_read(duration);
 }
 

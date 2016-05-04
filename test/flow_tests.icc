@@ -384,9 +384,8 @@ SECTION("seek") {
 		// seek backward, after end was already reached
 		gr.seek(7);
 		gr.run_for(2);
-		
+
 		// stop, when not at end
-		
 		REQUIRE(sink.check());
 	}
 
