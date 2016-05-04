@@ -113,7 +113,7 @@ void ndarray_view<Dim, T>::reset(const ndarray_view& other) noexcept {
 
 
 template<std::size_t Dim, typename T> template<typename T2>
-void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {
+void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {	
 	if(shape() != other.shape()) throw std::invalid_argument("ndarray views must have same shape for assignment");
 	std::copy(other.begin(), other.end(), begin());
 }

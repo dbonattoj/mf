@@ -35,8 +35,8 @@ bool async_node::frame_() {
 			
 			// begin reading frame 
 			timed_frames_view in_view = in.begin_read_frame(t);
-			MF_ASSERT(in_view.span().includes(t));
 			if(in_view.is_null()) { stopped = true; break; }
+			MF_ASSERT(in_view.span().includes(t));
 			
 			// add to job
 			job.push_input(in, in_view);
@@ -154,7 +154,7 @@ timed_frames_view async_node_output::begin_read(time_unit duration) {
 		
 		got_view = ring_->try_begin_read(duration, view); // TODO try_begin_read: return view? instead
 	} while(! got_view);
-	
+		
 	return view;
 }
 

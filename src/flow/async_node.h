@@ -2,6 +2,7 @@
 #define MF_FLOW_ASYNC_NODE_H_
 
 #include "node.h"
+#include "node_job.h"
 #include "node_io_wrapper.h"
 #include "../queue/shared_ring.h"
 #include <thread>

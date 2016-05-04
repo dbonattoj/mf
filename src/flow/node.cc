@@ -1,4 +1,5 @@
 #include "node.h"
+#include "node_job.h"
 
 namespace mf { namespace flow {
 
@@ -151,62 +152,6 @@ void node::cancel_job(node_job& job) {
 
 bool node::reached_end() const noexcept {
 	return (end_time_ != -1) && (current_time_ >= end_time_ - 1);
-}
-
-
-
-
-/////
-
-
-node_job::node_job(node& nd) :
-	node_(nd)
-{
-	input_views_.reserve(nd.inputs().size());
-	output_views_.reserve(nd.outputs().size());
-}
-
-
-node_job::~node_job() {
-	//MF_ASSERT(input_views_.size() == 0);
-	//MF_ASSERT(output_views_.size() == 0);
-}
-	
-
-void node_job::push_input(node_input& in, const timed_frames_view& vw) {
-	std::ptrdiff_t index = in.index();
-	while(input_views_.size() <= index) input_views_.emplace_back();
-	input_views_[index].reset(vw);
-}
-
-
-void node_job::push_output(node_output& out, const frame_view& vw) {
-	std::ptrdiff_t index = out.index();
-	while(output_views_.size() <= index) output_views_.emplace_back();
-	output_views_[index].reset(vw);
-}
-
-
-node_input* node_job::pop_input() {
-	if(input_views_.size() == 0) return nullptr;
-	timed_frames_view& back = input_views_.back();
-	input_views_.pop_back();
-	if(back.is_null()) return pop_input();
-	else return &node_.inputs()[input_views_.size()].get();
-}
-
-
-node_output* node_job::pop_output() {
-	if(output_views_.size() == 0) return nullptr;
-	frame_view& back = output_views_.back();
-	output_views_.pop_back();
-	if(back.is_null()) return pop_output();
-	else return &node_.outputs()[output_views_.size()].get(); // TODO simplify
-}
-	
-	
-void node_job::define_time(time_unit t) {
-	time_ = t;
 }
 
 

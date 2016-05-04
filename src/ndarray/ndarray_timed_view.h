@@ -23,6 +23,8 @@ public:
 
 	ndarray_timed_view(const base& vw, time_unit start_time) :
 		base(vw), start_time_(start_time) { }
+	
+	static ndarray_timed_view null() { return ndarray_timed_view(); }
 
 	time_unit start_time() const { return start_time_; }
 	time_unit end_time() const { return start_time_ + base::shape().front(); }

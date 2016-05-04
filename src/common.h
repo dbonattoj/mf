@@ -55,6 +55,7 @@ using time_unit = std::ptrdiff_t;
 using byte = std::uint8_t;
 
 
+
 class time_span : public ndspan<1, time_unit> {
 	using base = ndspan<1, time_unit>;
 	

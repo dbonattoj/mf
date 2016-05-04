@@ -1,6 +1,7 @@
 #ifndef MF_NDARRAY_VIEW_H_
 #define MF_NDARRAY_VIEW_H_
 
+#include "../common.h"
 #include "ndcoord.h"
 #include "ndarray_iterator.h"
 #include "../utility/misc.h"
@@ -60,8 +61,6 @@ protected:
 public:
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
 
-	static ndarray_view null() { return ndarray_view(); }
-
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
 	ndarray_view(pointer start, const shape_type&, const strides_type&);
 	ndarray_view(pointer start, const shape_type& shape);
@@ -69,16 +68,17 @@ public:
 	ndarray_view(const ndarray_view<Dim, std::remove_const_t<T>>& arr) :
 		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
 	
+	static ndarray_view null() { return ndarray_view(); }
+	bool is_null() const noexcept { return (start_ == nullptr); }
+	explicit operator bool () const noexcept { return ! is_null(); }
+
 	void reset(const ndarray_view& other) noexcept;
 	void reset() noexcept { reset(ndarray_view()); }
 	void reset(pointer start, const shape_type& shape, const strides_type& strides)
 		{ reset(ndarray_view(start, shape, strides)); }
 	void reset(pointer start, const shape_type& shape)
 		{ reset(ndarray_view(start, shape)); }
-	
-	bool is_null() const noexcept { return (start_ == nullptr); }
-	explicit operator bool () const noexcept { return ! is_null(); }
-	
+		
 	template<typename Arg> const ndarray_view& operator=(Arg&& arg) const
 		{ assign(std::forward<Arg>(arg)); return *this; }
 	const ndarray_view& operator=(const ndarray_view& other) const

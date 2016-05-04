@@ -5,4 +5,5 @@ output/
 dist/
 data/
 push.sh
+cloc.sh
 debug.txt

@@ -2,6 +2,8 @@ namespace mf {
 
 template<std::size_t Dim, typename Elem>
 ndarray_frame_view_generic to_generic_frame(const ndarray_view<Dim, Elem>& view) {
+	if(view.is_null()) return ndarray_frame_view_generic::null();
+	
 	std::size_t length = view.shape().product() * view.strides().back();
 	byte* data = reinterpret_cast<byte*>(view.start());
 	return ndarray_frame_view_generic(data, make_ndsize(length));
@@ -10,6 +12,8 @@ ndarray_frame_view_generic to_generic_frame(const ndarray_view<Dim, Elem>& view)
 
 template<std::size_t Dim, typename Elem>
 ndarray_view<Dim, Elem> from_generic_frame(const ndarray_frame_view_generic& view, const ndsize<Dim>& shape) {
+	if(view.is_null()) return ndarray_view<Dim, Elem>::null();
+	
 	if(shape.product() * sizeof(Elem) != view.size())
 		throw std::invalid_argument("shape does not match size of generic frame view");
 	Elem* ptr = reinterpret_cast<Elem*>(view.start());
@@ -19,6 +23,8 @@ ndarray_view<Dim, Elem> from_generic_frame(const ndarray_frame_view_generic& vie
 
 template<std::size_t Dim, typename Elem>
 ndarray_view_generic to_generic(const ndarray_view<Dim + 1, Elem>& view) {
+	if(view.is_null()) return ndarray_view_generic::null();
+	
 	std::size_t frame_length = view.shape().tail().product() * view.strides().back();
 	std::size_t frame_count = view.shape().front();
 	std::ptrdiff_t frame_stride = view.strides().front();
@@ -29,12 +35,15 @@ ndarray_view_generic to_generic(const ndarray_view<Dim + 1, Elem>& view) {
 
 template<std::size_t Dim, typename Elem>
 ndarray_timed_view_generic to_generic_timed(const ndarray_timed_view<Dim + 1, Elem>& view) {
+	if(view.is_null()) return ndarray_timed_view_generic::null();
 	return ndarray_timed_view_generic(to_generic(view), view.start_time());
 }
 
 
 template<std::size_t Dim, typename Elem>
 ndarray_view<Dim + 1, Elem> from_generic(const ndarray_view_generic& view, const ndsize<Dim>& frame_shape) {
+	if(view.is_null()) return ndarray_view<Dim + 1, Elem>::null();
+	
 	if(view.shape().front() != 0 && (frame_shape.product() * sizeof(Elem) != view.shape().tail().product()))
 		throw std::invalid_argument("frame shape does not match size of generic view");
 	std::size_t frame_count = view.shape().front();
@@ -50,6 +59,7 @@ ndarray_view<Dim + 1, Elem> from_generic(const ndarray_view_generic& view, const
 
 template<std::size_t Dim, typename Elem>
 ndarray_timed_view<Dim + 1, Elem> from_generic_timed(const ndarray_timed_view_generic& view, const ndsize<Dim>& frame_shape) {
+	if(view.is_null()) return ndarray_timed_view<Dim + 1, Elem>::null();
 	return ndarray_timed_view<Dim + 1, Elem>(from_generic<Dim, Elem>(view, frame_shape), view.start_time());
 }
 

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "node.h"
+#include "node_job.h"
 #include "node_io_wrapper.h"
 #include "../queue/frame.h"
 #include "../queue/timed_ring.h"

@@ -2,6 +2,7 @@
 #define MF_FLOW_SINK_NODE_H_
 
 #include "node.h"
+#include "node_job.h"
 #include "node_io_wrapper.h"
 
 namespace mf { namespace flow {

@@ -91,57 +91,6 @@ public:
 };
 
 
-/// Work unit of flow graph node.
-/** Contains input and output views for concrete node to read/write a frame to. Handles cast from internel genetic views
- ** to ndarray views of specified dimension and element type. */
-class node_job {
-private:
-	node& node_;
-	time_unit time_ = -1;
-	bool end_marked_ = false;
-	std::vector<timed_frames_view> input_views_;
-	std::vector<frame_view> output_views_;
-
-public:
-	node_job(node&);
-	~node_job();
-	
-	/// \name Set up interface.
-	///@{
-	void define_time(time_unit t);
-	void push_input(node_input&, const timed_frames_view&);
-	void push_output(node_output&, const frame_view&);
-	node_input* pop_input();
-	node_output* pop_output();
-	bool end_was_marked() const noexcept { return end_marked_; }
-	///@}
-	
-	time_unit time() const noexcept { return time_; }
-	void mark_end() { end_marked_ = true; }
-
-	template<typename Input>
-	decltype(auto) in_full(Input& port) {
-		return from_generic_timed<Input::dimension, typename Input::elem_type>(
-			input_views_.at(port.index()),
-			port.frame_shape()
-		);
-	}
-
-	template<typename Input>
-	decltype(auto) in(Input& port) {
-		return in_full(port).at_time(time_);
-	}	
-
-	template<typename Output>
-	decltype(auto) out(Output& port) {
-		return from_generic_frame<Output::dimension, typename Output::elem_type>(
-			output_views_.at(port.index()),
-			port.frame_shape()
-		);
-	}
-};
-
-
 /// Output port of node in flow graph.
 class node_output {
 private:
