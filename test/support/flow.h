@@ -9,11 +9,11 @@
 #include "../../src/flow/graph.h"
 #include "../../src/flow/node.h"
 #include "../../src/flow/sink_node.h"
-#include "../../src/flow/async_node.h"
 #include "../../src/ndarray/ndcoord.h"
 #include "../../src/utility/string.h"
 #include "ndarray.h"
 #include "thread.h"
+
 
 namespace mf { namespace test {
 
@@ -21,18 +21,19 @@ namespace mf { namespace test {
 constexpr int noframe = -2;
 constexpr int missingframe = -3;
 
-class sequence_frame_source : public flow::async_source_node {
+template<typename Base>
+class sequence_frame_source : public Base {
 private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
 	std::set<int> produced_frames_;
 
 public:
-	output_type<2, int> output;
+	typename Base::template output_type<2, int> output;
 	
 	explicit sequence_frame_source(flow::graph& gr, time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		flow::async_source_node(gr, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
-		output(*this) { name = "source"; }
+		Base(gr, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
+		output(*this) { Base::name = "source"; }
 	
 	void setup() override {
 		output.define_frame_shape(frame_shape_);
@@ -51,7 +52,8 @@ public:
 };
 
 
-class passthrough_node : public flow::async_node {
+template<typename Base>
+class passthrough_node : public Base {
 private:
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
@@ -73,16 +75,16 @@ private:
 public:
 	using callback_func = void(passthrough_node& self, flow::node_job& job);
 
-	input_type<2, int> input;
-	output_type<2, int> output;
+	typename Base::template input_type<2, int> input;
+	typename Base::template output_type<2, int> output;
 	
 	std::vector<bool> activation;
 	std::function<callback_func> callback;
 
 	passthrough_node(flow::graph& gr, time_unit past_window, time_unit future_window) :
-		flow::async_node(gr),
+		Base(gr),
 		input(*this, past_window, future_window),
-		output(*this) { name = "passthrough"; }
+		output(*this) { Base::name = "passthrough"; }
 };
 
 
@@ -138,20 +140,21 @@ public:
 
 
 
-class input_synchronize_test_node : public flow::async_node {
+template<typename Base>
+class input_synchronize_test_node : public Base {
 public:
-	input_type<2, int> input1;
-	input_type<2, int> input2;
-	output_type<2, int> output;
+	typename Base::template input_type<2, int> input1;
+	typename Base::template input_type<2, int> input2;
+	typename Base::template output_type<2, int> output;
 	
 	std::vector<bool> activation1;
 	std::vector<bool> activation2;
 	
 	input_synchronize_test_node(flow::graph& gr, time_unit prefetch = 0) :
-		flow::async_node(gr),
+		Base(gr),
 		input1(*this),
 		input2(*this),
-		output(*this) { name = "merge"; }
+		output(*this) { Base::name = "merge"; }
 
 
 	void setup() override {

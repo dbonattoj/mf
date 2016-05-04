@@ -16,13 +16,9 @@
 	#define MF_DEBUG(...) MF_DEBUG_T("", __VA_ARGS__)	
 
 	#define MF_DEBUG_EXPR_T(tag, ...) \
-		([&](auto... args) { \
-			::mf::detail::debug_print( \
-				tag, \
-				MF_DEBUG_HEADER("(" #__VA_ARGS__ ") = ", ", "), \
-				args... \
-			); \
-		})(__VA_ARGS__)
+		([&](const ::mf::detail::debug_header& header, auto... args) { \
+			::mf::detail::debug_print(tag, header, args...); \
+		})(MF_DEBUG_HEADER("(" #__VA_ARGS__ ") = ", ", "), __VA_ARGS__)
 
 	#define MF_DEBUG_EXPR(...) MF_DEBUG_EXPR_T("", __VA_ARGS__)
 

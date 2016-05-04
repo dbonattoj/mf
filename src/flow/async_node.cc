@@ -126,7 +126,6 @@ void async_node_output::setup() {
 	time_unit offset_diff = this_node().offset() - connected_node.offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 
-
 	frame_array_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	

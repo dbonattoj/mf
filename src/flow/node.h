@@ -70,7 +70,7 @@ public:
 	virtual void launch() = 0; ///< Called by graph for all nodes, before any frame is pulled from sink.
 	virtual void stop() = 0; ///< Called by graph for all node, before destruction of any node.
 	
-	virtual void pull() { }
+	virtual void process_next_frame() { }
 	
 	time_unit end_time() const noexcept { return end_time_; }
 	bool reached_end() const noexcept;
@@ -120,7 +120,7 @@ public:
 	const frame_format& format() const noexcept { return format_; }
 
 	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
-	node_input& connected_input() const noexcept { return *connected_input_; }
+	node_input& connected_input() const noexcept { MF_EXPECTS(is_connected()); return *connected_input_; }
 	void input_has_connected(node_input&);
 	
 	// TODO adjust format for thin node series
@@ -177,8 +177,8 @@ public:
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_output& connected_output() const noexcept { return *connected_output_; }
-	node& connected_node() const noexcept { return connected_output().this_node(); }
+	node_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return *connected_output_; }
+	node& connected_node() const noexcept { MF_EXPECTS(is_connected()); return connected_output().this_node(); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);

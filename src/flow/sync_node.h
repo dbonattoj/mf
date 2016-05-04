@@ -33,8 +33,9 @@ public:
 	void launch() final override;
 	void stop() final override;
 	
-	void pull();
+	void process_next_frame();
 };
+
 
 /// Synchronous source node base class.
 class sync_source_node : public sync_node {

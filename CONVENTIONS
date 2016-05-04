@@ -14,3 +14,10 @@ nodes:
 - sync (sync_source)
 - sink
 - thin
+
+
+.h = header (C++)
+.cc = module (C++)
+.tcc = template implementation (+ some inlines), included at end of .h
+.icc = other file included from header (exceptional)
+

@@ -13,14 +13,14 @@ void sync_node::launch() { }
 void sync_node::stop() { }
 
 
-void sync_node::pull() {	
+void sync_node::process_next_frame() {	
 	node_job job = make_job();
 	time_unit t;
 	
 	node_output& out = outputs().front();
 	auto out_view = out.begin_write_frame(t);
 	MF_ASSERT(! out_view.is_null());
-	if(end_time()) MF_ASSERT(t < end_time());
+	if(end_time() != -1) MF_ASSERT(t < end_time());
 		
 	set_current_time(t);
 	
@@ -72,7 +72,7 @@ void sync_node::pull() {
 void sync_node_output::setup() {
 	node& connected_node = connected_input().this_node();
 	
-	time_unit offset_diff = connected_node.offset() - this_node().offset();
+	time_unit offset_diff = this_node().offset() - connected_node.offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 	
 	frame_array_properties prop(format(), frame_length(), required_capacity);
@@ -85,13 +85,19 @@ void sync_node_output::pull(time_span span) {
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
 
-	// pull frames from node until requested span filled, or end reached
-	while(!ring_->readable_time_span().includes(span) && !this_node().reached_end())
-		this_node().pull();
+	// pull frames from node until requested span filled, or end reached	
+	while(!ring_->readable_time_span().includes(span) && !this_node().reached_end()) {
+		this_node().process_next_frame();
+	}
 }
 
 
 timed_frames_view sync_node_output::begin_read(time_unit duration) {
+	time_unit end_time = this_node().end_time();
+	
+	if(end_time != -1 && ring_->read_start_time() + duration > end_time)
+		duration = ring_->readable_duration();
+
 	return ring_->begin_read(duration);
 }
 

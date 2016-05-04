@@ -164,8 +164,8 @@ node_output::node_output(node& nd, const frame_format& format) :
 	format_(format) { }
 	
 
-void node_output::input_has_connected(node_input& in) {
-	connected_input_ = &in;
+void node_output::input_has_connected(node_input& input) {
+	connected_input_ = &input;
 }
 
 
