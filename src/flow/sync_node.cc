@@ -86,7 +86,7 @@ void sync_node_output::pull(time_span span) {
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
 
 	// pull frames from node until requested span filled, or end reached	
-	while(!ring_->readable_time_span().includes(span) && !this_node().reached_end()) {
+	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != this_node().end_time()) {
 		this_node().process_next_frame();
 	}
 }

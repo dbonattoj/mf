@@ -3,348 +3,348 @@ set_debug_filter({"node"});
 
 flow::graph gr;
 auto shp = make_ndsize(10, 10);
-
-std::vector<int> seq(20);
-for(int i = 0; i < seq.size(); ++i) seq[i] = i;
-
-
-SECTION("source -> sink") {
-	auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-	sink.input.connect(source.output);
-	gr.setup();
-	gr.run();
-	REQUIRE(sink.check());
-}
-
-
-SECTION("source --> passthrough --> sink") {
-	auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 0);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-	passthrough.input.connect(source.output);
-	sink.input.connect(passthrough.output);
-	gr.setup();
-	gr.run();
-	REQUIRE(sink.check());
-}
-
-
-SECTION("source1 --> [+3]passthrough1 --> sink") {
-	auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(0, 3);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-
-	passthrough1.input.connect(source1.output);
-	sink.input.connect(passthrough1.output);
 	
-	gr.setup();
-	gr.run();
-	
-	REQUIRE(gr.current_time() == seq.size()-1);
-	REQUIRE(sink.check());
-}
+SECTION("basic") {		
+	std::vector<int> seq(20);
+	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
 
-SECTION("source1 --> [-3]passthrough1 --> sink") {
-	auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 0);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-
-	passthrough1.input.connect(source1.output);
-	sink.input.connect(passthrough1.output);
-	
-	gr.setup();
-	gr.run();
-			
-	REQUIRE(gr.current_time() == seq.size()-1);
-	REQUIRE(sink.check());
-}
-
-SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
-	auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 3);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-
-	passthrough1.input.connect(source1.output);
-	sink.input.connect(passthrough1.output);
-	
-	gr.setup();
-
-	gr.run();
-			
-	REQUIRE(gr.current_time() == seq.size()-1);
-	REQUIRE(sink.check());
-}
-
-SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
-	auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-	auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(2, 2);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-
-	passthrough1.input.connect(source1.output);
-	passthrough2.input.connect(passthrough1.output);
-	sink.input.connect(passthrough2.output);
-	
-	gr.setup();
-
-	gr.run();
-	
-	REQUIRE(gr.current_time() == seq.size()-1);
-	REQUIRE(sink.check());
-}
-
-SECTION("detailled time window test") { 
-	const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
-	auto& source = gr.add_node<sequence_frame_source<source_node_type>>(5, shp, true);		
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-
-
-	SECTION("source --> [-3]pass --> sink") {
-		auto& node = gr.add_node<passthrough_node<node_type>>(3, 0);
-
-		node.input.connect(source.output);
-		sink.input.connect(node.output);
+	SECTION("source -> sink") {
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		sink.input.connect(source.output);
 		gr.setup();
-			
-		node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
-			auto in = job.in(self.input);
-			auto in_full = job.in_full(self.input);
-			std::ptrdiff_t center = in_full.time_index(job.time());
-		
-			switch(self.current_time()) {
-			case 0:
-				REQUIRE(in == make_frame(shp, 0));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 0 }));
-				break;
-
-			case 1:
-				REQUIRE(in == make_frame(shp, 1));
-				REQUIRE(center == 1);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1 }));
-				break;
-
-			case 2:
-				REQUIRE(in == make_frame(shp, 2));
-				REQUIRE(center == 2);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2 }));
-				break;
-	
-			case 3:
-				REQUIRE(in == make_frame(shp, 3));
-				REQUIRE(center == 3);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
-				break;
-				
-			case 4:
-				REQUIRE(in == make_frame(shp, 4));
-				REQUIRE(center == 3);
-				REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4 }));
-				break;
-			
-			case 5:
-				REQUIRE(in == make_frame(shp, 5));
-				REQUIRE(center == 3);
-				REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
-				break;
-			}
-		};
-
-		gr.run();
-		
-		REQUIRE(sink.check());	
-	}
-
-	SECTION("source --> [+3]pass --> sink") {
-		auto& node = gr.add_node<passthrough_node<node_type>>(0, 3);
-
-		node.input.connect(source.output);
-		sink.input.connect(node.output);
-		gr.setup();
-		
-		node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
-			auto in = job.in(self.input);
-			auto in_full = job.in_full(self.input);
-			std::ptrdiff_t center = in_full.time_index(job.time());
-		
-			switch(self.current_time()) {
-			case 0:
-				REQUIRE(in == make_frame(shp, 0));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
-				break;
-
-			case 1:
-				REQUIRE(in == make_frame(shp, 1));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4 }));
-				break;
-
-			case 2:
-				REQUIRE(in == make_frame(shp, 2));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
-				break;
-	
-			case 3:
-				REQUIRE(in == make_frame(shp, 3));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 3, 4, 5 }));
-				break;
-				
-			case 4:
-				REQUIRE(in == make_frame(shp, 4));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 4, 5 }));
-				break;
-			
-			case 5:
-				REQUIRE(in == make_frame(shp, 5));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 5 }));
-				break;
-			}
-		};
-		
-		gr.run();
-		
-		REQUIRE(sink.check());
-	}
-
-
-	SECTION("source --> [-3,+3]pass --> sink") {
-		auto& node = gr.add_node<passthrough_node<node_type>>(3, 3);
-
-		node.input.connect(source.output);
-		sink.input.connect(node.output);
-		gr.setup();
-		
-		node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
-			auto in = job.in(self.input);
-			auto in_full = job.in_full(self.input);
-			std::ptrdiff_t center = in_full.time_index(job.time());
-		
-			switch(self.current_time()) {
-			case 0:
-				REQUIRE(in == make_frame(shp, 0));
-				REQUIRE(center == 0);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
-				break;
-
-			case 1:
-				REQUIRE(in == make_frame(shp, 1));
-				REQUIRE(center == 1);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4 }));
-				break;
-
-			case 2:
-				REQUIRE(in == make_frame(shp, 2));
-				REQUIRE(center == 2);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4, 5 }));
-				break;
-	
-			case 3:
-				REQUIRE(in == make_frame(shp, 3));
-				REQUIRE(center == 3);
-				REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4, 5 }));
-				break;
-				
-			case 4:
-				REQUIRE(in == make_frame(shp, 4));
-				REQUIRE(center == 3);
-				REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4, 5 }));
-				break;
-			
-			case 5:
-				REQUIRE(in == make_frame(shp, 5));
-				REQUIRE(center == 3);
-				REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
-				break;
-			}
-		};
-
 		gr.run();
 		REQUIRE(sink.check());
 	}
-}
-
-
-SECTION("multiple inputs") {
-	auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& source2 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
-	auto& sink = gr.add_sink<expected_frames_sink>(seq);
-	auto& merge = gr.add_node<input_synchronize_test_node<node_type>>();
 	
-	SECTION("graph 1") {
-		/*
-		source1 --> [+5]passthrough --> merge --> sink
-		source2 ----------------------> /
-		*/
-		
-		auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 5);
 	
-		passthrough.input.connect(source1.output);
-		merge.input1.connect(passthrough.output);
-		merge.input2.connect(source2.output);
-		sink.input.connect(merge.output);
-	
+	SECTION("source --> passthrough --> sink") {
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 0);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		passthrough.input.connect(source.output);
+		sink.input.connect(passthrough.output);
 		gr.setup();
-		
 		gr.run();
-		
-		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-
-	SECTION("graph 2") {
-		/*
-		source1 --> [-3, +1]passthrough1 --> merge --> sink
-		source2 --> [-1, +2]passthrough2 --> /
-		*/
-		
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-		auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
+	
+	
+	SECTION("source1 --> [+3]passthrough1 --> sink") {
+		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(0, 3);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 	
 		passthrough1.input.connect(source1.output);
-		passthrough2.input.connect(source2.output);
-		merge.input1.connect(passthrough1.output);
-		merge.input2.connect(passthrough2.output);
-		sink.input.connect(merge.output);
-	
-		gr.setup();
+		sink.input.connect(passthrough1.output);
 		
+		gr.setup();
 		gr.run();
 		
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
 	
-	SECTION("graph 3") {
-		/*
-		source1 --> [-3, +1]passthrough1 ---------------------------> merge --> sink
-		source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2 --> /
-		*/
-		
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-		auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
-		auto& passthrough3 = gr.add_node<passthrough_node<node_type>>(2, 2);
+	SECTION("source1 --> [-3]passthrough1 --> sink") {
+		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 0);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
 	
 		passthrough1.input.connect(source1.output);
-		passthrough3.input.connect(source2.output);
-		passthrough2.input.connect(passthrough3.output);
-		merge.input1.connect(passthrough1.output);
-		merge.input2.connect(passthrough2.output);
-		sink.input.connect(merge.output);
+		sink.input.connect(passthrough1.output);
+		
+		gr.setup();
+		gr.run();
+				
+		REQUIRE(gr.current_time() == seq.size()-1);
+		REQUIRE(sink.check());
+	}
 	
-		gr.setup();			
+	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
+		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 3);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+	
+		passthrough1.input.connect(source1.output);
+		sink.input.connect(passthrough1.output);
+		
+		gr.setup();
+	
+		gr.run();
+				
+		REQUIRE(gr.current_time() == seq.size()-1);
+		REQUIRE(sink.check());
+	}
+	
+	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
+		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
+		auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(2, 2);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+	
+		passthrough1.input.connect(source1.output);
+		passthrough2.input.connect(passthrough1.output);
+		sink.input.connect(passthrough2.output);
+		
+		gr.setup();
+	
 		gr.run();
 		
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
+	
+	SECTION("detailled time window test") { 
+		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(5, shp, true);		
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+	
+	
+		SECTION("source --> [-3]pass --> sink") {
+			auto& node = gr.add_node<passthrough_node<node_type>>(3, 0);
+	
+			node.input.connect(source.output);
+			sink.input.connect(node.output);
+			gr.setup();
+				
+			node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
+				auto in = job.in(self.input);
+				auto in_full = job.in_full(self.input);
+				std::ptrdiff_t center = in_full.time_index(job.time());
+			
+				switch(self.current_time()) {
+				case 0:
+					REQUIRE(in == make_frame(shp, 0));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 0 }));
+					break;
+	
+				case 1:
+					REQUIRE(in == make_frame(shp, 1));
+					REQUIRE(center == 1);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1 }));
+					break;
+	
+				case 2:
+					REQUIRE(in == make_frame(shp, 2));
+					REQUIRE(center == 2);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2 }));
+					break;
+		
+				case 3:
+					REQUIRE(in == make_frame(shp, 3));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
+					break;
+					
+				case 4:
+					REQUIRE(in == make_frame(shp, 4));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4 }));
+					break;
+				
+				case 5:
+					REQUIRE(in == make_frame(shp, 5));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
+					break;
+				}
+			};
+	
+			gr.run();
+			
+			REQUIRE(sink.check());	
+		}
+	
+		SECTION("source --> [+3]pass --> sink") {
+			auto& node = gr.add_node<passthrough_node<node_type>>(0, 3);
+	
+			node.input.connect(source.output);
+			sink.input.connect(node.output);
+			gr.setup();
+			
+			node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
+				auto in = job.in(self.input);
+				auto in_full = job.in_full(self.input);
+				std::ptrdiff_t center = in_full.time_index(job.time());
+			
+				switch(self.current_time()) {
+				case 0:
+					REQUIRE(in == make_frame(shp, 0));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
+					break;
+	
+				case 1:
+					REQUIRE(in == make_frame(shp, 1));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4 }));
+					break;
+	
+				case 2:
+					REQUIRE(in == make_frame(shp, 2));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
+					break;
+		
+				case 3:
+					REQUIRE(in == make_frame(shp, 3));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 3, 4, 5 }));
+					break;
+					
+				case 4:
+					REQUIRE(in == make_frame(shp, 4));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 4, 5 }));
+					break;
+				
+				case 5:
+					REQUIRE(in == make_frame(shp, 5));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 5 }));
+					break;
+				}
+			};
+			
+			gr.run();
+			
+			REQUIRE(sink.check());
+		}
+	
+	
+		SECTION("source --> [-3,+3]pass --> sink") {
+			auto& node = gr.add_node<passthrough_node<node_type>>(3, 3);
+	
+			node.input.connect(source.output);
+			sink.input.connect(node.output);
+			gr.setup();
+			
+			node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
+				auto in = job.in(self.input);
+				auto in_full = job.in_full(self.input);
+				std::ptrdiff_t center = in_full.time_index(job.time());
+			
+				switch(self.current_time()) {
+				case 0:
+					REQUIRE(in == make_frame(shp, 0));
+					REQUIRE(center == 0);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3 }));
+					break;
+	
+				case 1:
+					REQUIRE(in == make_frame(shp, 1));
+					REQUIRE(center == 1);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4 }));
+					break;
+	
+				case 2:
+					REQUIRE(in == make_frame(shp, 2));
+					REQUIRE(center == 2);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4, 5 }));
+					break;
+		
+				case 3:
+					REQUIRE(in == make_frame(shp, 3));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 0, 1, 2, 3, 4, 5 }));
+					break;
+					
+				case 4:
+					REQUIRE(in == make_frame(shp, 4));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 1, 2, 3, 4, 5 }));
+					break;
+				
+				case 5:
+					REQUIRE(in == make_frame(shp, 5));
+					REQUIRE(center == 3);
+					REQUIRE(compare_frames(shp, in_full, { 2, 3, 4, 5 }));
+					break;
+				}
+			};
+	
+			gr.run();
+			REQUIRE(sink.check());
+		}
+	}
+	
+	
+	SECTION("multiple inputs") {
+		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& source2 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& merge = gr.add_node<input_synchronize_test_node<node_type>>();
+		
+		SECTION("graph 1") {
+			/*
+			source1 --> [+5]passthrough --> merge --> sink
+			source2 ----------------------> /
+			*/
+			
+			auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 5);
+		
+			passthrough.input.connect(source1.output);
+			merge.input1.connect(passthrough.output);
+			merge.input2.connect(source2.output);
+			sink.input.connect(merge.output);
+		
+			gr.setup();
+			
+			gr.run();
+			
+			REQUIRE(gr.current_time() == seq.size()-1);
+			REQUIRE(sink.check());
+		}
+	
+		SECTION("graph 2") {
+			/*
+			source1 --> [-3, +1]passthrough1 --> merge --> sink
+			source2 --> [-1, +2]passthrough2 --> /
+			*/
+			
+			auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
+			auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
+		
+			passthrough1.input.connect(source1.output);
+			passthrough2.input.connect(source2.output);
+			merge.input1.connect(passthrough1.output);
+			merge.input2.connect(passthrough2.output);
+			sink.input.connect(merge.output);
+		
+			gr.setup();
+			
+			gr.run();
+			
+			REQUIRE(gr.current_time() == seq.size()-1);
+			REQUIRE(sink.check());
+		}
+		
+		SECTION("graph 3") {
+			/*
+			source1 --> [-3, +1]passthrough1 ---------------------------> merge --> sink
+			source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2 --> /
+			*/
+			
+			auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
+			auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
+			auto& passthrough3 = gr.add_node<passthrough_node<node_type>>(2, 2);
+		
+			passthrough1.input.connect(source1.output);
+			passthrough3.input.connect(source2.output);
+			passthrough2.input.connect(passthrough3.output);
+			merge.input1.connect(passthrough1.output);
+			merge.input2.connect(passthrough2.output);
+			sink.input.connect(merge.output);
+		
+			gr.setup();			
+			gr.run();
+			
+			REQUIRE(gr.current_time() == seq.size()-1);
+			REQUIRE(sink.check());
+		}
+	}
 }
-
 
 SECTION("seek") {
 	constexpr int m = missingframe;
@@ -444,4 +444,122 @@ SECTION("seek") {
 		// stop, when not at end
 		REQUIRE(sink.check());
 	}
+}
+
+SECTION("activation") {
+	constexpr int n = noframe;
+	
+	const std::vector<bool>& act1     { 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1,  1,  1 };
+	const std::vector<int>& seq1      { 0, 1, 2, n, n, n, 6, 7, n, n, 10, 11, 12 };
+	const std::vector<bool>& act2     { 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1,  0,  0 };
+	const std::vector<int>& seq2      { 0, 1, n, n, 4, n, 6, 7, n, 9, 10, n , n };
+
+
+	const std::vector<bool>& act_and  { 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1,  0,  0 };
+	const std::vector<int>& seq_and   { 0, 1, n, n, n, n, 6, 7, n, n, 10, n,  n };
+
+	const std::vector<int>& seq_or    { 0, 1, 2, n, 4, n, 6, 7, n, 9, 10, 11, 12 };
+	const std::size_t last = seq_and.size() - 1;
+
+
+	SECTION("source -> sink") {
+		std::vector<int> seq(100, n);
+		std::vector<bool> act(100, false);
+		seq[0] = 0; act[0] = true;
+		seq[99] = 99; act[99] = true;
+		std::size_t last = 99;
+		
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		sink.input.connect(source.output);
+		sink.activation = act;
+		gr.setup();
+		gr.run();
+		REQUIRE(sink.check());
+		REQUIRE(gr.current_time() == last);
+	}
+
+	SECTION("source -> sink") {
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
+		sink.input.connect(source.output);
+		sink.activation = act_and;
+		gr.setup();
+		gr.run();
+		REQUIRE(sink.check());
+		REQUIRE(gr.current_time() == last);
+	}
+
+
+	SECTION("source -> passthrough -> sink") {
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
+		auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 0);
+
+		passthrough.input.connect(source.output);
+		sink.input.connect(passthrough.output);
+		
+		SECTION("test 1") {
+			passthrough.activation = act1;
+			sink.activation = act2;
+			gr.setup();
+			gr.launch();
+			gr.run();
+			REQUIRE(sink.check());
+			REQUIRE(gr.current_time() == last);
+		}
+		
+		SECTION("test 2") {
+			passthrough.activation = act2;
+			sink.activation = act1;
+			gr.setup();
+			gr.launch();
+			gr.run();
+			REQUIRE(sink.check());
+			REQUIRE(gr.current_time() == last);
+		}
+	}
+
+	SECTION("source -> [-3,+3]passthrough -> sink") {
+		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, true);
+		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
+		auto& passthrough = gr.add_node<passthrough_node<node_type>>(3, 3);
+		passthrough.input.connect(source.output);
+		sink.input.connect(passthrough.output);
+		passthrough.activation = act1;
+		sink.activation = act2;
+		gr.setup();
+		gr.launch();
+		gr.run();
+		REQUIRE(sink.check());
+		REQUIRE(gr.current_time() == last);
+	}
+
+	SECTION("two inputs") {
+		/*
+		source1 --> [-3, +1]passthrough1 --> merge --> sink
+		source2 --> [-1, +2]passthrough2 --> /
+		*/
+		
+		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, true);
+		auto& source2 = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, true);
+		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
+		auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
+		auto& merge = gr.add_node<input_synchronize_test_node<node_type>>();
+		auto& sink = gr.add_sink<expected_frames_sink>(seq_or);
+		
+		passthrough1.input.connect(source1.output);
+		passthrough2.input.connect(source2.output);
+		merge.input1.connect(passthrough1.output);
+		merge.input2.connect(passthrough2.output);
+		sink.input.connect(merge.output);
+	
+		merge.activation1 = act1;
+		merge.activation2 = act2;
+	
+		gr.setup();		
+		gr.run();
+		
+		REQUIRE(sink.check());
+	}	
 }
