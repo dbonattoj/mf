@@ -65,7 +65,7 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 
 		// reader may now have seeked to other time
 		if(ring_.write_start_time() != write_start) {
-			assert(seekable_); // this cannot happen when buffer is not seekable
+			MF_ASSERT(seekable_); // this cannot happen when buffer is not seekable
 			
 			// then retry with the new write position
 			// only seek() changes write position (on reader thread), so no risk of repeated recursion
@@ -251,21 +251,10 @@ void shared_ring::end_read(time_unit read_duration) {
 	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
-
-		if(read_start_time_ != ring_.read_start_time()) {
-			//MF_DEBUG("VBEFORE: read_start_time_ mismatch: ", ring_, " rst=", read_start_time_);
-			std::abort();
-		}
 		
-
 		ring_.end_read(read_duration);
 		read_start_time_ += read_duration;
-		//assert(read_start_time_ == ring_.read_start_time());
-		
-		if(read_start_time_ != ring_.read_start_time()) {
-			//MF_DEBUG("read_start_time_ mismatch: ", ring_, " rst=", read_start_time_);
-			std::abort();
-		}
+		MF_ASSERT(read_start_time_ == ring_.read_start_time());	
 	}
 	reader_state_ = idle;
 	reader_idle_event_.notify();
@@ -273,6 +262,7 @@ void shared_ring::end_read(time_unit read_duration) {
 
 
 void shared_ring::skip(time_unit skip_duration) {
+	MF_EXPECTS(skip_duration >= 0);
 	if(seekable_) {
 		// truncate to end time
 		time_unit target_time = std::min(read_start_time_ + skip_duration, end_time_.load());
@@ -284,9 +274,11 @@ void shared_ring::skip(time_unit skip_duration) {
 
 
 void shared_ring::read_and_discard_(time_unit skip_duration) {	
+	MF_EXPECTS(skip_duration >= 0);
+
 	// duration may be larger than ring capacity
 	
-	assert(! seekable_); // specific for non-seekable buffer
+	MF_ASSERT(! seekable_); // specific for non-seekable buffer
 	
 	const auto initial_readable_duration = readable_time_span().duration(); // locks mutex_
 	
@@ -305,7 +297,7 @@ void shared_ring::read_and_discard_(time_unit skip_duration) {
 			auto readable_view = begin_read(capacity()); // ...wait for buffer to fill up entirely
 			if(end_time_ != -1) {
 				// end was marked, don't try to skip beyond
-				assert(readable_view.end_time() == end_time_);
+				MF_ASSERT(readable_view.end_time() == end_time_);
 				skip_available_(readable_view.duration());
 				remaining_skip_duration = 0;
 				reader_state_ = idle;
@@ -330,12 +322,13 @@ void shared_ring::read_and_discard_(time_unit skip_duration) {
 
 
 void shared_ring::skip_available_(time_unit skip_duration) {
+	MF_EXPECTS(skip_duration >= 0);
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
-		assert(skip_duration <= ring_.readable_duration()); // ...can only skip frames that are already readable
+		MF_ASSERT(skip_duration <= ring_.readable_duration()); // ...can only skip frames that are already readable
 		ring_.skip(skip_duration);
 		read_start_time_ += skip_duration;
-		assert(read_start_time_ == ring_.read_start_time());
+		MF_ASSERT(read_start_time_ == ring_.read_start_time());
 	}
 	reader_idle_event_.notify();
 }
@@ -386,16 +379,16 @@ void shared_ring::seek(time_unit t) {
 		time_unit skip_duration = t - read_start_time_;
 		ring_.skip(skip_duration);
 		read_start_time_ += skip_duration;
-		assert(read_start_time_ == ring_.read_start_time());
+		MF_ASSERT(read_start_time_ == ring_.read_start_time());
 						
 	} else {
 		// writer is necessarily idle or waiting now
-		assert(writer_state_ != accessing);
+		MF_ASSERT(writer_state_ != accessing);
 
 		// perform seek on ring buffer now ("long seek")
 		ring_.seek(t);
 		read_start_time_ = t;
-		assert(read_start_time_ == ring_.read_start_time());
+		MF_ASSERT(read_start_time_ == ring_.read_start_time());
 	}
 
 	// notify writer: seeked, and new writable frames

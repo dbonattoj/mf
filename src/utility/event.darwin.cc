@@ -15,10 +15,12 @@
 #include <unistd.h>
 #include <poll.h>
 
+#include <mutex>
+
 namespace mf {
 
 namespace {
-	std::uintptr_t event_ident_ = 0;
+	std::uintptr_t event_ident_ = 0xC0FFEE;
 }
 
 event::event() : handle_(0) {
@@ -57,10 +59,11 @@ bool operator==(const event& a, const event& b) {
 
 void event::notify() {
 	struct ::kevent ev;
-
 	int queue = static_cast<int>(handle_);
 	EV_SET(&ev, event_ident_, EVFILT_USER, 0, NOTE_TRIGGER, 0, nullptr);
 	int result = ::kevent(queue, &ev, 1, nullptr, 0, nullptr);
+	if(result == -1 && errno == 2) { usleep(100000); notify(); return; }
+	
 	if(result == -1) throw std::system_error(errno, std::system_category(), "kevent failed (trigger)");
 }
 
@@ -69,10 +72,10 @@ void event::wait() {
 	struct ::kevent ev;
 
 	int queue = static_cast<int>(handle_);
-	EV_SET(&ev, 0, EVFILT_USER, 0, NOTE_FFNOP, 0, nullptr);
+	EV_SET(&ev, event_ident_, EVFILT_USER, 0, NOTE_FFNOP, 0, nullptr);
 	int result = ::kevent(queue, nullptr, 0, &ev, 1, nullptr);
 	if(result == -1) throw std::system_error(errno, std::system_category(), "kevent failed (wait)");
-	
+		
 	EV_SET(&ev, event_ident_, EVFILT_USER, EV_ADD | EV_ONESHOT, NOTE_FFCOPY, 0, nullptr);
 	result = ::kevent(queue, &ev, 1, nullptr, 0, nullptr);
 	if(result == -1) std::system_error(errno, std::system_category(), "kevent failed (readd after wait)");

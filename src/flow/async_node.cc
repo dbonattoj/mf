@@ -26,8 +26,6 @@ bool async_node::frame_() {
 	// pull & begin reading from activated inputs
 	bool stopped = false;
 	for(node_input& in : inputs()) {
-		MF_ASSERT_MSG(! in.reached_end(t), "input of node must not already be at end");
-
 		if(in.is_activated()) {
 			// pull frame t from input
 			// for sequential node: frame is now processed
@@ -68,7 +66,7 @@ bool async_node::frame_() {
 	// end reading from inputs
 	while(node_input* in = job.pop_input()) {
 		in->end_read_frame(t);
-		if(in->reached_end(t)) reached_end = true;
+		if(t == in->end_time() - 1) reached_end = true;
 	}
 	
 	// end writing to output,
@@ -138,7 +136,7 @@ void async_node_output::pull(time_span span) {
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {
 		if(ring_->is_seekable()) ring_->seek(t);
-		else if(t > ring_read_t) ring_->skip(ring_read_t - t);
+		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
 	}	
 }

@@ -196,7 +196,7 @@ void node_input::pull(time_unit t) {
 
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
-	
+		
 	connected_output().pull(time_span(start_time, end_time));
 }
 
@@ -216,14 +216,6 @@ void node_input::end_read_frame(time_unit t) {
 
 void node_input::cancel_read_frame() {
 	connected_output().end_read(0);
-}
-
-
-bool node_input::reached_end(time_unit t) const {
-	time_unit output_end_time = connected_output().end_time();
-
-	if(output_end_time == -1) return false;
-	else return (t - past_window_duration() >= output_end_time - 1);
 }
 
 

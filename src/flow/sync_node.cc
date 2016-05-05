@@ -24,14 +24,14 @@ void sync_node::process_next_frame() {
 		
 	set_current_time(t);
 	
+	MF_DEBUG_T("node", name, " preprocess t=", t);
 	this->pre_process(t);
 
 	job.define_time(t);
 	job.push_output(out, out_view);
 	
 	bool stopped = false;
-	for(node_input& in : inputs()) {
-		MF_ASSERT(! in.reached_end(t));
+	for(node_input& in : inputs()) {	
 		if(in.is_activated()) {
 			in.pull(t);
 			
@@ -48,6 +48,7 @@ void sync_node::process_next_frame() {
 		return;
 	}
 
+	MF_DEBUG_T("node", name, " process t=", t);
 	this->process(job);
 	
 	bool reached_end = false;
@@ -60,14 +61,14 @@ void sync_node::process_next_frame() {
 	
 	while(node_input* in = job.pop_input()) {
 		in->end_read_frame(t);
-		if(in->reached_end(t)) reached_end = true;
+		if(t == in->end_time() - 1) reached_end = true;
 	}
 	
 	job.pop_output()->end_write_frame(reached_end);
 
-	MF_DEBUG_EXPR_T("node", name, reached_end, t);
-
 	if(reached_end) mark_end();
+
+	MF_DEBUG_EXPR_T("node", name, reached_end, t);
 }
 
 
@@ -83,6 +84,8 @@ void sync_node_output::setup() {
 
 
 void sync_node_output::pull(time_span span) {
+	MF_DEBUG_T("node", this_node().name, ".output pulling ", span);
+
 	// if non-sequential: seek ring to new position
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
@@ -91,6 +94,8 @@ void sync_node_output::pull(time_span span) {
 	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != this_node().end_time()) {
 		this_node().process_next_frame();
 	}
+	
+	MF_DEBUG_T("node", this_node().name, ".output pulling ", span, " DONE");
 }
 
 

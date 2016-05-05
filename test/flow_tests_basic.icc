@@ -13,7 +13,6 @@ SECTION("basic") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-
 	
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
@@ -342,7 +341,7 @@ SECTION("basic") {
 		}
 	}
 }
-return;
+
 
 SECTION("activation") {
 	constexpr int n = noframe;
@@ -376,6 +375,8 @@ SECTION("activation") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
+return;
+
 
 	SECTION("source -> sink") {
 		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);

@@ -189,7 +189,7 @@ public:
 	timed_frames_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
 	void cancel_read_frame();
-	bool reached_end(time_unit t) const;
+	time_unit end_time() const { return connected_node().end_time(); }
 	///@}
 };
 

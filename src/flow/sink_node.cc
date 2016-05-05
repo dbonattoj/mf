@@ -25,8 +25,6 @@ void sink_node::pull(time_unit t) {
 	if(!is_seekable() && t <= current_time())
 		throw std::invalid_argument("cannot pull frame before current time on non-seekable sink");
 
-	MF_DEBUG_EXPR_T("node", t);
-
 	if(stream_duration_is_defined()) MF_ASSERT(t < stream_duration());
 		
 	// set pull = current time as requested
@@ -42,8 +40,6 @@ void sink_node::pull(time_unit t) {
 	// pull & begin reading from activated inputs
 	bool stopped = false;
 	for(node_input& in : inputs()) {
-		MF_ASSERT_MSG(! in.reached_end(t), "input of sink node must not already be at end");
-
 		if(in.is_activated()) {
 			in.pull(t);
 			timed_frames_view in_view = in.begin_read_frame(t);
@@ -66,7 +62,7 @@ void sink_node::pull(time_unit t) {
 	// end reading from inputs
 	while(node_input* in = job.pop_input()) {
 		in->end_read_frame(t);
-		if(in->reached_end(t)) reached_end = true;
+		if(t == in->end_time() - 1) reached_end = true;
 	}
 
 	// if no activated inputs: stream duration determines end
@@ -75,7 +71,7 @@ void sink_node::pull(time_unit t) {
 		
 	if(reached_end) mark_end();
 	
-	MF_DEBUG_EXPR_T("node", reached_end);
+	MF_DEBUG_EXPR_T("node", name, reached_end, t);
 }
 
 // TODO (all nodes): handle cross over end when ended input desactivated
