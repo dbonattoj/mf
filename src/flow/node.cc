@@ -221,8 +221,9 @@ void node_input::cancel_read_frame() {
 
 bool node_input::reached_end(time_unit t) const {
 	time_unit output_end_time = connected_output().end_time();
+
 	if(output_end_time == -1) return false;
-	else return (t - past_window_duration() >= output_end_time);
+	else return (t - past_window_duration() >= output_end_time - 1);
 }
 
 

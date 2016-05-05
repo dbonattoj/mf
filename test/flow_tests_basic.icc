@@ -13,7 +13,7 @@ SECTION("basic") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-	
+
 	
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
@@ -342,7 +342,7 @@ SECTION("basic") {
 		}
 	}
 }
-
+return;
 
 SECTION("activation") {
 	constexpr int n = noframe;

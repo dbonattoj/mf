@@ -48,8 +48,6 @@ void graph::run_until(time_unit last_frame) {
 	
 	while(sink_->current_time() < last_frame && !sink_->reached_end())
 		sink_->pull_next_frame();
-
-	MF_DEBUG("graph::reached end!");
 }
 
 

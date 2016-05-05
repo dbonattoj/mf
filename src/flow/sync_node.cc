@@ -65,6 +65,8 @@ void sync_node::process_next_frame() {
 	
 	job.pop_output()->end_write_frame(reached_end);
 
+	MF_DEBUG_EXPR_T("node", name, reached_end, t);
+
 	if(reached_end) mark_end();
 }
 

@@ -20,9 +20,13 @@ void sink_node::stop() { }
 
 void sink_node::pull(time_unit t) {
 	// fail if reading past current_time, but end already reached
-	if(t > current_time() && reached_end()) throw std::invalid_argument("cannot pull frame beyond end");
-	else if(! is_seekable()) throw std::invalid_argument("cannot pull frame before current time on non-seekable sink");
-	
+	if(t > current_time() && reached_end())
+		throw std::invalid_argument("cannot pull frame beyond end");
+	if(!is_seekable() && t <= current_time())
+		throw std::invalid_argument("cannot pull frame before current time on non-seekable sink");
+
+	MF_DEBUG_EXPR_T("node", t);
+
 	if(stream_duration_is_defined()) MF_ASSERT(t < stream_duration());
 		
 	// set pull = current time as requested
@@ -70,6 +74,8 @@ void sink_node::pull(time_unit t) {
 		if(t == stream_duration() - 1) reached_end = true;
 		
 	if(reached_end) mark_end();
+	
+	MF_DEBUG_EXPR_T("node", reached_end);
 }
 
 // TODO (all nodes): handle cross over end when ended input desactivated
