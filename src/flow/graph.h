@@ -57,7 +57,7 @@ public:
 	
 	void run_until(time_unit last_frame);
 	void run_for(time_unit duration);
-	void run();
+	bool run();
 
 	void seek(time_unit target_time);
 };

@@ -1,7 +1,6 @@
 #include "graph.h"
 #include "node.h"
 #include "sink_node.h"
-#include <limits>
 
 
 namespace mf { namespace flow {
@@ -56,9 +55,12 @@ void graph::run_for(time_unit duration) {
 }
 
 
-void graph::run() {
+bool graph::run() {
+	if(! was_setup_) throw std::logic_error("graph not set up");
 	if(! sink_->is_bounded()) throw std::logic_error("sink is not bounded");
-	run_until(std::numeric_limits<time_unit>::max());
+	if(! running_) launch();
+	while(sink_->is_bounded() && !sink_->reached_end()) sink_->pull_next_frame();
+	return sink_->is_bounded();
 }
 
 

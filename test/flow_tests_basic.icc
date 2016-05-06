@@ -371,11 +371,10 @@ SECTION("activation") {
 		sink.input.connect(source.output);
 		sink.activation = act;
 		gr.setup();
-		gr.run();
+		gr.run_until(last);
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
-return;
 
 
 	SECTION("source -> sink") {
@@ -384,7 +383,7 @@ return;
 		sink.input.connect(source.output);
 		sink.activation = act_and;
 		gr.setup();
-		gr.run();
+		gr.run_until(last);
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
@@ -403,7 +402,7 @@ return;
 			sink.activation = act2;
 			gr.setup();
 			gr.launch();
-			gr.run();
+			gr.run_until(last);
 			REQUIRE(sink.check());
 			REQUIRE(gr.current_time() == last);
 		}
@@ -413,11 +412,12 @@ return;
 			sink.activation = act1;
 			gr.setup();
 			gr.launch();
-			gr.run();
+			gr.run_until(last);
 			REQUIRE(sink.check());
 			REQUIRE(gr.current_time() == last);
 		}
 	}
+
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
 		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
@@ -429,7 +429,7 @@ return;
 		sink.activation = act2;
 		gr.setup();
 		gr.launch();
-		gr.run();
+		gr.run_until(last);
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
@@ -457,7 +457,7 @@ return;
 		merge.activation2 = act2;
 	
 		gr.setup();		
-		gr.run();
+		gr.run_until(last);
 		
 		REQUIRE(sink.check());
 	}	
