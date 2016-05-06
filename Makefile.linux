@@ -3,7 +3,7 @@ TEST_TARGET := $(DIST_DIR)/mf_test
 
 CXX := clang++-3.8
 PYTHON := python
-CXXFLAGS := -std=c++14 -fPIC -I./external/include
+CXXFLAGS := -std=c++14 -fPIC -I./external/include -I./dist/include
 LDFLAGS := 
 LDLIBS := -lpthread -lm
 
@@ -21,6 +21,7 @@ endif
 
 # library
 LIB_SRC := $(shell find src -name '*.cc')
+LIB_HPP := $(shell find src -name '*.h' -or -name '*.tcc')
 LIB_OBJ := $(patsubst src/%.cc,$(BUILD_DIR)/src/%.o,$(LIB_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(LIB_SRC))
 
@@ -39,7 +40,7 @@ PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,$(BUILD_DIR)/prog/support/%.o,$
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
-all : $(TARGET) $(NODE)
+all : $(TARGET)
 	
 
 test : $(TEST_TARGET)
@@ -48,8 +49,12 @@ test : $(TEST_TARGET)
 prog : $(PROG)
 	
 
-$(TARGET) : $(LIB_OBJ)
+$(TARGET) : $(LIB_OBJ) head
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -fPIC -shared -o $@ $(LIB_OBJ) $(LDLIBS)
+
+head : $(LIB_HPP)
+	mkdir -p dist/include && \
+	ln -sf ../../src dist/include/mf
 
 $(TEST_TARGET) : $(TEST_OBJ) $(TEST_SUPPORT_OBJ) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
@@ -66,7 +71,7 @@ clean :
 	rm -rf ./build/
 
 
-.PHONY: clean test prog
+.PHONY: clean test prog head
 	
 
 -include $(DEP)

@@ -3,7 +3,7 @@
 
 namespace mf { namespace flow {
 
-bool async_node::frame_() {
+bool async_node::process_next_frame() {
 	node_job job = make_job();
 	time_unit t;
 	
@@ -82,7 +82,7 @@ bool async_node::frame_() {
 void async_node::thread_main_() {
 	bool continuing = true;
 	while(continuing) {
-		continuing = frame_();
+		continuing = process_next_frame();
 	}
 }
 

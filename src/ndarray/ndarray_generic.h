@@ -10,8 +10,6 @@
 #include "../utility/misc.h"
 #include <cstdint>
 
-#include <iostream>
-
 namespace mf {
 
 using ndarray_view_generic = ndarray_view<2, byte>;

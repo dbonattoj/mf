@@ -1,10 +1,10 @@
-#include "../src/flow/graph.h"
-#include "../src/io/yuv_importer.h"
-#include "../src/io/video_exporter.h"
-#include "../src/nodes/importer.h"
-#include "../src/nodes/exporter.h"
-#include "../src/nodes/color_converter.h"
-#include "../src/utility/misc.h"
+#include <mf/flow/graph.h>
+#include <mf/io/yuv_importer.h>
+#include <mf/io/video_exporter.h>
+#include <mf/nodes/importer.h>
+#include <mf/nodes/exporter.h>
+#include <mf/nodes/color_converter.h>
+#include <mf/utility/misc.h>
 #include <string>
 
 using namespace mf;

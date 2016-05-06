@@ -70,15 +70,14 @@ void sink_node::pull(time_unit t) {
 		if(t == stream_duration() - 1) reached_end = true;
 		
 	if(reached_end) mark_end();
-	
-	MF_DEBUG_EXPR_T("node", name, reached_end, t);
 }
 
 // TODO (all nodes): handle cross over end when ended input desactivated
 
 	
-void sink_node::pull_next_frame() {
+bool sink_node::process_next_frame() {
 	pull(current_time() + 1);
+	return true;
 }
 
 void sink_node::seek(time_unit t) {

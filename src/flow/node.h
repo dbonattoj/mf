@@ -70,7 +70,7 @@ public:
 	virtual void launch() = 0; ///< Called by graph for all nodes, before any frame is pulled from sink.
 	virtual void stop() = 0; ///< Called by graph for all node, before destruction of any node.
 	
-	virtual void process_next_frame() { }
+	virtual bool process_next_frame() = 0;
 	
 	time_unit end_time() const noexcept { return end_time_; }
 	bool reached_end() const noexcept;

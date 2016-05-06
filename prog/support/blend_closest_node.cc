@@ -1,9 +1,15 @@
 #include "blend_closest_node.h"
 #include <algorithm>
 #include <cmath>
-#include "../../src/ndarray/ndarray.h"
+#include <mf/ndarray/ndarray.h>
 
 namespace mf { namespace node {
+
+namespace mf {
+	real camera_distance(const blend_closest_node::camera_type& a, const blend_closest_node::camera_type& b) {
+		return (a.absolute_pose().position() - b.absolute_pose.position()).norm();
+	}
+}
 
 void blend_closest_node::setup() {
 	output.define_frame_shape(visuals_[0]->image_input.frame_shape());
@@ -11,28 +17,12 @@ void blend_closest_node::setup() {
 
 
 void blend_closest_node::pre_process(time_unit t) {	
-	// vary output camera pose
-	// TODO node parameter system
-	Eigen_vec3 min_pos = visuals_.front()->camera.absolute_pose().position;
-	Eigen_quaternion min_ori = visuals_.front()->camera.absolute_pose().orientation;
-
-	Eigen_vec3 max_pos = visuals_.back()->camera.absolute_pose().position;
-	Eigen_quaternion max_ori = visuals_.back()->camera.absolute_pose().orientation;
-	
-	real k = (1.0 + std::cos(pi * t / 200.0)*0.7) / 2.0;
-	
-	Eigen_vec3 pos = min_pos + k*(max_pos - min_pos);
-	Eigen_quaternion ori = min_ori.slerp(k, max_ori);
-	
-	pose ps(pos, ori);
-	output_camera_.set_relative_pose(ps);
-	
 	// activate only number_of_active_inputs_ closest input visuals
 	active_visuals_.clear();
 	for(const auto& visual : visuals_) {
 		active_visuals_.emplace_back(
 			visual.get(),
-			(visual->camera.absolute_pose().position - output_camera_.absolute_pose().position).norm()
+			camera_distance(output_camera.get(t), visual->camera.get(t))
 		);
 	}
 	std::sort(
@@ -48,9 +38,7 @@ void blend_closest_node::pre_process(time_unit t) {
 
 
 
-void blend_closest_node::process(flow::node_job& job) {
-	std::cout << "frame " << job.time() << std::endl;
-	
+void blend_closest_node::process(flow::node_job& job) {	
 	auto out = job.out(output);
 	
 	for(std::ptrdiff_t y = 0; y < out.shape()[0]; ++y)

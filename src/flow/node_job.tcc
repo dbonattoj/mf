@@ -45,7 +45,13 @@ auto node_job::in(Input& port) {
 	auto full_view = in_full(port);
 	if(full_view) return full_view.at_time(time_);
 	return view_type::null();
-}	
+}
+
+
+template<typename Param>
+auto node_job::param(const Param& param) {
+	return param.get(time__);
+}
 
 	
 }}

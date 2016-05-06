@@ -13,7 +13,7 @@ void sync_node::launch() { }
 void sync_node::stop() { }
 
 
-void sync_node::process_next_frame() {	
+bool sync_node::process_next_frame() {	
 	node_job job = make_job();
 	time_unit t;
 	
@@ -24,7 +24,6 @@ void sync_node::process_next_frame() {
 		
 	set_current_time(t);
 	
-	MF_DEBUG_T("node", name, " preprocess t=", t);
 	this->pre_process(t);
 
 	job.define_time(t);
@@ -45,10 +44,9 @@ void sync_node::process_next_frame() {
 	
 	if(stopped) {
 		cancel_job(job);
-		return;
+		return false;
 	}
 
-	MF_DEBUG_T("node", name, " process t=", t);
 	this->process(job);
 	
 	bool reached_end = false;
@@ -67,8 +65,8 @@ void sync_node::process_next_frame() {
 	job.pop_output()->end_write_frame(reached_end);
 
 	if(reached_end) mark_end();
-
-	MF_DEBUG_EXPR_T("node", name, reached_end, t);
+	
+	return true;
 }
 
 
@@ -84,8 +82,6 @@ void sync_node_output::setup() {
 
 
 void sync_node_output::pull(time_span span) {
-	MF_DEBUG_T("node", this_node().name, ".output pulling ", span);
-
 	// if non-sequential: seek ring to new position
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
@@ -94,8 +90,6 @@ void sync_node_output::pull(time_span span) {
 	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != this_node().end_time()) {
 		this_node().process_next_frame();
 	}
-	
-	MF_DEBUG_T("node", this_node().name, ".output pulling ", span, " DONE");
 }
 
 

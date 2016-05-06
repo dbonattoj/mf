@@ -10,12 +10,14 @@ void warp<Color, Depth>::setup() {
 
 
 template<typename Color, typename Depth>
-void warp<Color, Depth>::process(flow::node_job& job) {
-	Eigen_projective3 homography = homography_transformation(input_camera_, output_camera_);
-	
+void warp<Color, Depth>::process(flow::node_job& job) {	
 	auto out = job.out(output);
 	auto depth_in = job.in(depth_input);
 	auto image_in = job.in(image_input);
+	auto in_cam = job.param(input_camera);
+	auto out_cam = job.param(input_camera);
+	
+	Eigen_projective3 homography = homography_transformation(in_cam, out_cam);
 	
 	std::fill(out.begin(), out.end(), Color::null());
 
@@ -29,19 +31,19 @@ void warp<Color, Depth>::process(flow::node_job& job) {
 		Depth pix_d = depth_in.at(pix_c);
 		Color col = image_in.at(pix_c);
 
-		real d = input_camera_.to_depth(pix_d);
-		auto c = input_camera_.to_image(pix_c);
+		real d = in_cam.to_depth(pix_d);
+		auto c = in_cam.to_image(pix_c);
 
 		Eigen_vec3 in_p(c[0], c[1], d);
 		Eigen_vec3 out_p = (homography * in_p.homogeneous()).eval().hnormalized();
 		
 		auto out_pix_c = output_camera_.to_pixel(out_p.head(2));
 		
-		if(output_camera_.image_span().includes(out_pix_c)) {
+		if(out_cam.image_span().includes(out_pix_c)) {
 			real& old_d = d_buffer.at(out_pix_c);
 			real new_d = out_p[2];
 			if(new_d > old_d) {
-				out.view().at(out_pix_c) = col;
+				out.at(out_pix_c) = col;
 				old_d = new_d;
 			}
 		}

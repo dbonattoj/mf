@@ -1,9 +1,9 @@
 #ifndef MF_BLEND_CLOSEST_NODE_H_
 #define MF_BLEND_CLOSEST_NODE_H_
 
-#include "../../src/flow/sync_node.h"
-#include "../../src/camera/projection_image_camera.h"
-#include "../../src/color.h"
+#include <mf/flow/sync_node.h>
+#include <mf/camera/projection_image_camera.h>
+#include <mf/color.h>
 #include <memory>
 
 namespace mf { namespace node {
@@ -17,7 +17,7 @@ public:
 			image_input(self), camera(cam) { }
 		
 		input_type<2, rgba_color> image_input;
-		camera_type camera;
+		parameter_type<camera_type> camera;
 	};
 	
 	struct active_input_visual {
@@ -30,16 +30,16 @@ public:
 
 private:
 	std::size_t number_of_active_inputs_;
-	camera_type output_camera_;
 	std::vector<std::unique_ptr<input_visual>> visuals_;
 	
 	std::vector<active_input_visual> active_visuals_;
 
 public:
 	output_type<2, rgba_color> output;
+	parameter_type<camera_type> output_camera;
 		
 	blend_closest_node(flow::graph& gr, const camera_type& cam_out, std::size_t n = 3) :
-		flow::sync_node(gr), number_of_active_inputs_(n), output_camera_(cam_out), output(*this) { }
+		flow::sync_node(gr), number_of_active_inputs_(n), output_camera(cam_out), output(*this) { }
 
 	input_visual& add_input_visual(const camera_type& cam) {
 		visuals_.emplace_back(new input_visual(*this, cam));

@@ -45,6 +45,7 @@ public:
 	template<typename Input> auto in_full(Input&);
 	template<typename Input> auto in(Input&);
 	template<typename Output> auto out(Output&);
+	template<typename Param> auto param(const Param&);
 };
 
 }}

@@ -4,6 +4,7 @@
 #include "node.h"
 #include "node_job.h"
 #include "node_io_wrapper.h"
+#include "node_parameter.h"
 #include "../queue/shared_ring.h"
 #include <thread>
 
@@ -22,7 +23,6 @@ private:
 	bool running_ = false;
 	std::thread thread_;
 	
-	bool frame_();
 	void thread_main_();
 
 protected:
@@ -37,12 +37,16 @@ public:
 	template<std::size_t Dim, typename Elem>
 	using output_type = node_output_wrapper<async_node_output, Dim, Elem>;
 
+	template<typename Value>
+	using parameter_type = node_parameter<Value>;
+
 	explicit async_node(graph&);
 	~async_node();
 	
 	void internal_setup() final override;
 	void launch() final override;
 	void stop() final override;
+	bool process_next_frame() override;
 };
 
 

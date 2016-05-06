@@ -5,6 +5,7 @@
 #include "node.h"
 #include "node_job.h"
 #include "node_io_wrapper.h"
+#include "node_parameter.h"
 #include "../queue/frame.h"
 #include "../queue/timed_ring.h"
 
@@ -29,11 +30,14 @@ public:
 	template<std::size_t Dim, typename Elem>
 	using output_type = node_output_wrapper<sync_node_output, Dim, Elem>;
 	
+	template<typename Value>
+	using parameter_type = node_parameter<Value>;
+	
 	void internal_setup() final override;
 	void launch() final override;
 	void stop() final override;
-	
-	void process_next_frame();
+		
+	bool process_next_frame() override;
 };
 
 

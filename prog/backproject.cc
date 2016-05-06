@@ -1,12 +1,12 @@
-#include "../src/io/yuv_importer.h"
-#include "../src/io/ply_exporter.h"
-#include "../src/ndarray/ndarray_view.h"
-#include "../src/ndarray/ndarray.h"
-#include "../src/point_cloud/point.h"
-#include "../src/point_cloud/point_cloud.h"
-#include "../src/config/tanimoto_camera_array.h"
-#include "../src/camera/projection_image_camera.h"
-#include "../src/color.h"
+#include <mf/io/yuv_importer.h>
+#include <mf/io/ply_exporter.h>
+#include <mf/ndarray/ndarray_view.h>
+#include <mf/ndarray/ndarray.h>
+#include <mf/point_cloud/point.h>
+#include <mf/point_cloud/point_cloud.h>
+#include <mf/config/tanimoto_camera_array.h>
+#include <mf/camera/projection_image_camera.h>
+#include <mf/color.h>
 
 #include <string>
 #include <iostream>
