@@ -15,6 +15,6 @@ Developped in modern C++14. Extensively tested. Some low-level OS-specific compo
 ### Requirements:
   * C++14 compatible compiler (tested on Clang/LLVM)
   * OpenCV (http://opencv.org/)
-  * Eigen (http://http://eigen.tuxfamily.org/)
+  * Eigen (http://eigen.tuxfamily.org/)
   * Linux or Darwin OS currently
 
