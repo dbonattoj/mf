@@ -50,7 +50,7 @@ auto node_job::in(Input& port) {
 
 template<typename Param>
 auto node_job::param(const Param& param) {
-	return param.get(time__);
+	return param.get(time_);
 }
 
 	

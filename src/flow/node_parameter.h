@@ -13,10 +13,10 @@ private:
 
 public:
 	node_parameter(const Value& constant_value = Value()) :
-		function_([constant_value](time_unit t) { return constant_value }) { }
+		function_([constant_value](time_unit t) { return constant_value; }) { }
 	
 	node_parameter& operator=(const Value& constant_value) {
-		function_ = [constant_value](time_unit t) { return constant_value };
+		function_ = [constant_value](time_unit t) { return constant_value; };
 	}
 	
 	value_type get(time_unit t) const {
@@ -29,7 +29,7 @@ public:
 	}
 	
 	void set_mirror(const node_parameter& param) {
-		function_ = [&param](time_unit t) { return param.get(t); }
+		function_ = [&param](time_unit t) { return param.get(t); };
 	}
 };
 
