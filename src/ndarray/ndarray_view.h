@@ -31,6 +31,34 @@ namespace detail {
 
 
 /// Mapping between coordinates, indices, and addresses of multi-dimensional data.
+/** Templated for dimension and element type. `T` must be `elem` type, i.e. `elem_traits<T>` must be defined.
+ ** The `ndarray_view` is defined by the three values `(start, shape, strides)`.
+ ** - `start` is the pointer to the array element at indices `(0, 0, ..., 0)`.
+ ** - `shape` is the vector of size `Dim` which defined length of array in each axis.
+ ** - `strides` defined memory layout of elements: `strides[i]` defined distance _in bytes_ between `arr[][k][]`
+ **    and `arr[][k+1][]` (the `i`-th coordinate changes).
+ ** `ndarray_view` is non-owning view to data. `T` can be a `const` type. Always gives full access to elements, no
+ ** matter if `this` const. Subscript operator `operator[]` and functions `section()`, etc., return another
+ ** `ndarray_view` to given region.
+ ** 
+ ** Stride values may be negative to form reverse-order view on that axis (then `start` is no longer the element with
+ ** lowest absolute address.) If strides are in non-descending order, coordinates to address mapping is no longer
+ ** row-major. Strides need to be set to at least `sizeof(T)` and multiple of `alignof(T)`. Default strides produce
+ ** row-major mapping, optionally with padding between elements. The term _default strides_ is still used here if
+ ** there is inter-element padding. Coordinates map to address, but not the other way.
+ ** 
+ ** Coordinates map one-to-one to index, and index to coordinates. Index always advances in row-major order with
+ ** coordinates, independently of strides. Index of coordinates `(0, 0, ..., 0)` is `0`.
+ ** Random-access iterator `ndarray_iterator` always traverses ndarray in index order. As an optimization, iterator
+ ** incrementation and decrementation is more efficient when all strides, or tail of strides, is default.
+ **
+ ** *Important*: Assignment and comparison operators perform deep assignment/comparison in the elements that the view
+ ** points to, and not of the `ndarray_view` itself. Shallow assignment and comparison is done with `same()` and
+ ** `reset()`. This simplifies interface: assigning a single element `arr[0][2] = 3` works the same as assigning an
+ ** entire region `arr[0] = make_frame(...)`. (Because `operator[]` returns an `ndarray_view`.)
+ **
+ ** Default constructor, or `null()` returns null view. All null views compare equal (with `same()`), and `is_null()`
+ ** or explicit `bool` conversion operator test for null view. */
 template<std::size_t Dim, typename T>
 class ndarray_view {
 	static_assert(Dim >= 1, "ndarray_view dimension must be >= 1");
@@ -59,7 +87,12 @@ protected:
 	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dim) const;
 			
 public:
+	/// Default strides which correspond to row-major order for specified shape.
+	/** Optionally with `padding` between elements. */
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
+	
+	bool has_default_strides(std::size_t minimal_dimension = 0) const noexcept;
+	std::size_t default_strides_padding(std::size_t minimal_dimension = 0) const;
 
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
 	ndarray_view(pointer start, const shape_type&, const strides_type&);
@@ -126,8 +159,7 @@ public:
 		
 	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
 		if(a.is_null() && b.is_null()) return true;
-		else return (a.start_ == b.start_) && (a.shape_ == b.shape_)
-		         && (a.strides_ == b.strides_);
+		else return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
 	}
 	
 	std::size_t size() const { return shape().product(); }

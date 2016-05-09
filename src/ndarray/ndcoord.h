@@ -108,16 +108,18 @@ public:
 	const T& back() const noexcept { return components_.back(); }
 	T& back() noexcept { return components_.back(); }	
 	
-	ndcoord<Dim - 1, T> tail() const noexcept {
-		ndcoord<Dim - 1, T> c(begin() + 1, end());
+	template<std::size_t Section_dim = Dim - 1>
+	auto tail() const noexcept {
+		ndcoord<Section_dim, T> c(begin() + (Dim - Section_dim), end());
 		return c;
 	}
-			
-	ndcoord<Dim - 1, T> head() const noexcept {
-		ndcoord<Dim - 1, T> c(begin(), end() - 1);
+
+	template<std::size_t Section_dim = Dim - 1>
+	auto head() const noexcept {
+		ndcoord<Section_dim, T> c(begin(), end() - (Dim - Section_dim));
 		return c;
 	}
-	
+		
 	ndcoord<Dim - 1, T> erase(std::ptrdiff_t i) const noexcept {
 		ndcoord<Dim - 1, T> result;
 		for(std::ptrdiff_t j = 0; j < i; ++j) result[j] = components_[j];
