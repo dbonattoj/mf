@@ -5,7 +5,7 @@
 
 namespace mf {
 
-/// Multidimensional array container with type erased frames.
+/// Array container with type erased multidimensional frames.
 /** Like \ref ndarray_view_generic, it retains \ref frame_format with element type and alignment of frames.  */
 template<typename Allocator = raw_allocator>
 class ndarray_generic : public ndarray<2, byte, Allocator> {
