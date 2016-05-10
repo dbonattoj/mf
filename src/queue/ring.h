@@ -1,15 +1,19 @@
 #ifndef MF_RING_H_
 #define MF_RING_H_
 
-#include "../ndarray/ndarray_generic.h"
+#include "../ndarray/generic/ndarray_generic.h"
+#include "frame.h"
 
 namespace mf {
 
+/// Ring buffer.
+/** Circular buffer of _frames_. Derived from \ref ndarray_generic, frames are type-erased _n_-dimensional arrays.
+ ** FILO interface to read/write frames to the ring buffer. */
 class ring : public ndarray_generic<raw_ring_allocator> {
 	using base = ndarray_generic<raw_ring_allocator>;
 	
 public:
-	using section_view_type = ndarray_view_generic;
+	using section_view_type = frame_array_view;
 
 private:
 	time_unit read_position_ = 0;

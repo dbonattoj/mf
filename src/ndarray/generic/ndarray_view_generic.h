@@ -1,55 +1,15 @@
 #ifndef MF_NDARRAY_VIEW_GENERIC_H_
 #define MF_NDARRAY_VIEW_GENERIC_H_
 
-#include "ndarray_view.h"
-#include "ndarray_timed_view.h"
-#include "../common.h"
-#include <typeinfo>
-#include <typeindex>
+#include "frame_format.h"
+#include "../ndarray_view.h"
+#include "../ndarray_timed_view.h"
+#include "../../common.h"
 #include <stdexcept>
 
 namespace mf {
 
-// TODO make less verbose, remove code duplication
-
-/// Format information of type-erased frame of `ndarray_view_generic`.
-/** Stores element type of anterior `ndarray_view` (`std::type_info`, `sizeof` and `alignof`), and the actual alignment
- ** of elements in the frame. */
-class frame_format {
-private:
-	std::type_index elem_type_;
-	std::size_t elem_size_ = 0;
-	std::size_t elem_alignment_requirement_ = 0;
-	
-	std::size_t alignment_ = 0;
-
-	frame_format() : elem_type_(typeid(void)) { }
-
-public:
-	template<typename Elem>
-	static frame_format default_format(std::size_t alignment = alignof(Elem)) {
-		frame_format format;
-		format.elem_type_ = std::type_index(typeid(Elem));
-		format.elem_size_ = sizeof(Elem);
-		format.elem_alignment_requirement_ = alignof(Elem);
-		format.alignment_ = alignment;
-		return format;
-	}
-	
-	template<typename Elem>
-	bool is_type() const noexcept {
-		std::type_index query_type(typeid(Elem));
-		return (elem_type_ == query_type);
-	}
-	
-	std::type_index type_index() const noexcept { return elem_type_; }
-	std::size_t elem_size() const noexcept { return elem_size_; }
-	std::size_t alignment() const noexcept { return alignment_; }
-	std::size_t padding() const noexcept { return (alignment_ - elem_size_); }
-};
-
-
-/// Generic ndarray_view where lower dimension(s) are type-erased.
+/// Generic \ref ndarray_view where lower dimension(s) are type-erased.
 /** Elements of `ndarray_view_generic<Dim>` represent entire `k`-dimensional sections (called _frame_) of an anterior
  ** `ndarray_view<Dim + k, Elem>`. This `ndarray_view` must have default strides (possibly with padding)
  ** for the first `k` dimensions. `ndarray_view_generic` preserves type information of `T` (`std::type_info`, along with
@@ -71,14 +31,18 @@ public:
 	
 private:
 	frame_format format_;
+
+	ndarray_view_generic() : format_(frame_format::null()) { }
 	
-public:
-	ndarray_view_generic() = default;
+public:	
 	ndarray_view_generic(const base& vw, const frame_format& format) :
 		base(vw), format_(format) { }
+	
 	ndarray_view_generic(byte* start, const frame_format& format, const shape_type& shape, const strides_type& strides) :
 		base(start, shape, strides),
 		format_(format) { }
+
+	static ndarray_view_generic null() { return ndarray_view_generic(); }
 	
 	const frame_format& format() const noexcept { return format_; }
 	
@@ -96,11 +60,20 @@ public:
 
 	decltype(auto) operator()() const
 		{ return ndarray_view_generic(base::operator()(), format_); }
+	
+	void reset(const ndarray_view_generic& other) noexcept {
+		base::reset(other);
+		format_ = other.format_;
+	}
+	void reset() noexcept { reset(null()); }
 };
 
 
 
 /// Cast input `ndarray_view` to generic `ndarray_view_generic` with given dimension.
+/** `Generic_dim` is dimension of generic ndarray, i.e. `Dim` of `ndarray_view_generic<Dim>`.
+ ** `Concrete_dim` is dimension of the typed ndarray, i.e. `Dim` of `ndarray_view<Dim>`.
+ ** Always `Concrete_dim >= Generic_dim`. Dimension of frame is `Concrete_dim - Generic_dim`. */
 template<std::size_t Generic_dim, std::size_t Concrete_dim, typename Concrete_elem>
 ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw);
 

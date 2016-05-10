@@ -10,7 +10,7 @@ auto node_job::out(Output& port) {
 	output_view_handle_type* ptr = outputs_map_.at(port.index());
 	MF_ASSERT(ptr != nullptr);
 	
-	return from_generic_frame<dimension, elem_type>(
+	return from_generic<dimension, elem_type>(
 		ptr->second,
 		port.frame_shape()
 	);
@@ -27,7 +27,7 @@ auto node_job::in_full(Input& port) {
 	input_view_handle_type* ptr = inputs_map_.at(port.index());
 	if(! ptr) return view_type::null();
 	
-	return from_generic_timed<dimension, elem_type>(
+	return from_generic<dimension + 1, elem_type>(
 		ptr->second,
 		port.frame_shape()
 	);

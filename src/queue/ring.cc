@@ -14,13 +14,13 @@ ring::ring(const frame_array_properties& prop) :
 
 
 std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
-	std::size_t frame_size = prop.frame_size();
-	std::size_t page_size = system_page_size();
+	std::size_t frame_size = prop.frame_size(); // frame size, in bytes
+	std::size_t page_size = system_page_size(); // system page size, in bytes
 
-	std::size_t a = prop.alignment();
+	std::size_t a = prop.format().alignment(); // a = alignment of elements
 
 	// will compute minimal padding frame_padding (bytes to insert between frames)
-	// such that duration * (frame_size + frame_padding) is a multiple of page_size
+	// such that array_length * (frame_size + frame_padding) is a multiple of page_size
 	//       and (frame_size + frame_padding) is a multiple of a
 	
 	// frame_size and page_size are necessarily multiples of a, because:
@@ -37,15 +37,19 @@ std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
 	std::size_t page_size_a = page_size / a;
 	// duration * (frame_size_a + frame_padding_a) must be multiple of page_size_a
 	
-	std::size_t d = page_size_a / gcd(page_size_a, prop.array_length);	
+	std::size_t d = page_size_a / gcd(page_size_a, prop.array_length());	
 	// --> (frame_size_a + frame_padding_a) must be multiple of d
 	// d is a power of 2
-	// d = factors 2 that are missing in duration for it to be multiple of page_size_a
+	// d = factors 2 that are missing in array_length for it to be multiple of page_size_a
 	
 	// if frame_size_a is already multiple of d, no padding is needed
 	std::size_t r = frame_size_a % d;
-	if(r == 0) return 0;
-	else return (d - r) * a;
+	std::size_t frame_padding = 0;
+	if(r != 0) frame_padding = (d - r) * a;
+	
+	MF_ENSURES(is_nonzero_multiple_of(prop.array_length() * (frame_size + frame_padding), page_size));
+	MF_ENSURES(is_nonzero_multiple_of(frame_size + frame_padding, a));
+	return frame_padding;
 }
 
 
@@ -63,7 +67,7 @@ auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
 	auto new_shape = make_ndsize(duration, frame_length());
 	auto new_strides = base::strides();
 	
-	return section_view_type(new_start, new_shape, new_strides);
+	return section_view_type(new_start, base::format(), new_shape, new_strides);
 }
 
 
@@ -95,7 +99,6 @@ void ring::end_write(time_unit written_duration) {
 	
 
 auto ring::begin_read(time_unit duration) -> section_view_type {
-	section_view_type res;
 	if(duration > total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
 	else if(duration > readable_duration()) throw sequencing_error("read duration larger than readable frames");
 	else return section_(read_position_, duration);

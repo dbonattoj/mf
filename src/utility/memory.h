@@ -7,8 +7,11 @@
 
 namespace mf {
 
+/// Get page size of operating system, in bytes.
 std::size_t system_page_size();
 
+
+/// Round `n` up so that `T[n]` has a size that is a multiple of the system page size.
 template<typename T>
 std::size_t round_up_to_fit_system_page_size(std::size_t n) {
 	MF_EXPECTS(system_page_size() % sizeof(T) == 0);
@@ -17,8 +20,9 @@ std::size_t round_up_to_fit_system_page_size(std::size_t n) {
 	return n + remaining;
 }
 
+/// Round number of bytes `len` up to a multiple of the system page size.
 inline std::size_t raw_round_up_to_fit_system_page_size(std::size_t len) {
-	return round_up_to_fit_system_page_size<unsigned char>(len);
+	return round_up_to_fit_system_page_size<byte>(len);
 }
 
 enum class memory_usage_advice {
@@ -27,7 +31,8 @@ enum class memory_usage_advice {
 	random
 };
 
-void set_memory_usage_advice(void*, std::size_t, memory_usage_advice);
+/// Provide hint to operating system on how memory at `ptr` will be accessed.
+void set_memory_usage_advice(void* ptr, std::size_t, memory_usage_advice);
 
 
 /// Raw allocator, allocates given number of bytes.

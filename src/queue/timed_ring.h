@@ -5,9 +5,11 @@
 #include <ostream>
 #include <stdexcept>
 #include "ring.h"
+#include "frame.h"
 
 namespace mf {
 
+/// Ring buffer which adds absolute time index to frames.
 class timed_ring : public ring {
 	using base = ring;
 
@@ -18,7 +20,7 @@ private:
 	// TODO remove atomic
 
 public:
-	using section_view_type = ndarray_timed_view_generic;
+	using section_view_type = timed_frame_array_view;
 
 	timed_ring(const frame_array_properties& prop) : base(prop) { }
 	

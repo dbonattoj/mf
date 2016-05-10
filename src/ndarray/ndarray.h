@@ -20,8 +20,8 @@ namespace mf {
 
 /// Multidimensional array container.
 /** Based on `ndarray_view`, but also owns items. Allocates and deallocates memory. Const-correct interface.
- ** Uses default strides, except that padding (in bytes) can be added in _first_ dimension. (i.e. between entire
- ** frames). */
+ ** Uses default strides when created from public constructor. Derived classes (i.e. \ref ring) can create \ref ndarray
+ ** with padding between elements (last dimension), and padding between frames (first dimension). */
 template<std::size_t Dim, typename T, typename Allocator = raw_allocator>
 class ndarray {
 public:
@@ -46,7 +46,7 @@ public:
 
 protected:
 	Allocator allocator_; ///< Raw allocator used to allocate memory, in bytes.
-	std::size_t alignment_; ///< Alignment for allocated memory. Always multiple of alignof(T).
+	std::size_t stride_; ///< Stride of elements, and alignment of allocated memory, in bytes.
 	std::size_t padding_; ///< Padding between frames, in bytes.
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	view_type view_; ///< View used to access items.
@@ -54,9 +54,16 @@ protected:
 	void allocate_();
 	void deallocate_();
 	
-	ndarray(const shape_type& shape, std::size_t padding, std::size_t alignment, const Allocator& alloc);
+	/// Constructor for use by derived classes.
+	/** Size of allocated memory segment is `shape.front() * (padding + shape.tail().product()*stride)`.
+	 ** Caller must ensure this satisfies requirements of allocator.
+	 ** \param shape Shape of entire array. First component is length of array, remaining components is frame shape.
+	 ** \param padding Padding between frames, in bytes.
+	 ** \param stride Stride of elements, in bytes. Must be multiple of alignof(T) and leq to sizeof(T).
+	 ** \param allocator Allocator instance. */
+	ndarray(const shape_type& shape, std::size_t padding, std::size_t stride, const Allocator& allocator);
 
-	static strides_type strides_with_padding_(const shape_type& shape, std::size_t padding);
+	strides_type strides_with_padding_(const shape_type& shape, std::size_t padding);
 
 public:
 	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator()) :

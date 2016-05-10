@@ -76,7 +76,7 @@ void sync_node_output::setup() {
 	time_unit offset_diff = this_node().offset() - connected_node.offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 	
-	frame_array_properties prop(format(), frame_length(), required_capacity);
+	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new timed_ring(prop));
 }
 

@@ -126,7 +126,7 @@ void async_node_output::setup() {
 	time_unit offset_diff = this_node().offset() - connected_node.offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 
-	frame_array_properties prop(format(), frame_length(), required_capacity);
+	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	
 
@@ -144,17 +144,18 @@ void async_node_output::pull(time_span span) {
 
 timed_frames_view async_node_output::begin_read(time_unit duration) {
 	event& stop_event = this_node().this_graph().stop_event();
-
-	timed_frames_view view;
-	bool got_view = false;
-	do {
+	
+	for(;;) {
 		bool status = ring_->wait_readable(stop_event);
 		if(! status) break;
 		
-		got_view = ring_->try_begin_read(duration, view); // TODO try_begin_read: return view? instead
-	} while(! got_view);
+		timed_frame_array_view view = ring_->try_begin_read(duration);
+		if(view.is_null()) continue;
 		
-	return view;
+		return view;
+	}
+	
+	return timed_frames_view::null();
 }
 
 
@@ -171,19 +172,20 @@ time_unit async_node_output::end_time() const {
 frame_view async_node_output::begin_write_frame(time_unit& t) {
 	event& stop_event = this_node().this_graph().stop_event();
 
-	timed_frames_view view;
-	bool got_view = false;
-	
-	do {
+	for(;;) {
 		bool status = ring_->wait_writable(stop_event);
 		if(! status) return frame_view::null();
 		
-		got_view = ring_->try_begin_write(1, view);
-	} while(! got_view);
+		timed_frame_array_view view = ring_->try_begin_write(1);
+		if(view.is_null()) continue;
+
+		MF_ASSERT(! view.is_null());
+		MF_ASSERT(view.duration() == 1);
+		t = view.start_time();
+		return view[0];
+	}
 	
-	MF_ASSERT(view.duration() == 1);
-	t = view.start_time();
-	return view[0];
+	return frame_view::null();
 }
 
 

@@ -9,7 +9,7 @@ using namespace mf::test;
 
 
 
-TEST_CASE("ndarray_view", "[ndarray_view]") {
+TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {
 	constexpr std::ptrdiff_t l = sizeof(int);
 	constexpr std::size_t len = 3 * 4 * 4;
 	std::vector<int> raw(len);

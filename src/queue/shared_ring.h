@@ -11,6 +11,7 @@
 
 namespace mf {
 
+/// Timed ring buffer with changed semantics, for dual-thread use.
 class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
@@ -48,6 +49,8 @@ public:
 	shared_ring(const frame_array_properties&, bool seekable, time_unit end_time = -1);
 		
 	void initialize();
+	
+	const frame_format& format() const noexcept { return ring_.format(); }
 
 	/// Capacity of buffer.
 	/** Maximal readable and writable frames that fit in buffer. */
@@ -70,7 +73,7 @@ public:
 	 ** when reader seeked to another time inbetween. If span to write crosses end of buffer, it is truncated first.
 	 ** If that span is not writable because not enough writable frames are available, returns false, and does not wait.
 	 ** Otherwise returns true and puts writable section in \a section. */
-	bool try_begin_write(time_unit write_duration, section_view_type& section);
+	section_view_type try_begin_write(time_unit write_duration);
 
 	/// Wait until a frame become writable, or \a break_event occurs.
 	/** If no frame is writable (either because reader has not read enough frames from the ring buffer yet or write
@@ -103,7 +106,7 @@ public:
 	section_view_type begin_read(time_unit read_duration);
 
 
-	bool try_begin_read(time_unit read_duration, section_view_type& section);
+	section_view_type try_begin_read(time_unit read_duration);
 
 	/// Wait until a frame become readable, or \a break_event occurs.
 	/** If no frame is readable (either because writer has not written enough frames from the ring buffer yet or read

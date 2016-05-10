@@ -5,6 +5,9 @@
 
 namespace mf {
 
+// TODO reduce verbosity
+
+/// Generic \ref ndarray_timed_view where lower dimension(s) are type-erased.
 template<std::size_t Dim>
 class ndarray_timed_view_generic : public ndarray_timed_view<Dim + 1, byte> {
 	using base = ndarray_timed_view<Dim + 1, byte>;
@@ -17,12 +20,16 @@ private:
 	frame_format format_;
 	
 public:
-	ndarray_timed_view_generic() = default;
+	ndarray_timed_view_generic() : format_(frame_format::null()) { }
 	ndarray_timed_view_generic(const base& vw, const frame_format& format) :
 		base(vw), format_(format) { }
+	explicit ndarray_timed_view_generic(time_unit start_time, const frame_format& format) :
+		base(start_time), format_(format) { }
 	ndarray_timed_view_generic(const ndarray_view_generic<Dim>& gen_vw, time_unit start_time) :
 		base(gen_vw, start_time), format_(gen_vw.format()) { }
-	
+
+	static ndarray_timed_view_generic null() { return ndarray_timed_view_generic(); }
+
 	operator ndarray_view_generic<Dim> () const noexcept
 		{ return ndarray_view_generic<Dim>(*this, format_); }
 	

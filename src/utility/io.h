@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <limits>
 #include <string>
+#include "../common.h"
 
 namespace mf {
 
@@ -23,10 +24,10 @@ void skip_line(std::istream&, line_delimitor = default_line_delimitor);
 void write_line(std::ostream&, const std::string&, line_delimitor = default_line_delimitor);
 void end_line(std::ostream&, line_delimitor = default_line_delimitor);
 
-void flip_endianness(char* data, std::size_t sz);
+void flip_endianness(byte* data, std::size_t sz);
 
 template<typename T> void flip_endianness(T& t) {
-	flip_endianness(reinterpret_cast<char*>(&t), sizeof(T));
+	flip_endianness(reinterpret_cast<byte*>(&t), sizeof(T));
 }
 
 std::size_t file_size(const std::string&);

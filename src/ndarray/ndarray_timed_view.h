@@ -8,6 +8,7 @@
 namespace mf {
 
 /// Ndarray view with absolute time indices associated to first dimension.
+/** Each frame `vw[i]` is associated with time index `t = start_time + i`. */
 template<std::size_t Dim, typename T>
 class ndarray_timed_view : public ndarray_view<Dim, T> {
 	using base = ndarray_view<Dim, T>;
@@ -16,13 +17,16 @@ private:
 	time_unit start_time_;
 	
 public:
+	/// Create null timed view.
 	ndarray_timed_view() : base(), start_time_(-1) { }
 
-	explicit ndarray_timed_view(time_unit start_time) :
-		base(), start_time_(start_time) { }
-
+	/// Create timed view where time index `start_time` is associated with frame `vw[0]`.
+	/** `vw` cannot be the null view. */
 	ndarray_timed_view(const base& vw, time_unit start_time) :
-		base(vw), start_time_(start_time) { }
+		base(vw), start_time_(start_time)
+	{
+		MF_EXPECTS(! vw.is_null());	
+	}
 	
 	static ndarray_timed_view null() { return ndarray_timed_view(); }
 

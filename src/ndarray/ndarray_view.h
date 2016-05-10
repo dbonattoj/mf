@@ -56,9 +56,11 @@ namespace detail {
  ** points to, and not of the `ndarray_view` itself. Shallow assignment and comparison is done with `same()` and
  ** `reset()`. This simplifies interface: assigning a single element `arr[0][2] = 3` works the same as assigning an
  ** entire region `arr[0] = make_frame(...)`. (Because `operator[]` returns an `ndarray_view`.)
+ ** Copy-constructing a view does not copy data. Semantics are similar to C++ references.
  **
- ** Default constructor, or `null()` returns null view. All null views compare equal (with `same()`), and `is_null()`
- ** or explicit `bool` conversion operator test for null view. */
+ ** Default constructor, or `null()` returns _null view_. All null views compare equal (with `same()`), and `is_null()`
+ ** or explicit `bool` conversion operator test for null view.
+ ** Zero-length views (where `shape().product() == 0`) are possible, and are not equal to null views. */
 template<std::size_t Dim, typename T>
 class ndarray_view {
 	static_assert(Dim >= 1, "ndarray_view dimension must be >= 1");
@@ -91,13 +93,27 @@ public:
 	/** Optionally with `padding` between elements. */
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
 	
+	/// Check if view has default strides.
+	/** If `minimal_dimension` is specified, checks if view has default strides in dimensions from `Dim - 1` down to
+	 ** `minimal_dimension`. Strides from `minimal_dimension + 1` down to `0` may be non-default. */
 	bool has_default_strides(std::size_t minimal_dimension = 0) const noexcept;
+	
+	/// Returns padding of the view which has default strides.
+	/** If view does not have default strides, throws exception.
+	 ** \param minimal_dimension Like in has_default_strides(). */
 	std::size_t default_strides_padding(std::size_t minimal_dimension = 0) const;
 
+	/// Create null view.
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
+	
+	/// Create view with explicitly specified start, shape and strides.
 	ndarray_view(pointer start, const shape_type&, const strides_type&);
+	
+	/// Create view with explicitly specified start and shape, with default strides (without padding).
 	ndarray_view(pointer start, const shape_type& shape);
 	
+	/// Copy-construct view.
+	/** Does not copy data. Can create `ndarray_view<const T>` from `ndarray_view<T>`. (But not the other way.) */
 	ndarray_view(const ndarray_view<Dim, std::remove_const_t<T>>& arr) :
 		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
 	
@@ -120,14 +136,23 @@ public:
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
 	pointer coordinates_to_pointer(const coordinates_type&) const;
-		
+	
+	/// Cuboid section of view, with interval in each axis.
+	/** Can also specify step for each axis: Stride of the new view are stride of this view multiplied by step.
+	 ** Step `1` does not change stride, step `2` skips every second element on that axis, negative step also reverses
+	 ** direction. It is not necessary that coordinate of last element on an axis coincides with `end - 1`. */
 	ndarray_view section(
 		const coordinates_type& start,
 		const coordinates_type& end,
 		const strides_type& steps = strides_type(1)
 	) const;
+	
+	/// Create `ndarray_view` with one less dimension, by fixing coordinate of axis `dimension` to `c`.
 	ndarray_view<Dim - 1, T> slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const;
 	
+	/// Subscript operator, creates slice on first dimension.
+	/** If `Dim > 1`, equivalent to `slide(c, 0)`. If `Dim == 1`, returns reference to `c`-th element in view.
+	 ** Can access elements in multi-dimensional array like `arr[i][j][k] = value`. */
 	decltype(auto) operator[](std::ptrdiff_t c) const {
 		return detail::get_subscript(*this, c);
 	}

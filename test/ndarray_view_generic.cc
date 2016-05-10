@@ -1,10 +1,10 @@
 #include <catch.hpp>
-#include "../src/ndarray/ndarray_view_generic.h"
-#include "../src/ndarray/ndarray_timed_view_generic.h"
+#include "../src/ndarray/generic/ndarray_view_generic.h"
+#include "../src/ndarray/generic/ndarray_timed_view_generic.h"
 
 using namespace mf;
 
-TEST_CASE("ndarray view, generic", "[ndarray_view][generic]") {
+TEST_CASE("ndarray view, generic", "[ndarray][generic]") {
 	constexpr std::size_t l = sizeof(int);
 	constexpr std::size_t len = 3 * 4 * 4;
 	std::vector<int> raw(2 * len);

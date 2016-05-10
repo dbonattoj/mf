@@ -41,8 +41,8 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 		if(write_start + duration > end_time_) duration = end_time_ - write_start;
 	}
 
-	// if duration zero (possibly because at end), return zero view
-	if(duration == 0) return section_view_type(write_start);
+	// if duration zero (possibly because at end), return zero-length view
+	if(duration == 0) return ring_.begin_write(0);
 
 	// prevent deadlock
 	// c.f. begin_read_span
@@ -82,7 +82,7 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 }
 
 
-bool shared_ring::try_begin_write(time_unit original_duration, section_view_type& section) {
+auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_type {
 	if(original_duration > capacity()) throw std::invalid_argument("write duration larger than ring capacity");
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
@@ -94,11 +94,11 @@ bool shared_ring::try_begin_write(time_unit original_duration, section_view_type
 	if(end_time_ != -1)
 		if(write_start + duration > end_time_) duration = end_time_ - write_start;
 
-	if(ring_.writable_duration() < duration) return false;
+	if(ring_.writable_duration() < duration) return section_view_type::null();
 
-	section.reset( ring_.begin_write(duration) );
+	section_view_type vw = ring_.begin_write(duration);
 	writer_state_ = accessing;
-	return true;
+	return vw;
 }
 
 
@@ -174,7 +174,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 		if(read_start_time_ + duration > end_time_) duration = end_time_ - read_start_time_;
 
 	// if duration zero (possibly because at end), return zero view
-	if(duration == 0) return section_view_type(read_start_time_);
+	if(duration == 0) return ring_.begin_read(0);
 	
 	// prevent deadlock
 	// writer_state_ may still be waiting, even after frames have become writable by end_write(),
@@ -204,7 +204,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 }
 
 
-bool shared_ring::try_begin_read(time_unit original_duration, section_view_type& section) {
+auto shared_ring::try_begin_read(time_unit original_duration) -> section_view_type {
 	if(original_duration > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
@@ -218,11 +218,11 @@ bool shared_ring::try_begin_read(time_unit original_duration, section_view_type&
 	if(end_time_ != -1)
 		if(read_start_time_ + duration > end_time_) duration = end_time_ - read_start_time_;
 	
-	if(ring_.readable_duration() < duration) return false;
+	if(ring_.readable_duration() < duration) return section_view_type::null();
 	
-	section.reset( ring_.begin_read(duration) );
+	section_view_type vw = ring_.begin_read(duration);
 	reader_state_ = accessing;
-	return true;
+	return vw;
 }
 
 

@@ -1,13 +1,19 @@
 #ifndef MF_FRAME_H_
 #define MF_FRAME_H_
 
-#include "../ndarray/ndarray_generic.h"
+#include "../ndarray/generic/ndarray_view_generic.h"
+#include "../ndarray/generic/ndarray_timed_view_generic.h"
+#include "../ndarray/generic/ndarray_generic.h"
 
 namespace mf {
 
-using timed_frames_view = ndarray_timed_view_generic;
-using frame_array_view = ndarray_view_generic;
-using frame_view = ndarray_frame_view_generic;
+using timed_frame_array_view = ndarray_timed_view_generic<1>;
+using frame_array_view = ndarray_view_generic<1>;
+using frame_view = ndarray_view_generic<0>;
+using frame_array_properties = ndarray_generic_properties;
+
+using frames_view = frame_array_view;
+using timed_frames_view = timed_frame_array_view; // TODO replace in source
 
 }
 

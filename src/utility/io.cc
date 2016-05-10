@@ -97,7 +97,7 @@ void end_line(std::ostream& str, line_delimitor ld) {
 
 
 
-void flip_endianness(char* data, std::size_t sz) {
+void flip_endianness(byte* data, std::size_t sz) {
 	if(sz < 2) return;
 	std::ptrdiff_t i = sz/2 - 1;
 	std::ptrdiff_t o = sz - i - 1;
