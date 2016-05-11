@@ -59,7 +59,8 @@ private:
 		output.define_frame_shape(input.frame_shape());	
 	}
 	
-	void pre_process(time_unit t) override {
+	void pre_process(flow::node_job& job) override {
+		time_unit t = job.time();
 		if(t < activation.size()) input.set_activated(activation[t]);
 	}
 	
@@ -108,7 +109,8 @@ public:
 		name = "sink";
 	}
 	
-	void pre_process(time_unit t) override {
+	void pre_process(flow::node_job& job) override {
+		time_unit t = job.time();
 		if(t < activation.size())
 			input.set_activated(activation[t]);
 	}
@@ -161,7 +163,8 @@ public:
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
-	void pre_process(time_unit t) override {
+	void pre_process(flow::node_job& job) override {
+		time_unit t = job.time();
 		if(t < activation1.size()) input1.set_activated(activation1[t]);
 		if(t < activation2.size()) input2.set_activated(activation2[t]);
 	}

@@ -114,6 +114,10 @@ template<> inline std::uint8_t color_convert(const ycbcr_color& in) {
 	return in.y;
 }
 
+template<> inline rgb_color color_convert(const std::uint8_t& in) {
+	return rgb_color(in, in, in);
+}
+
 
 template<> inline rgb_color color_convert(const rgba_color& in) {
 	return rgb_color(in.r, in.g, in.b);

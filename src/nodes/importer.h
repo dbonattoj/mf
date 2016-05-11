@@ -7,6 +7,8 @@
 #include "../io/seekable_frame_importer.h"
 #include "../flow/sync_node.h"
 
+#include <iostream>
+
 namespace mf { namespace node {
 
 /// Source node which reads frames from frame importer object.
@@ -55,7 +57,8 @@ public:
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void pre_process(time_unit t) override {
+	void pre_process(flow::node_job& job) override {		
+		time_unit t = job.time();
 		if(importer_.current_time() != t) importer_.seek(t);
 	}
 	

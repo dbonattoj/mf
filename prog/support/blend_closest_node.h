@@ -1,31 +1,36 @@
-#ifndef MF_BLEND_CLOSEST_NODE_H_
-#define MF_BLEND_CLOSEST_NODE_H_
+#ifndef PROG_BLEND_CLOSEST_NODE_H_
+#define PROG_BLEND_CLOSEST_NODE_H_
 
 #include <mf/flow/sync_node.h>
 #include <mf/camera/projection_image_camera.h>
 #include <mf/color.h>
 #include <memory>
 
-namespace mf { namespace node {
-
-class blend_closest_node : public flow::sync_node {
+/// Node blends input visuals with closest camera positions.
+/** _Input visual_ is an input port of image type `<2, rgba_color>`, associated with a \ref camera. Multiple input
+ ** visuals are added after construction using add_input_visual().
+ ** The node selects the _n_ input visuals whose camera is closest to `output_camera`, and does weighed pixel-wise
+ ** blending, ignoring null pixels on inputs.
+ ** 
+ ** Supposes that all the inputs images already contains an image that looks as if taken from the `output_camera`. */
+class blend_closest_node : public mf::flow::sync_node {
 public:
-	using camera_type = projection_image_camera<std::uint8_t>;
+	using camera_type = mf::projection_image_camera<std::uint8_t>;
 
 	struct input_visual {
 		input_visual(blend_closest_node& self, const camera_type& cam) :
 			image_input(self), camera(cam) { }
 		
-		input_type<2, rgba_color> image_input;
+		input_type<2, mf::rgba_color> image_input;
 		parameter_type<camera_type> camera;
 	};
 	
 	struct active_input_visual {
-		active_input_visual(input_visual* vis, real dist) :
+		active_input_visual(input_visual* vis, mf::real dist) :
 			visual(vis), camera_distance(dist) { }
 		
 		input_visual* visual;
-		real camera_distance;
+		mf::real camera_distance;
 	};
 
 private:
@@ -35,11 +40,11 @@ private:
 	std::vector<active_input_visual> active_visuals_;
 
 public:
-	output_type<2, rgba_color> output;
+	output_type<2, mf::rgba_color> output;
 	parameter_type<camera_type> output_camera;
 		
-	blend_closest_node(flow::graph& gr, const camera_type& cam_out, std::size_t n = 3) :
-		flow::sync_node(gr), number_of_active_inputs_(n), output_camera(cam_out), output(*this) { }
+	blend_closest_node(mf::flow::graph& gr, std::size_t n = 3) :
+		mf::flow::sync_node(gr), number_of_active_inputs_(n), output(*this) { }
 
 	input_visual& add_input_visual(const camera_type& cam) {
 		visuals_.emplace_back(new input_visual(*this, cam));
@@ -48,10 +53,8 @@ public:
 
 protected:
 	void setup() override;
-	void pre_process(time_unit t) override;
-	void process(flow::node_job&) override;
+	void pre_process(mf::flow::node_job&) override;
+	void process(mf::flow::node_job&) override;
 };
-
-}}
 
 #endif

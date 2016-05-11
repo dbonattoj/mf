@@ -1,7 +1,7 @@
 namespace mf { namespace flow {
 
 template<typename Output>
-auto node_job::out(Output& port) {
+decltype(auto) node_job::out(Output& port) {
 	constexpr std::size_t dimension = Output::dimension;
 	using elem_type = typename Output::elem_type;
 	
@@ -18,7 +18,7 @@ auto node_job::out(Output& port) {
 
 
 template<typename Input>
-auto node_job::in_full(Input& port) {
+decltype(auto) node_job::in_full(Input& port) {
 	constexpr std::size_t dimension = Input::dimension;
 	using elem_type = typename Input::elem_type;
 	
@@ -35,7 +35,7 @@ auto node_job::in_full(Input& port) {
 
 
 template<typename Input>
-auto node_job::in(Input& port) {
+decltype(auto) node_job::in(Input& port) {
 	constexpr std::size_t dimension = Input::dimension;
 	using elem_type = typename Input::elem_type;
 
@@ -49,7 +49,7 @@ auto node_job::in(Input& port) {
 
 
 template<typename Param>
-auto node_job::param(const Param& param) {
+decltype(auto) node_job::param(const Param& param) {
 	return param.get(time_);
 }
 

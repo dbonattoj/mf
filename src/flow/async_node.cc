@@ -14,13 +14,13 @@ bool async_node::process_next_frame() {
 	if(out_view.is_null()) return false; // stopped
 	
 	set_current_time(t);
+	job.define_time(t);
 	
 	// with time defined, run preprocess
 	// concrete node may activate/desactivate inputs now
-	this->pre_process(t);
+	this->pre_process(job);
 
 	// add output view to job
-	job.define_time(t);
 	job.push_output(out, out_view);
 	
 	// pull & begin reading from activated inputs

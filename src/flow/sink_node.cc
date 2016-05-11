@@ -1,4 +1,5 @@
 #include "sink_node.h"
+#include <iostream>
 
 namespace mf { namespace flow {
 	
@@ -34,7 +35,7 @@ void sink_node::pull(time_unit t) {
 	job.define_time(t);
 		
 	// preprocess, allow concrete subclass to activate/desactivate inputs
-	this->pre_process(t);
+	this->pre_process(job);
 	// TODO job-like object passed in pre_process for input activation
 
 	// pull & begin reading from activated inputs
@@ -77,6 +78,7 @@ void sink_node::pull(time_unit t) {
 	
 bool sink_node::process_next_frame() {
 	pull(current_time() + 1);
+	std::cout << "frame " << current_time() << std::endl;
 	return true;
 }
 

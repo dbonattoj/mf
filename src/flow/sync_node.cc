@@ -1,4 +1,5 @@
 #include "sync_node.h"
+#include <iostream>
 
 namespace mf { namespace flow {
 
@@ -23,10 +24,10 @@ bool sync_node::process_next_frame() {
 	if(end_time() != -1) MF_ASSERT(t < end_time());
 		
 	set_current_time(t);
-	
-	this->pre_process(t);
-
 	job.define_time(t);
+		
+	this->pre_process(job);
+
 	job.push_output(out, out_view);
 	
 	bool stopped = false;

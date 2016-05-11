@@ -6,6 +6,8 @@
 
 namespace mf { namespace flow {
 
+// TODO remove
+
 /// Output port of flow graph node, with nd-array frame.
 template<typename Output, std::size_t Dim, typename Elem>
 class node_output_wrapper : public Output {

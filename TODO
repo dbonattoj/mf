@@ -1,41 +1,35 @@
 ACMMM
 =====
-- node refactor (process() gets views through intermed)
 - thin node
 - cleanup
 - vsrs demo
 
 
 
-
-
-BASE
-- ndarray_view_cast + join finish
-- elem_tuple constructor
-
-- ring buffer: 0 length r/w test
-- view, time_span, etc: 0 length test
-
-CORE
-- point_cloud
+FLOW
+- decouple filter and node!!
 - parallel node (multiple frames in parallel)
-- simultaneous begin_read on inputs (and begin_write on outputs)
 - opencl node?
+- thin node
+- implicit convert/cast
 
 - real time, push from source
 - index --> actual time units (seconds)
 - nodes not 1:1 (skip frames / add frames)
 - shared object (=> also in GPU memory)
-- stateful/stateless nodes
-- thin/implicit node
 
 
-NODES
+
+TOOLKIT
+- point_cloud
 
 
-VSRS
-- time window based depth map improvement
-- OpenGL texture mapping --> wrapping
-- point cloud splatting
 
-- depth map -> point cloud + splat size + specularity model
+DETAILS
+- ndarray_view_cast + join finish
+- elem_tuple constructor
+- ring buffer: 0 length r/w test
+- view, time_span, etc: 0 length test
+- remove ndarray_ring, change tests
+
+- ndspan iterator (iterate over possible coordinates)

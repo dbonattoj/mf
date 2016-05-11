@@ -80,6 +80,9 @@ public:
 	ndcoord& operator*=(const ndcoord& c) noexcept { return transform_inplace(c, std::multiplies<T>()); }
 	ndcoord& operator/=(const ndcoord& c) noexcept { return transform_inplace(c, std::divides<T>()); }
 
+	ndcoord& operator*=(T val) noexcept { return operator*=(ndcoord(val)); };
+	ndcoord& operator/=(T val) noexcept { return operator/=(ndcoord(val)); };
+
 	ndcoord operator+() noexcept { return *this; }
 	ndcoord operator-() noexcept { return transform_inplace(std::negate<T>()); }
 
@@ -91,7 +94,12 @@ public:
 		{ return transform(a, b, std::multiplies<T>()); }
 	friend ndcoord operator/(const ndcoord& a, const ndcoord& b) noexcept
 		{ return transform(a, b, std::divides<T>()); }
-	
+
+	friend ndcoord operator*(const ndcoord& a, T val) noexcept
+		{ return a * ndcoord(val); }
+	friend ndcoord operator/(const ndcoord& a, T val) noexcept
+		{ return a / ndcoord(val); }
+		
 	friend bool operator==(const ndcoord& a, const ndcoord& b) noexcept
 		{ return a.components_ == b.components_; }
 	friend bool operator!=(const ndcoord& a, const ndcoord& b) noexcept

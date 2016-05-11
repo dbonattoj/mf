@@ -1,13 +1,12 @@
-#include "tanimoto_camera_array.h"
+#include "vsrs_camera_array.h"
 #include <fstream>
 #include <string>
 #include "../eigen.h"
 #include "../geometry/pose.h"
-#include <iostream>
 
 namespace mf {
 
-projection_camera tanimoto_camera_array::read_camera_
+projection_camera vsrs_camera_array::read_camera_
 (std::istream& str, const depth_projection_parameters& dparam, const ndsize<2>& img_sz) {
 	str.exceptions(std::ios_base::badbit | std::ios_base::failbit | std::ios_base::eofbit);
 	
@@ -25,6 +24,11 @@ projection_camera tanimoto_camera_array::read_camera_
 	str >> rotation(1, 0) >> rotation(1, 1) >> rotation(1, 2); str >> translation(1);
 	str >> rotation(2, 0) >> rotation(2, 1) >> rotation(2, 2); str >> translation(2);
 	
+	if(fourth_extrinsic_row_) {
+		real unused;
+		str >> unused >> unused >> unused >> unused;
+	}
+	
 	Eigen::Affine3f extrinsic_affine;
 	extrinsic_affine = Eigen::Translation3f(translation) * Eigen::Affine3f(rotation).inverse();
 		
@@ -32,8 +36,10 @@ projection_camera tanimoto_camera_array::read_camera_
 }
 
 
-tanimoto_camera_array::tanimoto_camera_array
-(const std::string& filename, const depth_projection_parameters& dparam, const ndsize<2>& img_sz) {
+vsrs_camera_array::vsrs_camera_array
+(const std::string& filename, const depth_projection_parameters& dparam, const ndsize<2>& img_sz, bool fourth_extrinsic_row) :
+	fourth_extrinsic_row_(fourth_extrinsic_row)
+{
 	std::ifstream file(filename);
 	
 	for(;;) {
@@ -42,7 +48,7 @@ tanimoto_camera_array::tanimoto_camera_array
 		std::string name;
 		file >> name;
 		if(file.eof() || file.fail()) break;
-		
+				
 		cameras_.insert(std::make_pair(
 			name,
 			read_camera_(file, dparam, img_sz)
@@ -51,12 +57,12 @@ tanimoto_camera_array::tanimoto_camera_array
 }
 
 
-bool tanimoto_camera_array::has(const std::string& name) const {
+bool vsrs_camera_array::has(const std::string& name) const {
 	return (cameras_.find(name) != cameras_.end());
 }
 
 
-const projection_camera& tanimoto_camera_array::operator[](const std::string& name) const {
+const projection_camera& vsrs_camera_array::operator[](const std::string& name) const {
 	return cameras_.at(name);
 }
 

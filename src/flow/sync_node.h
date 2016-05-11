@@ -18,7 +18,7 @@ class sync_node_output;
 class sync_node : public node {
 protected:
 	virtual void setup() { }
-	virtual void pre_process(time_unit t) { }
+	virtual void pre_process(node_job&) { }
 	virtual void process(node_job&) = 0;
 
 public:

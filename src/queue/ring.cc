@@ -17,7 +17,7 @@ std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
 	std::size_t frame_size = prop.frame_size(); // frame size, in bytes
 	std::size_t page_size = system_page_size(); // system page size, in bytes
 
-	std::size_t a = prop.format().alignment(); // a = alignment of elements
+	std::size_t a = prop.format().elem_alignment(); // a = alignment of elements
 
 	// will compute minimal padding frame_padding (bytes to insert between frames)
 	// such that array_length * (frame_size + frame_padding) is a multiple of page_size
@@ -29,9 +29,9 @@ std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
 	//    frame_size is required to be multiple of a
 	// need to make frame_padding also multiple of a
 	// --> count in units a
-		
-	MF_ASSERT_MSG(frame_size % a == 0, "frame size not multiple of frame alignment");
-	MF_ASSERT_MSG(page_size % a == 0, "system page size not multiple of frame alignment");
+	
+	MF_ASSERT_MSG(is_nonzero_multiple_of(frame_size, a), "frame size not multiple of frame alignment");
+	MF_ASSERT_MSG(is_nonzero_multiple_of(page_size, a), "system page size not multiple of frame alignment");
 	
 	std::size_t frame_size_a = frame_size / a;
 	std::size_t page_size_a = page_size / a;

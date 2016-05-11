@@ -4,6 +4,7 @@
 #include "../common.h"
 #include "ndcoord.h"
 #include "ndarray_iterator.h"
+#include "ndspan.h"
 #include "../utility/misc.h"
 #include "../elem.h"
 #include <type_traits>
@@ -73,6 +74,7 @@ public:
 	using coordinates_type = ndptrdiff<Dim>;
 	using shape_type = ndsize<Dim>;
 	using strides_type = ndptrdiff<Dim>;
+	using span_type = ndspan<Dim>;
 	
 	using iterator = ndarray_iterator<ndarray_view>;
 
@@ -146,6 +148,11 @@ public:
 		const coordinates_type& end,
 		const strides_type& steps = strides_type(1)
 	) const;
+	
+	/// Cuboid section of view, defined using `ndspan` object.
+	ndarray_view section(const span_type& span, const strides_type& steps = strides_type(1)) {
+		return section(span.start_pos(), span.end_pos(), steps);
+	}
 	
 	/// Create `ndarray_view` with one less dimension, by fixing coordinate of axis `dimension` to `c`.
 	ndarray_view<Dim - 1, T> slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const;

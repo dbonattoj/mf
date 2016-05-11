@@ -3,11 +3,11 @@
 #include <cmath>
 #include <mf/ndarray/ndarray.h>
 
-namespace mf { namespace node {
+using namespace mf;
 
-namespace mf {
+namespace {
 	real camera_distance(const blend_closest_node::camera_type& a, const blend_closest_node::camera_type& b) {
-		return (a.absolute_pose().position() - b.absolute_pose.position()).norm();
+		return (a.absolute_pose().position - b.absolute_pose().position).norm();
 	}
 }
 
@@ -16,13 +16,16 @@ void blend_closest_node::setup() {
 }
 
 
-void blend_closest_node::pre_process(time_unit t) {	
+void blend_closest_node::pre_process(flow::node_job& job) {	
+	time_unit t = job.time();
+	auto out_cam = job.param(output_camera);
+		
 	// activate only number_of_active_inputs_ closest input visuals
 	active_visuals_.clear();
 	for(const auto& visual : visuals_) {
 		active_visuals_.emplace_back(
 			visual.get(),
-			camera_distance(output_camera.get(t), visual->camera.get(t))
+			camera_distance(out_cam, job.param(visual->camera))
 		);
 	}
 	std::sort(
@@ -70,6 +73,3 @@ void blend_closest_node::process(flow::node_job& job) {
 		}
 	}
 }
-
-
-}}

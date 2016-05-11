@@ -20,7 +20,7 @@ struct ndarray_generic_properties {
 	const frame_format& format() const noexcept { return format_; }
 	std::size_t frame_length() const noexcept { return frame_length_; }
 	std::size_t array_length() const noexcept { return array_length_; }
-	std::size_t frame_size() const noexcept { return frame_length_ * format_.alignment(); }
+	std::size_t frame_size() const noexcept { return frame_length_ * format_.stride(); }
 
 	ndarray_generic_properties(const frame_format& format, std::size_t frame_length, std::size_t array_length) :
 		format_(format), frame_length_(frame_length), array_length_(array_length) { }

@@ -29,7 +29,7 @@ public:
 	node_job(node&);
 	~node_job();
 	
-	/// \name Set up interface.
+	/// \name Interface for set up.
 	///@{
 	void define_time(time_unit t);
 	void push_input(node_input&, const timed_frames_view&);
@@ -42,10 +42,10 @@ public:
 	time_unit time() const noexcept { return time_; }
 	void mark_end() { end_marked_ = true; }
 
-	template<typename Input> auto in_full(Input&);
-	template<typename Input> auto in(Input&);
-	template<typename Output> auto out(Output&);
-	template<typename Param> auto param(const Param&);
+	template<typename Input> decltype(auto) in_full(Input&);
+	template<typename Input> decltype(auto) in(Input&);
+	template<typename Output> decltype(auto) out(Output&);
+	template<typename Param> decltype(auto) param(const Param&);
 };
 
 }}

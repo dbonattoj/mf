@@ -4,7 +4,7 @@
 #include <mf/ndarray/ndarray.h>
 #include <mf/point_cloud/point.h>
 #include <mf/point_cloud/point_cloud.h>
-#include <mf/config/tanimoto_camera_array.h>
+#include <mf/config/vsrs_camera_array.h>
 #include <mf/camera/projection_image_camera.h>
 #include <mf/color.h>
 
@@ -47,7 +47,7 @@ void add(std::string I, ply_exporter& exporter) {
 	dparam.z_far = z_far;
 	dparam.flip_z = false;
 	dparam.range = depth_projection_parameters::unsigned_normalized_disparity;
-	tanimoto_camera_array cams(cams_file, dparam, {w, h});
+	vsrs_camera_array cams(cams_file, dparam, {w, h});
 	projection_image_camera<std::uint8_t> cam(cams[cam_name], make_ndsize(w, h));
 	cam.flip_pixel_coordinates();
 

@@ -23,8 +23,8 @@ void ndarray<Dim, T, Allocator>::allocate_() {
 	if(! is_nonzero_multiple_of(frame_bytes + padding_, alignof(T)))
 		throw std::runtime_error("padding does not satisfy alignment constraint of element type");
 		
-	void* raw_ptr = allocator_.raw_allocate(bytes, stride_);
-	if(! is_nonzero_multiple_of(reinterpret_cast<std::uintptr_t>(raw_ptr), stride_))
+	void* raw_ptr = allocator_.raw_allocate(bytes, alignof(T));
+	if(! is_nonzero_multiple_of(reinterpret_cast<std::uintptr_t>(raw_ptr), alignof(T)))
 		throw std::runtime_error("allocated memory not properly aligned");
 
 	T* ptr = reinterpret_cast<T*>(raw_ptr);

@@ -15,12 +15,12 @@ class frame_format {
 private:
 	std::type_index elem_type_ = std::type_index(typeid(void)); ///< Type of element.
 	std::size_t elem_size_ = 0; ///< sizeof of element.
-	std::size_t elem_alignment_requirement_ = 0; ///< alignof of elememt.
+	std::size_t elem_alignment_ = 0; ///< alignof of elememt.
 	
-	/// Actual alignment of element in frame.
+	/// Stride of element in frame.
 	/** Must be greater or equal to `elem_size_`, and non-zero multiple of `elem_alignment_requirement_`. 
 	 ** Corresponds to stride of elements in the frame. */
-	std::size_t alignment_ = 0;
+	std::size_t stride_ = 0;
 
 	frame_format() = default;
 
@@ -31,14 +31,14 @@ public:
 	static frame_format null() { return frame_format(); }
 
 	template<typename Elem>
-	static frame_format default_format(std::size_t alignment = alignof(Elem)) {
+	static frame_format default_format(std::size_t stride = sizeof(Elem)) {
 		static_assert(sizeof(Elem) >= alignof(Elem), "sizeof always larger or equal to alignof");
-		MF_EXPECTS(alignment >= sizeof(Elem) && is_nonzero_multiple_of(alignment, alignof(Elem)));
+		MF_EXPECTS(stride >= sizeof(Elem) && is_nonzero_multiple_of(stride, alignof(Elem)));
 		frame_format format;
 		format.elem_type_ = std::type_index(typeid(Elem));
 		format.elem_size_ = sizeof(Elem);
-		format.elem_alignment_requirement_ = alignof(Elem);
-		format.alignment_ = alignment;
+		format.elem_alignment_ = alignof(Elem);
+		format.stride_ = stride;
 		return format;
 	}
 		
@@ -50,9 +50,9 @@ public:
 	
 	std::type_index elem_type_index() const noexcept { return elem_type_; }
 	std::size_t elem_size() const noexcept { return elem_size_; }
-	std::size_t elem_alignment_requirement() const noexcept { return elem_alignment_requirement_; }
-	std::size_t alignment() const noexcept { return alignment_; }
-	std::size_t padding() const noexcept { return (alignment_ - elem_size_); }
+	std::size_t elem_alignment() const noexcept { return elem_alignment_; }
+	std::size_t stride() const noexcept { return stride_; }
+	std::size_t padding() const noexcept { return (stride_ - elem_size_); }
 };
 
 

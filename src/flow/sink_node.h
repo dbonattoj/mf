@@ -15,7 +15,7 @@ class graph;
 class sink_node : public node {
 protected:
 	virtual void setup() { }
-	virtual void pre_process(time_unit t) { }
+	virtual void pre_process(node_job&) { }
 	virtual void process(node_job&) = 0;
 	
 public:	

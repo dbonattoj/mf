@@ -32,6 +32,7 @@ public:
 	using coordinates_type = typename view_type::coordinates_type;
 	using shape_type = typename view_type::shape_type;
 	using strides_type = typename view_type::strides_type;
+	using span_type = typename view_type::span_type;
 
 	using value_type = T;
 	using pointer = T*;
@@ -46,7 +47,7 @@ public:
 
 protected:
 	Allocator allocator_; ///< Raw allocator used to allocate memory, in bytes.
-	std::size_t stride_; ///< Stride of elements, and alignment of allocated memory, in bytes.
+	std::size_t stride_; ///< Stride of elements, in bytes.
 	std::size_t padding_; ///< Padding between frames, in bytes.
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	view_type view_; ///< View used to access items.
@@ -67,7 +68,7 @@ protected:
 
 public:
 	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator()) :
-		ndarray(shp, 0, alignof(T), allocator) { }
+		ndarray(shp, 0, sizeof(T), allocator) { }
 
 	explicit ndarray(const const_view_type&);
 	ndarray(const ndarray& arr) : ndarray(arr.cview()) { }

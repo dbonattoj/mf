@@ -10,7 +10,7 @@ ndarray_generic<Allocator>::ndarray_generic(
 base(
 	make_ndsize(prop.array_length(), prop.frame_length()),
 	padding,
-	prop.format().alignment(),
+	prop.format().stride(),
 	allocator
 ),
 format_(prop.format()) { }

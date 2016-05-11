@@ -6,6 +6,8 @@
 #include "../io/frame_importer.h"
 #include "../flow/sink_node.h"
 
+#include <iostream>
+
 namespace mf { namespace node {
 
 template<typename Exporter>

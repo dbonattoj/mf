@@ -22,8 +22,16 @@ public:
 	
 	const cv_mat_type& cv_mat() const { return mat_; }
 	cv_mat_type& cv_mat() { return mat_; }
+	
+	template<typename Kernel, typename Function>
+	void apply_kernel(const Kernel& kernel, Function func);
+	
+	template<typename Kernel>
+	void convolve_kernel(const Kernel& kernel);
 };
 
 }
+
+#include "image.tcc"
 
 #endif
