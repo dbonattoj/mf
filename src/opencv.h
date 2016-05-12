@@ -4,8 +4,8 @@
 #include <opencv2/opencv.hpp>
 
 #include "color.h"
-
-#include <iostream>
+#include "ndarray/ndcoord.h"
+#include "ndarray/ndarray.h"
 
 namespace cv { // in OpenCV namespace
 	template<>
@@ -41,8 +41,16 @@ namespace cv { // in OpenCV namespace
 	};
 }
 
+
 namespace mf {
 
+
+/*
+/// Convert `ndarray_view` to OpenCV `Mat_` object, without copying data.
+/** Dimension, shape and strides of the resulting `Mat_` are adjusted to match the `ndarray_view` \a arg.
+ ** The element type of \a arr must have an OpenCV `DataType<>` specialization.
+ ** As many OpenCV functions do not support `Mat_` with non-default strides, it may be necessary to copy the array
+ ** to a new `Mat_` afterwards.  * /
 template<typename Array>
 auto to_opencv_mat(const Array& arr) {
 	using value_type = typename Array::value_type;
@@ -70,6 +78,58 @@ auto to_opencv_mat(const Array& arr) {
 	
 	return mat_;	
 };
+*/
+
+template<std::size_t Dim, typename Elem>
+auto to_opencv_mat(const ndarray_view<Dim, Elem>& vw) {
+	using opencv_type = cv::DataType<Elem>;
+	using channel_type = typename opencv_type::channel_type;
+
+	int sizes[Dim];
+	for(std::ptrdiff_t i = 0; i < Dim; ++i) sizes[i] = vw.shape()[i];
+
+/*	if(vw.has_default_strides()) {
+		cv::Mat mat(
+			Dim,
+			sizes,
+			opencv_type::type,
+			reinterpret_cast<void*>(vw.start())
+		);
+		cv::Mat_<Elem> mat_(mat);
+		return mat_;
+
+	} else {*/
+		ndarray<Dim, Elem> arr(vw);
+		cv::Mat mat(
+			Dim,
+			sizes,
+			opencv_type::type,
+			reinterpret_cast<void*>(arr.start())
+		);
+		cv::Mat_<Elem> mat_(mat);
+		cv::Mat_<Elem> mat_copy_;
+		mat_.copyTo(mat_copy_);
+		return mat_copy_;
+		
+
+}
+
+
+template<std::size_t Dim, typename Elem>
+bool copy_less_convertible_to_opencv_mat(const ndarray_view<Dim, Elem>& vw) {
+	return vw.has_default_strides();
+}
+
+
+
+template<std::size_t Dim, typename T>
+auto to_ndarray_view(const cv::Mat_<T>& mat) {
+	T* start = reinterpret_cast<T*>(mat.data);
+	ndcoord<Dim, int> shape(mat.size.p, mat.size.p + Dim);
+	ndcoord<Dim, std::size_t> strides(mat.step.p, mat.step.p + Dim);
+	return ndarray_view<Dim, T>(start, shape, strides);
+}
+
 
 }
 

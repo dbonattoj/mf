@@ -5,6 +5,7 @@
 #include <mf/camera/projection_image_camera.h>
 #include <mf/color.h>
 #include <memory>
+#include <mf/masked_elem.h>
 
 /// Node blends input visuals with closest camera positions.
 /** _Input visual_ is an input port of image type `<2, rgba_color>`, associated with a \ref camera. Multiple input
@@ -21,7 +22,7 @@ public:
 		input_visual(blend_closest_node& self, const camera_type& cam) :
 			image_input(self), camera(cam) { }
 		
-		input_type<2, mf::rgba_color> image_input;
+		input_type<2, mf::masked_elem<mf::rgb_color>> image_input;
 		parameter_type<camera_type> camera;
 	};
 	
@@ -40,7 +41,7 @@ private:
 	std::vector<active_input_visual> active_visuals_;
 
 public:
-	output_type<2, mf::rgba_color> output;
+	output_type<2, mf::masked_elem<mf::rgb_color>> output;
 	parameter_type<camera_type> output_camera;
 		
 	blend_closest_node(mf::flow::graph& gr, std::size_t n = 3) :

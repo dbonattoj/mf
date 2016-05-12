@@ -52,10 +52,12 @@ using real = float;
 using time_unit = std::ptrdiff_t;
 
 
+/// Single byte type.
 using byte = std::uint8_t;
 
 
-
+/// One-dimensional time span.
+/** Derived from `ndspan<1, time_unit>.` */
 class time_span : public ndspan<1, time_unit> {
 	using base = ndspan<1, time_unit>;
 	

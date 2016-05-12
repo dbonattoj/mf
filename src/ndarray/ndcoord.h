@@ -11,6 +11,9 @@
 
 namespace mf {
 
+/// Vector of n-dimensional coordinates.
+/** Vector of size `Dim` with items of arithmetic type `T`. Used mainly for coordinates of `ndarray_view`.
+ ** For real-values vectors expressing positions or directions in space, the `Eigen` vector types are used instead. */
 template<std::size_t Dim, typename T>
 class ndcoord {
 	static_assert(std::is_arithmetic<T>::value, "ndcoord component type must be arithmetic");

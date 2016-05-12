@@ -3,6 +3,7 @@
 #include <cmath>
 #include <mf/ndarray/ndarray.h>
 
+
 using namespace mf;
 
 namespace {
@@ -52,24 +53,24 @@ void blend_closest_node::process(flow::node_job& job) {
 		for(active_input_visual act_vis : active_visuals_) {
 			auto im = job.in(act_vis.visual->image_input);
 			
-			rgba_color i_col = im[y][x];
+			auto i_col = im[y][x];
 			if(i_col.is_null()) continue;
 			null = false;
 			
-			float w = 1.0 / act_vis.camera_distance;
-			sr += w * i_col.r;
-			sg += w * i_col.g;
-			sb += w * i_col.b;
+			float w = 1.0;// / act_vis.camera_distance;
+			sr += w * i_col.elem.r;
+			sg += w * i_col.elem.g;
+			sb += w * i_col.elem.b;
 			total += w;
 		}
 		
 		if(null) {
-			out[y][x] = rgba_color::null();
+			out[y][x] = masked_elem<rgb_color>::null();
 		} else {
 			sr /= total;
 			sg /= total;
 			sb /= total;
-			out[y][x] = rgba_color(sr, sg, sb);
+			out[y][x] = rgb_color(sr, sg, sb);
 		}
 	}
 }

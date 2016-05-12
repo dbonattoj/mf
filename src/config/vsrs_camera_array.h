@@ -11,6 +11,10 @@
 
 namespace mf {
 
+/// Reader of camera array format used by VSRS.
+/** File contains array of names projection cameras, defined using their extrinsic and intrinsic matrices, in plain
+ ** text format. Some camera array files contain additional fourth `0 0 0 1` row of extrinsic matrix, while some omit
+ ** it. `fourth_extrinsic_row` must be set accordingly. */
 class vsrs_camera_array {
 private:
 	std::map<std::string, projection_camera> cameras_;
@@ -24,7 +28,10 @@ public:
 	bool has(const std::string&) const;
 	const projection_camera& operator[](const std::string&) const;
 };
-	
+
+// TODO automatic fourth_extrinsic_row_
+// TODO no depth_projection_parameters here
+
 }
 
 #endif

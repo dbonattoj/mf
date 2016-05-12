@@ -109,12 +109,13 @@ public:
 	MF_NDARRAY_VIEW_FUNC_(operator[]);
 	MF_NDARRAY_VIEW_FUNC_(at);
 		
-	iterator begin() { return view().begin(); }
-	const_iterator begin() const { return cview().begin(); }
-	const_iterator cbegin() const { return cview().begin(); }
-	iterator end() { return view().end(); }
-	const_iterator end() const { return cview().end(); }
-	const_iterator cend() const { return cview().end(); }
+	iterator begin() { return view_.begin(); }
+	//const_iterator begin() const { return cview().begin(); }
+	//const_iterator cbegin() const { return cview().begin(); }
+	iterator end() { return view_.end(); }
+	//const_iterator end() const { return cview().end(); }
+	//const_iterator cend() const { return cview().end(); }
+	// TODO fix const iterators (can't call from temporary ndarray_view - binds to it)
 };
 
 

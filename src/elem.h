@@ -5,6 +5,7 @@
 #include <array>
 #include <complex>
 #include <type_traits>
+#include "common.h"
 
 namespace mf {
 
@@ -24,6 +25,7 @@ struct elem_traits_base {
 
 template<typename Elem>
 struct elem_traits : elem_traits_base<Elem> { };
+
 
 template<typename T, std::size_t N>
 struct elem_traits<std::array<T, N>> :
@@ -45,6 +47,7 @@ template<typename Elem>
 std::enable_if_t<! elem_traits<Elem>::is_nullable, bool> is_null(const Elem& elem) {
 	return false;
 }
+
 
 }
 

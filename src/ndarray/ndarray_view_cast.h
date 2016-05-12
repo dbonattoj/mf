@@ -5,7 +5,9 @@
 #include "../common.h"
 #include "../elem.h"
 #include "../elem_tuple.h"
+#include "../masked_elem.h"
 #include "../utility/misc.h"
+#include <cstddef>
 
 namespace mf {
 	
@@ -16,8 +18,8 @@ namespace detail {
 	// single element from tuple
 	template<typename Output_elem, std::size_t Dim, typename... Input_elems>
 	struct ndarray_view_caster<
-		ndarray_view<Dim, Output_elem>,
-		ndarray_view<Dim, elem_tuple<Input_elems...>>
+		ndarray_view<Dim, Output_elem>, // out
+		ndarray_view<Dim, elem_tuple<Input_elems...>> // in
 	>{
 		using input_tuple_type = elem_tuple<Input_elems...>;
 		
@@ -42,8 +44,8 @@ namespace detail {
 	// scalars from elem
 	template<std::size_t Dim, typename Input_elem>
 	struct ndarray_view_caster<
-		ndarray_view<Dim + 1, typename elem_traits<Input_elem>::scalar_type>,
-		ndarray_view<Dim, Input_elem>
+		ndarray_view<Dim + 1, typename elem_traits<Input_elem>::scalar_type>, // out
+		ndarray_view<Dim, Input_elem> // in
 	>{
 		using elem_traits_type = elem_traits<Input_elem>;
 		using elem_scalar_type = typename elem_traits_type::scalar_type;
@@ -60,7 +62,53 @@ namespace detail {
 			);
 		}
 	};
+	
+	// masked to elem cast
+	template<std::size_t Dim, typename Elem>
+	struct ndarray_view_caster<
+		ndarray_view<Dim, Elem>, // out
+		ndarray_view<Dim, masked_elem<Elem>> // in
+	>{
+		using input_view_type = ndarray_view<Dim, masked_elem<Elem>>;
+		using output_view_type = ndarray_view<Dim, Elem>;
 
+		output_view_type operator()(const input_view_type& arr) const {
+			auto* start = reinterpret_cast<Elem*>(arr.start());
+			return output_view_type(start, arr.shape(), arr.strides());
+		}
+	};
+	
+	
+	// masked to mask cast
+	template<std::size_t Dim, typename Elem>
+	struct ndarray_view_caster<
+		ndarray_view<Dim, bool>, // out
+		ndarray_view<Dim, masked_elem<Elem>> // in
+	>{
+		using input_view_type = ndarray_view<Dim, masked_elem<Elem>>;
+		using output_view_type = ndarray_view<Dim, bool>;
+
+		output_view_type operator()(const input_view_type& arr) const {
+			std::ptrdiff_t offset = offsetof(masked_elem<Elem>, mask);
+			auto* start = reinterpret_cast<bool*>(
+				advance_raw_ptr(arr.start(), offset)
+			);
+			return output_view_type(start, arr.shape(), arr.strides());
+		}
+	};
+
+
+	// no-op cast
+	template<std::size_t Dim, typename Elem>
+	struct ndarray_view_caster<
+		ndarray_view<Dim, Elem>, // out
+		ndarray_view<Dim, Elem> // in
+	>{
+		using view_type = ndarray_view<Dim, Elem>;
+		const view_type& operator()(const view_type& arr) const {
+			return arr;
+		}
+	};
 }
 
 

@@ -12,7 +12,7 @@ namespace mf {
 
 struct bounding_box;
 
-/// Base class for object that has a pose in 3D space relative to a coordinate system.
+/// Object that has a pose in 3D space relative to a coordinate system, base class.
 /** Can have a parent space object, meaning its pose will be defined relative to that parent.
  ** No parent means pose is absolute. Parent can be reassigned. Keeps references to its children,
  ** Guarantees that pointers to parent or children get properly removed when either child or parent gets deleted.*/

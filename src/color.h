@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "elem.h"
+#include "masked_elem.h"
 
 namespace mf {
 
@@ -109,20 +110,35 @@ template<> inline rgba_color color_convert(const ycbcr_color& in) {
 	return color_convert<rgba_color>(color_convert<rgb_color>(in));
 }
 
+template<> inline rgb_color color_convert(const rgba_color& in) {
+	return rgb_color(in.r, in.g, in.b);
+}
+
 // TODO remove, replace by thin/implicit nodes
+////////////
 template<> inline std::uint8_t color_convert(const ycbcr_color& in) {
 	return in.y;
+}
+
+template<> inline masked_elem<std::uint8_t> color_convert(const ycbcr_color& in) {
+	if(in.y == 0.0) return masked_elem<std::uint8_t>::null();
+	else return in.y;
 }
 
 template<> inline rgb_color color_convert(const std::uint8_t& in) {
 	return rgb_color(in, in, in);
 }
 
-
-template<> inline rgb_color color_convert(const rgba_color& in) {
-	return rgb_color(in.r, in.g, in.b);
+template<> inline rgb_color color_convert(const masked_elem<rgb_color>& in) {
+	if(in.is_null()) return rgb_color(0, 0, 50); // background
+	else return in;
 }
 
+template<> inline rgb_color color_convert(const masked_elem<std::uint8_t>& in) {
+	if(in.is_null()) return rgb_color(0, 0, 50); // background
+	else return rgb_color(in, in, in);
+}
+///////////
 
 template<>
 struct elem_traits<mono_color> :

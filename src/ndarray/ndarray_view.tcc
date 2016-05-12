@@ -49,6 +49,7 @@ auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t 
 
 template<std::size_t Dim, typename T>
 bool ndarray_view<Dim, T>::has_default_strides(std::size_t minimal_dimension) const noexcept {
+	// TODO fix
 	if(strides_.back() < sizeof(T)) return false;
 	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
 		std::ptrdiff_t expected_stride = shape_[i + 1] * strides_[i + 1];
@@ -97,7 +98,7 @@ std::ptrdiff_t ndarray_view<Dim, T>::fix_coordinate_(std::ptrdiff_t c, std::ptrd
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_view<Dim, T>::index_to_coordinates(const index_type& index) const -> coordinates_type {
+auto ndarray_view<Dim, T>::index_to_coordinates(const index_type& index) const -> coordinates_type {	
 	coordinates_type coord;
 	index_type remainder = index;
 	std::size_t factor = shape_.tail().product();

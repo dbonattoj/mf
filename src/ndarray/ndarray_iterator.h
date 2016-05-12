@@ -5,6 +5,13 @@
 
 namespace mf {
 
+/// Random access iterator which traverses an `ndarray_view`.
+/** Always traverses the elements in order of increasing index, regardless of strides. Random-access iterator operations
+ ** (addition, comparation, etc.) act on index values. Index and coordinates of current item can be accessed using
+ ** index() and coordinates().
+ ** Incrementation and decrementation are optimized when the strides of the `ndarray_view` are (partially) default, i.e.
+ ** items with sequential indices have sequential memory addresses, possibly with padding inbetween. This can be for the
+ ** entire `ndarray_view`, or just for smaller segments at a time. */
 template<typename Array>
 class ndarray_iterator :
 public std::iterator<std::random_access_iterator_tag, typename Array::value_type> {

@@ -7,7 +7,6 @@ namespace mf {
 template<typename Array>
 inline void ndarray_iterator<Array>::forward_(std::ptrdiff_t d) {
 	assert(d >= 0);
-
 	std::ptrdiff_t contiguous_limit = contiguous_length_ - (index_ % contiguous_length_);
 	index_ += d;
 	if(d < contiguous_limit) {
@@ -22,7 +21,6 @@ inline void ndarray_iterator<Array>::forward_(std::ptrdiff_t d) {
 template<typename Array>
 inline void ndarray_iterator<Array>::backward_(std::ptrdiff_t d) {
 	assert(d >= 0);
-
 	std::ptrdiff_t contiguous_limit = index_ % contiguous_length_;
 	index_ -= d;
 	if(d <= contiguous_limit) {

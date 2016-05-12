@@ -9,15 +9,12 @@ i_is_defined() --> value to set between contruction and setup
 interal_do()  --> virtual function overriden by subbase (Base --> Subbase --> Concrete)
 
 
-nodes:
-- async (async_source)
-- sync (sync_source)
-- sink
-- thin
-
-
 .h = header (C++)
 .cc = module (C++)
 .tcc = template implementation (+ some inlines), included at end of .h
 .icc = other file included from header (exceptional)
+
+
+make_x(a, b, c) = like constructor
+to_x(y) = like (implicit) copy constructor (y = object representing same thing)
 

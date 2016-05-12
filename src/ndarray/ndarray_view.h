@@ -150,7 +150,7 @@ public:
 	) const;
 	
 	/// Cuboid section of view, defined using `ndspan` object.
-	ndarray_view section(const span_type& span, const strides_type& steps = strides_type(1)) {
+	ndarray_view section(const span_type& span, const strides_type& steps = strides_type(1)) const {
 		return section(span.start_pos(), span.end_pos(), steps);
 	}
 	

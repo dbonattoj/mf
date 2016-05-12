@@ -14,7 +14,8 @@
 #include "elem.h"
 
 namespace mf {
-	
+
+/// Floating point type used for Eigen objects.
 using Eigen_scalar = real;
 
 template<std::size_t Rows, std::size_t Cols>

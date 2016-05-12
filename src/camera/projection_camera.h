@@ -22,8 +22,8 @@ private:
 
 	projection_view_frustum projection_frustum_; ///< Projection frustum, without pose and without image scale, offset.
 	Eigen_projective3 view_to_image_; ///< Transformation from view to image. Without pose, with image scale and offset.
-	Eigen_projective3 world_to_image_;
-	Eigen_projective3 image_to_world_;
+	Eigen_projective3 world_to_image_; ///< Full transformation from world to image. Pose, projection, scale, offset.
+	Eigen_projective3 image_to_world_; ///< Inverse of `world_to_image_`.
 	
 	static intrinsic_matrix_result read_intrinsic_matrix_
 		(const Eigen_mat3& intrinsic_matrix, const depth_projection_parameters&, const ndsize<2>&);

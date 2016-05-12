@@ -24,10 +24,12 @@ void reverse_homography_warp<Color, Depth>::process(flow::node_job& job) {
 	for(std::ptrdiff_t y = 0; y < image_shape[0]; ++y)
 	for(std::ptrdiff_t x = 0; x < image_shape[1]; ++x) {
 		auto dest_pix_coord = make_ndptrdiff(y, x);
-		Depth dest_pix_depth = depth_in.at(dest_pix_coord);
+		masked_depth_type dest_pix_depth = depth_in.at(dest_pix_coord);
+		if(dest_pix_depth.is_null()) {
+			out.at(dest_pix_coord) = masked_image_type::null();
+			continue;
+		}
 		
-		Color source_color = image_in.at(dest_pix_coord);
-
 		real dest_depth = out_cam.to_depth(dest_pix_depth);
 		auto dest_coord = out_cam.to_image(dest_pix_coord);
 
@@ -35,11 +37,13 @@ void reverse_homography_warp<Color, Depth>::process(flow::node_job& job) {
 		Eigen_vec3 source_3coord = (reverse_homography * dest_3coord.homogeneous()).eval().hnormalized();
 		
 		auto source_pix_coord = in_cam.to_pixel(source_3coord.head(2));
-		
-		if(in_cam.image_span().includes(source_pix_coord) && dest_pix_depth != 0)
+
+		if(in_cam.image_span().includes(source_pix_coord)) {
+			Color source_color = image_in.at(source_pix_coord);
 			out.at(dest_pix_coord) = source_color;
-		else
-			out.at(dest_pix_coord) = background_color_;
+		} else {
+			out.at(dest_pix_coord) = masked_image_type::null();
+		}
 	}
 }
 

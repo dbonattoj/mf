@@ -7,12 +7,15 @@
 
 namespace mf {
 
-
+/// Cuboid n-dimensional span delimited by two `ndcoord` vectors.
+/** Represents the interval, rectangular, or in general `Dim`-dimensional cuboid region where for all coordinates `c`
+ ** inside it and for each dimension `0 <= i < Dim`, one has `start_pos()[i] <= c[i] < end_pos()[i]`.
+ ** Can be zero-length on any axis (possibly on all). */
 template<std::size_t Dim, typename T = std::ptrdiff_t>
 class ndspan {
 public:
 	using coordinates_type = ndcoord<Dim, T>;
-	using shape_type = ndcoord<Dim, T>;
+	using shape_type = ndsize<Dim>;
 	
 private:
 	coordinates_type start_;
