@@ -10,14 +10,12 @@
 #include <functional>
 #include <algorithm>
 
-#include <iostream>
-
 using namespace mf;
 
 depth_map_filter_node::depth_map_filter_node(flow::graph& gr, std::size_t kernel_diameter) :
-	mf::flow::sync_node(gr), 
+	mf::flow::async_node(gr), 
 	kernel_diameter_(kernel_diameter),
-	input(*this, 5, 5), output(*this) { }
+	input(*this), output(*this) { }
 
 
 void depth_map_filter_node::setup() {
@@ -25,20 +23,32 @@ void depth_map_filter_node::setup() {
 }
 
 void depth_map_filter_node::process(flow::node_job& job) {
-	auto in_img = to_image(job.in(input));
-	auto out_img = to_image(job.out(output));
+	auto in = job.in(input);
+	auto out = job.out(output);
 
-	auto filter = [](const auto& placement, masked_elem<std::uint8_t>& out) {
-		out = placement.view_section.at(placement.section_position);
+	std::vector<depth_type> values;
+	values.reserve(sq(kernel_diameter_));
+
+	auto filter = [&](const auto& placement, masked_depth_type& out) {
+		if(! placement.view_section.at(placement.section_position).is_null())
+			out = placement.view_section.at(placement.section_position);
+		
+		values.clear();
+		for(auto it = placement.view_section.begin(); it != placement.view_section.end(); ++it) {
+			auto coord = it.coordinates();
+			if(! placement.kernel_section.at(coord)) continue;
+			if(placement.view_section.at(coord).is_null()) values.push_back(0);
+			values.push_back(placement.view_section.at(coord));
+		}
+		if(values.size() == 0) {
+			out = masked_depth_type::null();
+		} else {
+			std::ptrdiff_t median_index = values.size() / 2;
+			std::nth_element(values.begin(), values.begin() + median_index, values.end());
+			out = values[median_index];
+			if(out.elem == 0) out.mask = false;
+		}
 	};
 
-	apply_kernel(filter, in_img.view(), out_img.view(), disk_image_kernel(kernel_diameter_).view());
-/*
-	in_img.write_cv_mat_background(0);
-	cv::medianBlur(in_img.cv_mat(), in_img.cv_mat(), kernel_diameter_);
-	in_img.read_cv_mat_background(0);
-
-	in_img.commit_cv_mat();
-	out_img.view() = in_img.view();
-*/
+	apply_kernel(filter, in, out, box_image_kernel(kernel_diameter_).view());
 }

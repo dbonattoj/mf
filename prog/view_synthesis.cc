@@ -8,6 +8,7 @@
 #include <mf/nodes/homography_depth_warp.h>
 #include <mf/nodes/reverse_homography_warp.h>
 #include "support/blend_closest_node.h"
+#include "support/blend_depth_maps_node.h"
 #include "support/input_data.h"
 #include "support/inpaint_node.h"
 #include "support/result_filter_node.h"
@@ -36,7 +37,7 @@ int main(int argc, const char* argv[]) {
 		Eigen_vec3 max_pos = rightmost_cam.absolute_pose().position;
 		Eigen_quaternion max_ori = rightmost_cam.absolute_pose().orientation;
 	
-		real k = (1.0 + std::cos(pi * t / 30.0)*0.7) / 2.0;
+		real k = (1.0 + std::cos(pi * t / 200.0)*0.7) / 2.0;
 	
 		Eigen_vec3 pos = min_pos + k*(max_pos - min_pos);
 		Eigen_quaternion ori = min_ori.slerp(k, max_ori);
@@ -51,6 +52,7 @@ int main(int argc, const char* argv[]) {
 
 	auto& blender = graph.add_node<blend_closest_node>(3);
 	blender.output_camera.set_time_function(camera_at_time);
+
 	
 	for(const input_visual& vis : data.visuals) {
 		// Source+converter for image
@@ -76,17 +78,7 @@ int main(int argc, const char* argv[]) {
 		// Filter on the depth map
 		auto& di_filter = graph.add_node<depth_map_filter_node>(3);
 		di_filter.input.connect(di_warper.destination_depth_output);
-
-	// Converter+sink for output image
-	auto& sink = graph.add_sink<node::exporter<video_exporter>>("output/depth.avi", shape);
-	auto& sink_converter = graph.add_node<node::color_converter<masked_elem<std::uint8_t>, rgb_color>>();
-	sink_converter.input.connect(di_filter.output);
-	sink.input.connect(sink_converter.output);
-	
-	break;
-
-
-/*
+		
 		// Reverse homography warp
 		auto& warper = graph.add_node<node::reverse_homography_warp<rgb_color, std::uint8_t>>();
 		warper.source_image_input.connect(im_converter.output);
@@ -97,9 +89,8 @@ int main(int argc, const char* argv[]) {
 		// Connect to one blender visual
 		auto& blender_vis = blender.add_input_visual(vis.camera);
 		blender_vis.image_input.connect(warper.destination_image_output);
-*/
 	}
-/*	
+	
 	// Result filter
 	auto& result_filter = graph.add_node<result_filter_node>();
 	result_filter.input.connect(blender.output);
@@ -109,7 +100,7 @@ int main(int argc, const char* argv[]) {
 	auto& sink_converter = graph.add_node<node::color_converter<masked_elem<rgb_color>, rgb_color>>();
 	sink_converter.input.connect(result_filter.output);
 	sink.input.connect(sink_converter.output);
-*/
+
 	graph.setup();
 	graph.run();
 }

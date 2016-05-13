@@ -12,7 +12,7 @@ public:
 		
 	result_filter_node(mf::flow::graph& gr) :
 		mf::flow::sync_node(gr),
-		input(*this), output(*this) { }
+		input(*this, 2, 2), output(*this) { }
 
 protected:
 	void setup() override;
