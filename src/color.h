@@ -130,12 +130,12 @@ template<> inline rgb_color color_convert(const std::uint8_t& in) {
 }
 
 template<> inline rgb_color color_convert(const masked_elem<rgb_color>& in) {
-	if(in.is_null()) return rgb_color(0, 0, 50); // background
+	if(in.is_null()) return rgb_color(0, 0, 0); // background
 	else return in;
 }
 
 template<> inline rgb_color color_convert(const masked_elem<std::uint8_t>& in) {
-	if(in.is_null()) return rgb_color(0, 0, 50); // background
+	if(in.is_null()) return rgb_color(0, 0, 0); // background
 	else return rgb_color(in, in, in);
 }
 ///////////

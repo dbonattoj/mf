@@ -201,6 +201,8 @@ public:
 	const strides_type& strides() const noexcept { return strides_; }
 	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
 	
+	span_type full_span() const noexcept { return span_type(0, shape_); }
+	
 	template<std::size_t New_dim>
 	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
 	

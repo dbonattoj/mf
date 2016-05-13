@@ -44,6 +44,14 @@ bool is_nonzero_multiple_of(T x, T base) {
 	return (x != 0) && is_multiple_of(x, base);
 }
 
+/// Check if `x` is odd.
+template<typename T>
+bool is_odd(T x) { return (x % 2) != 0; }
+
+/// Check if `x` is even.
+template<typename T>
+bool is_even(T x) { return (x % 2) == 0; }
+
 }
 
 #include "misc.tcc"
