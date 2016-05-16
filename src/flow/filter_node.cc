@@ -1,5 +1,5 @@
 #include "filter_node.h"
-#include "filter.h"
+#include "../filter/filter.h"
 
 namespace mf { namespace flow {
 

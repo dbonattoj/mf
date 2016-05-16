@@ -7,7 +7,6 @@
 using namespace mf;
 using namespace mf::test;
 
-using source_node_type = flow::async_source_node;
 using node_type = flow::async_node;
 constexpr bool seekable = true;
 

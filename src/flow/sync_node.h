@@ -2,7 +2,7 @@
 #define MF_FLOW_SYNC_NODE_H_
 
 #include <memory>
-#include "node.h"
+#include "filter_node.h"
 #include "node_job.h"
 #include "node_io_wrapper.h"
 #include "node_parameter.h"
@@ -15,14 +15,9 @@ class sync_node_output;
 
 /// Synchronous node base class.
 /** Processes frames synchronously when pulled from output. Can have multiple inputs, but only one output. */
-class sync_node : public node {
-protected:
-	virtual void setup() { }
-	virtual void pre_process(node_job&) { }
-	virtual void process(node_job&) = 0;
-
+class sync_node final : public filter_node {
 public:
-	explicit sync_node(graph& gr) : node(gr) { }
+	explicit sync_node(graph& gr) : filter_node(gr) { }
 	
 	template<std::size_t Dim, typename Elem>
 	using input_type = node_input_wrapper<node_input, Dim, Elem>;
@@ -38,18 +33,16 @@ public:
 	void stop() final override;
 		
 	bool process_next_frame() override;
-};
 
-
-/// Synchronous source node base class.
-class sync_source_node : public sync_node {
-public:
-	explicit sync_source_node(graph& gr, bool seekable = false, time_unit stream_duration = -1) :
-		sync_node(gr)
-	{
-		define_source_stream_properties(seekable, stream_duration);
+	node_input& add_input(time_unit past_window, time_unit future_window) override {
+		return add_input<node_input>(past_window, future_window);
+	}
+	
+	sync_node_output& add_output(const frame_format& format) override {
+		return add_output<sync_node_output>(format);
 	}
 };
+
 
 
 class sync_node_output : public node_output {
@@ -59,8 +52,7 @@ private:
 public:
 	using node_type = sync_node;
 
-	sync_node_output(sync_node& nd, const frame_format& format) :
-		node_output(nd, format) { }
+	using node_output::node_output;
 	
 	void setup() override;
 	

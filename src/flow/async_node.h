@@ -1,7 +1,7 @@
 #ifndef MF_FLOW_ASYNC_NODE_H_
 #define MF_FLOW_ASYNC_NODE_H_
 
-#include "node.h"
+#include "filter_node.h"
 #include "node_job.h"
 #include "node_io_wrapper.h"
 #include "node_parameter.h"
@@ -18,17 +18,12 @@ class async_node_output;
 /** Processes frames in a separate thread owned by the node. Can have multiple inputs, but only one output. Can process
  ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
  ** in graph. */
-class async_node : public node {
+class async_node final : public filter_node {
 private:
 	bool running_ = false;
 	std::thread thread_;
 	
 	void thread_main_();
-
-protected:
-	virtual void setup() { }
-	virtual void pre_process(node_job&) { }
-	virtual void process(node_job&) = 0;
 
 public:
 	template<std::size_t Dim, typename Elem>
@@ -47,18 +42,16 @@ public:
 	void launch() final override;
 	void stop() final override;
 	bool process_next_frame() override;
-};
-
-
-/// Asynchronous source node base class.
-class async_source_node : public async_node {
-public:
-	explicit async_source_node(graph& gr, bool seekable = false, time_unit stream_duration = -1) :
-		async_node(gr)
-	{
-		define_source_stream_properties(seekable, stream_duration);
+	
+	node_input& add_input(time_unit past_window, time_unit future_window) override {
+		return add_input<node_input>(past_window, future_window);
+	}
+	
+	async_node_output& add_output(const frame_format& format) override {
+		return add_output<async_node_output>(format);
 	}
 };
+
 
 
 class async_node_output : public node_output {
@@ -68,8 +61,7 @@ private:
 public:
 	using node_type = async_node;
 
-	async_node_output(async_node& nd, const frame_format& format) :
-		node_output(nd, format) { }
+	using node_output::node_output;
 
 	void setup() override;
 

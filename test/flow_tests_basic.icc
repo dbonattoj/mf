@@ -6,8 +6,8 @@ SECTION("basic") {
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
 
 	SECTION("source -> sink") {
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
 		gr.setup();
 		gr.run();
@@ -15,9 +15,9 @@ SECTION("basic") {
 	}
 	
 	SECTION("source --> passthrough --> sink") {
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 0);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& passthrough = gr.add_filter<passthrough_filter, node_type>(0, 0);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
 		gr.setup();
@@ -27,9 +27,9 @@ SECTION("basic") {
 	
 	
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(0, 3);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(0, 3);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 	
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
@@ -42,9 +42,9 @@ SECTION("basic") {
 	}
 	
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 0);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 0);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 	
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
@@ -57,9 +57,9 @@ SECTION("basic") {
 	}
 	
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 3);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 3);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 	
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
@@ -73,10 +73,10 @@ SECTION("basic") {
 	}
 	
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2 --> sink") {
-		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-		auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(2, 2);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 1);
+		auto& passthrough2 = gr.add_filter<passthrough_filter, node_type>(2, 2);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 	
 		passthrough1.input.connect(source1.output);
 		passthrough2.input.connect(passthrough1.output);
@@ -92,12 +92,12 @@ SECTION("basic") {
 	
 	SECTION("detailled time window test") { 
 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(5, shp, seekable);		
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(5, shp, seekable);		
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 	
 	
 		SECTION("source --> [-3]pass --> sink") {
-			auto& node = gr.add_node<passthrough_node<node_type>>(3, 0);
+			auto& node = gr.add_filter<passthrough_filter, node_type>(3, 0);
 	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
@@ -153,7 +153,7 @@ SECTION("basic") {
 		}
 	
 		SECTION("source --> [+3]pass --> sink") {
-			auto& node = gr.add_node<passthrough_node<node_type>>(0, 3);
+			auto& node = gr.add_filter<passthrough_filter, node_type>(0, 3);
 	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
@@ -210,7 +210,7 @@ SECTION("basic") {
 	
 	
 		SECTION("source --> [-3,+3]pass --> sink") {
-			auto& node = gr.add_node<passthrough_node<node_type>>(3, 3);
+			auto& node = gr.add_filter<passthrough_filter, node_type>(3, 3);
 	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
@@ -267,10 +267,10 @@ SECTION("basic") {
 	
 	
 	SECTION("multiple inputs") {
-		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& source2 = gr.add_node<sequence_frame_source<source_node_type>>(seq.size()-1, shp, seekable);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
-		auto& merge = gr.add_node<input_synchronize_test_node<node_type>>();
+		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& source2 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
+		auto& merge = gr.add_filter<input_synchronize_test_filter, node_type>();
 		
 		SECTION("graph 1") {
 			/*
@@ -278,7 +278,7 @@ SECTION("basic") {
 			source2 ----------------------> /
 			*/
 			
-			auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 5);
+			auto& passthrough = gr.add_filter<passthrough_filter, node_type>(0, 5);
 		
 			passthrough.input.connect(source1.output);
 			merge.input1.connect(passthrough.output);
@@ -299,8 +299,8 @@ SECTION("basic") {
 			source2 --> [-1, +2]passthrough2 --> /
 			*/
 			
-			auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-			auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
+			auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 1);
+			auto& passthrough2 = gr.add_filter<passthrough_filter, node_type>(1, 2);
 		
 			passthrough1.input.connect(source1.output);
 			passthrough2.input.connect(source2.output);
@@ -322,9 +322,9 @@ SECTION("basic") {
 			source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2 --> /
 			*/
 			
-			auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-			auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
-			auto& passthrough3 = gr.add_node<passthrough_node<node_type>>(2, 2);
+			auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 1);
+			auto& passthrough2 = gr.add_filter<passthrough_filter, node_type>(1, 2);
+			auto& passthrough3 = gr.add_filter<passthrough_filter, node_type>(2, 2);
 		
 			passthrough1.input.connect(source1.output);
 			passthrough3.input.connect(source2.output);
@@ -366,8 +366,8 @@ SECTION("activation") {
 		seq[99] = 99; act[99] = true;
 		std::size_t last = 99;
 		
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
 		sink.input.connect(source.output);
 		sink.activation = act;
 		gr.setup();
@@ -378,8 +378,8 @@ SECTION("activation") {
 
 
 	SECTION("source -> sink") {
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_and);
 		sink.input.connect(source.output);
 		sink.activation = act_and;
 		gr.setup();
@@ -390,9 +390,9 @@ SECTION("activation") {
 
 
 	SECTION("source -> passthrough -> sink") {
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
-		auto& passthrough = gr.add_node<passthrough_node<node_type>>(0, 0);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_and);
+		auto& passthrough = gr.add_filter<passthrough_filter, node_type>(0, 0);
 
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
@@ -420,9 +420,9 @@ SECTION("activation") {
 
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
-		auto& source = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
-		auto& sink = gr.add_sink<expected_frames_sink>(seq_and);
-		auto& passthrough = gr.add_node<passthrough_node<node_type>>(3, 3);
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_and);
+		auto& passthrough = gr.add_filter<passthrough_filter, node_type>(3, 3);
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
 		passthrough.activation = act1;
@@ -440,12 +440,12 @@ SECTION("activation") {
 		source2 --> [-1, +2]passthrough2 --> /
 		*/
 		
-		auto& source1 = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
-		auto& source2 = gr.add_node<sequence_frame_source<source_node_type>>(last, shp, seekable);
-		auto& passthrough1 = gr.add_node<passthrough_node<node_type>>(3, 1);
-		auto& passthrough2 = gr.add_node<passthrough_node<node_type>>(1, 2);
-		auto& merge = gr.add_node<input_synchronize_test_node<node_type>>();
-		auto& sink = gr.add_sink<expected_frames_sink>(seq_or);
+		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
+		auto& source2 = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
+		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 1);
+		auto& passthrough2 = gr.add_filter<passthrough_filter, node_type>(1, 2);
+		auto& merge = gr.add_filter<input_synchronize_test_filter, node_type>();
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_or);
 		
 		passthrough1.input.connect(source1.output);
 		passthrough2.input.connect(source2.output);

@@ -18,7 +18,7 @@ bool async_node::process_next_frame() {
 	
 	// with time defined, run preprocess
 	// concrete node may activate/desactivate inputs now
-	this->pre_process(job);
+	pre_process_filter(job);
 
 	// add output view to job
 	job.push_output(out, out_view);
@@ -50,7 +50,7 @@ bool async_node::process_next_frame() {
 	}
 	
 	// process frame in concrete subclass
-	this->process(job);
+	process_filter(job);
 	
 	// check if node reached end
 	// determined by stream duration or reached_end() for source
@@ -87,7 +87,7 @@ void async_node::thread_main_() {
 }
 
 
-async_node::async_node(graph& gr) : node(gr) {
+async_node::async_node(graph& gr) : filter_node(gr) {
 	set_prefetch_duration(3);
 }
 
@@ -99,7 +99,7 @@ async_node::~async_node() {
 
 void async_node::internal_setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("async_node must have exactly 1 output");
-	this->setup();
+	setup_filter();
 }
 	
 

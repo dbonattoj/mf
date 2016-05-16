@@ -11,13 +11,8 @@ namespace mf { namespace flow {
 class graph;
 
 /// Sink node base class.
-/** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow for rest of graph. */
-class sink_node : public node {
-protected:
-	virtual void setup() { }
-	virtual void pre_process(node_job&) { }
-	virtual void process(node_job&) = 0;
-	
+/** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
+class sink_node final : public filter_node {
 public:	
 	template<std::size_t Dim, typename Elem>
 	using input_type = node_input_wrapper<node_input, Dim, Elem>;
@@ -25,7 +20,7 @@ public:
 	template<typename Value>
 	using parameter_type = node_parameter<Value>;
 
-	explicit sink_node(graph& gr) : node(gr) { }
+	explicit sink_node(graph& gr) : filter_node(gr) { }
 	
 	void internal_setup() final override;
 	void launch() final override;

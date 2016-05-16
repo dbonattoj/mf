@@ -1,20 +1,20 @@
-#ifndef MF_COLOR_CONVERTER_NODE_H_
-#define MF_COLOR_CONVERTER_NODE_H_
+#ifndef MF_COLOR_CONVERTER_FILTER_H_
+#define MF_COLOR_CONVERTER_FILTER_H_
 
 #include <algorithm>
-#include "../flow/sync_node.h"
+#include "filter.h"
 #include "../color.h"
 
-namespace mf { namespace node {
+namespace mf {
 
 template<typename Input_color, typename Output_color>
-class color_converter : public flow::sync_node {	
+class color_converter_filter : public filter {
 public:
 	output_type<2, Output_color> output;
 	input_type<2, Input_color> input;
 
-	color_converter(flow::graph& gr) :
-		flow::sync_node(gr), output(*this), input(*this) { }
+	color_converter(filter_node& nd) :
+		filter(nd), output(*this), input(*this) { }
 	
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());
@@ -32,6 +32,6 @@ public:
 	}
 };
 
-}}
+}
 
 #endif

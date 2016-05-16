@@ -3,6 +3,8 @@
 
 #include "../common.h"
 #include "../utility/event.h"
+#include "filter_node.h"
+#include "sink_node.h"
 #include <utility>
 #include <vector>
 #include <memory>
@@ -12,7 +14,9 @@
 namespace mf { namespace flow {
 
 class node;
-class sink_node;
+class sync_node;
+class filter;
+class sink_filter;
 
 /// Graph containing interconnected nodes through which media frames flow.
 class graph {
@@ -22,13 +26,10 @@ private:
 	bool was_setup_ = false;
 	bool running_ = false;
 	sticky_event stop_event_;
-
-public:
-	~graph();
-
+	
 	template<typename Node, typename... Args>
-	Node& add_node(Args&&... args) {
-		static_assert(std::is_base_of<node, Node>::value, "sink node must be subclass of media_node");
+	Node& add_node_(Args&&... args) {
+		static_assert(std::is_base_of<node, Node>::value, "");
 		if(was_setup_) throw std::logic_error("cannot add node after graph already set up");
 		Node* nd = new Node(*this, std::forward<Args>(args)...);
 		nodes_.emplace_back(nd);
@@ -36,11 +37,32 @@ public:
 	}
 	
 	template<typename Node, typename... Args>
-	Node& add_sink(Args&&... args) {
-		static_assert(std::is_base_of<sink_node, Node>::value, "sink node must be subclass of media_sink_node");
-		Node& sink = add_node<Node>(std::forward<Args>(args)...);
+	Node& add_sink_(Args&&... args) {
+		static_assert(std::is_base_of<sink_node, Node>::value, "");
+		Node& sink = add_node_<Node>(std::forward<Args>(args)...);
 		sink_ = &sink;
 		return sink;
+	}
+
+
+public:
+	~graph();
+	
+	template<typename Filter, typename Node = sync_node, typename... Args>
+	Filter& add_filter(Args&&... args) {
+		static_assert(std::is_base_of<filter, Filter>::value, "");
+		static_assert(std::is_base_of<filter_node, Node>::value, "");
+		filter_node& nd = add_node_<Node>();
+		nd.set_filter<Filter>(std::forward<Args>(args)...);
+		return nd.this_filter();
+	}
+	
+	template<typename Filter, typename... Args>
+	Filter& add_sink_filter(Args&&... args) {
+		static_assert(std::is_base_of<sink_filter, Filter>::value, "");
+		filter_node& nd = add_sink_<sink_node>();
+		nd.set_filter<Filter>(std::forward<Args>(args)...);
+		return nd.this_filter();
 	}
 	
 	bool was_setup() const { return was_setup_; }

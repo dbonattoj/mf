@@ -4,9 +4,9 @@
 #include "../common.h"
 #include "../queue/frame.h"
 #include <vector>
-#include <functional>
 #include <atomic>
 #include <string>
+#include <memory>
 
 namespace mf { namespace flow {
 
@@ -19,8 +19,8 @@ class node_job;
 class node {
 private:
 	graph& graph_; ///< Graph to which this node belongs.
-	std::vector<std::reference_wrapper<node_output>> outputs_; ///< Outputs, by reference.
-	std::vector<std::reference_wrapper<node_input>> inputs_; ///< Inputs, by reference.
+	std::vector<std::unique_ptr<node_output>> outputs_; ///< Outputs, by reference.
+	std::vector<std::unique_ptr<node_input>> inputs_; ///< Inputs, by reference.
 
 	bool was_setup_ = false; ///< True after node was set up.
 	time_unit prefetch_duration_ = 0; ///< Maximal number of frames after current time that node may prefetch.
@@ -41,8 +41,6 @@ protected:
 	node(const node&) = delete;
 	node& operator=(const node&) = delete;
 		
-	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
-	void set_prefetch_duration(time_unit);
 	void setup_sink(); ///< Called by sink node, runs set up procedure for all node in graph.
 
 	void set_current_time(time_unit t) noexcept { current_time_ = t; }
@@ -50,6 +48,20 @@ protected:
 	
 	node_job make_job();
 	void cancel_job(node_job&);
+	
+	template<typename Input>
+	Input& add_input(time_unit past_window, time_unit future_window) {
+		Input* input = new Input(*this, inputs_.size(), past_window, future_window);
+		inputs_.emplace_back(input);
+		return *input;
+	}
+
+	template<typename Output>
+	Output& add_output(const frame_format& format) {
+		Output* output = new Output(*this, outputs_.size(), format);
+		output_.emplace_back(output);
+		return *output;
+	}
 
 public:
 	std::string name;
@@ -57,9 +69,10 @@ public:
 	virtual ~node() { }
 	
 	graph& this_graph() noexcept { return graph_; }
-	std::ptrdiff_t register_input(node_input&);
-	std::ptrdiff_t register_output(node_output&);
-	
+
+	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
+	void set_prefetch_duration(time_unit);	
+
 	const auto& inputs() noexcept { return inputs_; }
 	const auto& outputs() noexcept { return outputs_; }
 
@@ -104,7 +117,7 @@ private:
 	bool active_ = true;
 
 protected:
-	node_output(node& nd, const frame_format&);
+	node_output(node& nd, std::ptrdiff_t index, const frame_format&);
 	node_output(const node_output&) = delete;
 
 public:
@@ -161,7 +174,7 @@ private:
 	bool activated_ = true;
 	
 protected:
-	node_input(node& nd, time_unit past_window, time_unit future_window);
+	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
 	node_input(const node_input&) = delete;
 
 	void connect(node_output&);

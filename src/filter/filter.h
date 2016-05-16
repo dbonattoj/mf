@@ -1,13 +1,14 @@
 #ifndef MF_FLOW_FILTER_H_
 #define MF_FLOW_FILTER_H_
 
-#include "node_job.h"
-#include "filter_node.h"
+#include "../flow/node.h"
+#include "../flow/node_job.h"
+#include "../flow/filter_node.h"
 #include <string>
 
 namespace mf { namespace flow {
 
-/// Filter which performs concrete processing media step, base class.
+/// Filter which performs concrete processing, base class.
 class filter {
 private:
 	template<std::size_t Dim, typename Elem> class port;
@@ -31,13 +32,30 @@ public:
 	virtual ~filter() { }
 
 	/// Set up the filter, called prior to any frame being processed.
-	virtual void setup() = 0;
+	virtual void setup() { }
 	
 	/// Prepare for processing a frame.
-	virtual void pre_process(node_job&) = 0;
+	virtual void pre_process(node_job&) { }
 	
 	/// Process a frame.
 	virtual void process(node_job&) = 0;
+};
+
+
+/// Source filter.
+class source_filter : public filter {
+public:
+	explicit source_filter(filter_node& nd, bool seekable = false, time_unit stream_duration = -1) :
+	filter(nd) {
+		nd.define_source_stream_properties(seekable, stream_duration);
+	}
+};
+
+
+/// Sink filter.
+class sink_filter : public filter {
+public:
+	explicit sink_filter(sink_node& nd) : filter(nd) { }
 };
 
 
@@ -53,7 +71,7 @@ private:
 	frame_shape_type frame_shape_;
 
 protected:
-	static frame_format default_format() const { return frame_format::default_format<Elem>(); }
+	static frame_format default_format() { return frame_format::default_format<Elem>(); }
 
 	explicit port(filter& filt) : filter_(filt) { }
 	port(const port&) = delete;
@@ -73,7 +91,7 @@ class filter::output_port : public filter::port<Dim, Elem> {
 	using base = filter::port<Dim, Elem>;
 	
 private:
-	node_output node_output_;
+	node_output& node_output_;
 
 public:
 	explicit output_port(filter& filt) :
@@ -99,7 +117,7 @@ class filter::input_port : public filter::port<Dim, Elem> {
 	using base = filter::port<Dim, Elem>;
 	
 private:
-	node_input node_input_;
+	node_input& node_input_;
 
 public:
 	explicit input_port(filter& filt, time_unit past_window = 0, time_unit future_window = 0) :
@@ -118,8 +136,12 @@ public:
 		return node_input_.is_activated();
 	}
 	
+	/*
+	template<std::size_t Output_dim, typename Output_elem>
+	void connect(output_port<Output_dim, Output_elem>& output);
+	*/
+	
 	void connect(output_port<Dim, Elem>& output) {
-		// TODO check compatibility, implicit conversion --> ndarray_view_cast, color_convert, etc.
 		node_input_.connect(output.this_node_output());
 		base::set_frame_shape(output.frame_shape());
 	}

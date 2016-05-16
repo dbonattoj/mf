@@ -10,7 +10,7 @@ void sink_node::setup_graph() {
 
 void sink_node::internal_setup() {
 	if(outputs().size() != 0) throw invalid_flow_graph("sink_node cannot have outputs");
-	this->setup();
+	setup_filter();
 }
 
 
@@ -35,8 +35,7 @@ void sink_node::pull(time_unit t) {
 	job.define_time(t);
 		
 	// preprocess, allow concrete subclass to activate/desactivate inputs
-	this->pre_process(job);
-	// TODO job-like object passed in pre_process for input activation
+	pre_process_filter(job);
 
 	// pull & begin reading from activated inputs
 	bool stopped = false;
@@ -57,7 +56,7 @@ void sink_node::pull(time_unit t) {
 	}
 
 	// process frame in concrete subclass
-	this->process(job);
+	process_filter(job);
 	
 	bool reached_end = false;
 	// end reading from inputs

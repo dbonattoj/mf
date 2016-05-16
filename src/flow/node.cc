@@ -158,9 +158,8 @@ bool node::reached_end() const noexcept {
 /////
 
 
-node_output::node_output(node& nd, const frame_format& format) :
-	node_(nd),
-	index_(nd.register_output(*this)),
+node_output::node_output(node& nd, std::ptrdiff_t index, const frame_format& format) :
+	node_(nd), index_(index),
 	format_(format) { }
 	
 
@@ -178,9 +177,8 @@ void node_output::propagate_activation(bool active) {
 /////
 
 
-node_input::node_input(node& nd, time_unit past_window, time_unit future_window) :
-	node_(nd),
-	index_(nd.register_input(*this)),
+node_input::node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window) :
+	node_(nd), index_(index),
 	past_window_(past_window),
 	future_window_(future_window) { }
 

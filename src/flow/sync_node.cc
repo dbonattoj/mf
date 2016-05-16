@@ -5,7 +5,7 @@ namespace mf { namespace flow {
 
 void sync_node::internal_setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("sync_node must have exactly 1 output");
-	this->setup();
+	setup_filter();
 }
 
 
@@ -26,7 +26,7 @@ bool sync_node::process_next_frame() {
 	set_current_time(t);
 	job.define_time(t);
 		
-	this->pre_process(job);
+	pre_process_filter(job);
 
 	job.push_output(out, out_view);
 	
@@ -48,7 +48,7 @@ bool sync_node::process_next_frame() {
 		return false;
 	}
 
-	this->process(job);
+	process_filter(job);
 	
 	bool reached_end = false;
 	if(stream_duration_is_defined()) {
