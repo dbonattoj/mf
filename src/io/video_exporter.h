@@ -8,6 +8,8 @@
 
 namespace mf {
 
+/// Frame exporter which writes video file.
+/** Uses OpenCV `VideoWriter`. */
 class video_exporter : public frame_exporter<2, rgb_color> {
 	using base = frame_exporter<2, rgb_color>;
 

@@ -8,6 +8,10 @@
 
 namespace mf {
 
+
+/// Seekable frame importer, abstract base class.
+/** Can change position in file using seek(). Keeps track of absolute frame index (called current time). Total duration
+ ** of file is known after construction. */
 template<std::size_t Dim, typename Elem>
 class seekable_frame_importer : public frame_importer<Dim, Elem> {
 	using base = frame_importer<Dim, Elem>;

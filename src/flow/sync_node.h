@@ -3,8 +3,6 @@
 
 #include <memory>
 #include "filter_node.h"
-#include "node_job.h"
-#include "node_parameter.h"
 #include "../queue/frame.h"
 #include "../queue/timed_ring.h"
 
@@ -46,9 +44,6 @@ public:
 class sync_node final : public filter_node {
 public:
 	explicit sync_node(graph& gr) : filter_node(gr) { }
-		
-	template<typename Value>
-	using parameter_type = node_parameter<Value>;
 	
 	void internal_setup() final override;
 	void launch() final override;

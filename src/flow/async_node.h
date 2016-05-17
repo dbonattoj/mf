@@ -2,8 +2,6 @@
 #define MF_FLOW_ASYNC_NODE_H_
 
 #include "filter_node.h"
-#include "node_job.h"
-#include "node_parameter.h"
 #include "../queue/shared_ring.h"
 #include <thread>
 
@@ -54,9 +52,6 @@ private:
 	void thread_main_();
 
 public:
-	template<typename Value>
-	using parameter_type = node_parameter<Value>;
-
 	explicit async_node(graph&);
 	~async_node();
 	

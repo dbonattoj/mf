@@ -1,4 +1,5 @@
 #include "sink_node.h"
+#include "node_job.h"
 #include <iostream>
 
 namespace mf { namespace flow {

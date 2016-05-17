@@ -1,9 +1,15 @@
 DEBUG := 0
 
+# always set debug if building tests
 ifeq ($(MAKECMDGOALS), test)
 	DEBUG := 1
 endif
+ifeq ($(MAKECMDGOALS), build_test)
+	DEBUG := 1
+endif
 
+# set build and dist dir
+# separate build dirs for debug/deploy builds
 DIST_DIR := dist
 ifeq ($(DEBUG), 1)
 	BUILD_DIR := build/debug

@@ -1,11 +1,13 @@
-#ifndef PROG_BLEND_CLOSEST_NODE_H_
-#define PROG_BLEND_CLOSEST_NODE_H_
+#ifndef PROG_BLEND_CLOSEST_FILTER_H_
+#define PROG_BLEND_CLOSEST_FILTER_H_
 
-#include <mf/flow/sync_node.h>
+#include <memory>
+#include <mf/filter/filter.h>
 #include <mf/camera/projection_image_camera.h>
 #include <mf/color.h>
-#include <memory>
 #include <mf/masked_elem.h>
+#include "../support/common.h"
+
 
 /// Node blends input visuals with closest camera positions.
 /** _Input visual_ is an input port of image type `<2, rgba_color>`, associated with a \ref camera. Multiple input
@@ -14,12 +16,12 @@
  ** blending, ignoring null pixels on inputs.
  ** 
  ** Supposes that all the inputs images already contains an image that looks as if taken from the `output_camera`. */
-class blend_closest_node : public mf::flow::sync_node {
+class blend_closest_filter : public mf::flow::filter {
 public:
 	using camera_type = mf::projection_image_camera<std::uint8_t>;
 
 	struct input_visual {
-		input_visual(blend_closest_node& self, const camera_type& cam) :
+		input_visual(blend_closest_filter& self, const camera_type& cam) :
 			image_input(self), camera(cam) { }
 		
 		input_type<2, mf::masked_elem<mf::rgb_color>> image_input;
@@ -44,8 +46,8 @@ public:
 	output_type<2, mf::masked_elem<mf::rgb_color>> output;
 	parameter_type<camera_type> output_camera;
 		
-	blend_closest_node(mf::flow::graph& gr, std::size_t n = 3) :
-		mf::flow::sync_node(gr), number_of_active_inputs_(n), output(*this) { }
+	blend_closest_filter(mf::flow::filter_node& nd, std::size_t n = 3) :
+		mf::flow::filter(nd), number_of_active_inputs_(n), output(*this) { }
 
 	input_visual& add_input_visual(const camera_type& cam) {
 		visuals_.emplace_back(new input_visual(*this, cam));

@@ -1,5 +1,5 @@
 #include "sync_node.h"
-#include <iostream>
+#include "node_job.h"
 
 namespace mf { namespace flow {
 

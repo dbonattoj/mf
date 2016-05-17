@@ -1,4 +1,5 @@
 #include "async_node.h"
+#include "node_job.h"
 #include "graph.h"
 
 namespace mf { namespace flow {

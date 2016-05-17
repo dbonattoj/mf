@@ -9,6 +9,7 @@
 
 namespace mf {
 
+/// Seekable frame importer which reads YUV file.
 class yuv_importer : public seekable_frame_importer<2, ycbcr_color> {
 	using base = seekable_frame_importer<2, ycbcr_color>;
 	

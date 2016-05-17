@@ -7,16 +7,17 @@
 
 namespace mf { namespace flow {
 
+/// Exporter sink filter, writes frames to associated \ref frame_exporter.
 template<typename Exporter>
 class exporter_filter : public sink_filter {
 private:
 	Exporter exporter_;
 
 public:
-	input_type<Importer::dimension, typename Importer::elem_type> input;
+	input_type<Exporter::dimension, typename Exporter::elem_type> input;
 	
 	template<typename... Args>
-	explicit exporter(sink_node& nd, Args&&... args) :
+	explicit exporter_filter(filter_node& nd, Args&&... args) :
 		sink_filter(nd),
 		exporter_(std::forward<Args>(args)...),
 		input(*this) { }
@@ -25,7 +26,7 @@ public:
 		//
 	}
 	
-	void progress(node_job& job) override {
+	void process(node_job& job) override {
 		auto in = job.in(input);
 		exporter_.write_frame(in);
 	}

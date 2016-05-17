@@ -1,18 +1,17 @@
+#include "reverse_homography_warp.h"
 #include <algorithm>
-#include "../ndarray/ndarray.h"
-#include "../ndarray/ndarray_filter.h"
-#include "../image/kernel.h"
+#include <mf/ndarray/ndarray.h>
+#include <mf/ndarray/ndarray_filter.h>
+#include <mf/image/kernel.h>
 
-namespace mf { namespace node {
+using namespace mf;
 
-template<typename Color, typename Depth>
-void reverse_homography_warp<Color, Depth>::setup() {
+void reverse_homography_warp_filter::setup() {
 	destination_image_output.define_frame_shape(source_image_input.frame_shape());
 }
 
 
-template<typename Color, typename Depth>
-void reverse_homography_warp<Color, Depth>::process(flow::node_job& job) {	
+void reverse_homography_warp_filter::process(mf::flow::node_job& job) {	
 	auto out = job.out(destination_image_output);
 	auto depth_in = job.in(destination_depth_input);
 	auto image_in = job.in(source_image_input);
@@ -43,17 +42,12 @@ void reverse_homography_warp<Color, Depth>::process(flow::node_job& job) {
 		auto source_pix_coord = in_cam.to_pixel(source_3coord.head(2));
 		
 		if(in_cam.image_span().includes(source_pix_coord)) {
-			Color source_color = image_in.at(source_pix_coord);
+			color_type source_color = image_in.at(source_pix_coord);
 			
 			auto p = place_kernel_at(out, kernel.cview(), dest_pix_coord);
 			std::fill(p.view_section.begin(), p.view_section.end(), source_color);
-			
-			//out.at(dest_pix_coord) = source_color;
 		} else {
 			out.at(dest_pix_coord) = masked_image_type::null();
 		}
 	}
 }
-
-
-}}

@@ -1,4 +1,4 @@
-#include "result_filter_node.h"
+#include "result_improve.h"
 #include <mf/image/image.h>
 #include <mf/opencv.h>
 #include <mf/ndarray/ndarray_filter.h>
@@ -6,11 +6,11 @@
 using namespace mf;
 
 
-void result_filter_node::setup() {
+void result_improve_filter::setup() {
 	output.define_frame_shape(input.frame_shape());
 }
 
-void result_filter_node::process(flow::node_job& job) {
+void result_improve_filter::process(mf::flow::node_job& job) {
 	job.out(output) = job.in(input); 
 	
 	auto in = job.in(input);

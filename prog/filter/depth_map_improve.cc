@@ -1,4 +1,4 @@
-#include "depth_map_filter_node.h"
+#include "depth_map_improve.h"
 #include <mf/image/image.h>
 #include <mf/image/kernel.h>
 #include <mf/utility/misc.h>
@@ -12,24 +12,24 @@
 
 using namespace mf;
 
-depth_map_filter_node::depth_map_filter_node(flow::graph& gr, std::size_t kernel_diameter) :
-	mf::flow::async_node(gr), 
+depth_map_improve_filter::depth_map_improve_filter(flow::filter_node& nd, std::size_t kernel_diameter) :
+	mf::flow::filter(nd), 
 	kernel_diameter_(kernel_diameter),
 	input(*this), output(*this) { }
 
 
-void depth_map_filter_node::setup() {
+void depth_map_improve_filter::setup() {
 	output.define_frame_shape(input.frame_shape());
 }
 
-void depth_map_filter_node::process(flow::node_job& job) {
+void depth_map_improve_filter::process(flow::node_job& job) {
 	auto in = job.in(input);
 	auto out = job.out(output);
 
 	std::vector<depth_type> values;
 	values.reserve(sq(kernel_diameter_));
 
-	auto filter = [&](const auto& placement, masked_depth_type& out) {
+	auto filt = [&](const auto& placement, masked_depth_type& out) {
 		if(! placement.view_section.at(placement.section_position).is_null())
 			out = placement.view_section.at(placement.section_position);
 		
@@ -50,5 +50,5 @@ void depth_map_filter_node::process(flow::node_job& job) {
 		}
 	};
 
-	apply_kernel(filter, in, out, box_image_kernel(kernel_diameter_).view());
+	apply_kernel(filt, in, out, box_image_kernel(kernel_diameter_).view());
 }

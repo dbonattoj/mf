@@ -1,23 +1,22 @@
-#include "blend_closest_node.h"
+#include "blend_closest.h"
 #include <algorithm>
 #include <cmath>
 #include <mf/ndarray/ndarray.h>
 
-
 using namespace mf;
 
 namespace {
-	real camera_distance(const blend_closest_node::camera_type& a, const blend_closest_node::camera_type& b) {
+	real camera_distance(const blend_closest_filter::camera_type& a, const blend_closest_filter::camera_type& b) {
 		return (a.absolute_pose().position - b.absolute_pose().position).norm();
 	}
 }
 
-void blend_closest_node::setup() {
+void blend_closest_filter::setup() {
 	output.define_frame_shape(visuals_[0]->image_input.frame_shape());
 }
 
 
-void blend_closest_node::pre_process(flow::node_job& job) {	
+void blend_closest_filter::pre_process(flow::node_job& job) {	
 	time_unit t = job.time();
 	auto out_cam = job.param(output_camera);
 		
@@ -42,7 +41,7 @@ void blend_closest_node::pre_process(flow::node_job& job) {
 
 
 
-void blend_closest_node::process(flow::node_job& job) {	
+void blend_closest_filter::process(flow::node_job& job) {	
 	auto out = job.out(output);
 	
 	for(std::ptrdiff_t y = 0; y < out.shape()[0]; ++y)

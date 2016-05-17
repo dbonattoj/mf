@@ -7,13 +7,15 @@
 
 namespace mf { namespace flow {
 
+/// Color converter filter.
+/** Runs \ref color_convert function on each elem. */
 template<typename Input_color, typename Output_color>
 class color_converter_filter : public filter {
 public:
 	output_type<2, Output_color> output;
 	input_type<2, Input_color> input;
 
-	color_converter(filter_node& nd) :
+	color_converter_filter(filter_node& nd) :
 		filter(nd), output(*this), input(*this) { }
 	
 	void setup() override {
@@ -31,6 +33,8 @@ public:
 		);
 	}
 };
+
+// TODO insert automatically, make thin_node
 
 }}
 

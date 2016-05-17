@@ -1,16 +1,17 @@
+#include "homography_warp.h"
 #include <algorithm>
-#include "../ndarray/ndarray.h"
+#include <mf/ndarray/ndarray.h>
 
-namespace mf { namespace node {
+using namespace mf;
 
-template<typename Color, typename Depth>
-void homography_warp<Color, Depth>::setup() {
+
+void homography_warp_filter::setup() {
 	destination_image_output.define_frame_shape(source_image_input.frame_shape());
 }
 
 
-template<typename Color, typename Depth>
-void homography_warp<Color, Depth>::process(flow::node_job& job) {	
+
+void homography_warp_filter::process(flow::node_job& job) {	
 	auto out = job.out(destination_image_output);
 	auto depth_in = job.in(source_depth_input);
 	auto image_in = job.in(source_image_input);
@@ -21,7 +22,7 @@ void homography_warp<Color, Depth>::process(flow::node_job& job) {
 		
 	Eigen_projective3 homography = homography_transformation(in_cam, out_cam);
 	
-	std::fill(out.begin(), out.end(), background_color_);
+	std::fill(out.begin(), out.end(), color_type::null());
 
 	ndarray<2, real> d_buffer(image_in.shape());
 	for(real& d : d_buffer) d = 0.0;
@@ -29,8 +30,8 @@ void homography_warp<Color, Depth>::process(flow::node_job& job) {
 	for(std::ptrdiff_t y = 0; y < image_shape[0]; ++y)
 	for(std::ptrdiff_t x = 0; x < image_shape[1]; ++x) {
 		auto source_pix_coord = make_ndptrdiff(y, x);
-		Depth source_pix_depth = depth_in.at(source_pix_coord);
-		Color source_color = image_in.at(source_pix_coord);
+		depth_type source_pix_depth = depth_in.at(source_pix_coord);
+		color_type source_color = image_in.at(source_pix_coord);
 
 		real source_depth = in_cam.to_depth(source_pix_depth);
 		auto source_coord = in_cam.to_image(source_pix_coord);
@@ -51,6 +52,3 @@ void homography_warp<Color, Depth>::process(flow::node_job& job) {
 		}
 	}
 }
-
-
-}}

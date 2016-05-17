@@ -1,15 +1,15 @@
-#include "inpaint_node.h"
+#include "inpaint.h"
 #include <mf/image/image.h>
 #include <mf/opencv.h>
 
 using namespace mf;
 
 
-void inpaint_node::setup() {
+void inpaint_filter::setup() {
 	output.define_frame_shape(input.frame_shape());
 }
 
-void inpaint_node::process(flow::node_job& job) {
+void inpaint_filter::process(mf::flow::node_job& job) {
 	auto in_img = to_image(job.in(input));
 	auto out_img = to_image(job.out(output));
 

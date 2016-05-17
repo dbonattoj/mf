@@ -5,8 +5,9 @@
 #include <vector>
 #include <mf/camera/projection_image_camera.h>
 #include <mf/config/vsrs_camera_array.h>
+#include "common.h"
 
-using camera_type = mf::projection_image_camera<std::uint8_t>;
+using camera_type = mf::projection_image_camera<depth_type>;
 
 struct input_visual {
 	camera_type camera;

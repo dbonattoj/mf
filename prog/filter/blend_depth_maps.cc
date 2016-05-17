@@ -1,20 +1,19 @@
-#include "blend_depth_maps_node.h"
+#include "blend_depth_maps.h"
+#include <mf/ndarray/ndarray.h>
 #include <algorithm>
 #include <cmath>
-#include <mf/ndarray/ndarray.h>
 #include <vector>
 #include <algorithm>
-
 
 using namespace mf;
 
 
-void blend_depth_maps_node::setup() {
+void blend_depth_maps_filter::setup() {
 	output.define_frame_shape(visuals_[0]->depth_input.frame_shape());
 }
 
 
-void blend_depth_maps_node::process(flow::node_job& job) {	
+void blend_depth_maps_filter::process(flow::node_job& job) {	
 	auto out = job.out(output);
 
 	std::vector<std::uint8_t> values;

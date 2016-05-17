@@ -7,6 +7,7 @@
 
 namespace mf {
 
+/// Frame exporter, abstract base class.
 template<std::size_t Dim, typename Elem>
 class frame_exporter {
 private:
@@ -28,6 +29,7 @@ public:
 	virtual void write_frame(const frame_view_type&) = 0;
 	virtual void close() { }
 };
+// TODO specify frame shape after construction, in setup step
 
 
 }

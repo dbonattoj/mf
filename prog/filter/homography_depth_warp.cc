@@ -1,16 +1,15 @@
+#include "homography_depth_warp.h"
 #include <algorithm>
-#include "../ndarray/ndarray.h"
+#include <mf/ndarray/ndarray.h>
 
-namespace mf { namespace node {
+using namespace mf;
 
-template<typename Depth>
-void homography_depth_warp<Depth>::setup() {
+void homography_depth_warp_filter::setup() {
 	destination_depth_output.define_frame_shape(source_depth_input.frame_shape());
 }
 
 
-template<typename Depth>
-void homography_depth_warp<Depth>::process(flow::node_job& job) {	
+void homography_depth_warp_filter::process(flow::node_job& job) {	
 	auto out = job.out(destination_depth_output);
 	auto depth_in = job.in(source_depth_input);
 	auto in_cam = job.param(source_camera);
@@ -37,7 +36,7 @@ void homography_depth_warp<Depth>::process(flow::node_job& job) {
 		real dest_depth = dest_3coord[2];
 		
 		auto dest_pix_coord = out_cam.to_pixel(dest_3coord.head(2));
-		Depth dest_pix_depth = out_cam.to_pixel_depth(dest_depth);
+		depth_type dest_pix_depth = out_cam.to_pixel_depth(dest_depth);
 		
 		if(out_cam.image_span().includes(dest_pix_coord)) {
 			masked_depth_type& output_dest_pix_depth = out.at(dest_pix_coord);
@@ -47,5 +46,3 @@ void homography_depth_warp<Depth>::process(flow::node_job& job) {
 	}
 }
 
-
-}}

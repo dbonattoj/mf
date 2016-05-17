@@ -2,8 +2,6 @@
 #define MF_FLOW_SINK_NODE_H_
 
 #include "filter_node.h"
-#include "node_job.h"
-#include "node_parameter.h"
 
 namespace mf { namespace flow {
 
@@ -13,9 +11,6 @@ class graph;
 /** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
 class sink_node final : public filter_node {
 public:	
-	template<typename Value>
-	using parameter_type = node_parameter<Value>;
-
 	explicit sink_node(graph& gr) : filter_node(gr) { }
 	
 	void internal_setup() final override;

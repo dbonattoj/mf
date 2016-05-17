@@ -7,7 +7,7 @@
 
 namespace mf {
 
-/// Abstract base class for frame-wise importer.
+/// Frame importer, abstract base class.
 /** Each frame is an ndarray<Dim, Elem> with fixed shape. Frames are read sequentially with read_frame(),
  ** and reached_end() becomes true when after last frame was read. */
 template<std::size_t Dim, typename Elem>

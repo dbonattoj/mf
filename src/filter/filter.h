@@ -5,11 +5,13 @@
 #include "../flow/node_job.h"
 #include "../flow/filter_node.h"
 #include "../queue/frame.h"
+#include "filter_parameter.h"
 #include <string>
 
 namespace mf { namespace flow {
 
 /// Filter which performs concrete processing, base class.
+/** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
 class filter {
 private:
 	template<std::size_t Dim, typename Elem> class port;
@@ -24,6 +26,7 @@ private:
 public:
 	template<std::size_t Dim, typename Elem> using input_type = input_port<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = output_port<Dim, Elem>;
+	template<typename Value> using parameter_type = filter_parameter<Value>;
 
 	explicit filter(filter_node& nd) : node_(nd) { }
 	
@@ -46,6 +49,7 @@ public:
 
 
 /// Source filter.
+/** For source nodes, has no inputs, and specifies stream properties upon construction. */
 class source_filter : public filter {
 public:
 	explicit source_filter(filter_node& nd, bool seekable = false, time_unit stream_duration = -1) :
@@ -56,6 +60,7 @@ public:
 
 
 /// Sink filter.
+/** For sink nodes, has no outputs. Always connected with \ref sink_node. */
 class sink_filter : public filter {
 public:
 	explicit sink_filter(filter_node& nd) : filter(nd) { }
@@ -120,7 +125,7 @@ public:
 	
 private:
 	flow::node_input& node_input_;
-	const frame_shape_type* shp_=nullptr;
+	const frame_shape_type* shp_=nullptr; // TODO improve, add polymorph. connection with casting
 
 public:
 	explicit input_port(filter& filt, time_unit past_window = 0, time_unit future_window = 0) :
