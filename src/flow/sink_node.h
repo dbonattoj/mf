@@ -1,7 +1,7 @@
 #ifndef MF_FLOW_SINK_NODE_H_
 #define MF_FLOW_SINK_NODE_H_
 
-#include "node.h"
+#include "filter_node.h"
 #include "node_job.h"
 #include "node_parameter.h"
 

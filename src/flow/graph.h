@@ -53,16 +53,14 @@ public:
 		static_assert(std::is_base_of<filter, Filter>::value, "");
 		static_assert(std::is_base_of<filter_node, Node>::value, "");
 		filter_node& nd = add_node_<Node>();
-		nd.set_filter<Filter>(std::forward<Args>(args)...);
-		return nd.this_filter();
+		return nd.set_filter<Filter>(std::forward<Args>(args)...);
 	}
 	
 	template<typename Filter, typename... Args>
 	Filter& add_sink_filter(Args&&... args) {
 		static_assert(std::is_base_of<sink_filter, Filter>::value, "");
 		filter_node& nd = add_sink_<sink_node>();
-		nd.set_filter<Filter>(std::forward<Args>(args)...);
-		return nd.this_filter();
+		return nd.set_filter<Filter>(std::forward<Args>(args)...);
 	}
 	
 	bool was_setup() const { return was_setup_; }

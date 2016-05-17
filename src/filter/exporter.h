@@ -5,7 +5,7 @@
 #include "filter.h"
 #include "../io/frame_exporter.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
 template<typename Exporter>
 class exporter_filter : public sink_filter {
@@ -16,7 +16,7 @@ public:
 	input_type<Importer::dimension, typename Importer::elem_type> input;
 	
 	template<typename... Args>
-	explicit exporter(flow::node& nd, Args&&... args) :
+	explicit exporter(sink_node& nd, Args&&... args) :
 		sink_filter(nd),
 		exporter_(std::forward<Args>(args)...),
 		input(*this) { }
@@ -25,12 +25,12 @@ public:
 		//
 	}
 	
-	void progress(flow::node_job& job) override {
+	void progress(node_job& job) override {
 		auto in = job.in(input);
 		exporter_.write_frame(in);
 	}
 };
 
-}
+}}
 
 #endif

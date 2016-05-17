@@ -39,13 +39,13 @@ void sink_node::pull(time_unit t) {
 
 	// pull & begin reading from activated inputs
 	bool stopped = false;
-	for(node_input& in : inputs()) {
-		if(in.is_activated()) {
-			in.pull(t);
-			timed_frames_view in_view = in.begin_read_frame(t);
+	for(auto&& in : inputs()) {
+		if(in->is_activated()) {
+			in->pull(t);
+			timed_frames_view in_view = in->begin_read_frame(t);
 			if(in_view.is_null()) { stopped = true; break; }
 			
-			job.push_input(in, in_view);
+			job.push_input(*in, in_view);
 		}
 	}
 	

@@ -11,7 +11,7 @@
 #include <vector>
 #include <cassert>
 
-#ifdef MF_OS_LINUX
+#if defined(MF_OS_LINUX) || defined(MF_OS_DARWIN)
 #include <execinfo.h>
 #include <unistd.h>
 #include <signal.h>
@@ -107,7 +107,7 @@ namespace detail {
 		else return (tags_.find(tag) != tags_.end());
 	}
 	
-	#ifdef MF_OS_LINUX
+	#if defined(MF_OS_LINUX) || defined(MF_OS_DARWIN)
 	debug_backtrace debug_get_backtrace() {
 		debug_backtrace bt;
 		bt.size = ::backtrace(bt.trace, debug_backtrace::max_size);

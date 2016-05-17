@@ -10,9 +10,9 @@ void node::propagate_offset_(time_unit new_offset) {
 	
 	offset_ = new_offset;
 	
-	for(node_input& in : inputs()) {
-		node& connected_node = in.connected_node();
-		time_unit off = offset_ + connected_node.prefetch_duration_ + in.future_window_duration();
+	for(auto&& in : inputs()) {
+		node& connected_node = in->connected_node();
+		time_unit off = offset_ + connected_node.prefetch_duration_ + in->future_window_duration();
 		connected_node.propagate_offset_(off);
 	}		
 }
@@ -25,8 +25,8 @@ void node::deduce_stream_properties_() {
 	seekable_ = true;
 	stream_duration_ = std::numeric_limits<time_unit>::max();
 	
-	for(node_input& in : inputs()) {
-		node& connected_node = in.connected_node();
+	for(auto&& in : inputs()) {
+		node& connected_node = in->connected_node();
 		
 		time_unit input_node_stream_duration = connected_node.stream_duration_;
 		bool input_node_seekable = connected_node.seekable_;
@@ -47,8 +47,8 @@ void node::propagate_setup_() {
 	if(was_setup_) return;
 	
 	// first set up preceding nodes
-	for(node_input& in : inputs()) {
-		node& connected_node = in.connected_output().this_node();
+	for(auto&& in : inputs()) {
+		node& connected_node = in->connected_output().this_node();
 		connected_node.propagate_setup_();
 	}
 	
@@ -60,7 +60,7 @@ void node::propagate_setup_() {
 	
 	// set up outputs
 	// their frame lengths are now defined
-	for(node_output& out : outputs()) out.setup();
+	for(auto&& out : outputs()) out->setup();
 	
 	was_setup_ = true;
 }
@@ -101,8 +101,8 @@ void node::setup_sink() {
 
 bool node::is_bounded() const {
 	if(stream_duration_ != -1 || is_source()) return true;
-	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](const node_input& in) {
-		return (in.is_activated() && in.connected_node().is_bounded());
+	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](auto&& in) {
+		return (in->is_activated() && in->connected_node().is_bounded());
 	});
 }
 
@@ -115,27 +115,15 @@ void node::update_activation() {
 	
 	bool now_active = std::any_of(
 		outputs_.cbegin(), outputs_.cend(),
-		[](node_output& out) { return out.is_active(); }
+		[](auto&& out) { return out->is_active(); }
 	);
 
 	if(now_active != active_) {
 		active_ = now_active;
 
 		// now set activation of preceeding nodes
-		for(node_input& in : inputs()) in.connected_node().update_activation();
+		for(auto&& in : inputs()) in->connected_node().update_activation();
 	}
-}
-
-
-std::ptrdiff_t node::register_input(node_input& in) {
-	inputs_.push_back(std::ref(in));
-	return inputs_.size() - 1;
-}
-
-
-std::ptrdiff_t node::register_output(node_output& out) {
-	outputs_.push_back(std::ref(out));
-	return outputs_.size() - 1;	
 }
 
 

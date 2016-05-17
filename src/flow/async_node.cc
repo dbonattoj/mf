@@ -9,8 +9,8 @@ bool async_node::process_next_frame() {
 	
 	// begin writing frame to output
 	// output determines time t of frame to write
-	node_output& out = outputs().front();
-	auto out_view = out.begin_write_frame(t);
+	auto&& out = outputs().front();
+	auto out_view = out->begin_write_frame(t);
 	if(out_view.is_null()) return false; // stopped
 	
 	set_current_time(t);
@@ -21,23 +21,23 @@ bool async_node::process_next_frame() {
 	pre_process_filter(job);
 
 	// add output view to job
-	job.push_output(out, out_view);
+	job.push_output(*out, out_view);
 	
 	// pull & begin reading from activated inputs
 	bool stopped = false;
-	for(node_input& in : inputs()) {
-		if(in.is_activated()) {
+	for(auto&& in : inputs()) {
+		if(in->is_activated()) {
 			// pull frame t from input
 			// for sequential node: frame is now processed
-			in.pull(t);
+			in->pull(t);
 			
 			// begin reading frame 
-			timed_frames_view in_view = in.begin_read_frame(t);
+			timed_frames_view in_view = in->begin_read_frame(t);
 			if(in_view.is_null()) { stopped = true; break; }
 			MF_ASSERT(in_view.span().includes(t));
 			
 			// add to job
-			job.push_input(in, in_view);
+			job.push_input(*in, in_view);
 		}
 	}
 	// TODO split pull/begin_read, and begin_read (wait) simultaneously if possible (async_node inputs)

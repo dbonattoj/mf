@@ -5,7 +5,7 @@
 #include "filter.h"
 #include "../color.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
 template<typename Input_color, typename Output_color>
 class color_converter_filter : public filter {
@@ -20,7 +20,7 @@ public:
 		output.define_frame_shape(input.frame_shape());
 	}
 	
-	void process(flow::node_job& job) override {
+	void process(node_job& job) override {
 		auto in = job.in(input);
 		auto out = job.out(output);
 		std::transform(
@@ -32,6 +32,6 @@ public:
 	}
 };
 
-}
+}}
 
 #endif

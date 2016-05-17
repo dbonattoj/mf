@@ -3,6 +3,10 @@
 
 namespace mf { namespace flow {
 
+filter_node::filter_node(graph& gr) : node(gr) { }
+
+filter_node::~filter_node() { }
+
 void filter_node::setup_filter() {
 	MF_EXPECTS(filter_ != nullptr);
 	filter_->setup();

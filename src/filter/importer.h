@@ -5,7 +5,7 @@
 #include "filter.h"
 #include "../io/frame_importer.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
 template<typename Importer>
 class importer_filter : public source_filter {
@@ -16,7 +16,7 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit importer(flow::node& nd, Args&&... args) :
+	explicit importer(filter_node& nd, Args&&... args) :
 		source_filter(nd, false),
 		importer_(std::forward<Args>(args)...),
 		output(*this) { }
@@ -25,13 +25,13 @@ public:
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void progress(flow::node_job& job) override {
+	void progress(node_job& job) override {
 		auto out = job.out(output);
 		return importer_.read_frame(out);
 		if(importer_.reached_end()) job.mark_end();
 	}
 };
 
-}
+}}
 
 #endif

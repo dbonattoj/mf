@@ -103,12 +103,12 @@ SECTION("basic") {
 			sink.input.connect(node.output);
 			gr.setup();
 				
-			node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
+			node.callback = [&](passthrough_filter& self, flow::node_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
 				std::ptrdiff_t center = in_full.time_index(job.time());
 			
-				switch(self.current_time()) {
+				switch(job.time()) {
 				case 0:
 					REQUIRE(in == make_frame(shp, 0));
 					REQUIRE(center == 0);
@@ -159,12 +159,12 @@ SECTION("basic") {
 			sink.input.connect(node.output);
 			gr.setup();
 			
-			node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
+			node.callback = [&](passthrough_filter& self, flow::node_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
 				std::ptrdiff_t center = in_full.time_index(job.time());
 			
-				switch(self.current_time()) {
+				switch(job.time()) {
 				case 0:
 					REQUIRE(in == make_frame(shp, 0));
 					REQUIRE(center == 0);
@@ -216,12 +216,12 @@ SECTION("basic") {
 			sink.input.connect(node.output);
 			gr.setup();
 			
-			node.callback = [&](passthrough_node<node_type>& self, flow::node_job& job) {
+			node.callback = [&](passthrough_filter& self, flow::node_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
 				std::ptrdiff_t center = in_full.time_index(job.time());
 			
-				switch(self.current_time()) {
+				switch(job.time()) {
 				case 0:
 					REQUIRE(in == make_frame(shp, 0));
 					REQUIRE(center == 0);

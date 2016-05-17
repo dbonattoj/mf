@@ -18,8 +18,8 @@ bool sync_node::process_next_frame() {
 	node_job job = make_job();
 	time_unit t;
 	
-	node_output& out = outputs().front();
-	auto out_view = out.begin_write_frame(t);
+	auto&& out = outputs().front();
+	auto out_view = out->begin_write_frame(t);
 	MF_ASSERT(! out_view.is_null());
 	if(end_time() != -1) MF_ASSERT(t < end_time());
 		
@@ -28,18 +28,18 @@ bool sync_node::process_next_frame() {
 		
 	pre_process_filter(job);
 
-	job.push_output(out, out_view);
+	job.push_output(*out, out_view);
 	
 	bool stopped = false;
-	for(node_input& in : inputs()) {	
-		if(in.is_activated()) {
-			in.pull(t);
+	for(auto&& in : inputs()) {	
+		if(in->is_activated()) {
+			in->pull(t);
 			
-			timed_frames_view in_view = in.begin_read_frame(t);
+			timed_frames_view in_view = in->begin_read_frame(t);
 			MF_ASSERT(in_view.span().includes(t));
 			if(in_view.is_null()) { stopped = true; break; }
 			
-			job.push_input(in, in_view);
+			job.push_input(*in, in_view);
 		}
 	}
 	

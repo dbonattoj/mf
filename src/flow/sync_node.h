@@ -56,12 +56,12 @@ public:
 		
 	bool process_next_frame() override;
 
-	node_input& add_input_(time_unit past_window, time_unit future_window) override {
-		return add_input<node_input>(past_window, future_window);
+	node_input& add_input(time_unit past_window, time_unit future_window) override {
+		return add_input_<node_input>(past_window, future_window);
 	}
 	
-	sync_node_output& add_output_(const frame_format& format) override {
-		return add_output<sync_node_output>(format);
+	sync_node_output& add_output(const frame_format& format) override {
+		return add_output_<sync_node_output>(format);
 	}
 };
 

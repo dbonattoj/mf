@@ -20,7 +20,7 @@ namespace mf { namespace test {
 constexpr int noframe = -2;
 constexpr int missingframe = -3;
 
-class sequence_frame_source : public source_filter {
+class sequence_frame_source : public flow::source_filter {
 private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
@@ -30,7 +30,7 @@ public:
 	output_type<2, int> output;
 	
 	explicit sequence_frame_source(flow::filter_node& nd, time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		source_filter(nd, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
+		flow::source_filter(nd, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
 		output(*this) { }
 	
 	void setup() override {
@@ -50,7 +50,7 @@ public:
 };
 
 
-class passthrough_filter : public filter {
+class passthrough_filter : public flow::filter {
 private:
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
@@ -80,14 +80,14 @@ public:
 	std::function<callback_func> callback;
 
 	passthrough_filter(flow::filter_node& nd, time_unit past_window, time_unit future_window) :
-		filter(nd),
+		flow::filter(nd),
 		input(*this, past_window, future_window),
 		output(*this) { }
 };
 
 
 
-class expected_frames_sink : public sink_filter {
+class expected_frames_sink : public flow::sink_filter {
 private:
 	const std::vector<int> expected_frames_;
 	std::vector<int> got_frames_;
@@ -97,8 +97,8 @@ public:
 
 	std::vector<bool> activation;
 	
-	explicit expected_frames_sink(flow::sink_filter& nd, const std::vector<int>& seq) :
-		sink_filter(nd),
+	explicit expected_frames_sink(flow::filter_node& nd, const std::vector<int>& seq) :
+		flow::sink_filter(nd),
 		expected_frames_(seq),
 		got_frames_(seq.size(), missingframe),
 		input(*this) { }
@@ -116,7 +116,7 @@ public:
 		if(in) index = frame_index(in);
 		else index = noframe;
 		
-		time_unit t = current_time();
+		time_unit t = job.time();
 		while(t >= got_frames_.size()) got_frames_.push_back(missingframe);
 		
 		got_frames_[t] = index;
@@ -136,7 +136,7 @@ public:
 
 
 
-class input_synchronize_test_filter : public filter {
+class input_synchronize_test_filter : public flow::filter {
 public:
 	input_type<2, int> input1;
 	input_type<2, int> input2;
@@ -146,7 +146,7 @@ public:
 	std::vector<bool> activation2;
 	
 	input_synchronize_test_filter(flow::filter_node& nd, time_unit prefetch = 0) :
-		filter(nd), input1(*this), input2(*this), output(*this) { }
+		flow::filter(nd), input1(*this), input2(*this), output(*this) { }
 
 
 	void setup() override {

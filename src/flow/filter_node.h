@@ -14,7 +14,7 @@ class node_job;
 /// Node which delegates concrete frame processing to associated \ref filter object.
 class filter_node : public node {
 private:
-	std::unique_ptr<filter> filter_ = nullptr;
+	std::unique_ptr<filter> filter_;
 
 protected:
 	void setup_filter();
@@ -23,11 +23,14 @@ protected:
 	
 
 public:
-	filter_node(graph& gr) : node(gr) { }
+	filter_node(graph& gr);
+	~filter_node();
 	
 	template<typename Filter, typename... Args>
-	void set_filter(Args&&... args) {
-		filter_.reset(new Filter(std::forward<Args>(args)...));
+	Filter& set_filter(Args&&... args) {
+		Filter* filter = new Filter(*this, std::forward<Args>(args)...);
+		filter_.reset(filter);
+		return *filter;
 	}
 	
 	filter& this_filter() { return *filter_; }

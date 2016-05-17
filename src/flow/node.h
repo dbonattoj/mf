@@ -117,10 +117,11 @@ private:
 	bool active_ = true;
 
 protected:
-	node_output(node& nd, std::ptrdiff_t index, const frame_format&);
 	node_output(const node_output&) = delete;
 
 public:
+	node_output(node& nd, std::ptrdiff_t index, const frame_format&);
+	
 	virtual ~node_output() { }
 
 	std::ptrdiff_t index() const noexcept { return index_; }
@@ -174,12 +175,11 @@ private:
 	bool activated_ = true;
 	
 protected:
-	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
 	node_input(const node_input&) = delete;
 
-	void connect(node_output&);
-
 public:
+	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
+
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
 	
@@ -189,6 +189,7 @@ public:
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
+	void connect(node_output&);
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
 	node_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return *connected_output_; }
 	node& connected_node() const noexcept { MF_EXPECTS(is_connected()); return connected_output().this_node(); }
