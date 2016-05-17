@@ -31,7 +31,10 @@ int main(int argc, const char* argv[]) {
 		
 	flow::graph graph;
 	
-	auto camera_at_time = [&](time_unit t) {
+	// camera as function of time
+	// varies between poses of left-most and right-most cameras
+	// sinusodial time function, slerp to interpolate orientation
+	auto camera_at_time = [&](time_unit t) -> camera_type {
 		const camera_type& leftmost_cam = data.visuals[2].camera;
 		const camera_type& rightmost_cam = data.visuals[data.visuals.size() - 2].camera;
 		const camera_type& middle_cam = data.visuals[data.visuals.size() / 2].camera;
@@ -54,6 +57,7 @@ int main(int argc, const char* argv[]) {
 	};
 
 	auto shape = make_ndsize(data.image_height, data.image_width);
+
 
 	auto& blender = graph.add_filter<blend_closest_filter>(3);
 	blender.output_camera.set_time_function(camera_at_time);

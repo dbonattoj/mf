@@ -1,0 +1,35 @@
+camera/
+	camera models
+	
+config/
+	configuration importer (VSRS camera array currently)
+	
+filter/
+	filter base class, predefined filters
+
+flow/
+	flow graph system, node classes
+
+geometry/
+	3D geometric primitives, space objects
+
+image/
+	image/masked_image, OpenCV interfaces
+
+io/
+	frame importer/exporter, video writer, yuv reader, ply importer/exporter
+
+ndarray/
+	ndcoord, ndspan, ndarray classes, type erasure, casts
+
+os/
+	OS-specific components
+
+point_cloud/
+	point cloud classes (TODO)
+
+queue/
+	ring, timed_ring, shared_ring classes
+
+utility/
+	general-purpore utility classes
