@@ -5,7 +5,7 @@
 #include "ndarray_view_generic.h"
 #include "../ndarray.h"
 #include "../../elem.h"
-#include "../../utility/memory.h"
+#include "../../os/memory.h"
 
 namespace mf {
 

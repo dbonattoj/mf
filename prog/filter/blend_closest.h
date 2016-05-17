@@ -8,7 +8,6 @@
 #include <mf/masked_elem.h>
 #include "../support/common.h"
 
-
 /// Node blends input visuals with closest camera positions.
 /** _Input visual_ is an input port of image type `<2, rgba_color>`, associated with a \ref camera. Multiple input
  ** visuals are added after construction using add_input_visual().

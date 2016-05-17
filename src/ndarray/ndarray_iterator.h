@@ -28,7 +28,7 @@ public:
 	constexpr static std::size_t dimension = Array::dimension;
 
 private:
-	const Array* array_ = nullptr;
+	const Array array_;
 	pointer pointer_ = nullptr;
 	index_type index_ = 0;
 	std::ptrdiff_t pointer_step_;
@@ -79,7 +79,7 @@ public:
 		{ return a.index() - b.index(); }
 	
 	index_type index() const noexcept { return index_; }
-	coordinates_type coordinates() const noexcept { return array_->index_to_coordinates(index_); }
+	coordinates_type coordinates() const noexcept { return array_.index_to_coordinates(index_); }
 };
 
 

@@ -1,7 +1,7 @@
 #include <catch.hpp>
 #include <algorithm>
 #include <cstdint>
-#include "../src/utility/memory.h"
+#include "../src/os/memory.h"
 #include "../src/queue/ndarray_ring.h"
 #include "support/ndarray.h"
 

@@ -2,7 +2,7 @@
 #define MF_FLOW_GRAPH_H_
 
 #include "../common.h"
-#include "../utility/event.h"
+#include "../os/event.h"
 #include "filter_node.h"
 #include "sink_node.h"
 #include <utility>

@@ -2,7 +2,7 @@
 
 #ifndef NDEBUG
 
-#include "utility/os.h"
+#include "os/os.h"
 #include <map>
 #include <iostream>
 #include <thread>

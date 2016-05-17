@@ -61,14 +61,14 @@ int main(int argc, const char* argv[]) {
 	
 	for(const input_visual& vis : data.visuals) {
 		// Source+converter for image
-		auto& im_source = graph.add_filter<flow::seekable_importer_filter<yuv_importer>>(
+		auto& im_source = graph.add_filter<flow::importer_filter<yuv_importer>>(
 			vis.image_yuv_file, shape, data.yuv_sampling
 		);
 		auto& im_converter = graph.add_filter<flow::color_converter_filter<ycbcr_color, rgb_color>>();
 		im_converter.input.connect(im_source.output);
 		
 		// Source+converter for depth image
-		auto& di_source = graph.add_filter<flow::seekable_importer_filter<yuv_importer>>(
+		auto& di_source = graph.add_filter<flow::importer_filter<yuv_importer>>(
 			vis.depth_image_yuv_file, shape, data.yuv_sampling
 		);
 		auto& di_converter = graph.add_filter<flow::color_converter_filter<ycbcr_color, masked_elem<depth_type>>>();

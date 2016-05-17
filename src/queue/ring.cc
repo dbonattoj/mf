@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <cmath>
 #include "../utility/misc.h"
-#include "../utility/memory.h"
+#include "../os/memory.h"
 
 namespace mf {
 	

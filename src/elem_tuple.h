@@ -122,6 +122,7 @@ namespace detail {
 }
 
 
+/// Index of first element of type `T` in \ref elem_tuple type `Tuple`.
 template<typename T, typename Tuple>
 constexpr std::ptrdiff_t elem_tuple_index = -1;
 
@@ -134,6 +135,7 @@ constexpr std::ptrdiff_t elem_tuple_index<T, elem_tuple<T, Other_elems...>>
 	= 0;
 
 
+/// Get element at index `Index` in \ref elem_tuple \a tup.
 template<std::size_t Index, typename First_elem, typename... Other_elems>
 const auto& get(const elem_tuple<First_elem, Other_elems...>& tup) {
 	using tuple_type = std::decay_t<decltype(tup)>;
@@ -147,6 +149,7 @@ auto& get(elem_tuple<First_elem, Other_elems...>& tup) {
 }
 
 
+/// Get first element of type `T` in \ref elem_tuple \a tup.
 template<typename T, typename First_elem, typename... Other_elems>
 const auto& get(const elem_tuple<First_elem, Other_elems...>& tup) {
 	using tuple_type = std::decay_t<decltype(tup)>;
@@ -162,6 +165,7 @@ auto& get(elem_tuple<First_elem, Other_elems...>& tup) {
 }
 
 
+/// Offset in bytes of element at index `Index` in \ref elem_tuple type `Tuple`.
 template<std::size_t Index, typename Tuple>
 constexpr std::ptrdiff_t elem_tuple_offset = -1;
 
@@ -170,14 +174,14 @@ constexpr std::ptrdiff_t elem_tuple_offset<Index, elem_tuple<First_elem, Other_e
 	detail::elem_tuple_accessor<Index, elem_tuple<First_elem, Other_elems...>>::offset();
 
 
-
+/// Make \ref elem_tuple with elements \a elems.
 template<typename... Elems>
 elem_tuple<Elems...> make_elem_tuple(const Elems&... elems) {
 	return elem_tuple<Elems...>(elems...);
 }
 
 
-
+/// Elem traits specialization of \ref elem_tuple.
 template<typename... Elems>
 struct elem_traits<elem_tuple<Elems...>> : elem_traits_base<elem_tuple<Elems...>> {
 	constexpr static bool is_tuple = true;

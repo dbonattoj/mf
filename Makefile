@@ -1,4 +1,4 @@
-DEBUG := 0
+DEBUG ?= 0
 
 # always set debug if building tests
 ifeq ($(MAKECMDGOALS), test)

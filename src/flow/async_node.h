@@ -25,7 +25,7 @@ public:
 	/// \name Read interface, used by connected input.
 	///@{
 	void pull(time_span span) override;
-	timed_frames_view begin_read(time_unit duration) override;
+	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
 	///@}

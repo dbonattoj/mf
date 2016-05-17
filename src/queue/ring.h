@@ -8,7 +8,7 @@ namespace mf {
 
 /// Ring buffer.
 /** Circular buffer of _frames_. Derived from \ref ndarray_generic, frames are type-erased _n_-dimensional arrays.
- ** FILO interface to read/write frames to the ring buffer. */
+ ** FIFO interface to read/write frames to the ring buffer. */
 class ring : public ndarray_generic<raw_ring_allocator> {
 	using base = ndarray_generic<raw_ring_allocator>;
 	

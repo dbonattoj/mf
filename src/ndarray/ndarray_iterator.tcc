@@ -12,8 +12,8 @@ inline void ndarray_iterator<Array>::forward_(std::ptrdiff_t d) {
 	if(d < contiguous_limit) {
 		pointer_ = advance_raw_ptr(pointer_, d * pointer_step_);
 	} else {
-		auto new_coord = array_->index_to_coordinates(index_);
-		pointer_ = array_->coordinates_to_pointer(new_coord);
+		auto new_coord = array_.index_to_coordinates(index_);
+		pointer_ = array_.coordinates_to_pointer(new_coord);
 	}
 }
 
@@ -26,15 +26,15 @@ inline void ndarray_iterator<Array>::backward_(std::ptrdiff_t d) {
 	if(d <= contiguous_limit) {
 		pointer_ = advance_raw_ptr(pointer_, -d * pointer_step_);
 	} else {
-		auto new_coord = array_->index_to_coordinates(index_);
-		pointer_ = array_->coordinates_to_pointer(new_coord);
+		auto new_coord = array_.index_to_coordinates(index_);
+		pointer_ = array_.coordinates_to_pointer(new_coord);
 	}
 }
 
 
 template<typename Array>
 ndarray_iterator<Array>::ndarray_iterator(const Array& array, index_type index, pointer ptr) :
-	array_(&array),
+	array_(array),
 	pointer_(ptr),
 	index_(index),
 	pointer_step_(array.strides().back()),

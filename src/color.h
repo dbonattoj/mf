@@ -3,10 +3,10 @@
 
 #include <cstdint>
 #include "elem.h"
-#include "masked_elem.h"
 
 namespace mf {
 
+/// Monochrome color, 8 bit.
 struct alignas(4) mono_color {
 	mono_color() = default;
 	mono_color(std::uint8_t nint) : intensity(nint) { }
@@ -23,7 +23,7 @@ struct alignas(4) mono_color {
 bool operator==(const mono_color& a, const mono_color& b);
 bool operator!=(const mono_color& a, const mono_color& b);
 
-
+/// RGB color, 8 bit.
 struct rgb_color {
 	rgb_color() = default;
 	rgb_color(std::uint8_t nr, std::uint8_t ng, std::uint8_t nb) :
@@ -45,7 +45,7 @@ bool operator==(const rgb_color& a, const rgb_color& b);
 bool operator!=(const rgb_color& a, const rgb_color& b);
 
 
-
+/// RGBA color, 8 bit.
 struct alignas(4) rgba_color {
 	rgba_color() = default;
 	rgba_color(std::uint8_t nr, std::uint8_t ng, std::uint8_t nb, std::uint8_t na = 255) :
@@ -70,6 +70,7 @@ bool operator==(const rgba_color& a, const rgba_color& b);
 bool operator!=(const rgba_color& a, const rgba_color& b);
 
 
+/// YCbCr color, 8 bit.
 struct alignas(4) ycbcr_color {
 	ycbcr_color() = default;
 	ycbcr_color(std::uint8_t ny, std::uint8_t ncr, std::uint8_t ncb) :
@@ -88,7 +89,7 @@ bool operator!=(const ycbcr_color& a, const ycbcr_color& b);
 
 
 
-
+/// Color conversion, specialized for different color formats.
 template<typename Output, typename Input>
 Output color_convert(const Input&);
 
@@ -113,32 +114,6 @@ template<> inline rgba_color color_convert(const ycbcr_color& in) {
 template<> inline rgb_color color_convert(const rgba_color& in) {
 	return rgb_color(in.r, in.g, in.b);
 }
-
-// TODO remove, replace by thin/implicit nodes
-////////////
-template<> inline std::uint8_t color_convert(const ycbcr_color& in) {
-	return in.y;
-}
-
-template<> inline masked_elem<std::uint8_t> color_convert(const ycbcr_color& in) {
-	if(in.y == 0.0) return masked_elem<std::uint8_t>::null();
-	else return in.y;
-}
-
-template<> inline rgb_color color_convert(const std::uint8_t& in) {
-	return rgb_color(in, in, in);
-}
-
-template<> inline rgb_color color_convert(const masked_elem<rgb_color>& in) {
-	if(in.is_null()) return rgb_color(0, 0, 0); // background
-	else return in;
-}
-
-template<> inline rgb_color color_convert(const masked_elem<std::uint8_t>& in) {
-	if(in.is_null()) return rgb_color(0, 0, 0); // background
-	else return rgb_color(in, in, in);
-}
-///////////
 
 template<>
 struct elem_traits<mono_color> :

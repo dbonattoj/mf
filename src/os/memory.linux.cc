@@ -1,5 +1,5 @@
 #include "os.h"
-#ifdef MF_OS_DARWIN
+#ifdef MF_OS_LINUX
 
 #include "memory.h"
 
@@ -13,7 +13,7 @@
 #include <system_error>
 #include <stdio.h>
 
-#include "misc.h"
+#include "../utility/misc.h"
 
 
 namespace mf {
@@ -76,7 +76,7 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	if(status != 0)
 		throw std::system_error(errno, std::system_category(), "ring allocator ftruncate failed");
 		
-	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0); // ...aligns to page size
+	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0); // ...aligns to page size
 	if(base == MAP_FAILED)
 		throw std::system_error(errno, std::system_category(), "ring allocator mmap failed (whole region)");
 		

@@ -8,7 +8,8 @@
 #include "common.h"
 
 namespace mf {
-
+	
+/// Elem traits base class with the required members.
 template<typename Elem, typename Scalar = Elem, std::size_t Components = 1, bool Nullable = false>
 struct elem_traits_base {
 	static_assert(std::is_standard_layout<Elem>::value, "elem must be standard layout type");
@@ -23,15 +24,19 @@ struct elem_traits_base {
 };
 
 
+/// Default elem traits, using Elem as standard layout scalar type.
+/** `Elem` must be standard layout type. */
 template<typename Elem>
 struct elem_traits : elem_traits_base<Elem> { };
 
 
+/// Elem traits specialization for `std::array<T, N>`.
+/** `T` must be standard layout type. */
 template<typename T, std::size_t N>
 struct elem_traits<std::array<T, N>> :
 	elem_traits_base<std::array<T, N>, T, N> { };
 
-
+/// Elem traits specialization for `std::complex<T>`.
 template<typename T>
 struct elem_traits<std::complex<T>> :
 	elem_traits_base<std::complex<T>, T, 2> { };

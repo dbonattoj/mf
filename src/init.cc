@@ -1,7 +1,7 @@
 #include "common.h"
 #include "debug.h"
 #include "eigen.h"
-#include "utility/os.h"
+#include "os/os.h"
 
 namespace mf {
 

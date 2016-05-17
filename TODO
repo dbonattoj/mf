@@ -7,7 +7,6 @@ ACMMM
 
 
 FLOW
-- decouple filter and node!!
 - parallel node (multiple frames in parallel)
 - opencl node?
 - thin node

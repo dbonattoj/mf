@@ -1,6 +1,5 @@
 #include "shared_ring.h"
 #include <algorithm>
-#include <iostream>
 
 namespace mf {
 

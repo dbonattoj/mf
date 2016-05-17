@@ -22,6 +22,7 @@ protected:
 
 public:
 	using typename base::frame_view_type;
+	constexpr static bool is_seekable = true;
 	
 	virtual time_unit current_time() const = 0;
 	virtual time_unit total_duration() const = 0;

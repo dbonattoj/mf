@@ -35,7 +35,7 @@ bool sync_node::process_next_frame() {
 		if(in->is_activated()) {
 			in->pull(t);
 			
-			timed_frames_view in_view = in->begin_read_frame(t);
+			timed_frame_array_view in_view = in->begin_read_frame(t);
 			MF_ASSERT(in_view.span().includes(t));
 			if(in_view.is_null()) { stopped = true; break; }
 			
@@ -94,7 +94,7 @@ void sync_node_output::pull(time_span span) {
 }
 
 
-timed_frames_view sync_node_output::begin_read(time_unit duration) {
+timed_frame_array_view sync_node_output::begin_read(time_unit duration) {
 	time_unit end_time = this_node().end_time();
 	
 	if(end_time != -1 && ring_->read_start_time() + duration > end_time)

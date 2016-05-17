@@ -12,7 +12,7 @@ namespace mf { namespace flow {
  ** to ndarray views of specified dimension and element type. */
 class node_job {
 private:
-	using input_view_handle_type = std::pair<node_input*, timed_frames_view>;
+	using input_view_handle_type = std::pair<node_input*, timed_frame_array_view>;
 	using output_view_handle_type = std::pair<node_output*, frame_view>;
 
 	node& node_;
@@ -32,7 +32,7 @@ public:
 	/// \name Interface for set up.
 	///@{
 	void define_time(time_unit t);
-	void push_input(node_input&, const timed_frames_view&);
+	void push_input(node_input&, const timed_frame_array_view&);
 	void push_output(node_output&, const frame_view&);
 	node_input* pop_input();
 	node_output* pop_output();

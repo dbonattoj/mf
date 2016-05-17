@@ -33,7 +33,7 @@ bool async_node::process_next_frame() {
 			in->pull(t);
 			
 			// begin reading frame 
-			timed_frames_view in_view = in->begin_read_frame(t);
+			timed_frame_array_view in_view = in->begin_read_frame(t);
 			if(in_view.is_null()) { stopped = true; break; }
 			MF_ASSERT(in_view.span().includes(t));
 			
@@ -143,7 +143,7 @@ void async_node_output::pull(time_span span) {
 }
 
 
-timed_frames_view async_node_output::begin_read(time_unit duration) {
+timed_frame_array_view async_node_output::begin_read(time_unit duration) {
 	event& stop_event = this_node().this_graph().stop_event();
 	
 	for(;;) {
@@ -156,7 +156,7 @@ timed_frames_view async_node_output::begin_read(time_unit duration) {
 		return view;
 	}
 	
-	return timed_frames_view::null();
+	return timed_frame_array_view::null();
 }
 
 

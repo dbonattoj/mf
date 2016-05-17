@@ -56,7 +56,7 @@ void blend_closest_filter::process(flow::node_job& job) {
 			if(i_col.is_null()) continue;
 			null = false;
 			
-			float w = 1.0 / act_vis.camera_distance;
+			real w = 1.0 / act_vis.camera_distance;
 			sr += w * i_col.elem.r;
 			sg += w * i_col.elem.g;
 			sb += w * i_col.elem.b;

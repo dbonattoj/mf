@@ -45,6 +45,8 @@ using Eigen_hyperplane3 = Eigen::Hyperplane<Eigen_scalar, 3>;
 using Eigen_quaternion = Eigen::Quaternion<Eigen_scalar>;
 
 
+/// Elem traits specialization for Eigen matrix type.
+/** 2 dimensional matrix becomes 1 dimensional vector elem. */
 template<typename Scalar, std::size_t Rows, std::size_t Columns>
 struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> :
 	elem_traits_base<

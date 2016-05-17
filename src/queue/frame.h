@@ -12,9 +12,6 @@ using frame_array_view = ndarray_view_generic<1>;
 using frame_view = ndarray_view_generic<0>;
 using frame_array_properties = ndarray_generic_properties;
 
-using frames_view = frame_array_view;
-using timed_frames_view = timed_frame_array_view; // TODO replace in source
-
 }
 
 #endif

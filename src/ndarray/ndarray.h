@@ -3,7 +3,7 @@
 
 #include "ndarray_view.h"
 #include "ndcoord.h"
-#include "../utility/memory.h"
+#include "../os/memory.h"
 #include <memory>
 #include <utility>
 
@@ -110,13 +110,13 @@ public:
 	MF_NDARRAY_VIEW_FUNC_(at);
 		
 	iterator begin() { return view_.begin(); }
-	//const_iterator begin() const { return cview().begin(); }
-	//const_iterator cbegin() const { return cview().begin(); }
+	const_iterator begin() const { return cview().begin(); }
+	const_iterator cbegin() const { return cview().begin(); }
 	iterator end() { return view_.end(); }
-	//const_iterator end() const { return cview().end(); }
-	//const_iterator cend() const { return cview().end(); }
-	// TODO fix const iterators (can't call from temporary ndarray_view - binds to it)
+	const_iterator end() const { return cview().end(); }
+	const_iterator cend() const { return cview().end(); }
 };
+
 
 
 template<std::size_t Dim, typename T>

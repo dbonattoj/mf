@@ -2,7 +2,7 @@
 #define MF_SHARED_RING_H_
 
 #include "timed_ring.h"
-#include "../utility/event.h"
+#include "../os/event.h"
 #include <mutex>
 #include <condition_variable>
 #include <stdexcept>
@@ -12,6 +12,23 @@
 namespace mf {
 
 /// Timed ring buffer with changed semantics, for dual-thread use.
+/** Not derived from \ref timed_ring because semantics are changed and functionality is added. Interface and
+ ** implementation, and scope of functionality designed to prevent data races and deadlocks. Must be used with two
+ ** threads, one reader and one writer.
+ ** Added functionality compared to \ref timed_ring:
+ ** - Reader and writer mutually wait until frames become readable/writable. Deadlocks are prevented.
+ ** - Handling of end of stream.
+ ** - Possibility to cancel waits by supplying additional break \ref event.
+ ** Two policies exist:
+ ** - _seekable_: Duration of stream is specified at construction and cannot be changed. Reader can seek() to another
+ **               absolute time index. Writer receives the time index at which it is supposed to write with the
+ **               timed section view returned by begin_write(). That is, the values it received from write_start_time()
+ **               can change during begin_write() call.
+ ** - _non-seekable_: seek() is not allowed. Reading at absolute time index in future instead skips intermediate frames.
+ **                   Can skip more frames that buffer capacity (in which case buffer gets repeatedly filled and
+ **                   discarded). Stream duration need not be specified at construction, and can remain undeterminate.
+ **                   Writer can mark end in `end_write()`, when it wrote at least 1 frame. Reader responds by not
+ **                   waiting for any more frames, even if at start of `begin_read()`, duration was not yet known. */
 class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
@@ -20,10 +37,7 @@ private:
 	/// Indicates current state of reader and writer.
 	/** May be `idle` or `accessing`, or a positive integer if thread is waiting for that number of frames. */
 	using thread_state = time_unit;
-	enum : thread_state {
-		idle = 0,
-		accessing = -1
-	};
+	enum : thread_state { idle = 0, accessing = -1 };
 
 	timed_ring ring_; ///< Underlying, non thread-safe timed ring buffer.
 
@@ -67,12 +81,9 @@ public:
 	 ** Returns section for writer to write into, with time information.
 	 ** Must be called from single writer thread only, and followed by call to end_write(). */
 	section_view_type begin_write(time_unit write_duration);
-	
-	/// Begin writing \a write_duration frames at current write start time, if possible.
-	/** For seekable buffer only: returned section may have start time different to `writable_time_span().start_time()`
-	 ** when reader seeked to another time inbetween. If span to write crosses end of buffer, it is truncated first.
-	 ** If that span is not writable because not enough writable frames are available, returns false, and does not wait.
-	 ** Otherwise returns true and puts writable section in \a section. */
+
+	/// Begin writing \a write_duration frames at current write start time, if they are available.
+	/** Like begin_write(), but never waits. Instead returns null view when the frames are not available. */
 	section_view_type try_begin_write(time_unit write_duration);
 
 	/// Wait until a frame become writable, or \a break_event occurs.
@@ -105,7 +116,8 @@ public:
 	 ** Must be called from single reader thread only, and followed by call to end_read(). */
 	section_view_type begin_read(time_unit read_duration);
 
-
+	/// Begin reading \a read_duration frames at current read start time, if they are available.
+	/** Like begin_read(), but never waits. Instead returns null view when the frames are not available. */
 	section_view_type try_begin_read(time_unit read_duration);
 
 	/// Wait until a frame become readable, or \a break_event occurs.
@@ -129,7 +141,8 @@ public:
 	 ** Must be called from single reader thread only. */
 	void skip(time_unit skip_duration);
 	
-	
+	/// Check if the ring is seekable.
+	/** As specified in construction. */
 	bool is_seekable() const { return seekable_; }
 	
 	/// Seeks to read time \a t.
@@ -147,16 +160,35 @@ public:
 	/** Equivalent to `write_start_time() - 1`. -1 in initial state. */
 	time_unit current_time() const;
 	
+	/// Presumptive start time of next write.
+	/** Value gets changed by writer. For seekable policy, if can also be changed by reader, including during a 
+	 ** begin_write() call while writer is waiting. Writer must always use start time of span returned by begin_write()
+	 ** of try_begin_write() instead. */
 	time_unit write_start_time() const;
+	
+	/// Read start time.
+	/** Value gets changed by reader. Start time of view returned by begin_read(), unless reader seeks to another
+	 ** frame. */
 	time_unit read_start_time() const;
-	
-	[[deprecated]] time_unit writable_duration() const { return writable_time_span().duration(); }
-	[[deprecated]] time_unit readable_duration() const { return readable_time_span().duration(); }
-	
+		
+	/// Currently writable time span.
+	/** Span starting from write_start_time(), going until end of _currently_ writable span, or end of stream, whichever
+	 ** comes earlier. That is, writer can wait for more than this span in former case. Span is fetched atomically. */
 	time_span writable_time_span() const;
+	
+	/// Currently readable time span.
+	/** Span starting from read_start_time(), going until end of _currently_ readable span, or end of stream, whichever
+	 ** comes earlier. That is, reader can wait for more than this span in former case. Span is fetched atomically. */
 	time_span readable_time_span() const;
 	
-		
+	/// Currently writable duration.
+	/** Equivalent to `writable_time_span().duration()`. */
+	time_unit writable_duration() const { return writable_time_span().duration(); }
+
+	/// Currently readable duration.
+	/** Equivalent to `readable_time_span().duration()`. */
+	time_unit readable_duration() const { return readable_time_span().duration(); }
+
 	/// End of file time. */
 	/** Returns -1 if not defined. For non-seekable buffer, reader must not rely on this value because it can change
 	 ** between end_time() call and begin_read() call. */

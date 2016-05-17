@@ -4,12 +4,15 @@
 #include <utility>
 #include "filter.h"
 #include "../io/frame_importer.h"
+#include "../io/seekable_frame_importer.h"
 
 namespace mf { namespace flow {
 
 /// Importer source filter, reads frames from associated \ref frame_importer.
-template<typename Importer>
+template<typename Importer, typename = void>
 class importer_filter : public source_filter {
+	static_assert(! Importer::is_seekable, "Importer must not be seekable");
+
 private:
 	Importer importer_;
 
@@ -36,7 +39,9 @@ public:
 
 /// Seekable importer source filter, reads frames from associated \ref seekable_frame_importer.
 template<typename Importer>
-class seekable_importer_filter : public source_filter {
+class importer_filter<Importer, std::enable_if_t<Importer::is_seekable>> : public source_filter {
+	static_assert(Importer::is_seekable, "Importer must be seekable");
+	
 private:
 	Importer importer_;
 
@@ -44,12 +49,17 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit seekable_importer_filter(filter_node& nd, Args&&... args) :
+	explicit importer_filter(filter_node& nd, Args&&... args) :
 		source_filter(nd, false),
 		importer_(std::forward<Args>(args)...),
 		output(*this)
 	{
-		nd.define_source_stream_properties(true, importer_.total_duration());
+		set_seekable(true);
+	}
+	
+	void set_seekable(bool seekable) {
+		if(seekable) this_node().define_source_stream_properties(true, importer_.total_duration());
+		else this_node().define_source_stream_properties(false, -1);
 	}
 	
 	void setup() override {
@@ -67,7 +77,6 @@ public:
 		return importer_.read_frame(out);
 	}
 };
-// TODO combine with importer_filter, SFINAE test
 
 
 }}

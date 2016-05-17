@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include "../src/utility/event.h"
+#include "../src/os/event.h"
 #include "support/thread.h"
 #include <mutex>
 

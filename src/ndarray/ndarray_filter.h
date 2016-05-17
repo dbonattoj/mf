@@ -5,12 +5,13 @@
 
 namespace mf {
 
+/// Placement of a kernel on an `ndarray_view`.
 template<std::size_t Dim, typename Elem, typename Kernel_elem>
 struct kernel_placement {
-	ndarray_view<Dim, Elem> view_section;
-	ndarray_view<Dim, Kernel_elem> kernel_section;
-	ndptrdiff<Dim> section_position;
-	ndptrdiff<Dim> absolute_position;
+	ndarray_view<Dim, Elem> view_section; ///< Section of the view covered by kernel.
+	ndarray_view<Dim, Kernel_elem> kernel_section; ///< Section of the kernel which covers view (may be truncated).
+	ndptrdiff<Dim> section_position; ///< Coordinates of kernel center in `view_section` and `kernel_section`.
+	ndptrdiff<Dim> absolute_position; ///< Coordinates of kernel center in full view.
 };
 
 

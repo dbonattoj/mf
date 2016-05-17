@@ -187,9 +187,9 @@ void node_input::pull(time_unit t) {
 }
 
 
-timed_frames_view node_input::begin_read_frame(time_unit t) {
+timed_frame_array_view node_input::begin_read_frame(time_unit t) {
 	time_unit duration = std::min(t, past_window_) + 1 + future_window_;
-	timed_frames_view view = connected_output().begin_read(duration);
+	timed_frame_array_view view = connected_output().begin_read(duration);
 	return view;
 }
 

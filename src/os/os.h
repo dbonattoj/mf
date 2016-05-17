@@ -1,5 +1,5 @@
-#ifndef MF_UTILITY_OS_H_
-#define MF_UTILITY_OS_H_
+#ifndef MF_OS_H_
+#define MF_OS_H_
 
 // macros for OS
 #if defined(__APPLE__)

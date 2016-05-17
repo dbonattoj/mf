@@ -19,10 +19,7 @@ private:
 	template<std::size_t Dim, typename Elem> class output_port;
 	
 	flow::filter_node& node_;
-	
-	const flow::filter_node& this_node() const { return node_; }
-	flow::filter_node& this_node() { return node_; }
-	
+		
 public:
 	template<std::size_t Dim, typename Elem> using input_type = input_port<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = output_port<Dim, Elem>;
@@ -32,6 +29,9 @@ public:
 	
 	filter(const filter&) = delete;
 	filter& operator=(const filter&) = delete;
+	
+	filter_node& this_node() noexcept { return node_; }
+	const filter_node& this_node() const noexcept { return node_; }
 	
 	bool reached_end() const { return node_.reached_end(); }
 	

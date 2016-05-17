@@ -20,7 +20,7 @@
 namespace mf {
 
 namespace {
-	std::uintptr_t event_ident_ = 0xC0FFEE;
+	std::uintptr_t event_ident_ = 1;
 }
 
 event::event() : handle_(0) {

@@ -17,7 +17,7 @@ private:
 	/// Time of last written frame.
 	/** Defined _current time_ of timed ring buffer. Next write starts at `last_write_time_ + 1`. */
 	std::atomic<time_unit> last_write_time_{-1};
-	// TODO remove atomic
+	// TODO remove atomic?
 
 public:
 	using section_view_type = timed_frame_array_view;

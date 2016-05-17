@@ -7,7 +7,7 @@ LDLIBS := -lpthread -lm
 
 # debug/deploy build settings
 ifeq ($(DEBUG), 1)
-	CXXFLAGS += -g -Wl,-export-dynamic
+	CXXFLAGS += -g -Wl,-export-dynamic -pedantic
 else
 	CXXFLAGS += -O3 -DNDEBUG
 endif
@@ -80,7 +80,7 @@ clean :
 $(LIB) : $(LIB_OBJ)
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) -o $@ $(LIB_OBJ) $(LDLIBS) && \
-	mkdir -p dist/include && ln -s ../../src dist/include/mf
+	mkdir -p dist/include && ln -fs ../../src dist/include/mf
 	
 
 # .cc compilation in src/: compile for shared library

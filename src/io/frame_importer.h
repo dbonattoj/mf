@@ -23,6 +23,7 @@ public:
 	using frame_view_type = ndarray_view<Dim, Elem>;
 	using elem_type = Elem;
 	constexpr static std::size_t dimension = Dim;
+	constexpr static bool is_seekable = false;
 
 	virtual ~frame_importer() { }
 	

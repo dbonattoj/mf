@@ -18,7 +18,7 @@ node_job::~node_job() {
 }
 	
 
-void node_job::push_input(node_input& in, const timed_frames_view& vw) {
+void node_job::push_input(node_input& in, const timed_frame_array_view& vw) {
 	MF_EXPECTS(! vw.is_null());
 	inputs_stack_.emplace_back(&in, vw);
 	inputs_map_.at(in.index()) = &inputs_stack_.back();

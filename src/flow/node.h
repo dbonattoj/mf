@@ -147,7 +147,7 @@ public:
 	/// Constitutes access point to the node from other nodes in graph.
 	///@{
 	virtual void pull(time_span span) = 0;
-	virtual timed_frames_view begin_read(time_unit duration) = 0;
+	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
 	virtual void end_read(time_unit duration) = 0;
 	virtual time_unit end_time() const = 0;
 	///@}
@@ -200,7 +200,7 @@ public:
 	/// \name Read interface, used by node.
 	///@{
 	void pull(time_unit t);
-	timed_frames_view begin_read_frame(time_unit t);
+	timed_frame_array_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
 	void cancel_read_frame();
 	time_unit end_time() const { return connected_node().end_time(); }
