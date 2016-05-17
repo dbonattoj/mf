@@ -3,7 +3,6 @@
 
 #include "node.h"
 #include "node_job.h"
-#include "node_io_wrapper.h"
 #include "node_parameter.h"
 
 namespace mf { namespace flow {
@@ -14,9 +13,6 @@ class graph;
 /** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
 class sink_node final : public filter_node {
 public:	
-	template<std::size_t Dim, typename Elem>
-	using input_type = node_input_wrapper<node_input, Dim, Elem>;
-
 	template<typename Value>
 	using parameter_type = node_parameter<Value>;
 
@@ -33,6 +29,12 @@ public:
 	void pull_next_frame() { process_next_frame(); }
 	
 	void seek(time_unit t);
+	
+	node_input& add_input(time_unit past_window, time_unit future_window) override {
+		return add_input_<node_input>(past_window, future_window);
+	}
+	
+	node_output& add_output(const frame_format& format) override { throw 0; }
 };
 
 

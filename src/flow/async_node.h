@@ -3,7 +3,6 @@
 
 #include "filter_node.h"
 #include "node_job.h"
-#include "node_io_wrapper.h"
 #include "node_parameter.h"
 #include "../queue/shared_ring.h"
 #include <thread>
@@ -11,47 +10,7 @@
 namespace mf { namespace flow {
 
 class graph;
-class async_node_output;
-
-
-/// Asynchronous node base class.
-/** Processes frames in a separate thread owned by the node. Can have multiple inputs, but only one output. Can process
- ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
- ** in graph. */
-class async_node final : public filter_node {
-private:
-	bool running_ = false;
-	std::thread thread_;
-	
-	void thread_main_();
-
-public:
-	template<std::size_t Dim, typename Elem>
-	using input_type = node_input_wrapper<node_input, Dim, Elem>;
-	
-	template<std::size_t Dim, typename Elem>
-	using output_type = node_output_wrapper<async_node_output, Dim, Elem>;
-
-	template<typename Value>
-	using parameter_type = node_parameter<Value>;
-
-	explicit async_node(graph&);
-	~async_node();
-	
-	void internal_setup() final override;
-	void launch() final override;
-	void stop() final override;
-	bool process_next_frame() override;
-	
-	node_input& add_input(time_unit past_window, time_unit future_window) override {
-		return add_input<node_input>(past_window, future_window);
-	}
-	
-	async_node_output& add_output(const frame_format& format) override {
-		return add_output<async_node_output>(format);
-	}
-};
-
+class async_node;
 
 
 class async_node_output : public node_output {
@@ -81,6 +40,39 @@ public:
 	///@}
 };
 
+
+
+/// Asynchronous node base class.
+/** Processes frames in a separate thread owned by the node. Can have multiple inputs, but only one output. Can process
+ ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
+ ** in graph. */
+class async_node final : public filter_node {
+private:
+	bool running_ = false;
+	std::thread thread_;
+	
+	void thread_main_();
+
+public:
+	template<typename Value>
+	using parameter_type = node_parameter<Value>;
+
+	explicit async_node(graph&);
+	~async_node();
+	
+	void internal_setup() final override;
+	void launch() final override;
+	void stop() final override;
+	bool process_next_frame() override;
+	
+	node_input& add_input(time_unit past_window, time_unit future_window) override {
+		return add_input_<node_input>(past_window, future_window);
+	}
+	
+	async_node_output& add_output(const frame_format& format) override {
+		return add_output_<async_node_output>(format);
+	}
+};
 
 }}
 

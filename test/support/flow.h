@@ -27,7 +27,7 @@ private:
 	std::set<int> produced_frames_;
 
 public:
-	typename Base::template output_type<2, int> output;
+	output_type<2, int> output;
 	
 	explicit sequence_frame_source(flow::filter_node& nd, time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
 		source_filter(nd, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
@@ -71,10 +71,10 @@ private:
 	}
 	
 public:
-	using callback_func = void(passthrough_node& self, flow::node_job& job);
+	using callback_func = void(passthrough_filter& self, flow::node_job& job);
 
-	typename Base::template input_type<2, int> input;
-	typename Base::template output_type<2, int> output;
+	input_type<2, int> input;
+	output_type<2, int> output;
 	
 	std::vector<bool> activation;
 	std::function<callback_func> callback;
@@ -97,7 +97,7 @@ public:
 
 	std::vector<bool> activation;
 	
-	explicit expected_frames_sink(flow::filter_node& nd, const std::vector<int>& seq) :
+	explicit expected_frames_sink(flow::sink_filter& nd, const std::vector<int>& seq) :
 		sink_filter(nd),
 		expected_frames_(seq),
 		got_frames_(seq.size(), missingframe),

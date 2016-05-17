@@ -50,19 +50,19 @@ protected:
 	void cancel_job(node_job&);
 	
 	template<typename Input>
-	Input& add_input(time_unit past_window, time_unit future_window) {
+	Input& add_input_(time_unit past_window, time_unit future_window) {
 		Input* input = new Input(*this, inputs_.size(), past_window, future_window);
 		inputs_.emplace_back(input);
 		return *input;
 	}
 
 	template<typename Output>
-	Output& add_output(const frame_format& format) {
+	Output& add_output_(const frame_format& format) {
 		Output* output = new Output(*this, outputs_.size(), format);
-		output_.emplace_back(output);
+		outputs_.emplace_back(output);
 		return *output;
 	}
-
+	
 public:
 	std::string name;
 
