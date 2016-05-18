@@ -22,7 +22,7 @@ void reverse_homography_warp_filter::process(mf::flow::node_job& job) {
 		
 	Eigen_projective3 reverse_homography = homography_transformation(out_cam, in_cam);
 
-	auto kernel = disk_image_kernel(5);
+	auto kernel = box_image_kernel(3);
 	
 	for(std::ptrdiff_t y = 0; y < image_shape[0]; ++y)
 	for(std::ptrdiff_t x = 0; x < image_shape[1]; ++x) {

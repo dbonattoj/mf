@@ -17,7 +17,7 @@ void result_improve_filter::process(mf::flow::node_job& job) {
 	auto in_full = job.in_full(input);
 	auto out = job.out(output);
 	
-	ndarray<3, bool> kernel(make_ndsize(5, 5, 5));
+	ndarray<3, bool> kernel(make_ndsize(5, 3, 3));
 	std::fill(kernel.begin(), kernel.end(), true);
 	
 	for(auto it = in.begin(); it != in.end(); ++it) {

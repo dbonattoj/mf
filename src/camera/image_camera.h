@@ -9,7 +9,7 @@
 
 namespace mf {
 
-/// Base class for camera which handles mapping to image coordinates.
+/// Camera which handles mapping to image coordinates, base class.
 /** Handles mapping between 2D real image coordinates and integer pixel coordinates, and bounds checking.
  ** Does not add scaling or offset, image coordinates map to center point of the square pixel. Pixel coordinates
  ** can be flipped. */

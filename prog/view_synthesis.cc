@@ -45,7 +45,7 @@ int main(int argc, const char* argv[]) {
 		Eigen_vec3 max_pos = rightmost_cam.absolute_pose().position;
 		Eigen_quaternion max_ori = rightmost_cam.absolute_pose().orientation;
 	
-		real k = (1.0 + std::cos(pi * t / 200.0)*0.7) / 2.0;
+		real k = (1.0 + std::sin(pi * t / 100.0)*0.7) / 2.0;
 	
 		Eigen_vec3 pos = min_pos + k*(max_pos - min_pos);
 		Eigen_quaternion ori = min_ori.slerp(k, max_ori);
@@ -99,7 +99,7 @@ int main(int argc, const char* argv[]) {
 		auto& blender_vis = blender.add_input_visual(vis.camera);
 		blender_vis.image_input.connect(warper.destination_image_output);
 	}
-	
+
 	// Result filter
 	auto& result_filter = graph.add_filter<result_improve_filter>();
 	result_filter.input.connect(blender.output);

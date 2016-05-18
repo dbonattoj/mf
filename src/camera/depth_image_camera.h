@@ -7,7 +7,7 @@
 
 namespace mf {
 
-/// Base class for depth camera which handles mapping to integer depth values.
+/// Depth camera which handles mapping to integer depth values, base class.
 template<typename Depth>
 class depth_image_camera : public image_camera {
 	static_assert(std::is_integral<Depth>::value, "Depth must be integer type");

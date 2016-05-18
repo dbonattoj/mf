@@ -43,3 +43,45 @@ input_data poznan_blocks() {
 	
 	return data;
 }
+
+
+input_data poznan_blocks_scaled() {	
+	std::string dir = "../poznan_blocks/";
+
+	std::string im = "im";
+	std::string di = "di";
+	std::string cm = "camera.txt";
+	std::string pr = "param_cam";
+
+	std::size_t w = 960, h = 540;
+	int sampling = 420;
+	real z_far = 100.0, z_near = 15.0;
+
+	depth_projection_parameters dparam;
+	dparam.z_near = z_near;
+	dparam.z_far = z_far;
+	dparam.flip_z = false;
+	dparam.range = depth_projection_parameters::unsigned_normalized_disparity;
+
+	vsrs_camera_array cams(dir + cm, dparam, {w, h}, true);
+
+	input_data data {
+		w,
+		h,
+		sampling,
+		dparam
+	};
+	
+	for(int i = 0; i <= 9; ++i) {	
+		std::string cam_name = pr + std::to_string(i);
+		input_visual vis {
+			camera_type(cams[cam_name], make_ndsize(w, h)),
+			dir + im + std::to_string(i) + ".yuv",
+			dir + di + std::to_string(i) + ".yuv"
+		};
+		vis.camera.flip_pixel_coordinates();
+		data.visuals.push_back(vis);
+	}
+	
+	return data;
+}

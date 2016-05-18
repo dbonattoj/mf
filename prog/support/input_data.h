@@ -25,5 +25,6 @@ struct input_data {
 };
 
 input_data poznan_blocks();
+input_data poznan_blocks_scaled();
 
 #endif

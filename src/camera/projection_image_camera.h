@@ -7,6 +7,7 @@
 
 namespace mf {
 
+/// Pin-hole camera with mapping onto image pixel coordinates.
 template<typename Depth>
 class projection_image_camera : public projection_camera, public depth_image_camera<Depth> {
 	using depth_image_camera_base = depth_image_camera<Depth>;
