@@ -1,6 +1,6 @@
 ---
 title: mf: Graph
-----
+---
 
 # Using the graph
 A flow graph is constructed and run using the `graph` class. First create an instance

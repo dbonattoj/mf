@@ -1,6 +1,6 @@
 ---
 title: mf: Build and usage guide
-----
+---
 
 The package consists of the framework, its unit tests, and a demonstration program which implements an FTV view
 synthesis algorithm. The project website is <http://timlenertz.github.io/mf/>, the current version of the repository

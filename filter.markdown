@@ -1,6 +1,6 @@
 ---
 title: mf: Filters
-----
+---
 
 # Writing Filters
 Filters are implemented as derived classes of `filter`, `source_filter` or `sink_filter`. For example:
