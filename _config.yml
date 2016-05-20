@@ -1,0 +1,21 @@
+title: "mf Media Framework"
+email: "timlenertz@gmail.com"
+description: >
+  desc
+github_username: timlenertz
+url: "http://timlenertz.github.io/"
+baseurl: "/mf"
+
+markdown: kramdown
+highlighter: rouge
+
+collections:
+  manual:
+    output: true
+
+defaults:
+- scope:
+    path: ""
+    type: manual
+  values:
+    layout: page
