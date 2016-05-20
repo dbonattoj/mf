@@ -12,8 +12,6 @@ Full package with the framework and demonstration program source code, paper, an
 _Poznan blocks_ test sequence required by the demonstration program:
 <https://www.dropbox.com/s/ctkg34lvgyvhqb6/poznan_blocks.tar.bz2?dl=0> (946,3 MB).
 
-The paper describing the framework is available [here]({{ site.baseurl }}/acmmm2016_paper.pdf).
-
 ## Documentation
 [Usage and built instructions]({{ site.baseurl }}/manual/instructions.html) are available in the [manual]({{ site.baseurl }}/manual.html).
 
