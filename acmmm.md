@@ -6,10 +6,11 @@ title: ACMMM2016 package
 The _mf_ framework was submitted to the [ACM Multimedia 2016 Open Source Software Competition](http://www.acmmm.org/2016/?page_id=201) on 20 May 2016.
 
 ## Downloads
-The full package with the framework and demonstration program source code, paper, and documentation, can be downloaded at
-<http://dsfsd>.
+Full package with the framework and demonstration program source code, paper, and documentation:
+<https://www.dropbox.com/s/l5krms9m4s4c3kq/mf_acmmm2016.zip?dl=0>.
 
-The _Poznan blocks_ test sequence required by the demonstration program can be downloaded at <https://www.dropbox.com/s/ctkg34lvgyvhqb6/poznan_blocks.tar.bz2?dl=0> (946,3 MB).
+_Poznan blocks_ test sequence required by the demonstration program:
+<https://www.dropbox.com/s/ctkg34lvgyvhqb6/poznan_blocks.tar.bz2?dl=0> (946,3 MB).
 
 The paper describing the framework is available [here]({{ site.baseurl }}/acmmm2016_paper.pdf).
 
