@@ -22,11 +22,13 @@
 
 using namespace mf;
 
-std::string out = "output/view_synthesis_video.avi";
+std::string out = "view_synthesis_video.avi";
 
-input_data data = poznan_blocks();
+input_data data = poznan_blocks_scaled();
 
 int main(int argc, const char* argv[]) {
+	sleep(10);
+	
 	if(argc >= 2) out = argv[1];
 		
 	flow::graph graph;
@@ -85,7 +87,7 @@ int main(int argc, const char* argv[]) {
 		di_warper.destination_camera.set_mirror(blender.output_camera);
 
 		// Filter on the depth map
-		auto& di_filter = graph.add_filter<depth_map_improve_filter>(3);
+		auto& di_filter = graph.add_filter<depth_map_improve_filter, flow::async_node>(3);
 		di_filter.input.connect(di_warper.destination_depth_output);
 		
 		// Reverse homography warp

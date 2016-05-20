@@ -43,6 +43,8 @@ private:
 		sink_ = &sink;
 		return sink;
 	}
+	
+	void pull_next_frame_();
 
 
 public:

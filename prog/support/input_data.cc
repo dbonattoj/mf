@@ -46,7 +46,7 @@ input_data poznan_blocks() {
 
 
 input_data poznan_blocks_scaled() {	
-	std::string dir = "../poznan_blocks/";
+	std::string dir = "poznan_blocks/";
 
 	std::string im = "im";
 	std::string di = "di";

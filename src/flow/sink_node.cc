@@ -1,6 +1,5 @@
 #include "sink_node.h"
 #include "node_job.h"
-#include <iostream>
 
 namespace mf { namespace flow {
 	
@@ -78,7 +77,6 @@ void sink_node::pull(time_unit t) {
 	
 bool sink_node::process_next_frame() {
 	pull(current_time() + 1);
-	std::cout << "frame " << current_time() << std::endl;
 	return true;
 }
 

@@ -1,10 +1,18 @@
 #include "graph.h"
 #include "node.h"
 #include "sink_node.h"
-
+#include "../utility/stopwatch.h"
 
 namespace mf { namespace flow {
 
+
+void graph::pull_next_frame_() {
+	stopwatch watch;
+	watch.start();
+	sink_->pull_next_frame();
+	watch.stop();
+	//std::cout << sink_->current_time() << " " << std::chrono::duration_cast<std::chrono::milliseconds>(watch.total_duration()).count() << std::endl;
+}
 
 graph::~graph() {
 	if(running_) stop();
@@ -46,7 +54,7 @@ void graph::run_until(time_unit last_frame) {
 	if(! running_) launch();
 	
 	while(sink_->current_time() < last_frame && !sink_->reached_end())
-		sink_->pull_next_frame();
+		pull_next_frame_();
 }
 
 
@@ -59,7 +67,7 @@ bool graph::run() {
 	if(! was_setup_) throw std::logic_error("graph not set up");
 	if(! sink_->is_bounded()) throw std::logic_error("sink is not bounded");
 	if(! running_) launch();
-	while(sink_->is_bounded() && !sink_->reached_end()) sink_->pull_next_frame();
+	while(sink_->is_bounded() && !sink_->reached_end()) pull_next_frame_();
 	return sink_->is_bounded();
 }
 
