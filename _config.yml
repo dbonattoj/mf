@@ -3,8 +3,8 @@ email: "timlenertz@gmail.com"
 description: >
   desc
 github_username: timlenertz
-url: "http://timlenertz.github.io/"
-baseurl: "/mf"
+url: http://timlenertz.github.io
+baseurl: /mf
 
 markdown: kramdown
 highlighter: rouge
