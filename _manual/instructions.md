@@ -42,7 +42,7 @@ run
 
     doxygen
 
-The HTML documentation is outputed in `doc/doxy/index.html`.
+The HTML documentation is outputed in `doc/doxy/html/index.html`.
 
 
 ## Demonstration program
