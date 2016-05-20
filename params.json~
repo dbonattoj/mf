@@ -1,0 +1,6 @@
+{
+  "name": "mf",
+  "tagline": "Media Framework",
+  "body": "Media Framework\r\n===============\r\n\r\nC++ framework for video and 3D processing.\r\n\r\nMedia flow graph system with support for inter-node parallelism, past and future time windows on multiple inputs,\r\nseekable or real-time streams, and more. Minimal high-level interface for concrete node classes which do image\r\nprocessing.\r\n\r\nCore components for image processing, camera models, point clouds. Generalized to n-d array data type where elements\r\nmay be vectors, tuples or nullable. Support for interfacing with OpenCV, or other external code.\r\n\r\nDevelopped in modern C++14. Extensively tested. Some low-level OS-specific components.\r\n\r\n### Requirements:\r\n  * C++14 compatible compiler (tested on Clang/LLVM)\r\n  * OpenCV (http://opencv.org/)\r\n  * Eigen (http://eigen.tuxfamily.org/)\r\n  * Linux or Darwin OS currently\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
