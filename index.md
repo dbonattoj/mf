@@ -2,7 +2,7 @@
 layout: default
 ---
 
-*[ACMMM2016 package available here]({{ site.baseurl }/acmmm.html})*
+*[ACMMM2016 package available here]({{ site.baseurl }}/acmmm.html)*
 
 C++ framework for multi-stream video and 3D processing.
 
