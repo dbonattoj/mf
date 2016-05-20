@@ -2,7 +2,6 @@
 title: N-d arrays
 ---
 
-# N-d arrays
 The `ndarray` represents a multi-dimensional homogeneous array. Its items ("elements") must be of an _elem_ type, i.e.
 a type for which `elem_traits` is specialized. See the page on [elem types]({{ site.baseurl }}/manual/elem.html) for
 more on this. All data processed by the [flow graph]({{ site.baseurl }}/manual/graph.html) is of this type.
