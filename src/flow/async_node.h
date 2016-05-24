@@ -45,6 +45,11 @@ public:
 	/// \name Read interface, used by connected input.
 	///@{
 	void pull(time_span span) override;
+	
+	/// Begin reading `duration` frames pulled previously.
+	/** For asynchronous views, thje function waits until the frames become available (or end of stream occurs), and
+	 ** returns the view with duration `0` to `duration` (lower than `duration` if end was reached.). If stream was
+	 ** interrupted, returns null view. */
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;

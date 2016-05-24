@@ -123,9 +123,45 @@ public:
 	time_unit current_time() const noexcept { return current_time_; }
 };
 
+/// Output port of another node, read interface for connected node.
+/** Constitutes access point to the node from other nodes in graph. Polymorphic abstract class with interface
+ ** functions. Implemented by `node_output` itself for a direct connection where generic frames are passed through edge.
+ ** Filters implement alternate versions. */
+class node_remote_output {
+public:
+	virtual node_output& this_output() noexcept = 0;
+
+	/// Pull the frames for time span \a span from the node.
+	/** Must be called prior to begin_read(). Ensures that `span.duration()` frames can be read using begin_read()
+	 ** afterwards, and that the timed span returned by begin_read() will start at `span.start_time()`. If near
+	 ** and, only pulls to end, and span returned by begin_read() will be truncated.
+	 ** For synchronous node types, this recursively pulls and processes frames, while begin_read() just reads them. */
+	virtual void pull(time_span span) = 0;
+	
+	/// Begin reading `duration` frames pulled previously.
+	/** Returns timed frame array view `vw` with `vw.duration() == duration` and `vw.start_time() == span.start_time()`
+	 ** where `span` is the time span previously passed to `pull()`. Near end of stream, the returned view may be
+	 ** truncated. May return null view in an error condition.
+	 ** The view remains available for reading until the call to end_read(). pull() or begin_read() must not be called
+	 ** again before call to end_read(). */
+	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
+	
+	/// End reading, and mark \a duration frames as having been read.
+	/** Must be called after begin_read() call. \a duration must be less or equal to `duration` argument of preceding
+	 ** begin_read() call. This informs the node that `duration` frames were read, and next pull/read will likely
+	 ** occur for time `vw.start_time() + duration`. The view `vw` that was returned by begin_read() cannot be accessed
+	 ** after the end_read() call. */
+	virtual void end_read(time_unit duration) = 0;
+	
+	/// Stream end time of node, or -1 if currently undefined.
+	/** If pull() or begin_read() call crossed end (and the span/duration got truncated), then end_time() must return
+	 ** the stream end time (and not -1) after the call to pull() or begin_read(). */
+	virtual time_unit end_time() const = 0;
+};
+
 
 /// Output port of node in flow graph.
-class node_output {
+class node_output : public node_remote_output {
 private:
 	node& node_;
 	std::ptrdiff_t index_ = -1;
@@ -146,6 +182,7 @@ public:
 
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
+	node_output& this_output() noexcept final override { return *this; }
 	
 	void define_frame_length(std::size_t len) { frame_length_ = len; }
 	std::size_t frame_length() const noexcept { return frame_length_; }
@@ -162,16 +199,7 @@ public:
 	
 	bool is_active() const noexcept { return active_; }
 	void propagate_activation(bool active);
-	
-	/// \name Read interface, used by connected input.
-	/// Constitutes access point to the node from other nodes in graph.
-	///@{
-	virtual void pull(time_span span) = 0;
-	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
-	virtual void end_read(time_unit duration) = 0;
-	virtual time_unit end_time() const = 0;
-	///@}
-	
+		
 	/// \name Write interface, used by node.
 	/// Implemented differently for different node types. 
 	///@{
@@ -190,8 +218,9 @@ private:
 
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
-	node_output* connected_output_ = nullptr;
 	
+	node_remote_output* connected_output_ = nullptr;
+		
 	bool activated_ = true;
 	
 protected:
@@ -202,16 +231,16 @@ public:
 
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
-	
+	/*
 	std::size_t frame_length() const noexcept { return connected_output().frame_length(); }
 	const frame_format& format() const noexcept { return connected_output().format(); }
-	
+	*/
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
-	void connect(node_output&);
+	void connect(node_remote_output&);
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return *connected_output_; }
+	node_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return connected_output_->this_output(); }
 	node& connected_node() const noexcept { MF_EXPECTS(is_connected()); return connected_output().this_node(); }
 
 	bool is_activated() const noexcept { return activated_; }

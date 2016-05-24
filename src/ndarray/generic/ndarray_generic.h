@@ -30,7 +30,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Properties for construction of \ref ndarray_generic and derived container objects.
-/** Described frame format, frame length and number of frames. Does not describe padding between array frames, because
+/** Describes frame format, frame length and number of frames. Does not describe padding between array frames, because
  ** this may be determined internally by the container. (For example, \ref ring needs to adjust is to fit page size.) */
 struct ndarray_generic_properties {
 	frame_format format_; ///< Element type and alignment of frame.

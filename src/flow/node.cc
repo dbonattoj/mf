@@ -191,9 +191,9 @@ node_input::node_input(node& nd, std::ptrdiff_t index, time_unit past_window, ti
 	future_window_(future_window) { }
 
 
-void node_input::connect(node_output& output) {
+void node_input::connect(node_remote_output& output) {
 	connected_output_ = &output;
-	connected_output_->input_has_connected(*this);
+	connected_output_->this_output().input_has_connected(*this);
 }
 
 

@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_NDARRAY_VIEW_CAST_H_
 
 #include "ndarray_view.h"
+#include "ndarray_timed_view.h"
 #include "../common.h"
 #include "../elem.h"
 #include "../elem_tuple.h"
@@ -31,6 +32,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 	
+template<typename Output_view, typename Input_view> Output_view ndarray_view_cast(const Input_view& vw);
+
 namespace detail {
 	template<typename Output_view, typename Input_view>
 	struct ndarray_view_caster;
@@ -129,14 +132,54 @@ namespace detail {
 			return arr;
 		}
 	};
+	
+	
+	// ndarray_timed_view to ndarray_timed_view
+	template<std::size_t Output_dim, typename Output_elem, std::size_t Input_dim, typename Input_elem>
+	struct ndarray_view_caster<
+		ndarray_timed_view<Output_dim, Output_elem>, // out
+		ndarray_timed_view<Input_dim, Input_elem> // in
+	>{
+		using output_view_type = ndarray_timed_view<Output_dim, Output_elem>;
+		using input_view_type = ndarray_timed_view<Input_dim, Input_elem>;
+
+		using untimed_output_view_type = ndarray_view<Output_dim, Output_elem>;
+		using untimed_input_view_type = ndarray_view<Input_dim, Input_elem>;
+		
+		output_view_type operator()(const input_view_type& vw) const {
+			auto untimed_output_view = ndarray_view_cast<untimed_output_view_type>(
+				untimed_input_view_type(vw)
+			);
+			return ndarray_timed_view<Output_dim, Output_elem>(untimed_output_view, vw.start_time());
+		}
+	};
 }
 
 
+/// Cast `ndarray_view` to one with different dimension and/or element type, with same data.
+/** The input and output views may be of type `ndarray_view` or `ndarray_timed_view`.
+ ** - _No-op_: Output and input views have same dimension and element type.
+ ** - _Tuple element_: Input element type is an `elem_tuple`. Output element type is the type of one of the elements
+ **                    in this tuple. Input and output dimension is same. Returns view of same shape, but with changed
+ **                    start and strides, which covers only that element in each tuple.
+ **                    Example: `ndarray_view<1, point_xyzrgb>` --> `ndarray_view<1, rgb_color>`
+ ** - _Scalars from vector_: Input element type is vector type, such as `rgb_color`. Output element type is the scalar
+ **                          type of this vector. Output dimension is one more than input dimension. Returns view where
+ **                          added, last dimension is index of scalar element from the original vector elements.
+ **                          Example: `ndarray_view<2, rgb_color>` --> `ndarray_view<3, byte>`.
+ ** - _Masked to unmasked_: Input element type is `masked_elem<Elem>`. Output element type is `Elem`. Dimensions are
+ **                         the same. Returns view to the elements without `masked_elem` wrapper. Value of the items
+ **                         that were null/masked is undefined.
+ **                         Example: `ndarray_view<2, masked_elem<rgb_color>>` --> ndarray_view<2, rgb_color>.
+ ** - _Masked to bool:_ Input element type is `masked_elem<Elem>. Output element type is `bool`. Dimensions are equal.
+ **                     Returns view where element is `true` when the original element is non-null, and `false`,
+ **                     otherwise, i.e. the binary mask. */
 template<typename Output_view, typename Input_view>
-Output_view ndarray_view_cast(const Input_view& view) {
+Output_view ndarray_view_cast(const Input_view& vw) {
 	detail::ndarray_view_caster<Output_view, Input_view> caster;
-	return caster(view);
+	return caster(vw);
 }
+
 
 
 template<typename Output_view, typename Input_view>

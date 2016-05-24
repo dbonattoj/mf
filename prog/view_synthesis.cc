@@ -44,7 +44,7 @@ using namespace mf;
 
 std::string out = "view_synthesis_video.avi";
 
-input_data data = poznan_blocks_scaled();
+input_data data = poznan_blocks();
 
 int main(int argc, const char* argv[]) {
 	sleep(10);
