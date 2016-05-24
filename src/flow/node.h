@@ -231,17 +231,14 @@ public:
 
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
-	/*
-	std::size_t frame_length() const noexcept { return connected_output().frame_length(); }
-	const frame_format& format() const noexcept { return connected_output().format(); }
-	*/
+
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
 	void connect(node_remote_output&);
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return connected_output_->this_output(); }
-	node& connected_node() const noexcept { MF_EXPECTS(is_connected()); return connected_output().this_node(); }
+	node_remote_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return *connected_output_; }
+	node& connected_node() const noexcept { MF_EXPECTS(is_connected()); return connected_output().this_output().this_node(); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);
@@ -252,7 +249,7 @@ public:
 	timed_frame_array_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
 	void cancel_read_frame();
-	time_unit end_time() const { return connected_node().end_time(); }
+	time_unit end_time() const { return connected_output_->end_time(); }
 	///@}
 };
 

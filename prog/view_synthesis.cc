@@ -128,9 +128,7 @@ int main(int argc, const char* argv[]) {
 
 	// Converter+sink for output image
 	auto& sink = graph.add_sink_filter<flow::exporter_filter<video_exporter>>(out, shape);
-	auto& sink_converter = graph.add_filter<flow::color_converter_filter<masked_elem<rgb_color>, rgb_color>>();
-	sink_converter.input.connect(result_filter.output);
-	sink.input.connect(sink_converter.output);
+	sink.input.connect(result_filter.output);
 
 	// Setup the graph
 	graph.setup();

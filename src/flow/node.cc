@@ -68,7 +68,7 @@ void node::propagate_setup_() {
 	
 	// first set up preceding nodes
 	for(auto&& in : inputs()) {
-		node& connected_node = in->connected_output().this_node();
+		node& connected_node = in->connected_output().this_output().this_node();
 		connected_node.propagate_setup_();
 	}
 	
@@ -203,25 +203,25 @@ void node_input::pull(time_unit t) {
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 		
-	connected_output().pull(time_span(start_time, end_time));
+	connected_output_->pull(time_span(start_time, end_time));
 }
 
 
 timed_frame_array_view node_input::begin_read_frame(time_unit t) {
 	time_unit duration = std::min(t, past_window_) + 1 + future_window_;
-	timed_frame_array_view view = connected_output().begin_read(duration);
+	timed_frame_array_view view = connected_output_->begin_read(duration);
 	return view;
 }
 
 
 void node_input::end_read_frame(time_unit t) {
 	time_unit duration = (t < past_window_) ? 0 : 1;
-	connected_output().end_read(duration);
+	connected_output_->end_read(duration);
 }
 
 
 void node_input::cancel_read_frame() {
-	connected_output().end_read(0);
+	connected_output_->end_read(0);
 }
 
 
@@ -230,7 +230,7 @@ void node_input::set_activated(bool activated) {
 		activated_ = activated;
 		
 		bool output_active = activated && this_node().is_active();
-		connected_output().propagate_activation(output_active);
+		connected_output().this_output().propagate_activation(output_active);
 	}
 }
 

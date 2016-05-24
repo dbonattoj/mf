@@ -39,11 +39,15 @@ void blend_depth_maps_filter::process(flow::node_job& job) {
 	std::vector<std::uint8_t> values;
 	values.reserve(visuals_.size());
 	
+	std::vector<ndarray_view<2, masked_elem<std::uint8_t>>> ins;
+	for(const auto& vis : visuals_)
+		ins.push_back(job.in(vis->depth_input));
+	
 	for(std::ptrdiff_t y = 0; y < out.shape()[0]; ++y)
 	for(std::ptrdiff_t x = 0; x < out.shape()[1]; ++x) {
 		values.clear();	
-		for(auto&& act_vis : visuals_) {
-			auto im = job.in(act_vis->depth_input);
+		
+		for(const auto& im : ins) {
 			auto i_d = im[y][x];
 			if(i_d.is_null()) continue;
 			values.push_back(i_d);

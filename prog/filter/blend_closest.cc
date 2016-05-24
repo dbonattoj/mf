@@ -64,13 +64,18 @@ void blend_closest_filter::pre_process(flow::node_job& job) {
 void blend_closest_filter::process(flow::node_job& job) {	
 	auto out = job.out(output);
 	
+	std::vector<ndarray_view<2, masked_elem<rgb_color>>> act_ins;
+	for(active_input_visual act_vis : active_visuals_)
+		act_ins.push_back(job.in(act_vis.visual->image_input));
+	
 	for(std::ptrdiff_t y = 0; y < out.shape()[0]; ++y)
 	for(std::ptrdiff_t x = 0; x < out.shape()[1]; ++x) {
 		real sr = 0, sg  = 0, sb = 0, total = 0;
 		bool null = true;
 		
-		for(active_input_visual act_vis : active_visuals_) {
-			auto im = job.in(act_vis.visual->image_input);
+		for(std::ptrdiff_t i = 0; i < act_ins.size(); ++i) {
+			const auto& im = act_ins[i];
+			const auto& act_vis = active_visuals_[i];
 			
 			auto i_col = im[y][x];
 			if(i_col.is_null()) continue;

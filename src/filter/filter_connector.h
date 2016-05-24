@@ -5,6 +5,9 @@
 #include "../ndarray/ndarray_view_cast.h"
 #include "../ndarray/generic/ndarray_timed_view_generic.h"
 
+#include <iostream>
+#include <typeinfo>
+
 class filter;
 
 namespace mf { namespace flow {
@@ -55,13 +58,12 @@ public:
 	timed_frame_array_view begin_read(time_unit duration) override {
 		auto generic_output_view = this_output().begin_read(duration);
 		if(generic_output_view.is_null()) return timed_frame_array_view::null();
-		
-		auto generic_shape = make_ndsize(generic_output_view.duration());
-		auto concrete_output_view = from_generic<Output_dim, Output_elem>(generic_output_view, generic_shape);
-		
-		using concrete_input_view_type = ndarray_timed_view<Input_dim, Input_elem>;
+				
+		auto concrete_output_view = from_generic<Output_dim + 1, Output_elem>(generic_output_view, frame_shape());
+
+		using concrete_input_view_type = ndarray_timed_view<Input_dim + 1, Input_elem>;
 		auto concrete_input_view = ndarray_view_cast<concrete_input_view_type>(concrete_output_view);
-		
+
 		return to_generic<1>(concrete_input_view);
 	}
 	
