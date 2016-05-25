@@ -42,7 +42,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 		}
 
 	#define MF_ASSERT(condition) MF_ASSERT_MSG(condition, "`" #condition "`")
-
+	
 	#define MF_EXPECTS_MSG(condition, msg) MF_ASSERT_MSG(condition, "precondition: " msg)
 	#define MF_EXPECTS(condition) MF_EXPECTS_MSG(condition, "`" #condition "`")
 		
@@ -59,6 +59,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 	#define MF_ENSURES_MSG(condition, msg) ((void)0)
 	
 #endif
+
+
+#define MF_STATIC_ASSERT(condition) static_assert(condition, #condition)
+#define MF_STATIC_ASSERT_MSG(condition, msg) static_assert(condition, msg)
+
 
 
 namespace mf {

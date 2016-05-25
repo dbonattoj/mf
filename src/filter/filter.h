@@ -29,6 +29,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <string>
 
 namespace mf { namespace flow {
+	
+template<std::size_t Dim, typename Elem> class filter_connector_base;
 
 /// Filter which performs concrete processing, base class.
 /** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
@@ -137,9 +139,6 @@ public:
 	
 	const frame_shape_type& frame_shape() const { return frame_shape_; }
 };
-
-
-template<std::size_t Dim, typename Elem> class filter_connector_base;
 
 
 /// Input port of filter.

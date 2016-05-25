@@ -40,11 +40,6 @@ template<> inline mf::rgb_color color_convert(const std::uint8_t& in) {
 	return mf::rgb_color(in, in, in);
 }
 
-template<> inline mf::rgb_color color_convert(const mf::masked_elem<mf::rgb_color>& in) {
-	if(in.is_null()) return mf::rgb_color(0, 0, 0); // background
-	else return in;
-}
-
 template<> inline mf::rgb_color color_convert(const mf::masked_elem<std::uint8_t>& in) {
 	if(in.is_null()) return mf::rgb_color(0, 0, 0); // background
 	else return mf::rgb_color(in, in, in);

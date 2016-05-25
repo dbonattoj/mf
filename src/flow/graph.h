@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../os/event.h"
 #include "filter_node.h"
 #include "sink_node.h"
+#include "../filter/convert_filter.h"
 #include <utility>
 #include <vector>
 #include <memory>
@@ -84,6 +85,12 @@ public:
 		return nd.set_filter<Filter>(std::forward<Args>(args)...);
 	}
 	
+	template<std::size_t Dim, typename Input_elem, typename Output_elem, typename Element_function>
+	auto& add_convert_filter(Element_function func) {
+		using filter_type = convert_filter<Dim, Input_elem, Output_elem, Element_function>;
+		return add_filter<filter_type>(func);
+	}
+		
 	template<typename Filter, typename... Args>
 	Filter& add_sink_filter(Args&&... args) {
 		static_assert(std::is_base_of<sink_filter, Filter>::value, "");

@@ -9,14 +9,15 @@ ACMMM
 FLOW
 - parallel node (multiple frames in parallel)
 - opencl node?
-- thin node
-- implicit convert/cast
 
 - real time, push from source
 - index --> actual time units (seconds)
 - nodes not 1:1 (skip frames / add frames)
 - shared object (=> also in GPU memory)
 
+- high level graph class with:
+  - implicit convert/multiplex nodes
+  - parse graph+node+filter params from file
 
 
 TOOLKIT

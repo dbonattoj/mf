@@ -26,7 +26,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/flow/async_node.h>
 #include <mf/filter/importer.h>
 #include <mf/filter/exporter.h>
-#include <mf/filter/color_converter.h>
 
 #include "support/input_data.h"
 
@@ -52,6 +51,35 @@ int main(int argc, const char* argv[]) {
 	if(argc >= 2) out = argv[1];
 		
 	flow::graph graph;
+	
+	auto connect_with_color_converter = [&](auto& input, auto& output) {
+		/*
+		Node
+		 output      : output_elem_type
+		  |
+		 conv.input  : output_elem_type
+		Converter
+		 conv.output : input_elem_type
+		  |
+		 input       : input_elem_type
+		Node
+		*/
+		
+		using input_type = std::decay_t<decltype(input)>;
+		using output_type = std::decay_t<decltype(output)>;
+		
+		MF_STATIC_ASSERT(input_type::dimension == output_type::dimension);
+		constexpr std::size_t dimension = input_type::dimension;
+		using input_elem_type = typename input_type::elem_type;
+		using output_elem_type = typename output_type::elem_type;
+				
+		auto& conv = graph.add_convert_filter<dimension, output_elem_type, input_elem_type>(
+			color_convert<input_elem_type, output_elem_type>
+		);
+		conv.input.connect(output);
+		input.connect(conv.output);
+	};
+
 	
 	// camera as function of time
 	// varies between poses of left-most and right-most cameras
@@ -83,26 +111,22 @@ int main(int argc, const char* argv[]) {
 
 	auto& blender = graph.add_filter<blend_closest_filter>(3);
 	blender.output_camera.set_time_function(camera_at_time);
-
 	
+		
 	for(const input_visual& vis : data.visuals) {
 		// Source+converter for image
 		auto& im_source = graph.add_filter<flow::importer_filter<yuv_importer>>(
 			vis.image_yuv_file, shape, data.yuv_sampling
 		);
-		auto& im_converter = graph.add_filter<flow::color_converter_filter<ycbcr_color, rgb_color>>();
-		im_converter.input.connect(im_source.output);
 		
 		// Source+converter for depth image
 		auto& di_source = graph.add_filter<flow::importer_filter<yuv_importer>>(
 			vis.depth_image_yuv_file, shape, data.yuv_sampling
 		);
-		auto& di_converter = graph.add_filter<flow::color_converter_filter<ycbcr_color, masked_elem<depth_type>>>();
-		di_converter.input.connect(di_source.output);
 		
 		// Forward homography warp of depth map alone
 		auto& di_warper = graph.add_filter<homography_depth_warp_filter>();
-		di_warper.source_depth_input.connect(di_converter.output);
+		connect_with_color_converter(di_warper.source_depth_input, di_source.output);
 		di_warper.source_camera.set_constant(vis.camera);
 		di_warper.destination_camera.set_mirror(blender.output_camera);
 
@@ -112,7 +136,7 @@ int main(int argc, const char* argv[]) {
 		
 		// Reverse homography warp
 		auto& warper = graph.add_filter<reverse_homography_warp_filter, flow::async_node>();
-		warper.source_image_input.connect(im_converter.output);
+		connect_with_color_converter(warper.source_image_input, im_source.output);
 		warper.destination_depth_input.connect(di_filter.output);		
 		warper.source_camera.set_constant(vis.camera);
 		warper.destination_camera.set_mirror(blender.output_camera);
