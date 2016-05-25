@@ -38,7 +38,7 @@ public:
 	using output_view_type = ndarray_view<Dim, Output_elem>;
 
 protected:
-	virtual void process_frame(const input_view_type& in, const output_view_type& out, time_unit t) = 0;
+	virtual void process_frame(const input_view_type& in, const output_view_type& out, node_job& job) = 0;
 
 public:
 	simple_filter(filter_node& nd) :
@@ -48,10 +48,10 @@ public:
 		output.define_frame_shape(input.frame_shape());
 	}
 	
-	void pre_process(node_job&) final override { }
+	void pre_process(job_type&) final override { }
 	
-	void process(node_job& job) final override {
-		this->process_frame(job.in(input), job.out(output), job.time());
+	void process(job_type& job) final override {
+		this->process_frame(job.in(input), job.out(output), job);
 	}
 };
 

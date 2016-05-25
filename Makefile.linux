@@ -1,8 +1,9 @@
 # toolset
 CXX := clang++-3.8
 CXXFLAGS := -std=c++14
-CXXFLAGS_SHARED := -fPIC -shared
+CXXFLAGS_SHARED := -fPIC
 LDFLAGS := 
+LDFLAGS_SHARED := -shared
 LDLIBS := -lpthread -lm
 
 # debug/deploy build settings
@@ -13,7 +14,7 @@ else
 endif
 
 # included external dependencies
-CXXFLAGS += -std=c++14 -fPIC -I./external/include -I./dist/include
+CXXFLAGS += -I./external/include -I./dist/include
 
 # external dependencies on system
 PACKAGES := opencv eigen3
@@ -42,13 +43,9 @@ DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
 PROG_SRC := $(shell find prog -maxdepth 1 -name '*.cc')
 PROG := $(patsubst prog/%.cc,$(DIST_DIR)/prog/%,$(PROG_SRC))
 # programs support
-PROG_SUPPORT_SRC := $(shell find prog/support -name '*.cc')
-PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,$(BUILD_DIR)/prog/support/%.o,$(PROG_SUPPORT_SRC))
-# programs filters: one shared library per .cc in prog/filter/*.cc
-PROG_FILTER_SRC := $(shell find prog/filter -name '*.cc')
-PROG_FILTER_OBJ := $(patsubst prog/filter/%.cc,$(BUILD_DIR)/prog/filter/%.o,$(PROG_FILTER_SRC))
-PROG_FILTER := $(patsubst prog/filter/%.cc,$(DIST_DIR)/prog/filter/%.so,$(PROG_FILTER_SRC))
-DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC) $(PROG_FILTER_SRC)) 
+PROG_SUPPORT_SRC := $(shell find prog/support prog/filter -name '*.cc')
+PROG_SUPPORT_OBJ := $(patsubst prog/%.cc,$(BUILD_DIR)/prog/%.o,$(PROG_SUPPORT_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
 # === default targets ======
@@ -79,14 +76,14 @@ clean :
 # TODO improve
 $(LIB) : $(LIB_OBJ)
 	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) -o $@ $(LIB_OBJ) $(LDLIBS) && \
+	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_SHARED) -o $@ $(LIB_OBJ) $(LDLIBS) && \
 	mkdir -p dist/include && ln -fs ../../src dist/include/mf
 	
 
 # .cc compilation in src/: compile for shared library
 $(BUILD_DIR)/src/%.o : src/%.cc
 	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXX_FLAGS_SHARED) -c -o $@ $< -MMD
+	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $< -MMD
 
 
 
@@ -105,24 +102,15 @@ $(BUILD_DIR)/test/%.o : test/%.cc
 
 
 # program executable: build mf, program filter shared libs, obj for program executable and program support, and link
-$(DIST_DIR)/prog/% :  $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(LIB) $(PROG_FILTER)
+$(DIST_DIR)/prog/% :  $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(LIB)
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
-# program filter shared lib: build mf, program filter obj, program support, and link into shared lib
-$(DIST_DIR)/prog/filter/%.so : $(BUILD_DIR)/prog/filter/%.o $(LIB) $(PROG_SUPPORT_OBJ)
-	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # .cc compilation in prog/: compile for program executable
 $(BUILD_DIR)/prog/%.o : prog/%.cc
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
 
-# .cc compilation in prog/filter/: compile for filter shared library
-$(BUILD_DIR)/prog/filter/%.o : prog/filter/%.cc
-	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $< -MMD
 
 
 .PHONY: clean library build_test test prog

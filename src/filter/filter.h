@@ -47,6 +47,7 @@ public:
 	template<std::size_t Dim, typename Elem> using input_type = input_port<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = output_port<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
+	using job_type = node_job;
 
 	explicit filter(filter_node& nd) : node_(nd) { }
 	
@@ -64,10 +65,10 @@ public:
 	virtual void setup() { }
 	
 	/// Prepare for processing a frame.
-	virtual void pre_process(node_job&) { }
+	virtual void pre_process(job_type&) { }
 	
 	/// Process a frame.
-	virtual void process(node_job&) = 0;
+	virtual void process(job_type&) = 0;
 };
 
 

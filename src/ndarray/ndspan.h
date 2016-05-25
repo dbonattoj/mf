@@ -82,6 +82,13 @@ ndspan<Dim, T> make_ndspan(const ndcoord<Dim, T>& start, const ndcoord<Dim, T>& 
 
 
 template<std::size_t Dim, typename T>
+ndspan<Dim, T> make_ndspan(const ndcoord<Dim, T>& end) {
+	ndcoord<Dim, T> start;
+	return ndspan<Dim, T>(start, end);
+}
+
+
+template<std::size_t Dim, typename T>
 std::ostream& operator<<(std::ostream& str, const ndspan<Dim, T>& span) {
 	str << '[' << span.start_pos() << ", " << span.end_pos() << '[';
 	return str;

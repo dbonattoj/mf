@@ -32,12 +32,13 @@ class convert_filter : public simple_filter<Dim, Input_elem, Output_elem> {
 
 	using input_view_type = typename base::input_view_type;
 	using output_view_type = typename base::output_view_type;
+	using job_type = typename base::job_type;
 	
 private:
 	Element_function function_;
 
 protected:
-	void process_frame(const input_view_type& in, const output_view_type& out, time_unit t) override {
+	void process_frame(const input_view_type& in, const output_view_type& out, job_type&) override {
 		std::transform(in.begin(), in.end(), out.begin(), function_);
 	}
 
