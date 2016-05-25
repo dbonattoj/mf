@@ -20,43 +20,56 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "color.h"
 #include "utility/misc.h"
+#include <cstdint>
 
 namespace mf {
-	
-const mono_color mono_color::black(0);
-const mono_color mono_color::white(255);
-
 
 const rgb_color rgb_color::black(0, 0, 0);
 const rgb_color rgb_color::white(255, 255, 255);
 
 
-const rgba_color rgba_color::black(0, 0, 0);
-const rgba_color rgba_color::white(255, 255, 255);
-
-
 template<>
 rgb_color color_convert(const ycbcr_color& in) {
-	float y  = static_cast<float>(in.y) + 0.5f;
+	real y  = static_cast<real>(in.y) + 0.5;
 
-	float cr = static_cast<float>(in.cr) - 127.0f;
-	float cb = static_cast<float>(in.cb) - 127.0f;
+	real cr = static_cast<real>(in.cr) - 127.0;
+	real cb = static_cast<real>(in.cb) - 127.0;
 
-	float r = clamp(y             + 1.402f*cr, 0.0f, 255.0f);
-	float g = clamp(y - 0.344f*cb - 0.714f*cr, 0.0f, 255.0f);
-	float b = clamp(y + 1.772f*cb            , 0.0f, 255.0f);
+	real r = clamp(y            + 1.402*cr, 0.0, 255.0);
+	real g = clamp(y - 0.344*cb - 0.714*cr, 0.0, 255.0);
+	real b = clamp(y + 1.772*cb,            0.0, 255.0);
 		
 	return rgb_color(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(g), static_cast<std::uint8_t>(b));
 }
 
 
-bool operator==(const mono_color& a, const mono_color& b) {
-	return (a.intensity == b.intensity);
+rgb_color color_blend(const rgb_color& a, const rgb_color& b) {
+	// TODO generalize to similar operations, use SIMD
+	using sum_type = std::int_fast16_t;
+	sum_type r_sum = static_cast<sum_type>(a.r) + static_cast<sum_type>(b.r);
+	sum_type g_sum = static_cast<sum_type>(a.g) + static_cast<sum_type>(b.g);
+	sum_type b_sum = static_cast<sum_type>(a.b) + static_cast<sum_type>(b.b);
+	rgb_color result;
+	result.r = static_cast<std::uint8_t>(r_sum / 2);
+	result.g = static_cast<std::uint8_t>(g_sum / 2);
+	result.b = static_cast<std::uint8_t>(b_sum / 2);
+	return result;
 }
 
-bool operator!=(const mono_color& a, const mono_color& b) {
-	return (a.intensity != b.intensity);
+
+rgb_color color_blend(const rgb_color& a, real a_weight, const rgb_color& b, real b_weight) {
+	using sum_type = real;
+	real r_sum = a_weight * static_cast<sum_type>(a.r) + b_weight * static_cast<sum_type>(b.r);
+	real g_sum = a_weight * static_cast<sum_type>(a.g) + b_weight * static_cast<sum_type>(b.g);
+	real b_sum = a_weight * static_cast<sum_type>(a.b) + b_weight * static_cast<sum_type>(b.b);
+	real weight_sum = a_weight + b_weight;
+	rgb_color result;
+	result.r = clamp(r_sum / weight_sum, 0.0, 255.0);
+	result.g = clamp(g_sum / weight_sum, 0.0, 255.0);
+	result.b = clamp(b_sum / weight_sum, 0.0, 255.0);
+	return result;
 }
+
 
 bool operator==(const rgb_color& a, const rgb_color& b) {
 	return (a.r == b.r) && (a.g == b.g) && (a.b == b.b);
@@ -64,14 +77,6 @@ bool operator==(const rgb_color& a, const rgb_color& b) {
 
 bool operator!=(const rgb_color& a, const rgb_color& b) {
 	return (a.r != b.r) || (a.g != b.g) || (a.b != b.b);
-}
-
-bool operator==(const rgba_color& a, const rgba_color& b) {
-	return (a.r == b.r) && (a.g == b.g) && (a.b == b.b) && (a.a == b.a);
-}
-
-bool operator!=(const rgba_color& a, const rgba_color& b) {
-	return (a.r != b.r) || (a.g != b.g) || (a.b != b.b) || (a.a != b.a);
 }
 
 bool operator==(const ycbcr_color& a, const ycbcr_color& b) {

@@ -45,9 +45,7 @@ std::string out = "view_synthesis_video.avi";
 
 input_data data = poznan_blocks();
 
-int main(int argc, const char* argv[]) {
-	sleep(10);
-	
+int main(int argc, const char* argv[]) {	
 	if(argc >= 2) out = argv[1];
 		
 	flow::graph graph;

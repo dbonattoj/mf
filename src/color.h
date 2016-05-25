@@ -26,22 +26,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Monochrome color, 8 bit.
-struct alignas(4) mono_color {
-	mono_color() = default;
-	mono_color(std::uint8_t nint) : intensity(nint) { }
-	
-	mono_color(const mono_color&) = default;
-	mono_color& operator=(const mono_color&) = default;
-	
-	std::uint8_t intensity;
-
-	const static mono_color black;
-	const static mono_color white;
-};
-
-bool operator==(const mono_color& a, const mono_color& b);
-bool operator!=(const mono_color& a, const mono_color& b);
 
 /// RGB color, 8 bit.
 struct rgb_color {
@@ -63,31 +47,6 @@ struct rgb_color {
 
 bool operator==(const rgb_color& a, const rgb_color& b);
 bool operator!=(const rgb_color& a, const rgb_color& b);
-
-
-/// RGBA color, 8 bit.
-struct alignas(4) rgba_color {
-	rgba_color() = default;
-	rgba_color(std::uint8_t nr, std::uint8_t ng, std::uint8_t nb, std::uint8_t na = 255) :
-		r(nr), g(ng), b(nb), a(na) { }
-
-	rgba_color(const rgba_color&) = default;
-	rgba_color& operator=(const rgba_color&) = default;
-
-	std::uint8_t r; // red
-	std::uint8_t g; // green
-	std::uint8_t b; // blue
-	std::uint8_t a; // alpha
-	
-	static rgba_color null() noexcept { return rgba_color(0, 0, 0, 0); }
-	bool is_null() const noexcept { return (a == 0); }
-	
-	const static rgba_color black;
-	const static rgba_color white;
-};
-
-bool operator==(const rgba_color& a, const rgba_color& b);
-bool operator!=(const rgba_color& a, const rgba_color& b);
 
 
 /// YCbCr color, 8 bit.
@@ -115,43 +74,22 @@ Output color_convert(const Input&);
 
 template<> rgb_color color_convert(const ycbcr_color&);
 
-template<> inline rgba_color color_convert(const rgb_color& in) {
-	return rgba_color(in.r, in.g, in.b, 255);
-}
 
-template<> inline rgb_color color_convert(const mono_color& in) {
-	return rgb_color(in.intensity, in.intensity, in.intensity);
-}
+/// Color blend.
+rgb_color color_blend(const rgb_color& a, const rgb_color& b);
+rgb_color color_blend(const rgb_color& a, real a_weight, const rgb_color& b, real b_weight);
 
-template<> inline mono_color color_convert(const ycbcr_color& in) {
-	return mono_color(in.y);
-}
 
-template<> inline rgba_color color_convert(const ycbcr_color& in) {
-	return color_convert<rgba_color>(color_convert<rgb_color>(in));
-}
 
-template<> inline rgb_color color_convert(const rgba_color& in) {
-	return rgb_color(in.r, in.g, in.b);
-}
 
-template<>
-struct elem_traits<mono_color> :
-	elem_traits_base<mono_color, std::uint8_t, 1, false> { };
-
+/// Color `elem_traits` specializations.
 template<>
 struct elem_traits<rgb_color> :
 	elem_traits_base<rgb_color, std::uint8_t, 3, false> { };
 	
 template<>
-struct elem_traits<rgba_color> :
-	elem_traits_base<rgba_color, std::uint8_t, 4, true> { };
-
-template<>
 struct elem_traits<ycbcr_color> :
 	elem_traits_base<ycbcr_color, std::uint8_t, 3, false> { };
-
-
 
 }
 
