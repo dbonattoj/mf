@@ -59,7 +59,7 @@ void blend_depth_maps_filter::process(flow::node_job& job) {
 			std::ptrdiff_t median_index = values.size() / 2;
 			std::nth_element(values.begin(), values.begin() + median_index, values.end());
 			real out_d = values[median_index];
-			out[y][x] = clamp(out_d, 0.0f, 255.0f);
+			out[y][x] = clamp(out_d, 0.0, 255.0);
 		}
 	}
 }

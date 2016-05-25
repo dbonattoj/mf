@@ -27,6 +27,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+template<std::size_t Dim, typename T> class ndspan_iterator;
+
 /// Cuboid n-dimensional span delimited by two `ndcoord` vectors.
 /** Represents the interval, rectangular, or in general `Dim`-dimensional cuboid region where for all coordinates `c`
  ** inside it and for each dimension `0 <= i < Dim`, one has `start_pos()[i] <= c[i] < end_pos()[i]`.
@@ -36,6 +38,8 @@ class ndspan {
 public:
 	using coordinates_type = ndcoord<Dim, T>;
 	using shape_type = ndsize<Dim>;
+	
+	using iterator = ndspan_iterator<Dim, T>;
 	
 private:
 	coordinates_type start_;
@@ -66,7 +70,8 @@ public:
 	shape_type shape() const { return end_ - start_; }
 	std::size_t size() const { return shape().product(); }
 
-	// TODO iterator over span coordinates
+	iterator begin() const noexcept;
+	iterator end() const noexcept;
 };
 
 
@@ -86,7 +91,30 @@ std::ostream& operator<<(std::ostream& str, const ndspan<Dim, T>& span) {
 template<std::size_t Dim, typename T>
 ndspan<Dim, T> span_intersection(const ndspan<Dim, T>& a, const ndspan<Dim, T>& b);
 
+
+
+/// One-dimensional time span.
+/** Derived from `ndspan<1, time_unit>.` */
+class time_span : public ndspan<1, time_unit> {	
+public:
+	time_span() = default;
+	time_span(const ndspan& span) : ndspan(span) { }
+	time_span(time_unit start, time_unit end) :
+		ndspan(start, end) { }
+	
+	time_unit start_time() const { return start_pos().front(); }
+	time_unit end_time() const { return end_pos().front(); }
+	time_unit duration() const { return size(); }
+};
+
+
+inline std::ostream& operator<<(std::ostream& str, const time_span& span) {
+	str << '[' << span.start_time() << ", " << span.end_time() << '[';
+	return str;
 }
+
+}
+
 
 #include "ndspan.tcc"
 

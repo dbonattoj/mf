@@ -35,7 +35,7 @@ projection_camera vsrs_camera_array::read_camera_
 	str >> intrinsic(1, 0) >> intrinsic(1, 1) >> intrinsic(1, 2);
 	str >> intrinsic(2, 0) >> intrinsic(2, 1) >> intrinsic(2, 2);
 	
-	float gomi[2]; // ?
+	Eigen_scalar gomi[2]; // ?
 	str >> gomi[0] >> gomi[1];
 
 	Eigen_mat3 rotation;
@@ -49,8 +49,8 @@ projection_camera vsrs_camera_array::read_camera_
 		str >> unused >> unused >> unused >> unused;
 	}
 	
-	Eigen::Affine3f extrinsic_affine;
-	extrinsic_affine = Eigen::Translation3f(translation) * Eigen::Affine3f(rotation).inverse();
+	Eigen_affine3 extrinsic_affine;
+	extrinsic_affine = Eigen_translation3(translation) * Eigen_affine3(rotation).inverse();
 		
 	return projection_camera(extrinsic_affine, intrinsic, dparam, img_sz);
 }

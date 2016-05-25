@@ -26,9 +26,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <exception>
 #include <stdexcept>
 
-#include <ostream>
-
-#include "ndarray/ndspan.h"
 #include "debug.h"
 #include "exceptions.h"
 
@@ -70,7 +67,7 @@ namespace mf {
 
 
 /// Real number type.
-using real = float;
+using real = double;
 
 
 /// Discrete time unit type.
@@ -79,29 +76,6 @@ using time_unit = std::ptrdiff_t;
 
 /// Single byte type.
 using byte = std::uint8_t;
-
-
-/// One-dimensional time span.
-/** Derived from `ndspan<1, time_unit>.` */
-class time_span : public ndspan<1, time_unit> {
-	using base = ndspan<1, time_unit>;
-	
-public:
-	time_span() = default;
-	time_span(const base& span) : base(span) { }
-	time_span(time_unit start, time_unit end) :
-		base{start, end} { }
-	
-	time_unit start_time() const { return base::start_pos().front(); }
-	time_unit end_time() const { return base::end_pos().front(); }
-	time_unit duration() const { return base::size(); }
-};
-
-
-inline std::ostream& operator<<(std::ostream& str, const time_span& span) {
-	str << '[' << span.start_time() << ", " << span.end_time() << '[';
-	return str;
-}
 
 
 }

@@ -31,7 +31,7 @@ namespace mf {
 /** Represented using normal vector and distance value. That is the values (a, b, c, d) in the plane equation
  ** ax + by + cz = d. When normalized, representations are unique and distance is from origin to plane. */
 struct plane {
-	Eigen::Vector3f normal = Eigen::Vector3f::Zero();
+	Eigen_vec3 normal = Eigen_vec3::Zero();
 	float distance = 0;
 	
 	plane() = default;
@@ -40,38 +40,38 @@ struct plane {
 	
 	/// Create from coefficients.
 	/// Creates plane for equation ax + by + cz = d. Resulting plane is normalized.
-	plane(float a, float b, float c, float d);
+	plane(Eigen_scalar a, Eigen_scalar b, Eigen_scalar c, Eigen_scalar d);
 	
 	/// Create from any point on plane and normal vector.
 	/// Normal vector does not need to be normalized. Resulting plane is normalized.
-	plane(const Eigen::Vector3f& p, const Eigen::Vector3f& n);
+	plane(const Eigen_vec3& p, const Eigen_vec3& n);
 	
 	/// Create any three points on the plane.
 	/// Resulting plane is normalized. Points must not be aligned or coincide.
-	plane(const Eigen::Vector3f& p1, const Eigen::Vector3f& p2, const Eigen::Vector3f& p3);
+	plane(const Eigen_vec3& p1, const Eigen_vec3& p2, const Eigen_vec3& p3);
 	
 	/// Normalize the plane representation.
 	void normalize();
 	
 	/// Project point on plane.
 	/// Result is the point on plane that is closest to the given point.
-	Eigen::Vector3f project(const Eigen::Vector3f&) const;
+	Eigen_vec3 project(const Eigen_vec3&) const;
 	
-	Eigen::Vector3f origin() const;
+	Eigen_vec3 origin() const;
 	
 	pose to_pose() const;
 	
-	operator Eigen::Hyperplane<float, 3>() const;
+	operator Eigen_hyperplane3() const;
 	
-	void apply_transformation(const Eigen::Affine3f&);
+	void apply_transformation(const Eigen_affine3&);
 
 	std::string to_string() const;
 	static plane from_string(const std::string&);
 };
 
 
-float signed_distance(const Eigen::Vector3f&, const plane&);
-float distance(const Eigen::Vector3f&, const plane&);
+Eigen_scalar signed_distance(const Eigen_vec3&, const plane&);
+Eigen_scalar distance(const Eigen_vec3&, const plane&);
 
 
 }

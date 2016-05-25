@@ -76,7 +76,7 @@ std::string pose::to_string() const {
 }
 
 pose pose::from_string(const std::string& str) {
-	std::vector<Eigen_scalar> p = explode_from_string<float>(',', str);
+	std::vector<Eigen_scalar> p = explode_from_string<Eigen_scalar>(',', str);
 	if(p.size() != 7)
 		throw std::invalid_argument("invalid string to convert to pose");
 	
@@ -93,7 +93,7 @@ void pose::look_at(const Eigen_vec3& target) {
 	orientation.normalize();
 }
 
-void pose::flip(const Eigen::Vector3f& axis) {
+void pose::flip(const Eigen_vec3& axis) {
 	orientation = Eigen_angleaxis(pi, axis) * orientation;
 }
 

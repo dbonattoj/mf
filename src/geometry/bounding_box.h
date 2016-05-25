@@ -34,28 +34,28 @@ namespace mf {
 /** Represented using origin and extremity coordinates.
  ** Point is inside iff for every coordinate `i`, `origin[i] <= p[i] < extremity[i]`. */
 struct bounding_box {
-	using edge = std::pair<Eigen::Vector3f, Eigen::Vector3f>;
-	using face = std::array<Eigen::Vector3f, 4>;
+	using edge = std::pair<Eigen_vec3, Eigen_vec3>;
+	using face = std::array<Eigen_vec3, 4>;
 
-	using corners_array = std::array<Eigen::Vector3f, 8>;
+	using corners_array = std::array<Eigen_vec3, 8>;
 	using edges_array = std::array<edge, 12>;
 	using faces_array = std::array<face, 6>;
 
-	Eigen::Vector3f origin;
-	Eigen::Vector3f extremity;
+	Eigen_vec3 origin;
+	Eigen_vec3 extremity;
 	
 	bounding_box() = default;
 	bounding_box(const bounding_box&) = default;
-	bounding_box(const Eigen::Vector3f& o, const Eigen::Vector3f& e);
+	bounding_box(const Eigen_vec3& o, const Eigen_vec3& e);
 	
-	Eigen::Vector3f center() const;
-	Eigen::Vector3f side_lengths() const;
-	float side_length(std::ptrdiff_t i = 0) const;
-	float volume() const;
+	Eigen_vec3 center() const;
+	Eigen_vec3 side_lengths() const;
+	Eigen_scalar side_length(std::ptrdiff_t i = 0) const;
+	Eigen_scalar volume() const;
 	
-	void expand_extremity(float ep = 0.1);
+	void expand_extremity(Eigen_scalar ep = 0.1);
 	
-	bool contains(const Eigen::Vector3f&) const;
+	bool contains(const Eigen_vec3&) const;
 	bool contains(const bounding_box&) const;
 	
 	corners_array corners() const;
@@ -70,26 +70,26 @@ struct bounding_box {
 
 
 
-float minimal_distance_sq(const bounding_box& a, const bounding_box& b);
-float maximal_distance_sq(const bounding_box& a, const bounding_box& b);
+Eigen_scalar minimal_distance_sq(const bounding_box& a, const bounding_box& b);
+Eigen_scalar maximal_distance_sq(const bounding_box& a, const bounding_box& b);
 
-float minimal_distance_sq(const Eigen::Vector3f& p, const bounding_box& b);
-float maximal_distance_sq(const Eigen::Vector3f& p, const bounding_box& b);
+Eigen_scalar minimal_distance_sq(const Eigen_vec3& p, const bounding_box& b);
+Eigen_scalar maximal_distance_sq(const Eigen_vec3& p, const bounding_box& b);
 
-inline float maximal_distance(const bounding_box& a, const bounding_box& b) {
+inline Eigen_scalar maximal_distance(const bounding_box& a, const bounding_box& b) {
 	return std::sqrt( maximal_distance_sq(a, b) );
 }
 
-inline float minimal_distance(const bounding_box& a, const bounding_box& b) {
+inline Eigen_scalar minimal_distance(const bounding_box& a, const bounding_box& b) {
 	return std::sqrt( minimal_distance_sq(a, b) );
 }
 
 
-inline float minimal_distance(const Eigen::Vector3f& p, const bounding_box& b) {
+inline Eigen_scalar minimal_distance(const Eigen_vec3& p, const bounding_box& b) {
 	return std::sqrt( minimal_distance_sq(p, b) );
 }
 
-inline float maximal_distance(const Eigen::Vector3f& p, const bounding_box& b) {
+inline Eigen_scalar maximal_distance(const Eigen_vec3& p, const bounding_box& b) {
 	return std::sqrt( maximal_distance_sq(p, b) );
 }
 

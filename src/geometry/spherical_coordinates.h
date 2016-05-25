@@ -34,17 +34,17 @@ namespace mf {
  ** Azimuth is angle between -Z and the projection of OP on Y=0.
  ** Both azimuth and elevation are always in [-pi, pi]. */
 struct spherical_coordinates {
-	float radius = 0.0f;
-	angle azimuth = 0.0f;
-	angle elevation = 0.0f;
+	Eigen_scalar radius = 0.0;
+	angle azimuth = 0.0;
+	angle elevation = 0.0;
 
 	spherical_coordinates() = default;
 	spherical_coordinates(const spherical_coordinates&) = default;
-	spherical_coordinates(float r, angle az, angle el) :
+	spherical_coordinates(Eigen_scalar r, angle az, angle el) :
 		radius(r), azimuth(az), elevation(el) { }
 	
-	static spherical_coordinates from_cartesian(const Eigen::Vector3f&);
-	Eigen::Vector3f to_cartesian() const;
+	static spherical_coordinates from_cartesian(const Eigen_vec3&);
+	Eigen_vec3 to_cartesian() const;
 	
 	bool operator==(const spherical_coordinates&) const;
 	bool operator!=(const spherical_coordinates&) const;	

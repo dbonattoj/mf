@@ -74,11 +74,11 @@ public:
 	std::string to_string() const;
 	static pose from_string(const std::string&);
 		
-	Eigen_vec3 transform_from_world(const Eigen::Vector3f& p) const {
+	Eigen_vec3 transform_from_world(const Eigen_vec3& p) const {
 		return transformation_from_world() * p;
 	}
 	
-	Eigen_vec3 transform_to_world(const Eigen::Vector3f& p) const {
+	Eigen_vec3 transform_to_world(const Eigen_vec3& p) const {
 		return transformation_to_world() * p;
 	}
 	

@@ -50,7 +50,7 @@ void result_improve_filter::process(mf::flow::node_job& job) {
 				r += col.elem.r; g += col.elem.g; b += col.elem.b; c += 1.0;
 			}
 			if(c == 0) out.at(coord) = mf::masked_elem<mf::rgb_color>::null();
-			else out.at(coord) = rgb_color( clamp(r/c, 0.0f, 255.0f), clamp(g/c, 0.0f, 255.0f), clamp(b/c, 0.0f, 255.0f) );
+			else out.at(coord) = rgb_color( clamp(r/c, 0.0, 255.0), clamp(g/c, 0.0, 255.0), clamp(b/c, 0.0, 255.0) );
 		} else {
 			out.at(coord) = *it;
 		}

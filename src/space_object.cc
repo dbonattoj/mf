@@ -135,7 +135,7 @@ void space_object::make_sibling(const space_object& obj, const pose& new_pose) {
 }
 
 
-void space_object::transform_(const Eigen::Affine3f& t) {
+void space_object::transform_(const Eigen_affine3& t) {
 	Eigen_affine3 pose_transformation = pose_.transformation_to_world();
 	pose_transformation = t * pose_transformation;
 	pose_ = pose(pose_transformation);
@@ -149,14 +149,14 @@ bounding_box space_object::box() const {
 }
 
 
-Eigen::Affine3f space_object::transformation_to(const space_object& obj) const {
+Eigen_affine3 space_object::transformation_to(const space_object& obj) const {
 	Eigen_affine3 obj_to_world = obj.absolute_pose().transformation_to_world();
 	Eigen_affine3 world_to_this = absolute_pose().transformation_from_world();
 	return world_to_this * obj_to_world;
 }
 
 
-Eigen::Affine3f space_object::transformation_from(const space_object& obj) const {
+Eigen_affine3 space_object::transformation_from(const space_object& obj) const {
 	return obj.transformation_to(*this);
 }
 

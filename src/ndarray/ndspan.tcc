@@ -19,6 +19,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <cassert>
+#include "ndspan_iterator.h"
+
 
 namespace mf {
 
@@ -28,6 +30,21 @@ ndspan<Dim, T>::ndspan(const coordinates_type& start, const coordinates_type& en
 {
 	for(std::ptrdiff_t i = 0; i < Dim; ++i) assert(end_[i] >= start_[i]);
 }
+
+
+template<std::size_t Dim, typename T>
+auto ndspan<Dim, T>::begin() const noexcept -> iterator {
+	return iterator(*this, start_);
+}
+
+
+template<std::size_t Dim, typename T>
+auto ndspan<Dim, T>::end() const noexcept -> iterator {
+	coordinates_type iterator_end_coord = start_;
+	iterator_end_coord.front() = end_.front();
+	return iterator(*this, iterator_end_coord);
+}
+
 
 
 template<std::size_t Dim, typename T>

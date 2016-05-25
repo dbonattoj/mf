@@ -25,8 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-spherical_coordinates spherical_coordinates::from_cartesian(const Eigen::Vector3f& c) {
-	float r = c.norm();
+spherical_coordinates spherical_coordinates::from_cartesian(const Eigen_vec3& c) {
+	Eigen_scalar r = c.norm();
 	return spherical_coordinates(
 		r,
 		std::atan2(c[0], -c[2]),
@@ -35,8 +35,8 @@ spherical_coordinates spherical_coordinates::from_cartesian(const Eigen::Vector3
 }
 
 
-Eigen::Vector3f spherical_coordinates::to_cartesian() const {
-	return Eigen::Vector3f(
+Eigen_vec3 spherical_coordinates::to_cartesian() const {
+	return Eigen_vec3(
 		std::cos(azimuth) * std::sin(elevation),
 		std::cos(elevation),
 		-std::sin(azimuth) * std::sin(elevation)

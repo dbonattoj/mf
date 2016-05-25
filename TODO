@@ -18,6 +18,7 @@ FLOW
 - high level graph class with:
   - implicit convert/multiplex nodes
   - parse graph+node+filter params from file
+  - sub-graph (-> composite node)
 
 
 TOOLKIT

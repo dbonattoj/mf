@@ -31,7 +31,9 @@ namespace mf {
  ** index() and coordinates().
  ** Incrementation and decrementation are optimized when the strides of the `ndarray_view` are (partially) default, i.e.
  ** items with sequential indices have sequential memory addresses, possibly with padding inbetween. This can be for the
- ** entire `ndarray_view`, or just for smaller segments at a time. */
+ ** entire `ndarray_view`, or just for smaller segments at a time.
+ ** If `coordinates()` is called at each iteration, using `ndspan_iterator` may be more efficient because it does not
+ ** recompute the coordinates from an index each time. */
 template<typename Array>
 class ndarray_iterator :
 public std::iterator<std::random_access_iterator_tag, typename Array::value_type> {

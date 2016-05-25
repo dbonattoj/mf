@@ -24,73 +24,73 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-plane::plane(float a, float b, float c, float d) :
+plane::plane(Eigen_scalar a, Eigen_scalar b, Eigen_scalar c, Eigen_scalar d) :
 normal(a, b, c), distance(d) {
 	normalize();
 }
 
 
-plane::plane(const Eigen::Vector3f& p, const Eigen::Vector3f& n) :
+plane::plane(const Eigen_vec3& p, const Eigen_vec3& n) :
 normal(n), distance(n.dot(p)) {
 	normalize();
 }
 
 
-plane::plane(const Eigen::Vector3f& p1, const Eigen::Vector3f& p2, const Eigen::Vector3f& p3) :
+plane::plane(const Eigen_vec3& p1, const Eigen_vec3& p2, const Eigen_vec3& p3) :
 plane(p1, (p2 - p1).cross(p3 - p1)) { }
 
 
 plane::plane(const pose& ps) :
-plane(ps.position, ps.orientation * Eigen::Vector3f::UnitY()) {}
+plane(ps.position, ps.orientation * Eigen_vec3::UnitY()) {}
 
 void plane::normalize() {
-	float norm = normal.norm();
+	Eigen_scalar norm = normal.norm();
 	normal /= norm;
 	distance /= norm;
 }
 
 
-Eigen::Vector3f plane::project(const Eigen::Vector3f& p) const {
-	float a = normal[0], b = normal[1], c = normal[2];
-	float k = a*p[0] + b*p[1] + c*p[2] - distance;
-	return Eigen::Vector3f(p[0] - a*k, p[1] - b*k, p[2] - c*k);
+Eigen_vec3 plane::project(const Eigen_vec3& p) const {
+	Eigen_scalar a = normal[0], b = normal[1], c = normal[2];
+	Eigen_scalar k = a*p[0] + b*p[1] + c*p[2] - distance;
+	return Eigen_vec3(p[0] - a*k, p[1] - b*k, p[2] - c*k);
 }
 
 
-Eigen::Vector3f plane::origin() const {
-	return Eigen::Vector3f(normal[0]*distance, normal[1]*distance, normal[2]*distance);
+Eigen_vec3 plane::origin() const {
+	return Eigen_vec3(normal[0]*distance, normal[1]*distance, normal[2]*distance);
 }
 
 
-float signed_distance(const Eigen::Vector3f& pt, const plane& pl) {
+Eigen_scalar signed_distance(const Eigen_vec3& pt, const plane& pl) {
 	return pl.normal.dot(pt) + pl.distance;
 }
 
 
-float distance(const Eigen::Vector3f& pt, const plane& pl) {
-	float d = signed_distance(pt, pl);
-	return (d > 0 ? d : -d);
+Eigen_scalar distance(const Eigen_vec3& pt, const plane& pl) {
+	Eigen_scalar d = signed_distance(pt, pl);
+	return (d > 0.0 ? d : -d);
 }
 
 pose plane::to_pose() const {
-	Eigen::Vector3f translation = project(Eigen::Vector3f::Zero());
-	Eigen::Quaternionf orientation = Eigen::Quaternionf::FromTwoVectors(Eigen::Vector3f::UnitY(), normal);
+	Eigen_vec3 translation = project(Eigen_vec3::Zero());
+	Eigen_quaternion orientation = Eigen_quaternion::FromTwoVectors(Eigen_vec3::UnitY(), normal);
 	return pose(translation, orientation);
 }
 
 
-plane::operator Eigen::Hyperplane<float, 3>() const {
-	return Eigen::Hyperplane<float, 3>(origin(), normal);
+plane::operator Eigen_hyperplane3() const {
+	return Eigen_hyperplane3(origin(), normal);
 }
 
 
-void plane::apply_transformation(const Eigen::Affine3f& t) {
-	normal = (t * Eigen::Vector4f(normal[0], normal[1], normal[2], 0.0)).head(3);
+void plane::apply_transformation(const Eigen_affine3& t) {
+	normal = (t * Eigen_vec4(normal[0], normal[1], normal[2], 0.0)).head(3);
 	distance += normal.dot(t.translation());
 }
 
 std::string plane::to_string() const {
-	return implode_to_string<float>(',', {
+	return implode_to_string<Eigen_scalar>(',', {
 		normal[0],
 		normal[1],
 		normal[2],
@@ -100,7 +100,7 @@ std::string plane::to_string() const {
 
 
 plane plane::from_string(const std::string& str) {
-	std::vector<float> p = explode_from_string<float>(',', str);
+	std::vector<Eigen_scalar> p = explode_from_string<Eigen_scalar>(',', str);
 	if(p.size() != 4)
 		throw std::invalid_argument("invalid string to convert to plane");
 	
