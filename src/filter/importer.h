@@ -92,7 +92,7 @@ public:
 	}
 	
 	void process(node_job& job) override {
-		MF_ASSERT(importer_.current_time() == t);
+		MF_ASSERT(importer_.current_time() == job.time());
 		auto out = job.out(output);
 		return importer_.read_frame(out);
 	}

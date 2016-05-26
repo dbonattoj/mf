@@ -30,7 +30,7 @@ video_exporter::video_exporter
 {
 	writer_.open(
 		filename,
-		CV_FOURCC(format[0], format[1], format[2], format[3]),
+		CV_FOURCC_PROMPT,//,CV_FOURCC(format[0], format[1], format[2], format[3]),
 		frame_rate,
 		cv::Size(frame_shape[1], frame_shape[0]), // TODO ndcoord -> cv::Size cast
 		true

@@ -34,8 +34,12 @@ template<typename Pixel>
 class image {
 public:
 	using pixel_type = Pixel;
+	using unmasked_pixel_type = unmasked_type<pixel_type>;
+	
 	using view_type = ndarray_view<2, pixel_type>;
-	using cv_mat_type = cv::Mat_<unmasked_type<pixel_type>>;
+	using unmasked_view_type = ndarray_view<2, unmasked_pixel_type>;
+	
+	using cv_mat_type = cv::Mat_<unmasked_pixel_type>;
 
 private:
 	view_type view_;
@@ -45,7 +49,7 @@ public:
 	image(const view_type& vw);
 	
 	const view_type& view() noexcept { return view_; }
-	const cv_mat_type& cv_mat() { return mat_; }
+	cv_mat_type& cv_mat() { return mat_; }
 	
 	virtual void update_cv_mat();
 	virtual void commit_cv_mat();
@@ -60,9 +64,11 @@ class masked_image : public image<masked_elem<Pixel>> {
 	
 public:
 	using pixel_type = typename base::pixel_type;
-	using masked_pixel_type = masked_elem<Pixel>;
 	using view_type = typename base::view_type;
 	using cv_mat_type = typename base::cv_mat_type;
+
+	using mask_view_type = ndarray_view<2, bool>;
+	using masked_pixel_type = masked_elem<Pixel>;
 	using cv_mask_mat_type = cv::Mat_<bool>;	
 
 private:
@@ -71,7 +77,8 @@ private:
 public:
 	masked_image(const view_type& vw);
 
-	const cv_mask_mat_type& cv_mask_mat() { return mask_mat_; }
+	mask_view_type mask_view() { return ndarray_view_cast<mask_view_type>(base::view()); }
+	cv_mask_mat_type& cv_mask_mat() { return mask_mat_; }
 
 	void update_cv_mat();
 	void commit_cv_mat();

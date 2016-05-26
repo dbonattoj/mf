@@ -48,8 +48,9 @@ public:
 	template<std::size_t Dim, typename Elem> using output_type = output_port<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = node_job;
+	using node_type = filter_node;
 
-	explicit filter(filter_node& nd) : node_(nd) { }
+	explicit filter(node_type& nd) : node_(nd) { }
 	
 	filter(const filter&) = delete;
 	filter& operator=(const filter&) = delete;
@@ -76,7 +77,7 @@ public:
 /** For source nodes, has no inputs, and specifies stream properties upon construction. */
 class source_filter : public filter {
 public:
-	explicit source_filter(filter_node& nd, bool seekable = false, time_unit stream_duration = -1) :
+	explicit source_filter(node_type& nd, bool seekable = false, time_unit stream_duration = -1) :
 	filter(nd) {
 		nd.define_source_stream_properties(seekable, stream_duration);
 	}
@@ -87,7 +88,7 @@ public:
 /** For sink nodes, has no outputs. Always connected with \ref sink_node. */
 class sink_filter : public filter {
 public:
-	explicit sink_filter(filter_node& nd) : filter(nd) { }
+	explicit sink_filter(node_type& nd) : filter(nd) { }
 };
 
 

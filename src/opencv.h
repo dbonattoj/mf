@@ -65,41 +65,6 @@ namespace cv { // in OpenCV namespace
 namespace mf {
 
 
-/*
-/// Convert `ndarray_view` to OpenCV `Mat_` object, without copying data.
-/** Dimension, shape and strides of the resulting `Mat_` are adjusted to match the `ndarray_view` \a arg.
- ** The element type of \a arr must have an OpenCV `DataType<>` specialization.
- ** As many OpenCV functions do not support `Mat_` with non-default strides, it may be necessary to copy the array
- ** to a new `Mat_` afterwards.  * /
-template<typename Array>
-auto to_opencv_mat(const Array& arr) {
-	using value_type = typename Array::value_type;
-	using opencv_type = cv::DataType<value_type>;
-	using channel_type = typename opencv_type::channel_type;
-
-	int sizes[Array::dimension];
-	std::size_t steps[Array::dimension];
-	
-	for(std::ptrdiff_t i = 0; i < Array::dimension; ++i) {
-		sizes[i] = arr.shape()[i];
-		steps[i] = arr.strides()[i];
-	}
-	
-	// need intermadiary Mat, because Mat_ constructor not properly implemented in OpenCV 2.4
-	// no data is copied
-	cv::Mat mat(
-		Array::dimension,
-		sizes,
-		opencv_type::type,
-		reinterpret_cast<void*>(arr.start()),
-		steps
-	);
-	cv::Mat_<value_type> mat_(mat);
-	
-	return mat_;	
-};
-*/
-
 template<std::size_t Dim, typename Elem>
 auto to_opencv_mat(const ndarray_view<Dim, Elem>& vw) {
 	using opencv_type = cv::DataType<Elem>;
@@ -108,30 +73,17 @@ auto to_opencv_mat(const ndarray_view<Dim, Elem>& vw) {
 	int sizes[Dim];
 	for(std::ptrdiff_t i = 0; i < Dim; ++i) sizes[i] = vw.shape()[i];
 
-/*	if(vw.has_default_strides()) {
-		cv::Mat mat(
-			Dim,
-			sizes,
-			opencv_type::type,
-			reinterpret_cast<void*>(vw.start())
-		);
-		cv::Mat_<Elem> mat_(mat);
-		return mat_;
-
-	} else {*/
-		ndarray<Dim, Elem> arr(vw);
-		cv::Mat mat(
-			Dim,
-			sizes,
-			opencv_type::type,
-			reinterpret_cast<void*>(arr.start())
-		);
-		cv::Mat_<Elem> mat_(mat);
-		cv::Mat_<Elem> mat_copy_;
-		mat_.copyTo(mat_copy_);
-		return mat_copy_;
-		
-
+	ndarray<Dim, Elem> arr(vw);
+	cv::Mat mat(
+		Dim,
+		sizes,
+		opencv_type::type,
+		reinterpret_cast<void*>(arr.start())
+	);
+	
+	cv::Mat_<Elem> mat_copy;
+	mat.copyTo(mat_copy);
+	return mat_copy;
 }
 
 

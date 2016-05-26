@@ -24,7 +24,11 @@ LDLIBS += $(shell pkg-config --libs-only-l --libs-only-other $(PACKAGES))
 
 
 # === shared library mf ======
-LIB := $(DIST_DIR)/libmf.so
+ifeq ($(DEBUG), 1)
+	LIB := $(DIST_DIR)/libmf_debug.so
+else
+	LIB := $(DIST_DIR)/libmf.so
+endif
 LIB_SRC := $(shell find src -name '*.cc')
 LIB_OBJ := $(patsubst src/%.cc,$(BUILD_DIR)/src/%.o,$(LIB_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(LIB_SRC))
