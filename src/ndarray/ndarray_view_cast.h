@@ -86,6 +86,28 @@ namespace detail {
 		}
 	};
 	
+	// scalars from elem, const
+	template<std::size_t Dim, typename Input_elem>
+	struct ndarray_view_caster<
+		ndarray_view<Dim + 1, const typename elem_traits<Input_elem>::scalar_type>, // out
+		ndarray_view<Dim, const Input_elem> // in
+	>{
+		using elem_traits_type = elem_traits<Input_elem>;
+		using elem_scalar_type = const typename elem_traits_type::scalar_type;
+		
+		using output_view_type = ndarray_view<Dim + 1, const elem_scalar_type>;
+		using input_view_type = ndarray_view<Dim, const Input_elem>;
+		
+		output_view_type operator()(const input_view_type& arr) const {
+			auto* start = reinterpret_cast<const elem_scalar_type*>(arr.start());
+			return output_view_type(
+				start,
+				ndcoord_cat(arr.shape(), make_ndsize(elem_traits_type::components)),
+				ndcoord_cat(arr.strides(), make_ndptrdiff(elem_traits_type::stride))
+			);
+		}
+	};
+	
 	// masked to elem cast
 	template<std::size_t Dim, typename Elem>
 	struct ndarray_view_caster<
@@ -105,7 +127,7 @@ namespace detail {
 	// masked to mask cast
 	template<std::size_t Dim, typename Elem>
 	struct ndarray_view_caster<
-		ndarray_view<Dim, bool>, // out
+		ndarray_view<Dim, mask_type>, // out
 		ndarray_view<Dim, masked_elem<Elem>> // in
 	>{
 		using input_view_type = ndarray_view<Dim, masked_elem<Elem>>;
@@ -113,7 +135,7 @@ namespace detail {
 
 		output_view_type operator()(const input_view_type& arr) const {
 			std::ptrdiff_t offset = offsetof(masked_elem<Elem>, mask);
-			auto* start = reinterpret_cast<bool*>(
+			auto* start = reinterpret_cast<mask_type*>(
 				advance_raw_ptr(arr.start(), offset)
 			);
 			return output_view_type(start, arr.shape(), arr.strides());
@@ -170,10 +192,10 @@ namespace detail {
  ** - _Masked to unmasked_: Input element type is `masked_elem<Elem>`. Output element type is `Elem`. Dimensions are
  **                         the same. Returns view to the elements without `masked_elem` wrapper. Value of the items
  **                         that were null/masked is undefined.
- **                         Example: `ndarray_view<2, masked_elem<rgb_color>>` --> ndarray_view<2, rgb_color>.
- ** - _Masked to bool:_ Input element type is `masked_elem<Elem>. Output element type is `bool`. Dimensions are equal.
- **                     Returns view where element is `true` when the original element is non-null, and `false`,
- **                     otherwise, i.e. the binary mask. */
+ **                         Example: `ndarray_view<2, masked_elem<rgb_color>>` --> `ndarray_view<2, rgb_color>`.
+ ** - _Masked to mask_type:_ Input element type is `masked_elem<Elem>`. Output element type is `mask_type`.
+ **                          Dimensions are equal. Returns view where element is `masked_elem::mask` of the element. 
+ **                          Example: `ndarray_view<2, masked_elem<rgb_color>>` --> `ndarray_view<2, mask_type>`.*/
 template<typename Output_view, typename Input_view>
 Output_view ndarray_view_cast(const Input_view& vw) {
 	detail::ndarray_view_caster<Output_view, Input_view> caster;

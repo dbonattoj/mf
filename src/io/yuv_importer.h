@@ -29,6 +29,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+// TODO rewrite with raw_video_frame_format, name raw_video_importer
+
 /// Seekable frame importer which reads YUV file.
 class yuv_importer : public seekable_frame_importer<2, ycbcr_color> {
 	using base = seekable_frame_importer<2, ycbcr_color>;

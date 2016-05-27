@@ -43,7 +43,7 @@ public:
 		input(*this) { }
 	
 	void setup() override {
-		//
+		exporter_.setup(input.frame_shape());
 	}
 	
 	void process(node_job& job) override {

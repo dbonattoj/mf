@@ -29,6 +29,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 	
+using mask_type = byte;
+
 using masked_elem_flag_index = unsigned;
 
 /// Nullable wrapper for elem type which adds mask.
@@ -46,9 +48,9 @@ struct masked_elem {
 	static_assert(! elem_traits<Elem>::is_nullable, "masked_elem elem cannot be nullable in this specialization");
 	
 	Elem elem; ///< Non-nullable element.
-	byte mask; ///< Mask, false if masked_elem is null.
+	mask_type mask; ///< Mask, false if masked_elem is null.
 	
-	static masked_elem null() { return masked_elem(); }
+	[[deprecated]] static masked_elem null() { return masked_elem(); }
 	bool is_null() const { return ! mask; }
 	explicit operator bool () const { return ! is_null(); }
 	
@@ -57,17 +59,18 @@ struct masked_elem {
 	void set_flag(masked_elem_flag_index i) { mask |= flag_mask_bitmask(i); }
 	void unset_flag(masked_elem_flag_index i) { mask &= ~flag_mask_bitmask(i); }
 	
-	masked_elem() : elem(), mask(false) { }
-	masked_elem(const Elem& el) : elem(el), mask(true) { }
+	masked_elem() : elem(), mask(0) { }
+	masked_elem(nullelem_t) : elem(), mask(0) { }
+	masked_elem(const Elem& el) : elem(el), mask(1) { }
 	masked_elem(const masked_elem&) = default;
-	
+		
 	masked_elem& operator=(const masked_elem&) = default;
 	masked_elem& operator=(const Elem& el) { elem = el; mask = true; return *this; }
+	masked_elem& operator=(nullelem_t) { mask = 0; return *this; }
 	
 	friend bool operator==(const masked_elem& a, const masked_elem& b) {
-		if(a.mask && b.mask) return true;
-		else if(a.mask != b.mask) return false;
-		else return (a.elem == b.elem);
+		if(a.is_null() && b.is_null()) return true;
+		else return (a.mask == b.mask) && (a.elem == b.elem);
 	}
 	friend bool operator!=(const masked_elem& a, const masked_elem& b) {
 		return !(a == b);
@@ -78,11 +81,9 @@ struct masked_elem {
 };
 
 
-// TODO FIX ndarray_cast<bool> where mask is not bool type
+// TODO separate mask, flags
 
-// TODO nullptr_t-like object
 // TODO const support
-// TODO disallow masked_elem<bool> (ndarray_view_cast...)
 // TODO data hiding, allow overwrite elem if masked => allow flags also if masked
 
 

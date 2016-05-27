@@ -68,7 +68,7 @@ auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t 
 
 
 template<std::size_t Dim, typename T>
-bool ndarray_view<Dim, T>::has_default_strides(std::size_t minimal_dimension) const noexcept {
+bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension) const noexcept {
 	// TODO fix
 	if(strides_.back() < sizeof(T)) return false;
 	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
@@ -81,7 +81,7 @@ bool ndarray_view<Dim, T>::has_default_strides(std::size_t minimal_dimension) co
 
 
 template<std::size_t Dim, typename T>
-std::size_t ndarray_view<Dim, T>::default_strides_padding(std::size_t minimal_dimension) const {
+std::size_t ndarray_view<Dim, T>::default_strides_padding(std::ptrdiff_t minimal_dimension) const {
 	if(! has_default_strides(minimal_dimension)) throw std::logic_error("not default strides, cannot get padding");
 	else return (strides_.back() - sizeof(T));
 }

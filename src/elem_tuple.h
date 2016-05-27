@@ -78,6 +78,7 @@ public:
 
 public:
 	elem_tuple() = default;
+	elem_tuple(nullelem_t) { }
 	elem_tuple(const elem_tuple&) = default;
 	elem_tuple(elem_tuple&&) = default;
 
@@ -86,6 +87,11 @@ public:
 
 	elem_tuple& operator=(const elem_tuple&) = default;
 	elem_tuple& operator=(elem_tuple&&) = default;
+
+	elem_tuple& operator=(nullelem_t) {
+		first_ = nullelem;
+		return *this;
+	}
 
 	friend bool operator==(const elem_tuple& a, const elem_tuple& b) {
 		return (a.first_ == b.first_);

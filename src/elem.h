@@ -28,7 +28,26 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "common.h"
 
 namespace mf {
-	
+
+/// Type for null element.
+class nullelem_t {
+public:
+	constexpr explicit nullelem_t(int) { }
+};
+
+/// Null element constant.
+/** Can be assigned to, or used to construction nullable element types. */
+constexpr nullelem_t nullelem { 0 };
+
+
+template<typename Elem> bool operator==(const Elem& elem, nullelem_t) noexcept { return is_null(elem); }
+template<typename Elem> bool operator==(nullelem_t, const Elem& elem) noexcept { return is_null(elem); }
+template<typename Elem> bool operator==(nullelem_t, nullelem_t) noexcept { return true; }
+template<typename Elem> bool operator!=(const Elem& elem, nullelem_t) noexcept { return not is_null(elem); }
+template<typename Elem> bool operator!=(nullelem_t, const Elem& elem) noexcept { return not is_null(elem); }
+template<typename Elem> bool operator!=(nullelem_t, nullelem_t) noexcept { return false; }
+
+
 /// Elem traits base class with the required members.
 template<typename Elem, typename Scalar = Elem, std::size_t Components = 1, bool Nullable = false>
 struct elem_traits_base {

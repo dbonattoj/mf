@@ -20,47 +20,142 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../ndarray/ndarray_view_cast.h"
 #include <stdexcept>
+#include <utility>
 
 namespace mf {
 
+
 template<typename Pixel>
-image<Pixel>::image(const view_type& vw) : view_(vw) {
-	update_cv_mat();
+image<Pixel>::image(const shape_type& shape) :
+	mat_(shape[0], shape[1]) { }
+
+
+template<typename Pixel>
+image<Pixel>::image(const const_view_type& vw) {
+	copy_to_opencv(vw, mat_);
+}
+
+
+template<typename Pixel>
+image<Pixel>::image(const image& img) :
+	image(img.view()) { }
+
+
+template<typename Pixel>
+image<Pixel>::image(const image&& img) :
+	mat_(img.mat_) { }
+
+
+template<typename Pixel>
+auto image<Pixel>::operator=(const image& img) -> image& {
+	img.mat_.copyTo(mat_);
+	return *this;
+}
+
+
+template<typename Pixel>
+auto image<Pixel>::operator=(image&& img) -> image& {
+	mat_ = img.mat_;
+	return *this;
+}
+
+
+template<typename Pixel>
+auto image<Pixel>::view() -> view_type {
+	return to_ndarray_view(mat_);
+}
+
+
+template<typename Pixel>
+auto image<Pixel>::view() const -> const_view_type {
+	return to_ndarray_view(mat_);	
+}
+
+
+
+template<typename Pixel>
+masked_image<Pixel>::masked_image(const shape_type& shape) :
+	base(shape),
+	mask_mat_(shape[0], shape[1]) { }
+
+
+template<typename Pixel>
+masked_image<Pixel>::masked_image(const masked_const_view_type& vw) {
+	read(vw);
+}
+
+
+template<typename Pixel>
+masked_image<Pixel>::masked_image(const masked_image& img) :
+base(img) {
+	img.mask_mat_.copyTo(mask_mat_);
 }
 	
-template<typename Pixel>
-void image<Pixel>::update_cv_mat() {
-	to_opencv_mat( ndarray_view_cast<unmasked_view_type>(view_) ).copyTo(mat_);
-}
-	
-template<typename Pixel>
-void image<Pixel>::commit_cv_mat() {
-	for(auto coord : make_ndspan(view().shape()))
-		view_.at(coord) = mat_(coord[0], coord[1]);
-}
-
-
 
 
 template<typename Pixel>
-masked_image<Pixel>::masked_image(const view_type& vw) : base(vw) {
-	to_opencv_mat(mask_view()).copyTo(mask_mat_);
-}
-	
-template<typename Pixel>
-void masked_image<Pixel>::update_cv_mat() {
-	base::update_cv_mat();
-	to_opencv_mat(mask_view()).copyTo(mask_mat_);
-}
-	
-template<typename Pixel>
-void masked_image<Pixel>::commit_cv_mat() {
-	base::commit_cv_mat();
-
-	for(auto coord : make_ndspan(base::view().shape()))
-		if(! mask_mat_(coord[0], coord[1])) base::view().at(coord) = masked_pixel_type::null();
+masked_image<Pixel>::masked_image(const base& img) :
+base(img) {
+	mask_mat_.setTo(255);
 }
 
+
+template<typename Pixel>
+masked_image<Pixel>::masked_image(masked_image&& img) : 
+base(std::move(img)) {
+	mask_mat_ = img.mask_mat_;
+}
+
+
+template<typename Pixel>
+masked_image<Pixel>::masked_image(base&& img) :
+base(std::move(img)) {
+	mask_mat_ = img.mask_mat_;
+}
+
+
+template<typename Pixel>
+auto masked_image<Pixel>::operator=(const masked_image& img) -> masked_image& {
+	base::operator=(img);
+	img.mask_mat_.copyTo(mask_mat_);
+	return *this;
+}
+
+
+template<typename Pixel>
+auto masked_image<Pixel>::operator=(const base& img) -> masked_image& {
+	base::operator=(img);
+	mask_mat_.setTo(255);
+	return *this;
+}
+
+
+template<typename Pixel>
+auto masked_image<Pixel>::operator=(masked_image&& img) -> masked_image& {
+	base::operator=(std::move(img));
+	mask_mat_ = img.mask_mat_;
+	return *this;
+}
+
+
+template<typename Pixel>
+auto masked_image<Pixel>::operator=(base&& img) -> masked_image& {
+	base::operator=(std::move(img));
+	mask_mat_.setTo(255);
+	return *this;
+}
+
+
+template<typename Pixel>
+void masked_image<Pixel>::read(const masked_const_view_type& vw) {
+	copy_masked_to_opencv(vw, base::mat_, mask_mat_);
+}
+
+
+template<typename Pixel>
+void masked_image<Pixel>::write(const masked_view_type& vw) const {
+	copy_masked_to_ndarray_view(base::mat_, mask_mat_, vw);
+}
 
 
 }

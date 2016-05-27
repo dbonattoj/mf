@@ -118,12 +118,12 @@ public:
 	/// Check if view has default strides.
 	/** If `minimal_dimension` is specified, checks if view has default strides in dimensions from `Dim - 1` down to
 	 ** `minimal_dimension`. Strides from `minimal_dimension + 1` down to `0` may be non-default. */
-	bool has_default_strides(std::size_t minimal_dimension = 0) const noexcept;
+	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 	
 	/// Returns padding of the view which has default strides.
 	/** If view does not have default strides, throws exception.
 	 ** \param minimal_dimension Like in has_default_strides(). */
-	std::size_t default_strides_padding(std::size_t minimal_dimension = 0) const;
+	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
 
 	/// Create null view.
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }

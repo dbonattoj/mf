@@ -30,29 +30,20 @@ namespace mf {
 /// Frame exporter, abstract base class.
 template<std::size_t Dim, typename Elem>
 class frame_exporter {
-private:
-	ndsize<Dim> frame_shape_;
-
-protected:
-	frame_exporter(const ndsize<Dim>& frame_shape) :
-		frame_shape_(frame_shape) { }
-
 public:
-	using frame_view_type = ndarray_view<Dim, Elem>;
+	using frame_view_type = ndarray_view<Dim, const Elem>;
+	using frame_shape_type = ndsize<Dim>;
+	
 	using elem_type = Elem;
 	constexpr static std::size_t dimension = Dim;
 
 	virtual ~frame_exporter() { }
-	
-	const ndsize<Dim>& frame_shape() { return frame_shape_; }
-	
+		
+	virtual void setup(const frame_shape_type&) { }
 	virtual void write_frame(const frame_view_type&) = 0;
 	virtual void close() { }
 };
-// TODO specify frame shape after construction, in setup step
-
 
 }
 
 #endif
-
