@@ -1,4 +1,3 @@
-/*
 #ifndef MF_FLOW_MULTIPLEX_NODE_H_
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
@@ -19,13 +18,14 @@ private:
 public:
 	using node_type = multiplex_node;
 
+	shared_ring& ring() { return *ring_; }
+
 	using node_output::node_output;
 	
 	void setup() override;
 	
 	/// \name Read interface, used by connected input.
 	///@{
-	bool may_pull() const override;
 	void pull(time_span) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
@@ -44,9 +44,15 @@ public:
 
 class multiplex_node final : public node {
 private:
-	node_input& input_;
+	using output_rings_vector_type = std::vector<std::reference_wrapper<shared_ring>>;
+	
+	//node_input& input_;
 	std::thread thread_;
-
+	
+	output_rings_vector_type output_rings_();
+	
+	
+	
 	void thread_main_();
 
 public:
@@ -58,7 +64,7 @@ public:
 		
 	bool process_next_frame() override;
 	
-	multiplex_node_output& add_output(const frame_format& format) override {
+	multiplex_node_output& add_output(const frame_format& format) {
 		return add_output_<multiplex_node_output>(format);
 	}
 };
@@ -66,4 +72,3 @@ public:
 }}
 
 #endif
-*/

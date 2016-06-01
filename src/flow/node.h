@@ -129,7 +129,7 @@ class node_remote_output {
 public:
 	virtual node_output& this_output() noexcept = 0;
 
-	virtual bool may_pull() { return true; }
+	virtual bool may_pull() const { return true; }
 	
 	/// Pull the frames for time span \a span from the node.
 	/** Must be called prior to begin_read(). Ensures that `span.duration()` frames can be read using begin_read()

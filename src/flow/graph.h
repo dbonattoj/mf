@@ -52,6 +52,7 @@ private:
 	bool running_ = false;
 	sticky_event stop_event_;
 	
+public:
 	template<typename Node, typename... Args>
 	Node& add_node_(Args&&... args) {
 		static_assert(std::is_base_of<node, Node>::value, "");
