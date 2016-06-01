@@ -37,6 +37,11 @@ image<Pixel>::image(const const_view_type& vw) {
 
 
 template<typename Pixel>
+image<Pixel>::image(const cv_mat_type& mat) :
+	mat_(mat) { }
+
+
+template<typename Pixel>
 image<Pixel>::image(const image& img) :
 	image(img.view()) { }
 

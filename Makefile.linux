@@ -1,6 +1,6 @@
 # toolset
-CXX := clang++-3.8
-CXXFLAGS := -std=c++14
+CXX := ccache clang++-3.8
+CXXFLAGS := -std=c++14 -fcolor-diagnostics -Qunused-arguments
 CXXFLAGS_SHARED := -fPIC
 LDFLAGS := 
 LDFLAGS_SHARED := -shared
@@ -8,9 +8,10 @@ LDLIBS := -lpthread -lm
 
 # debug/deploy build settings
 ifeq ($(DEBUG), 1)
-	CXXFLAGS += -g -Wl,-export-dynamic -pedantic
+	CXXFLAGS += -g -pedantic
+	LDFLAGS += -Wl,--export-dynamic
 else
-	CXXFLAGS += -O3 -DNDEBUG
+	CXXFLAGS += -O3 -DNDEBUG 
 endif
 
 # included external dependencies
@@ -79,6 +80,7 @@ clean :
 # also create symlink dist/include/mf --> src/ , so that test+prog can #include <mf/...>
 # TODO improve
 $(LIB) : $(LIB_OBJ)
+	@echo building $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_SHARED) -o $@ $(LIB_OBJ) $(LDLIBS) && \
 	mkdir -p dist/include && ln -fs ../../src dist/include/mf
@@ -86,6 +88,7 @@ $(LIB) : $(LIB_OBJ)
 
 # .cc compilation in src/: compile for shared library
 $(BUILD_DIR)/src/%.o : src/%.cc
+	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $< -MMD
 
@@ -95,11 +98,13 @@ $(BUILD_DIR)/src/%.o : src/%.cc
 
 # test executable:  build mf, obj for test/../*.cc, test/support/*.cc, and link into test executable 
 $(TEST) : $(LIB) $(TEST_OBJ) $(TEST_SUPPORT_OBJ)
+	@echo linking $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
 
 # .cc compilation in test/: compile for test executable
 $(BUILD_DIR)/test/%.o : test/%.cc
+	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
 
@@ -107,11 +112,13 @@ $(BUILD_DIR)/test/%.o : test/%.cc
 
 # program executable: build mf, program filter shared libs, obj for program executable and program support, and link
 $(DIST_DIR)/prog/% :  $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(LIB)
+	@echo linking $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # .cc compilation in prog/: compile for program executable
 $(BUILD_DIR)/prog/%.o : prog/%.cc
+	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
 

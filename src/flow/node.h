@@ -44,15 +44,15 @@ private:
 
 	bool was_setup_ = false; ///< True after node was set up.
 	time_unit prefetch_duration_ = 0; ///< Maximal number of frames after current time that node may prefetch.
-	time_unit offset_ = -1; ///< Maximal number of frames that node can be in advance of sink.
+	time_unit min_offset_ = -1; ///< Minimal number of frames that node can be in advance of sink.
+	time_unit max_offset_ = -1; ///< Maximal number of frames that node can be in advance of sink.
 	time_unit stream_duration_ = -1; ///< Total duration of stream for this node, or -1 if undetermined.
 	bool seekable_ = false; ///< Whether this node can handle seek request from input.
 	
-	bool active_ = true;
 	std::atomic<time_unit> current_time_ {-1}; ///<  Time of last/current frame processed by node.
 	std::atomic<time_unit> end_time_ {-1}; ///< End time of stream, or -1. Always defined when end reached.
 	
-	void propagate_offset_(time_unit offset); ///< Define this node's offset and then recursively preceding node's.
+	void propagate_offset_(time_unit min_off, time_unit max_off); ///< Define this node's offsets and preceding node's.
 	void propagate_setup_(); ///< Recursively set up outputs and node of preceding nodes, and then this node.
 	void deduce_stream_properties_(); ///< Define stream properties of non-source node based on input nodes.
 
@@ -106,21 +106,19 @@ public:
 	virtual bool process_next_frame() = 0;
 	
 	time_unit end_time() const noexcept { return end_time_; }
-	bool reached_end() const noexcept;
+	[[deprecated]] bool reached_end() const noexcept;
 
 	bool was_setup() const noexcept { return was_setup_; }
 
 	time_unit prefetch_duration() const noexcept { return prefetch_duration_; }
-	time_unit offset() const noexcept { return offset_; }
+	time_unit min_offset() const noexcept { return min_offset_; }
+	time_unit max_offset() const noexcept { return max_offset_; }
 	bool stream_duration_is_defined() const noexcept { return (stream_duration_ != -1); }
 	time_unit stream_duration() const noexcept { return stream_duration_; }
 	bool is_seekable() const noexcept { return seekable_; }
 	bool is_bounded() const;
 
-	bool is_active() const noexcept { MF_EXPECTS(was_setup_); return active_; }
-	void update_activation(); ///< Called by output, propagates to preceding nodes.
-
-	time_unit current_time() const noexcept { return current_time_; }
+	[[deprecated]] time_unit current_time() const noexcept { return current_time_; }
 };
 
 /// Output port of another node, read interface for connected node.
@@ -131,6 +129,8 @@ class node_remote_output {
 public:
 	virtual node_output& this_output() noexcept = 0;
 
+	virtual bool may_pull() { return true; }
+	
 	/// Pull the frames for time span \a span from the node.
 	/** Must be called prior to begin_read(). Ensures that `span.duration()` frames can be read using begin_read()
 	 ** afterwards, and that the timed span returned by begin_read() will start at `span.start_time()`. If near
@@ -196,10 +196,7 @@ public:
 	
 	// TODO adjust format for thin node series
 	virtual void setup() = 0;
-	
-	bool is_active() const noexcept { return active_; }
-	void propagate_activation(bool active);
-		
+			
 	/// \name Write interface, used by node.
 	/// Implemented differently for different node types. 
 	///@{

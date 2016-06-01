@@ -61,7 +61,6 @@ bool async_node::process_next_frame() {
 			job.push_input(*in, in_view);
 		}
 	}
-	// TODO split pull/begin_read, and begin_read (wait) simultaneously if possible (async_node inputs)
 	
 	if(stopped) {
 		// stopped while reading from input:
@@ -144,7 +143,7 @@ void async_node::stop() {
 void async_node_output::setup() {
 	node& connected_node = connected_input().this_node();
 	
-	time_unit offset_diff = this_node().offset() - connected_node.offset();
+	time_unit offset_diff = this_node().max_offset() - connected_node.min_offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 
 	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
@@ -159,7 +158,7 @@ void async_node_output::pull(time_span span) {
 		if(ring_->is_seekable()) ring_->seek(t);
 		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
-	}	
+	}
 }
 
 

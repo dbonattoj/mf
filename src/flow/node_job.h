@@ -46,7 +46,7 @@ private:
 	std::vector<output_view_handle_type*> outputs_map_; 
 
 public:
-	node_job(node&);
+	explicit node_job(node&);
 	~node_job();
 	
 	/// \name Interface for set up.

@@ -23,17 +23,19 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-void node::propagate_offset_(time_unit new_offset) {
+void node::propagate_offset_(time_unit new_min_offset, time_unit new_max_offset) {
 	MF_EXPECTS(! was_setup_);
 	
-	if(new_offset <= offset_) return;
+	if(new_min_offset <= min_offset_) return;
 	
-	offset_ = new_offset;
+	min_offset_ = new_min_offset;
+	max_offset_ = new_max_offset;
 	
 	for(auto&& in : inputs()) {
 		node& connected_node = in->connected_node();
-		time_unit off = offset_ + connected_node.prefetch_duration_ + in->future_window_duration();
-		connected_node.propagate_offset_(off);
+		time_unit min_off = min_offset_ + in->future_window_duration();
+		time_unit max_off = max_offset_ + in->future_window_duration() + connected_node.prefetch_duration_;
+		connected_node.propagate_offset_(min_off, max_off);
 	}		
 }
 
@@ -60,7 +62,7 @@ void node::deduce_stream_properties_() {
 
 
 void node::propagate_setup_() {	
-	MF_EXPECTS(offset_ != -1); // ...was defined in prior setup phase
+	MF_EXPECTS(min_offset_ != -1 && max_offset_ != -1); // ...were defined in prior setup phase
 	
 	// do nothing when was_setup_ is already set:
 	// during recursive propagation it may be called multiple times on same node
@@ -112,7 +114,7 @@ void node::setup_sink() {
 	MF_EXPECTS(! was_setup_);
 	MF_EXPECTS(is_sink());
 	
-	propagate_offset_(0);
+	propagate_offset_(0, 0);
 	propagate_setup_();
 
 	MF_ENSURES(was_setup_);
@@ -124,26 +126,6 @@ bool node::is_bounded() const {
 	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](auto&& in) {
 		return (in->is_activated() && in->connected_node().is_bounded());
 	});
-}
-
-
-void node::update_activation() {
-	// activation of succeeding nodes (down to sink) must already have been defined
-
-	// this node is active if any of its outputs are active
-	// an output is active, if its connected input is activated AND the connected node is active
-	
-	bool now_active = std::any_of(
-		outputs_.cbegin(), outputs_.cend(),
-		[](auto&& out) { return out->is_active(); }
-	);
-
-	if(now_active != active_) {
-		active_ = now_active;
-
-		// now set activation of preceeding nodes
-		for(auto&& in : inputs()) in->connected_node().update_activation();
-	}
 }
 
 
@@ -176,12 +158,6 @@ void node_output::input_has_connected(node_input& input) {
 }
 
 
-void node_output::propagate_activation(bool active) {
-	active_ = active;
-	this_node().update_activation();
-}
-
-
 /////
 
 
@@ -202,7 +178,7 @@ void node_input::pull(time_unit t) {
 
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
-		
+	
 	connected_output_->pull(time_span(start_time, end_time));
 }
 
@@ -226,12 +202,7 @@ void node_input::cancel_read_frame() {
 
 
 void node_input::set_activated(bool activated) {
-	if(activated_ != activated) {
-		activated_ = activated;
-		
-		bool output_active = activated && this_node().is_active();
-		connected_output().this_output().propagate_activation(output_active);
-	}
+	if(activated_ != activated) activated_ = activated;
 }
 
 }}

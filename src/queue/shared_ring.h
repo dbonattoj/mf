@@ -39,6 +39,7 @@ namespace mf {
  ** - Reader and writer mutually wait until frames become readable/writable. Deadlocks are prevented.
  ** - Handling of end of stream.
  ** - Possibility to cancel waits by supplying additional break \ref event.
+ **
  ** Two policies exist:
  ** - _seekable_: Duration of stream is specified at construction and cannot be changed. Reader can seek() to another
  **               absolute time index. Writer receives the time index at which it is supposed to write with the
@@ -78,6 +79,7 @@ private:
 		
 	void skip_available_(time_unit duration);
 	void read_and_discard_(time_unit duration);
+	time_span writable_time_span_() const;
 	
 public:
 	shared_ring(const frame_array_properties&, bool seekable, time_unit end_time = -1);
@@ -112,6 +114,9 @@ public:
 	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is writable.
 	 ** Also waits if write start position is at end time, until seek occurs or \a break_event occurs. */
 	bool wait_writable(event& break_event);
+	
+	template<typename Iterator>
+	static Iterator wait_any_writable(Iterator begin, Iterator end, event& break_event);
 	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned
@@ -231,5 +236,7 @@ public:
 
 
 }
+
+#include "shared_ring.tcc"
 
 #endif

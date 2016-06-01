@@ -124,6 +124,10 @@ public:
 	/** If view does not have default strides, throws exception.
 	 ** \param minimal_dimension Like in has_default_strides(). */
 	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
+	
+	/// Check if view has default strides without padding.
+	/** \param minimal_dimension Like in has_default_strides(). */
+	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 
 	/// Create null view.
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
@@ -201,7 +205,7 @@ public:
 	iterator end() const;
 	
 	template<typename T2> void assign(const ndarray_view<Dim, T2>&) const;
-	void assign(const ndarray_view<Dim, const T>& other) const { assign<const T>(other); }
+	void assign(const ndarray_view<Dim, const T>& other) const;
 	
 	template<typename T2> bool compare(const ndarray_view<Dim, T2>&) const;
 	bool compare(const ndarray_view<Dim, const T>& other) const { return compare<const T>(other); }

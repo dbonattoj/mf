@@ -48,6 +48,7 @@ protected:
 public:
 	explicit image(const shape_type&);
 	explicit image(const const_view_type&);
+	explicit image(const cv_mat_type&);
 	
 	image(const image&);
 	image(const image&&);
@@ -119,6 +120,13 @@ template<typename Pixel>
 masked_image<Pixel> to_image(const ndarray_view<2, masked_elem<Pixel>>& vw) {
 	return masked_image<Pixel>(vw);
 }
+
+
+template<typename Pixel>
+image<Pixel> to_image(const cv::Mat_<Pixel>& mat) {
+	return image<Pixel>(mat);
+}
+
 
 
 }

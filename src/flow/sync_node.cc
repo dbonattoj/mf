@@ -94,7 +94,7 @@ bool sync_node::process_next_frame() {
 void sync_node_output::setup() {
 	node& connected_node = connected_input().this_node();
 	
-	time_unit offset_diff = this_node().offset() - connected_node.offset();
+	time_unit offset_diff = this_node().max_offset() - connected_node.min_offset();
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 	
 	ndarray_generic_properties prop(format(), frame_length(), required_capacity);

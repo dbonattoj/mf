@@ -116,6 +116,7 @@ auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_t
 	if(ring_.writable_duration() < duration) return section_view_type::null();
 
 	section_view_type vw = ring_.begin_write(duration);
+
 	writer_state_ = accessing;
 	return vw;
 }
@@ -123,18 +124,24 @@ auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_t
 
 bool shared_ring::wait_writable(event& break_event) {
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
+	
+	std::unique_lock<std::mutex> lock(mutex_);
+	
+	if(ring_.writable_duration() == 0 && ring_.readable_duration() < reader_state_)
+		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
 
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		if(ring_.writable_duration() == 0 && ring_.readable_duration() < reader_state_)
-			throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
-	}
-
-	while(writable_time_span().duration() == 0) {
+	while(writable_time_span_().duration() == 0) {
+		writer_state_ = 1;
+		
+		lock.unlock();
 		event& ev = event::wait_any(reader_idle_event_, reader_seek_event_, break_event);
+		lock.lock();
+		
+		writer_state_ = idle;
+		
 		if(ev == break_event) return false;
 	}
-	
+		
 	return true;
 }
 
@@ -248,19 +255,25 @@ auto shared_ring::try_begin_read(time_unit original_duration) -> section_view_ty
 
 bool shared_ring::wait_readable(event& break_event) {
 	if(reader_state_ != idle) throw sequencing_error("read not idle");
+	
+	std::unique_lock<std::mutex> lock(mutex_);
+	
+	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() == 0)
+		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
 
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() == 0)
-			throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
-	}
-
-	while(readable_time_span().duration() == 0) {
+	while(ring_.readable_duration() == 0) {
+		reader_state_ = 1;
+		
+		lock.unlock();
 		event& ev = event::wait_any(writer_idle_event_, break_event);
+		lock.lock();
+		
+		reader_state_ = idle;
+		
 		if(ev == break_event) return false;
 	}
 	
-	return true;	
+	return true;
 }
 
 
@@ -438,8 +451,17 @@ time_unit shared_ring::read_start_time() const {
 }
 
 
+time_span shared_ring::writable_time_span_() const {
+	time_span writable = ring_.writable_time_span();
+	if(end_time_ == -1) return writable;
+	else if(current_time() == end_time_) return time_span(end_time_, end_time_);
+	else return time_span(writable.start_time(), std::min(writable.end_time(), end_time_.load()));
+}
+
+
 time_span shared_ring::writable_time_span() const {
 	std::lock_guard<std::mutex> lock(mutex_);
+	return writable_time_span_();
 	time_span writable = ring_.writable_time_span();
 	if(end_time_ == -1) return writable;
 	else if(current_time() == end_time_) return time_span(end_time_, end_time_);
