@@ -21,10 +21,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "async_node.h"
 #include "node_job.h"
 #include "graph.h"
+#include <unistd.h>
 
 namespace mf { namespace flow {
 
 bool async_node::process_next_frame() {
+	usleep(200000);
+
 	node_job job = make_job();
 	time_unit t;
 	
@@ -34,9 +37,18 @@ bool async_node::process_next_frame() {
 	auto out_view = out->begin_write_frame(t);
 	if(out_view.is_null()) return false; // stopped
 	
+		
+	if(t > out->connected_input().pull_time() + prefetch_duration()) {
+		//MF_DEBUG_EXPR(t, out->connected_input().pull_time(), prefetch_duration());
+		
+		out->cancel_write_frame();
+		usleep(100000);
+		return ! this_graph().stop_event().was_notified();
+	}
+	
 	set_current_time(t);
 	job.define_time(t);
-	
+
 	// with time defined, run preprocess
 	// concrete node may activate/desactivate inputs now
 	pre_process_filter(job);
@@ -65,7 +77,6 @@ bool async_node::process_next_frame() {
 	if(stopped) {
 		// stopped while reading from input:
 		// need to cancel output and already-opened inputs, and then quit
-		cancel_job(job);
 		return false;
 	}
 	

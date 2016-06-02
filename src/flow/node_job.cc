@@ -20,6 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "node_job.h"
 
+#include <iostream>
+
 namespace mf { namespace flow {
 
 node_job::node_job(node& nd) :
@@ -33,12 +35,18 @@ node_job::node_job(node& nd) :
 
 
 node_job::~node_job() {
-	MF_ASSERT(inputs_stack_.empty());
-	MF_ASSERT(outputs_stack_.empty());
+	cancel();
+}
+
+
+void node_job::cancel() {
+	while(node_input* in = pop_input()) in->cancel_read_frame();
+	while(node_output* out = pop_output()) out->cancel_write_frame();
 }
 	
 
 void node_job::push_input(node_input& in, const timed_frame_array_view& vw) {
+	//MF_DEBUG_BACKTRACE("push");
 	MF_EXPECTS(! vw.is_null());
 	inputs_stack_.emplace_back(&in, vw);
 	inputs_map_.at(in.index()) = &inputs_stack_.back();
@@ -53,6 +61,7 @@ void node_job::push_output(node_output& out, const frame_view& vw) {
 
 
 node_input* node_job::pop_input() {
+	//MF_DEBUG_BACKTRACE("pop");
 	if(inputs_stack_.empty()) return nullptr;
 	node_input* input = inputs_stack_.back().first;
 	inputs_stack_.pop_back();

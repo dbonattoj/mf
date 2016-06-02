@@ -35,7 +35,7 @@ Iterator shared_ring::wait_any_writable(Iterator begin, Iterator end, event& bre
 	
 	events.push_back(&break_event);
 	
-	Iterator gotten_ring;
+	Iterator gotten_ring = end;
 	
 	do {
 		for(locked_ring& lrng : locked_rings) {

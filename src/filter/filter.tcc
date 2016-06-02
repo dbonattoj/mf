@@ -12,7 +12,7 @@ void filter::input_port<Dim, Elem>::connect(output_port<Output_dim, Output_elem>
 
 template<std::size_t Dim, typename Elem>
 auto filter::input_port<Dim, Elem>::frame_shape() const -> const frame_shape_type& {
-	static auto shp = make_ndsize(1, 1024/sizeof(int));
+	static auto shp = make_ndsize(1, 256);
 	
 if(!connector_) return shp; //TODO remove
 	return connector_->frame_shape();

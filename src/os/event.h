@@ -29,6 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <memory>
 #include <type_traits>
 #include <array>
+#include <atomic>
 
 namespace mf {
 
@@ -59,6 +60,8 @@ public:
 	virtual void notify();
 	virtual void wait();
 	
+	// TODO rename to send(), receive(), try_receive()
+	
 	template<typename It>
 	static event& wait_any_list(It begin_it, It end_it) {
 		static_assert(
@@ -84,7 +87,7 @@ public:
  ** waiting, until the event is reset using reset(). */
 class sticky_event : public event {
 private:
-	bool notified_ = false;
+	std::atomic<bool> notified_ {false};
 	
 public:
 	sticky_event() = default;
@@ -103,6 +106,8 @@ public:
 		if(notified_) event::wait();
 		notified_ = false;
 	}
+	
+	bool was_notified() { return notified_; }
 };
 
 }

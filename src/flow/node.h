@@ -44,8 +44,8 @@ private:
 
 	bool was_setup_ = false; ///< True after node was set up.
 	time_unit prefetch_duration_ = 0; ///< Maximal number of frames after current time that node may prefetch.
-	time_unit min_offset_ = -1; ///< Minimal number of frames that node can be in advance of sink.
-	time_unit max_offset_ = -1; ///< Maximal number of frames that node can be in advance of sink.
+	time_unit min_offset_ = 0; ///< Minimal number of frames that node can be in advance of sink.
+	time_unit max_offset_ = 0; ///< Maximal number of frames that node can be in advance of sink.
 	time_unit stream_duration_ = -1; ///< Total duration of stream for this node, or -1 if undetermined.
 	bool seekable_ = false; ///< Whether this node can handle seek request from input.
 	
@@ -67,7 +67,6 @@ protected:
 	void mark_end() { end_time_ = current_time_ + 1; }
 	
 	node_job make_job();
-	void cancel_job(node_job&);
 	
 	template<typename Input>
 	Input& add_input_(time_unit past_window, time_unit future_window) {
@@ -219,6 +218,7 @@ private:
 	node_remote_output* connected_output_ = nullptr;
 		
 	bool activated_ = true;
+	time_unit pull_time_ = -1;
 	
 protected:
 	node_input(const node_input&) = delete;
@@ -239,6 +239,8 @@ public:
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);
+	
+	time_unit pull_time() const noexcept { return pull_time_; }
 
 	/// \name Read interface, used by node.
 	///@{

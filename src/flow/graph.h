@@ -102,7 +102,7 @@ public:
 	bool was_setup() const { return was_setup_; }
 	bool is_running() const { return running_; }
 	
-	event& stop_event() { return stop_event_; }
+	sticky_event& stop_event() { return stop_event_; }
 	
 	void setup();
 	

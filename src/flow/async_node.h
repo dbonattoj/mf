@@ -75,6 +75,8 @@ private:
 	std::thread thread_;
 	
 	void thread_main_();
+	
+	time_unit pull_time_ = -1;
 
 public:
 	explicit async_node(graph&);

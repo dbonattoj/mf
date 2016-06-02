@@ -51,7 +51,7 @@ private:
 	
 	output_rings_vector_type output_rings_();
 	
-	
+	time_span curspan;
 	
 	void thread_main_();
 

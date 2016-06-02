@@ -18,6 +18,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <iostream>
+
 namespace mf { namespace flow {
 
 template<typename Output>
@@ -46,7 +48,7 @@ decltype(auto) node_job::in_full(Input& port) {
 	
 	input_view_handle_type* ptr = inputs_map_.at(port.index());
 	if(! ptr) return view_type::null();
-	
+		
 	return from_generic<dimension + 1, elem_type>(
 		ptr->second,
 		port.frame_shape()

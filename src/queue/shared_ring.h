@@ -152,6 +152,10 @@ public:
 	 ** Also waits if write start position is at end time, until \a break_event occurs. */
 	bool wait_readable(event& break_event);
 
+
+	//template<typename Iterator>
+	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);
+
 	
 	/// End reading \a read_duration frames.
 	/** Must be called after begin_read() or begin_read_span(). \a read_duration must be lesser of equal to duration

@@ -57,6 +57,7 @@ public:
 	node_input* pop_input();
 	node_output* pop_output();
 	bool end_was_marked() const noexcept { return end_marked_; }
+	void cancel();
 	///@}
 	
 	time_unit time() const noexcept { return time_; }

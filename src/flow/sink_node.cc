@@ -71,7 +71,6 @@ void sink_node::pull(time_unit t) {
 	
 	if(stopped) {
 		// if stopped, close already-openned inputs and quit
-		cancel_job(job);
 		return;
 	}
 

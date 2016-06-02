@@ -20,6 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "sync_node.h"
 #include "node_job.h"
+#include "graph.h"
+#include <unistd.h>
 
 namespace mf { namespace flow {
 
@@ -35,14 +37,17 @@ void sync_node::stop() { }
 
 
 bool sync_node::process_next_frame() {	
+	usleep(200000);
+
 	node_job job = make_job();
 	time_unit t;
 	
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
 	MF_ASSERT(! out_view.is_null());
+
 	if(end_time() != -1) MF_ASSERT(t < end_time());
-		
+	
 	set_current_time(t);
 	job.define_time(t);
 		
@@ -64,7 +69,6 @@ bool sync_node::process_next_frame() {
 	}
 	
 	if(stopped) {
-		cancel_job(job);
 		return false;
 	}
 

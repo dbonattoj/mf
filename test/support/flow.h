@@ -33,6 +33,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray.h"
 #include "thread.h"
 
+#include <iostream>
 
 namespace mf { namespace test {
 
@@ -81,11 +82,12 @@ private:
 		if(t < activation.size()) input.set_activated(activation[t]);
 	}
 	
-	void process(flow::node_job& job) override {
+	void process(flow::node_job& job) override {		
 		auto in = job.in(input);
-		auto out = job.out(input);
+		auto out = job.out(output);
 	
 		if(callback) callback(*this, job);
+
 		if(in) out = in;
 		else out = make_frame(input.frame_shape(), noframe);
 	}
@@ -129,7 +131,7 @@ public:
 			input.set_activated(activation[t]);
 	}
 	
-	void process(flow::node_job& job) override {
+	void process(flow::node_job& job) override {		
 		auto in = job.in(input);
 		
 		int index;

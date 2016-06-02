@@ -3,9 +3,7 @@
 #include <vector>
 #include <iostream>
 
-#include <mutex>
-
-static std::mutex mut;
+#include <unistd.h>
 
 namespace mf { namespace flow {
 
@@ -23,16 +21,37 @@ bool multiplex_node::process_next_frame() {
 	output_rings_vector_type output_rings = output_rings_();
 	
 	auto it = shared_ring::wait_any_writable(output_rings.begin(), output_rings.end(), this_graph().stop_event());
+		
 	if(it != output_rings.end()) {
 		shared_ring& rng = *it;
 		auto vw = rng.try_begin_write(1);
 
-		if(vw) rng.end_write(1);
+		auto prefix = (&rng != &(output_rings.front().get())) ? "                             " : " ";
+ 
+		if(vw) {
+			time_unit t = vw.start_time();
+			
+			if(t < this_graph().current_time() + min_offset()
+			|| t > this_graph().current_time() + max_offset()) {
+				//std::cout << prefix << "not wrote (unsync)..." << std::endl;
+				usleep(100000);
+				rng.end_write(0);
+				return true;
+			}
+
+			rng.end_write(1);
+			
+			curspan = time_span(std::max(t, curspan.start_time()),std::max(t, curspan.start_time())+1);
+			std::cout << prefix << "wrote " << vw.start_time() << "..." << std::endl;
+		} else {
+			std::cout << prefix << "not wrote..." << std::endl;
+		}
 		
-		mut.lock();
-		std::cout << &rng << " : wrote " << vw.start_time() << "..." << std::endl;
-		mut.unlock();
+		std::cout << "                                                           span: " << curspan << std::endl;
 	}
+				usleep(100000);
+		
+	return true;
 }
 
 void multiplex_node::thread_main_() {
@@ -41,8 +60,9 @@ void multiplex_node::thread_main_() {
 
 
 void multiplex_node::internal_setup() {
+	define_source_stream_properties(true, 50);
 	for(auto&& base_out : outputs()) {
-		base_out->define_frame_length(1024);
+		base_out->define_frame_length(256);
 	}
 }
 
@@ -67,14 +87,12 @@ void multiplex_node_output::setup() {
 	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
 
 	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
-	std::cout << "setup mlpx output ring" << std::endl;
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	
 
 
 void multiplex_node_output::pull(time_span span) {
 	time_unit t = span.start_time();
-	std::cout << "mlpx pull " << t << std::endl;
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {
 		if(ring_->is_seekable()) ring_->seek(t);
@@ -112,17 +130,17 @@ time_unit multiplex_node_output::end_time() const {
 
 
 frame_view multiplex_node_output::begin_write_frame(time_unit& t) {
-
+	throw 0;
 }
 
 
 void multiplex_node_output::end_write_frame(bool was_last_frame) {
-
+	throw 0;
 }
 
 
 void multiplex_node_output::cancel_write_frame() {
-
+	throw 0;
 }
 
 

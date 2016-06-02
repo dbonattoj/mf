@@ -26,14 +26,12 @@ namespace mf { namespace flow {
 void node::propagate_offset_(time_unit new_min_offset, time_unit new_max_offset) {
 	MF_EXPECTS(! was_setup_);
 	
-	if(new_min_offset <= min_offset_) return;
-	
-	min_offset_ = new_min_offset;
-	max_offset_ = new_max_offset;
+	min_offset_ = std::min(min_offset_, new_min_offset);
+	max_offset_ = std::max(max_offset_, new_max_offset);
 	
 	for(auto&& in : inputs()) {
 		node& connected_node = in->connected_node();
-		time_unit min_off = min_offset_ + in->future_window_duration();
+		time_unit min_off = min_offset_ - in->past_window_duration();
 		time_unit max_off = max_offset_ + in->future_window_duration() + connected_node.prefetch_duration_;
 		connected_node.propagate_offset_(min_off, max_off);
 	}		
@@ -62,7 +60,7 @@ void node::deduce_stream_properties_() {
 
 
 void node::propagate_setup_() {	
-	MF_EXPECTS(min_offset_ != -1 && max_offset_ != -1); // ...were defined in prior setup phase
+	//MF_EXPECTS(min_offset_ != -1 && max_offset_ != -1); // ...were defined in prior setup phase
 	
 	// do nothing when was_setup_ is already set:
 	// during recursive propagation it may be called multiple times on same node
@@ -134,12 +132,6 @@ node_job node::make_job() {
 }
 
 
-void node::cancel_job(node_job& job) {
-	while(node_input* in = job.pop_input()) in->cancel_read_frame();
-	while(node_output* out = job.pop_output()) out->cancel_write_frame();
-}
-
-
 bool node::reached_end() const noexcept {
 	return (end_time_ != -1) && (current_time_ >= end_time_ - 1);
 }
@@ -175,6 +167,8 @@ void node_input::connect(node_remote_output& output) {
 
 void node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
+	
+	pull_time_ = t;
 
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
