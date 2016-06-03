@@ -39,6 +39,8 @@ namespace mf {
  ** - Reader and writer mutually wait until frames become readable/writable. Deadlocks are prevented.
  ** - Handling of end of stream.
  ** - Possibility to cancel waits by supplying additional break \ref event.
+ ** - Simultaneously wait for multiple rings to become readable or writable.
+ ** - Shift or alter duration of ongoing read or write operation.
  **
  ** Two policies exist:
  ** - _seekable_: Duration of stream is specified at construction and cannot be changed. Reader can seek() to another
@@ -92,6 +94,31 @@ public:
 	/** Maximal readable and writable frames that fit in buffer. */
 	time_unit capacity() const { return ring_.shape().front(); }
 
+	/// \name Write interface.
+	/// Must be called by the writer thread only.
+	///@{
+	
+	/// Wait until a frame become writable, or \a break_event occurs.
+	/** If no frame is writable (either because reader has not read enough frames from the ring buffer yet or write
+	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
+	 ** If \a break_event occured, returns false. Also waits if write start position is at end time, until
+	 ** seek occurs or \a break_event occurs. */
+	bool wait_writable(event& break_event);
+	
+	/// Wait until a frame in any of the given \ref shared_ring buffers becomes writable.
+	/** `Iterator` is an iterator type whose value type is convertible to `shared_ring&`. Returns the iterator pointing
+	 ** to a `shared_ring` that is writable, or returns `end` if `break_event` occured before any `shared_ring`
+	 ** became writable. If any `shared_ring` is already writable, returns it immediatly, before waiting for any
+	 ** other `shared_ring` or for \a break_event.
+	 ** Also waits if write start position is at end time, until seek occurs or \a break_event occurs. */
+	template<typename Iterator>
+	static Iterator wait_any_writable(Iterator begin, Iterator end, event& break_event);
+
+	/// Begin writing \a write_duration frames at current write start time, if they are available.
+	/** Like begin_write(), but never waits. Instead returns null view when the frames are not available. */
+	section_view_type try_begin_write(time_unit write_duration);
+
+
 	/// Begin writing \a write_duration frames at current write start time.
 	/** If span to write crosses end of buffer, it is truncated.
 	 ** For seekable buffer only: returned section may have start time different to `writable_time_span().start_time()`
@@ -104,26 +131,33 @@ public:
 	 ** Must be called from single writer thread only, and followed by call to end_write(). */
 	section_view_type begin_write(time_unit write_duration);
 
-	/// Begin writing \a write_duration frames at current write start time, if they are available.
-	/** Like begin_write(), but never waits. Instead returns null view when the frames are not available. */
-	section_view_type try_begin_write(time_unit write_duration);
 
-	/// Wait until a frame become writable, or \a break_event occurs.
-	/** If no frame is writable (either because reader has not read enough frames from the ring buffer yet or write
-	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
-	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is writable.
-	 ** Also waits if write start position is at end time, until seek occurs or \a break_event occurs. */
-	bool wait_writable(event& break_event);
 	
-	template<typename Iterator>
-	static Iterator wait_any_writable(Iterator begin, Iterator end, event& break_event);
+	//section_view_type shift_write(time_unit write_duration, time_unit shift_duration = 0);
 	
 	/// End writing \a written_duration frames.
 	/** Must be called after begin_write(). \a written_duration must be lesser of equal to duration of section returned
 	 ** by begin_write(). For non-seekable buffer, \a mark_end is used to mark this written frame(s) as last.
 	 ** \a mark_end cannot be set when \a written_duration is zero.
 	 ** The reader cannot seek to other position inbetween begin_write() and end_write() calls of writer. */
-	void end_write(time_unit written_duration, bool mark_end = false);
+	void end_write(time_unit did_write_duration, bool mark_end = false);
+
+	///@}
+
+
+	/// \name Read interface.
+	/// Must be called by the reader thread only.
+	///@{
+
+	/// Wait until a frame become readable, or \a break_event occurs.
+	/** If no frame is readable (either because writer has not written enough frames from the ring buffer yet or read
+	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
+	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
+	 ** Also waits if write start position is at end time, until \a break_event occurs. */
+	bool wait_readable(event& break_event);
+
+	//template<typename Iterator>
+	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);
 
 	/// Begin reading frames at time span \a span.
 	/** If \a span does not start at `readable_time_span().start_time()`, seeks to `span.start_time()` first.
@@ -145,22 +179,13 @@ public:
 	/** Like begin_read(), but never waits. Instead returns null view when the frames are not available. */
 	section_view_type try_begin_read(time_unit read_duration);
 
-	/// Wait until a frame become readable, or \a break_event occurs.
-	/** If no frame is readable (either because writer has not written enough frames from the ring buffer yet or read
-	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
-	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
-	 ** Also waits if write start position is at end time, until \a break_event occurs. */
-	bool wait_readable(event& break_event);
-
-
-	//template<typename Iterator>
-	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);
-
+	/// Alter ongoing read operation.
+	section_view_type shift_read(time_unit read_duration, time_unit shift_duration = 0);
 	
 	/// End reading \a read_duration frames.
 	/** Must be called after begin_read() or begin_read_span(). \a read_duration must be lesser of equal to duration
 	 ** of section returned by that function. */
-	void end_read(time_unit read_duration);	
+	void end_read(time_unit did_read_duration);	
 	
 	/// Skips \a duration frames.
 	/** If span to skip crosses end of buffer, it is truncated, and skips to end of file.
@@ -184,6 +209,8 @@ public:
 	/// Verifies if is is possible to seek to read time \a t.
 	/** Returns false when buffer is not seekable, or when time is out of bounds. */
 	bool can_seek(time_unit target_time) const;
+	
+	///@}
 	
 	/// Time of last written frame in buffer.
 	/** Equivalent to `write_start_time() - 1`. -1 in initial state. */

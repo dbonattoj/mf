@@ -78,7 +78,7 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 		event::wait_any(reader_idle_event_, reader_seek_event_);
 		lock.lock();
 		
-		// received event: 1+ frame was written, or reader seeked
+		// received event: 1+ frame was read, or reader seeked
 		// or neither (was notified when not waiting)
 		// will recheck if enough frames are now available.
 
@@ -203,8 +203,12 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 	if(duration == 0) return ring_.begin_read(0);
 	
 	// prevent deadlock
-	// writer_state_ may still be waiting, even after frames have become writable by end_write(),
-	// because begin_read_span() might get the lock earlier than the in-progress begin_write()
+	// it is not sufficient to have a single writer_state_ == waiting state:
+	// end_read() would make frames writable, and then begin_write() can set writer_state_ to accessing.
+	// BUT shift_read() or begin_read() here might have gotten the mutex between end_read() call,
+	// and the ongoing begin_write(), leading to deadlock.
+	// `ring_.writable_duration()` is however changed by end_read(), so if writer_state_ still indicates that
+	// writer is waiting, this also checks if the wait is still necessary, or if it will end
 	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() < duration)
 		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
 
@@ -278,8 +282,71 @@ bool shared_ring::wait_readable(event& break_event) {
 
 
 
+auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_duration) -> section_view_type {
+	if(original_read_duration > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
+	if(shift_duration < 0) throw std::invalid_argument("shift duration must be >= 0");
+	if(reader_state_ != accessing) throw sequencing_error("was not reading");
+	
+	std::unique_lock<std::mutex> lock(mutex_);
+	
+	// marking first `shift_duration` frames as read
+	// temporarily ends read from underlying buffer. mutex remains locked.
+	if(shift_duration > 0) {
+		ring_.end_read(shift_duration);
+		read_start_time_ += shift_duration;
+		reader_idle_event_.notify(); // new frames have become writable...
+	} else {
+		ring_.end_read(0);
+	}
+
+	// truncate read duration if near end
+	// if end time not defined: buffer is not seekable, and so end can only by marked by writer (end_write).
+	// then if span is not readable yet, will need to recheck after waiting for additional frames	
+	time_unit read_duration = original_read_duration;
+	if(end_time_ != -1)
+		if(read_start_time_ + read_duration > end_time_) read_duration = end_time_ - read_start_time_;
+
+	// if duration zero (possibly because at end):
+	// end read and return zero view
+	if(read_duration == 0) {
+		reader_state_ = idle;
+		return ring_.begin_read(0);
+	}
+	
+	// prevent deadlock
+	// it is not sufficient to have a single writer_state_ == waiting state:
+	// end_read() would make frames writable, and then begin_write() can set writer_state_ to accessing.
+	// BUT shift_read() or begin_read() here might have gotten the mutex between end_read() call,
+	// and the ongoing begin_write(), leading to deadlock.
+	// `ring_.writable_duration()` is however changed by end_read(), so if writer_state_ still indicates that
+	// writer is waiting, this also checks if the wait is still necessary, or if it will end
+	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() < read_duration)
+		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
+
+	// wait until duration becomes readable
+	while(ring_.readable_duration() < read_duration) {
+		reader_state_ = read_duration;
+		// wait until more frames written (mutex unlocked during wait, and relocked after)
+				
+		lock.unlock();
+		writer_idle_event_.wait();
+		lock.lock();
+		
+		// writer might have marked end while reader was waiting
+		if(end_time_ != -1 && read_start_time_ + duration >= end_time_)
+			read_duration = end_time_ - read_start_time_;
+	}
+	
+	// writer cannot have called end_write(0, true) (mark end when no frame written)
+	MF_ASSERT(read_duration != 0);
+
+	reader_state_ = accessing;
+	return ring_.begin_read(read_duration);
+}
+
+
 void shared_ring::end_read(time_unit read_duration) {
-	if(reader_state_ == idle) throw sequencing_error("was not reading");
+	if(reader_state_ != accessing) throw sequencing_error("was not reading");
 	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
