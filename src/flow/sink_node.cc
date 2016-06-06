@@ -28,7 +28,7 @@ void sink_node::setup_graph() {
 }
 
 
-void sink_node::internal_setup() {
+void sink_node::setup() {
 	if(outputs().size() != 0) throw invalid_flow_graph("sink_node cannot have outputs");
 	setup_filter();
 }

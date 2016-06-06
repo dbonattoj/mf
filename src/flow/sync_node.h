@@ -65,7 +65,7 @@ class sync_node final : public filter_node {
 public:
 	explicit sync_node(graph& gr) : filter_node(gr) { }
 	
-	void internal_setup() final override;
+	void setup() final override;
 	void launch() final override;
 	void stop() final override;
 		

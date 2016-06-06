@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node.h"
 #include "node_job.h"
 #include <limits>
+#include <algorithm>
 
 namespace mf { namespace flow {
 
@@ -70,8 +71,44 @@ bool node::precedes_strict(const node& nd) const {
 
 
 
-const node& node::first_successor_() const {
-	return *this; // TODO
+const node& node::first_successor() const {
+	if(outputs_.size() == 1) return outputs_.front()->connected_node();
+	
+	using nodes_vector_type = std::vector<const node*>;
+	
+	std::function<void(const node&, nodes_vector_type&)> collect_all_successors;
+	collect_all_successors = [&](const node& nd, nodes_vector_type& vec) {
+		for(auto&& out : nd.outputs_) {
+			const node& connected_node = out->connected_node();
+			vec.push_back(&connected_node);
+			collect_all_successors(connected_node, vec);
+		}
+	};
+
+	nodes_vector_type common_successors;
+	collect_all_successors(outputs_.front()->connected_node(), common_successors);
+	
+	for(auto it = outputs_.cbegin() + 1; it != outputs_.cend(); ++it) {
+		const node& connected_node = (*it)->connected_node();
+		nodes_vector_type out_successors;
+		collect_all_successors(connected_node, out_successors);
+				
+		nodes_vector_type old_common_successors = common_successors;
+		common_successors.clear();
+		std::set_intersection(
+			old_common_successors.cbegin(), old_common_successors.cend(),
+			out_successors.cbegin(), out_successors.cend(),
+			std::back_inserter(common_successors)
+		);
+	}
+
+	auto it = std::min_element(
+		common_successors.cbegin(), common_successors.cend(),
+		[](const node* a, const node* b) { return a->precedes(*b); }
+	);
+	
+	
+	return **it;
 }
 
 
@@ -97,16 +134,26 @@ void node::deduce_stream_properties_() {
 }
 
 
-void node::propagate_setup_() {	
-	//MF_EXPECTS(min_offset_ != -1 && max_offset_ != -1); // ...were defined in prior setup phase
-	
+void node::propagate_pre_setup_() {
+	if(was_pre_setup_) return;
+	for(auto&& in : inputs()) {
+		node& connected_node = in->connected_node();
+		connected_node.propagate_pre_setup_();
+	}
+	this->pre_setup();
+	was_pre_setup_ = true;
+}
+
+
+
+void node::propagate_setup_() {		
 	// do nothing when was_setup_ is already set:
 	// during recursive propagation it may be called multiple times on same node
 	if(was_setup_) return;
 	
 	// first set up preceding nodes
 	for(auto&& in : inputs()) {
-		node& connected_node = in->connected_output().this_output().this_node();
+		node& connected_node = in->connected_node();
 		connected_node.propagate_setup_();
 	}
 	
@@ -114,7 +161,7 @@ void node::propagate_setup_() {
 	if(! is_source()) deduce_stream_properties_();
 	
 	// set up this node in concrete subclass
-	this->internal_setup();
+	this->setup();
 	
 	// set up outputs
 	// their frame lengths are now defined
@@ -150,6 +197,7 @@ void node::setup_sink() {
 	MF_EXPECTS(! was_setup_);
 	MF_EXPECTS(is_sink());
 	
+	propagate_pre_setup_();
 	propagate_setup_();
 
 	MF_ENSURES(was_setup_);
@@ -213,6 +261,11 @@ void node_output::input_has_connected(node_input& input) {
 bool node_output::is_active() const {
 	if(connected_input_->is_activated() == false) return false;
 	else return (connected_input_->this_node().activation() == node::active);
+}
+
+
+node& node_output::connected_node() const noexcept {
+	return connected_input_->this_node();
 }
 
 

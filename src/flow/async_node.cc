@@ -37,8 +37,8 @@ bool async_node::process_next_frame() {
 	auto out_view = out->begin_write_frame(t);
 	if(out_view.is_null()) return false; // stopped
 			
-	if(t > out->connected_input().this_node().current_time() + out->connected_input().future_window_duration() + prefetch_duration()) {
-		//MF_DEBUG_EXPR(t, out->connected_input().pull_time(), prefetch_duration());
+	if(t >= out->connected_input().pull_time() + out->connected_input().future_window_duration() + prefetch_duration()) {
+		MF_DEBUG_EXPR(t, out->connected_input().pull_time(), prefetch_duration());
 		
 		out->cancel_write_frame();
 		usleep(100000);
@@ -127,7 +127,7 @@ void async_node::thread_main_() {
 
 
 async_node::async_node(graph& gr) : filter_node(gr) {
-	set_prefetch_duration(10);
+	set_prefetch_duration(1);
 }
 
 
@@ -136,7 +136,7 @@ async_node::~async_node() {
 }
 
 
-void async_node::internal_setup() {
+void async_node::setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("async_node must have exactly 1 output");
 	setup_filter();
 }

@@ -82,7 +82,7 @@ public:
 	explicit async_node(graph&);
 	~async_node();
 	
-	void internal_setup() final override;
+	void setup() final override;
 	void launch() final override;
 	void stop() final override;
 	bool process_next_frame() override;

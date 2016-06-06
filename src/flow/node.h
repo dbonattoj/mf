@@ -47,6 +47,7 @@ private:
 
 	std::atomic<activation_state> activation_ {active};
 
+	bool was_pre_setup_ = false;
 	bool was_setup_ = false; ///< True after node was set up.
 	time_unit prefetch_duration_ = 0; ///< Maximal number of frames after current time that node may prefetch.
 	time_unit stream_duration_ = -1; ///< Total duration of stream for this node, or -1 if undetermined.
@@ -55,6 +56,7 @@ private:
 	std::atomic<time_unit> current_time_ {-1}; ///<  Time of last/current frame processed by node.
 	std::atomic<time_unit> end_time_ {-1}; ///< End time of stream, or -1. Always defined when end reached.
 	
+	void propagate_pre_setup_();
 	void propagate_setup_(); ///< Recursively set up outputs and node of preceding nodes, and then this node.
 	void deduce_stream_properties_(); ///< Define stream properties of non-source node based on input nodes.
 
@@ -65,13 +67,13 @@ public:
 	bool precedes(const node& nd) const; ///< True if this node is closer to source than \a nd.
 	bool precedes_strict(const node& nd) const; ///< True if this node is closer to source than \a nd.
 
+	const node& first_successor() const;
+
 	activation_state activation() const { return activation_; }
 	
 	void propagate_inactive();
 	void propagate_reactivating();
 	void set_active();
-
-	const node& first_successor_() const;
 
 
 protected:	
@@ -116,7 +118,8 @@ public:
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 	
-	virtual void internal_setup() = 0; ///< Called by propagate_setup_.
+	virtual void pre_setup() { }
+	virtual void setup() = 0; ///< Called by propagate_setup_.
 	virtual void launch() = 0; ///< Called by graph for all nodes, before any frame is pulled from sink.
 	virtual void stop() = 0; ///< Called by graph for all node, before destruction of any node.
 	
@@ -205,6 +208,7 @@ public:
 
 	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
 	node_input& connected_input() const noexcept { MF_EXPECTS(is_connected()); return *connected_input_; }
+	node& connected_node() const noexcept;
 	void input_has_connected(node_input&);
 	
 	bool is_active() const;
@@ -235,9 +239,12 @@ private:
 	bool activated_ = true;
 	time_unit pull_time_ = -1;
 	
-protected:
+public:
 	node_input(const node_input&) = delete;
 
+	void set_past_window(time_unit dur) { past_window_ = dur; }
+	void set_future_window(time_unit dur) { future_window_ = dur; }
+	
 public:
 	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
 

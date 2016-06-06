@@ -46,21 +46,25 @@ class multiplex_node final : public node {
 private:
 	using output_rings_vector_type = std::vector<std::reference_wrapper<shared_ring>>;
 	
-	//node_input& input_;
+	node_input& input_;
+	
+	timed_frame_array_view input_view_;
+	
 	std::thread thread_;
 	
 	output_rings_vector_type output_rings_();
-	
-	time_span curspan;
-	
+		
 	void thread_main_();
 
 public:
-	explicit multiplex_node(graph& gr) : node(gr) { }
+	explicit multiplex_node(graph& gr) : node(gr), input_(add_input_<node_input>(0, 0)) { }
 	
-	void internal_setup() final override;
+	void pre_setup() final override;
+	void setup() final override;
 	void launch() final override;
 	void stop() final override;
+	
+	node_input& input() { return input_; }
 		
 	bool process_next_frame() override;
 	

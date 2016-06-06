@@ -1,4 +1,3 @@
-/*
 #include <catch.hpp>
 #include "support/flow.h"
 #include "support/ndarray.h"
@@ -12,11 +11,15 @@ using namespace mf;
 using namespace mf::test;
 
 TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
-	std::vector<int> seq(5);
+	std::vector<int> seq(50);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
 
+	auto shp = make_ndsize(1, 256);
+
 	flow::graph gr;
+	auto& source = gr.add_filter<sequence_frame_source>(50, shp, false);
 	auto& mplx_node = gr.add_node_<flow::multiplex_node>();
+	mplx_node.input().connect(source.output.this_node_output());
 	auto& mout1 = mplx_node.add_output(frame_format::default_format<int>());
 	auto& mout2 = mplx_node.add_output(frame_format::default_format<int>());
 
@@ -24,8 +27,9 @@ TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 	const std::vector<bool>& act2     { 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1,  0,  0 };
 
 	
-	auto& filt1 = gr.add_filter<passthrough_filter, flow::sync_node>(0, 2);
+	auto& filt1 = gr.add_filter<passthrough_filter, flow::async_node>(0, 0);
 	auto& filt2 = gr.add_filter<passthrough_filter, flow::sync_node>(0, 0);
+	filt1.this_node().set_prefetch_duration(3);
 	//filt1.activation = act1;
 	filt1.input.connect(mout1);
 	//filt2.activation = act1;
@@ -42,10 +46,7 @@ TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 	gr.setup();
 	MF_DEBUG("run...");
 	gr.callback_function = [&](time_unit t) {
-		std::cout << std::endl;
-		std::cout << "             " << t + mplx_node.min_offset() << " ... " << t + mplx_node.max_offset()+1;
-		std::cout << std::endl;
+		std::cout << "..." << std::endl;
 	};
 	gr.run();
 }
-*/

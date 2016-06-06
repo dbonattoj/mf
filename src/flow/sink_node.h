@@ -33,7 +33,7 @@ class sink_node final : public filter_node {
 public:	
 	explicit sink_node(graph& gr) : filter_node(gr) { }
 	
-	void internal_setup() final override;
+	void setup() final override;
 	void launch() final override;
 	void stop() final override;
 	bool process_next_frame() final override;

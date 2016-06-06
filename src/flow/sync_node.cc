@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-void sync_node::internal_setup() {
+void sync_node::setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("sync_node must have exactly 1 output");
 	setup_filter();
 }
