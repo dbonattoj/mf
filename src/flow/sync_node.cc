@@ -37,7 +37,7 @@ void sync_node::stop() { }
 
 
 bool sync_node::process_next_frame() {	
-	usleep(200000);
+	//usleep(200000);
 
 	node_job job = make_job();
 	time_unit t;
@@ -45,6 +45,9 @@ bool sync_node::process_next_frame() {
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
 	MF_ASSERT(! out_view.is_null());
+
+	MF_ASSERT(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration());
+	MF_ASSERT(t <= out->connected_input().this_node().current_time() + out->connected_input().future_window_duration());
 
 	if(end_time() != -1) MF_ASSERT(t < end_time());
 	
@@ -95,21 +98,22 @@ bool sync_node::process_next_frame() {
 }
 
 
-void sync_node_output::setup() {
+void sync_node_output::setup() {	
 	node& connected_node = connected_input().this_node();
 	
-	time_unit offset_diff = this_node().max_offset() - connected_node.min_offset();
-	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
-	
+	time_unit required_capacity = 1 + this_node().maximal_offset_to(connected_node) - this_node().minimal_offset_to(connected_node);
+		
 	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new timed_ring(prop));
 }
 
 
-void sync_node_output::pull(time_span span) {
+void sync_node_output::pull(time_span span, bool reactivate) {
 	// if non-sequential: seek ring to new position
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
+	
+	if(reactivate) this_node().set_active();
 
 	// pull frames from node until requested span filled, or end reached	
 	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != this_node().end_time()) {

@@ -20,22 +20,60 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "node.h"
 #include "node_job.h"
+#include <limits>
 
 namespace mf { namespace flow {
 
-void node::propagate_offset_(time_unit new_min_offset, time_unit new_max_offset) {
-	MF_EXPECTS(! was_setup_);
-	
-	min_offset_ = std::min(min_offset_, new_min_offset);
-	max_offset_ = std::max(max_offset_, new_max_offset);
-	
-	for(auto&& in : inputs()) {
-		node& connected_node = in->connected_node();
-		time_unit min_off = min_offset_ - in->past_window_duration();
-		time_unit max_off = max_offset_ + in->future_window_duration() + connected_node.prefetch_duration_;
-		connected_node.propagate_offset_(min_off, max_off);
-	}		
+time_unit node::minimal_offset_to(const node& target_node) const {
+	time_unit minimum = std::numeric_limits<time_unit>::max();
+	if(&target_node == this) return 0;
+	for(auto&& out : outputs_) {
+		const node_input& in = out->connected_input();
+		if(in.this_node().precedes(target_node)) {
+			time_unit off = in.this_node().minimal_offset_to(target_node) - in.past_window_duration();
+			minimum = std::min(minimum, off);
+		}
+	}
+	if(minimum != std::numeric_limits<time_unit>::max()) return minimum;
+	else throw std::invalid_argument("tried to get minimal offset to preceding node");
 }
+
+
+time_unit node::maximal_offset_to(const node& target_node) const {
+	time_unit maximum = std::numeric_limits<time_unit>::min();
+	if(&target_node == this) return 0;
+	for(auto&& out : outputs_) {
+		const node_input& in = out->connected_input();
+		if(in.this_node().precedes(target_node)) {
+			time_unit off = in.this_node().maximal_offset_to(target_node) + in.future_window_duration() + prefetch_duration();
+			maximum = std::max(maximum, off);
+		}
+	}
+	if(maximum != std::numeric_limits<time_unit>::min()) return maximum;
+	else throw std::invalid_argument("tried to get maximal offset to preceding node");
+}
+
+
+bool node::precedes(const node& nd) const {
+	if(&nd == this) return true;
+	for(auto&& out : outputs_) if(out->connected_input().this_node().precedes(nd)) return true;
+	return false;
+}
+
+
+
+bool node::precedes_strict(const node& nd) const {
+	if(&nd == this) return false;
+	for(auto&& out : outputs_) if(out->connected_input().this_node().precedes(nd)) return true;
+	return false;
+}
+
+
+
+const node& node::first_successor_() const {
+	return *this; // TODO
+}
+
 
 
 void node::deduce_stream_properties_() {
@@ -112,10 +150,32 @@ void node::setup_sink() {
 	MF_EXPECTS(! was_setup_);
 	MF_EXPECTS(is_sink());
 	
-	propagate_offset_(0, 0);
 	propagate_setup_();
 
 	MF_ENSURES(was_setup_);
+}
+
+
+void node::propagate_inactive() {
+	if(activation_ == inactive) return;
+	if(std::none_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_active(); })) {
+		activation_ = inactive;
+		for(auto&& in : inputs_) in->connected_node().propagate_inactive();
+	}
+}
+
+
+void node::propagate_reactivating() {
+	if(activation_ != inactive) return;
+	if(std::any_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_active(); })) {
+		activation_ = reactivating;
+		for(auto&& in : inputs_) in->connected_node().propagate_reactivating();
+	}
+}
+
+
+void node::set_active() {
+	activation_ = active;
 }
 
 
@@ -150,6 +210,12 @@ void node_output::input_has_connected(node_input& input) {
 }
 
 
+bool node_output::is_active() const {
+	if(connected_input_->is_activated() == false) return false;
+	else return (connected_input_->this_node().activation() == node::active);
+}
+
+
 /////
 
 
@@ -173,7 +239,9 @@ void node_input::pull(time_unit t) {
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 	
-	connected_output_->pull(time_span(start_time, end_time));
+	bool reactivate = (this_node().activation() == node::active) && (connected_node().activation() == node::reactivating);
+	
+	connected_output_->pull(time_span(start_time, end_time), reactivate);
 }
 
 
@@ -197,6 +265,9 @@ void node_input::cancel_read_frame() {
 
 void node_input::set_activated(bool activated) {
 	if(activated_ != activated) activated_ = activated;
+	
+	if(activated) connected_node().propagate_reactivating();
+	else connected_node().propagate_inactive();
 }
 
 }}

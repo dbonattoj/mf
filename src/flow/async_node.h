@@ -44,7 +44,7 @@ public:
 
 	/// \name Read interface, used by connected input.
 	///@{
-	void pull(time_span span) override;
+	void pull(time_span span, bool reactivate) override;
 	
 	/// Begin reading `duration` frames pulled previously.
 	/** For asynchronous views, thje function waits until the frames become available (or end of stream occurs), and

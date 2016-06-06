@@ -37,24 +37,42 @@ class node_job;
 
 /// Node in flow graph, base class.
 class node {
+public:
+	enum activation_state { active, inactive, reactivating };
+
 private:
 	graph& graph_; ///< Graph to which this node belongs.
 	std::vector<std::unique_ptr<node_output>> outputs_; ///< Outputs, by reference.
 	std::vector<std::unique_ptr<node_input>> inputs_; ///< Inputs, by reference.
 
+	std::atomic<activation_state> activation_ {active};
+
 	bool was_setup_ = false; ///< True after node was set up.
 	time_unit prefetch_duration_ = 0; ///< Maximal number of frames after current time that node may prefetch.
-	time_unit min_offset_ = 0; ///< Minimal number of frames that node can be in advance of sink.
-	time_unit max_offset_ = 0; ///< Maximal number of frames that node can be in advance of sink.
 	time_unit stream_duration_ = -1; ///< Total duration of stream for this node, or -1 if undetermined.
 	bool seekable_ = false; ///< Whether this node can handle seek request from input.
 	
 	std::atomic<time_unit> current_time_ {-1}; ///<  Time of last/current frame processed by node.
 	std::atomic<time_unit> end_time_ {-1}; ///< End time of stream, or -1. Always defined when end reached.
 	
-	void propagate_offset_(time_unit min_off, time_unit max_off); ///< Define this node's offsets and preceding node's.
 	void propagate_setup_(); ///< Recursively set up outputs and node of preceding nodes, and then this node.
 	void deduce_stream_properties_(); ///< Define stream properties of non-source node based on input nodes.
+
+public:
+	time_unit minimal_offset_to(const node&) const;
+	time_unit maximal_offset_to(const node&) const;
+		
+	bool precedes(const node& nd) const; ///< True if this node is closer to source than \a nd.
+	bool precedes_strict(const node& nd) const; ///< True if this node is closer to source than \a nd.
+
+	activation_state activation() const { return activation_; }
+	
+	void propagate_inactive();
+	void propagate_reactivating();
+	void set_active();
+
+	const node& first_successor_() const;
+
 
 protected:	
 	explicit node(graph& gr) : graph_(gr) { }
@@ -110,8 +128,6 @@ public:
 	bool was_setup() const noexcept { return was_setup_; }
 
 	time_unit prefetch_duration() const noexcept { return prefetch_duration_; }
-	time_unit min_offset() const noexcept { return min_offset_; }
-	time_unit max_offset() const noexcept { return max_offset_; }
 	bool stream_duration_is_defined() const noexcept { return (stream_duration_ != -1); }
 	time_unit stream_duration() const noexcept { return stream_duration_; }
 	bool is_seekable() const noexcept { return seekable_; }
@@ -135,7 +151,7 @@ public:
 	 ** afterwards, and that the timed span returned by begin_read() will start at `span.start_time()`. If near
 	 ** and, only pulls to end, and span returned by begin_read() will be truncated.
 	 ** For synchronous node types, this recursively pulls and processes frames, while begin_read() just reads them. */
-	virtual void pull(time_span span) = 0;
+	virtual void pull(time_span span, bool reactivate) = 0;
 	
 	/// Begin reading `duration` frames pulled previously.
 	/** Returns timed frame array view `vw` with `vw.duration() == duration` and `vw.start_time() == span.start_time()`
@@ -169,8 +185,6 @@ private:
 	frame_format format_;
 	std::size_t frame_length_;
 	
-	bool active_ = true;
-
 protected:
 	node_output(const node_output&) = delete;
 
@@ -193,7 +207,8 @@ public:
 	node_input& connected_input() const noexcept { MF_EXPECTS(is_connected()); return *connected_input_; }
 	void input_has_connected(node_input&);
 	
-	// TODO adjust format for thin node series
+	bool is_active() const;
+
 	virtual void setup() = 0;
 			
 	/// \name Write interface, used by node.

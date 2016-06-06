@@ -30,7 +30,7 @@ bool multiplex_node::process_next_frame() {
  
 		if(vw) {
 			time_unit t = vw.start_time();
-			
+/*			
 			if(t < this_graph().current_time() + min_offset()
 			|| t > this_graph().current_time() + max_offset()) {
 				//std::cout << prefix << "not wrote (unsync)..." << std::endl;
@@ -38,7 +38,7 @@ bool multiplex_node::process_next_frame() {
 				rng.end_write(0);
 				return true;
 			}
-
+*/
 			rng.end_write(1);
 			
 			curspan = time_span(std::max(t, curspan.start_time()),std::max(t, curspan.start_time())+1);
@@ -80,7 +80,7 @@ void multiplex_node::stop() {
 
 
 
-void multiplex_node_output::setup() {
+void multiplex_node_output::setup() {/*
 	node& connected_node = connected_input().this_node();
 	
 	time_unit offset_diff = this_node().max_offset() - connected_node.min_offset();
@@ -88,10 +88,10 @@ void multiplex_node_output::setup() {
 
 	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
-}	
+*/}	
 
 
-void multiplex_node_output::pull(time_span span) {
+void multiplex_node_output::pull(time_span span, bool reactivate) {
 	time_unit t = span.start_time();
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {

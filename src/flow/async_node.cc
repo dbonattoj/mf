@@ -26,24 +26,32 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 bool async_node::process_next_frame() {
-	usleep(200000);
+	//usleep(200000);
 
 	node_job job = make_job();
 	time_unit t;
-	
+		
 	// begin writing frame to output
 	// output determines time t of frame to write
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
 	if(out_view.is_null()) return false; // stopped
-	
-		
-	if(t > out->connected_input().pull_time() + prefetch_duration()) {
+			
+	if(t > out->connected_input().this_node().current_time() + out->connected_input().future_window_duration() + prefetch_duration()) {
 		//MF_DEBUG_EXPR(t, out->connected_input().pull_time(), prefetch_duration());
 		
 		out->cancel_write_frame();
 		usleep(100000);
 		return ! this_graph().stop_event().was_notified();
+	}
+	
+
+	if(activation() == active) {
+		if(!(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration()))
+			MF_DEBUG_EXPR(t, out->connected_input().this_node().current_time(), out->connected_input().past_window_duration());
+		
+		MF_ASSERT(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration());
+		MF_ASSERT(t <= out->connected_input().this_node().current_time() + out->connected_input().future_window_duration() + prefetch_duration());
 	}
 	
 	set_current_time(t);
@@ -154,15 +162,14 @@ void async_node::stop() {
 void async_node_output::setup() {
 	node& connected_node = connected_input().this_node();
 	
-	time_unit offset_diff = this_node().max_offset() - connected_node.min_offset();
-	time_unit required_capacity = 1 + connected_input().past_window_duration() + offset_diff;
+	time_unit required_capacity = 1 + this_node().maximal_offset_to(connected_node) - this_node().minimal_offset_to(connected_node);
 
 	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
 	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	
 
 
-void async_node_output::pull(time_span span) {
+void async_node_output::pull(time_span span, bool reactivate) {
 	time_unit t = span.start_time();
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {
@@ -170,6 +177,7 @@ void async_node_output::pull(time_span span) {
 		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
 	}
+	if(reactivate) this_node().set_active();
 }
 
 

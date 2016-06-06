@@ -333,7 +333,7 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 		lock.lock();
 		
 		// writer might have marked end while reader was waiting
-		if(end_time_ != -1 && read_start_time_ + duration >= end_time_)
+		if(end_time_ != -1 && read_start_time_ + read_duration >= end_time_)
 			read_duration = end_time_ - read_start_time_;
 	}
 	

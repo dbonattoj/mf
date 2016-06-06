@@ -482,3 +482,4 @@ SECTION("activation") {
 		REQUIRE(sink.check());
 	}	
 }
+
