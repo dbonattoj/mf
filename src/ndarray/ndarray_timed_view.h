@@ -26,6 +26,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray_view.h"
 
 namespace mf {
+	
+namespace detail {
+	template<std::size_t Dim, typename T, std::ptrdiff_t Target_dim>
+	class ndarray_timed_view_fcall;
+}
+
 
 /// Ndarray view with absolute time indices associated to first dimension.
 /** Each frame `vw[i]` is associated with time index `t = start_time + i`. */
@@ -37,6 +43,10 @@ private:
 	time_unit start_time_;
 	
 public:
+	using typename base::coordinates_type;
+	using typename base::strides_type;
+	using typename base::span_type;
+
 	/// Create null timed view.
 	ndarray_timed_view() : base(), start_time_(-1) { }
 
@@ -65,6 +75,29 @@ public:
 		if(span().includes(t)) return base::operator[](time_index(t));
 		else throw std::out_of_range("time out of bounds");
 	}
+	
+	ndarray_timed_view section(
+		const coordinates_type& start,
+		const coordinates_type& end,
+		const strides_type& steps = strides_type(1)
+	) const {
+		return ndarray_timed_view(base::section(start, end, steps), start_time_ + start.first());
+	}
+
+	ndarray_timed_view section(const span_type& span, const strides_type& steps = strides_type(1)) const {
+		return section(span.start_pos(), span.end_pos(), steps);
+	}
+	
+	using fcall_result = detail::ndarray_timed_view_fcall<Dim, T, 1>;
+	fcall_result operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
+		return ndarray_timed_view(base::section_(0, start, end, step), start_time_ + start);
+	}
+	fcall_result operator()(std::ptrdiff_t c) const {
+		return ndarray_timed_view(base::section_(0, c, c + 1, 1), start_time_ + c);
+	}
+	fcall_result operator()() const {
+		return *this;
+	}
 
 	time_span span() const { return time_span(start_time(), start_time() + duration()); }
 	
@@ -73,8 +106,9 @@ public:
 		base::reset(vw);
 	}
 };
-// TODO section() etc.
 
 }
+
+#include "ndarray_timed_view.tcc"
 
 #endif

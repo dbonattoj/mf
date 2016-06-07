@@ -34,10 +34,10 @@ namespace detail {
 		static_assert(Target_dim <= Dim, "detail::ndarray_view_fcall target dimension out of bounds");
 	
 	public:
-		using super = ndarray_view<Dim, T>;
+		using base = ndarray_view<Dim, T>;
 
-		ndarray_view_fcall(const super& arr) :
-			super(arr) { }
+		ndarray_view_fcall(const base& arr) :
+			base(arr) { }
 		
 		ndarray_view_fcall<Dim, T, Target_dim + 1>
 		operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {

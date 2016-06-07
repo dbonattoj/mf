@@ -102,7 +102,9 @@ timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 	MF_DEBUG("begin_read... ", nd.input_view_.span());
 	MF_ASSERT(nd.input_view_.span().includes( time_span(pull_time_, pull_time_+duration+1) ));
 	
-	return nd.input_view_;
+	time_span sp = nd.input_view_.span();
+	
+	return nd.input_view_(nd.input_view_.time_index(pull_time_), nd.input_view_.time_index(pull_time_+duration));
 }
 
 
