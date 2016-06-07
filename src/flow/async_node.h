@@ -32,8 +32,10 @@ class async_node;
 
 
 class async_node_output : public node_output {
-private:
+public:
 	std::unique_ptr<shared_ring> ring_;
+
+	time_span allowed_span_;
 
 public:
 	using node_type = async_node;
@@ -75,9 +77,7 @@ private:
 	std::thread thread_;
 	
 	void thread_main_();
-	
-	time_unit pull_time_ = -1;
-
+			
 public:
 	explicit async_node(graph&);
 	~async_node();

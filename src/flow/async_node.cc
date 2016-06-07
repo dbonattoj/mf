@@ -36,24 +36,22 @@ bool async_node::process_next_frame() {
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
 	if(out_view.is_null()) return false; // stopped
+
+	async_node_output& out_ = (async_node_output&)*out;
 			
-	if(t >= out->connected_input().pull_time() + out->connected_input().future_window_duration() + prefetch_duration()) {
-		MF_DEBUG_EXPR(t, out->connected_input().pull_time(), prefetch_duration());
-		
+	if(! out_.allowed_span_.includes(t)) {
+					
 		out->cancel_write_frame();
-		usleep(100000);
+		//usleep(100000);
 		return ! this_graph().stop_event().was_notified();
 	}
 	
-
+/*
 	if(activation() == active) {
-		if(!(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration()))
-			MF_DEBUG_EXPR(t, out->connected_input().this_node().current_time(), out->connected_input().past_window_duration());
-		
 		MF_ASSERT(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration());
 		MF_ASSERT(t <= out->connected_input().this_node().current_time() + out->connected_input().future_window_duration() + prefetch_duration());
 	}
-	
+*/
 	set_current_time(t);
 	job.define_time(t);
 
@@ -127,7 +125,7 @@ void async_node::thread_main_() {
 
 
 async_node::async_node(graph& gr) : filter_node(gr) {
-	set_prefetch_duration(1);
+	set_prefetch_duration(5);
 }
 
 
@@ -170,11 +168,17 @@ void async_node_output::setup() {
 
 
 void async_node_output::pull(time_span span, bool reactivate) {
+	allowed_span_ = time_span(span.start_time(), span.end_time() + this_node().prefetch_duration());
+	
 	time_unit t = span.start_time();
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {
 		if(ring_->is_seekable()) ring_->seek(t);
-		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
+		else if(t > ring_read_t) {
+			allowed_span_ = time_span(ring_read_t, span.end_time() + this_node().prefetch_duration());
+			ring_->skip(t - ring_read_t);
+			allowed_span_ = time_span(span.start_time(), span.end_time() + this_node().prefetch_duration());
+		}
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
 	}
 	if(reactivate) this_node().set_active();

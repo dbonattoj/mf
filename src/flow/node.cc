@@ -31,7 +31,7 @@ time_unit node::minimal_offset_to(const node& target_node) const {
 	for(auto&& out : outputs_) {
 		const node_input& in = out->connected_input();
 		if(in.this_node().precedes(target_node)) {
-			time_unit off = in.this_node().minimal_offset_to(target_node) - in.past_window_duration();
+			time_unit off = in.this_node().minimal_offset_to(target_node) - in.past_window_duration() - 1;
 			minimum = std::min(minimum, off);
 		}
 	}
@@ -287,8 +287,6 @@ void node_input::connect(node_remote_output& output) {
 void node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
 	
-	pull_time_ = t;
-
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 	

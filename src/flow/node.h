@@ -237,7 +237,6 @@ private:
 	node_remote_output* connected_output_ = nullptr;
 		
 	bool activated_ = true;
-	time_unit pull_time_ = -1;
 	
 public:
 	node_input(const node_input&) = delete;
@@ -262,8 +261,6 @@ public:
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);
 	
-	time_unit pull_time() const noexcept { return pull_time_; }
-
 	/// \name Read interface, used by node.
 	///@{
 	void pull(time_unit t);

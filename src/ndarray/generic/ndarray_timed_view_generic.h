@@ -69,6 +69,12 @@ public:
 
 	decltype(auto) operator()() const
 		{ return ndarray_timed_view_generic(base::operator()(), format_); }
+
+	void reset(const ndarray_timed_view_generic& other) noexcept {
+		base::reset(other);
+		format_ = other.format_;
+	}
+	void reset() noexcept { reset(null()); }
 };
 
 

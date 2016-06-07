@@ -2,7 +2,6 @@
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
 #include "node.h"
-#include "../queue/shared_ring.h"
 #include <thread>
 #include <memory>
 
@@ -12,13 +11,10 @@ class multiplex_node;
 
 
 class multiplex_node_output : public node_output {
-private:
-	std::unique_ptr<shared_ring> ring_;
-
 public:
 	using node_type = multiplex_node;
 
-	shared_ring& ring() { return *ring_; }
+	time_unit pull_time_;
 
 	using node_output::node_output;
 	
@@ -43,16 +39,19 @@ public:
 
 
 class multiplex_node final : public node {
-private:
-	using output_rings_vector_type = std::vector<std::reference_wrapper<shared_ring>>;
+public:
+	//using output_rings_vector_type = std::vector<std::reference_wrapper<shared_ring>>;
 	
 	node_input& input_;
-	
 	timed_frame_array_view input_view_;
 	
-	std::thread thread_;
+	std::atomic<time_unit> next_pull_ {-1};
 	
-	output_rings_vector_type output_rings_();
+	const node* common_successor_ = nullptr;
+		
+	std::thread thread_;
+		
+	//output_rings_vector_type output_rings_();
 		
 	void thread_main_();
 

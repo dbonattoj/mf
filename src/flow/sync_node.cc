@@ -46,9 +46,6 @@ bool sync_node::process_next_frame() {
 	auto out_view = out->begin_write_frame(t);
 	MF_ASSERT(! out_view.is_null());
 
-	MF_ASSERT(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration());
-	MF_ASSERT(t <= out->connected_input().this_node().current_time() + out->connected_input().future_window_duration());
-
 	if(end_time() != -1) MF_ASSERT(t < end_time());
 	
 	set_current_time(t);

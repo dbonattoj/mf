@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 namespace mf { namespace flow {
-
+/*
 multiplex_node::output_rings_vector_type multiplex_node::output_rings_() {
 	output_rings_vector_type rings;
 	for(auto&& base_out : outputs()) {
@@ -15,73 +15,38 @@ multiplex_node::output_rings_vector_type multiplex_node::output_rings_() {
 	}
 	return rings;
 }
-
+*/
 
 bool multiplex_node::process_next_frame() {
-	output_rings_vector_type output_rings = output_rings_();
+	usleep(10000);
 	
-	auto it = shared_ring::wait_any_writable(output_rings.begin(), output_rings.end(), this_graph().stop_event());
-		
-	if(it != output_rings.end()) {
-		shared_ring& rng = *it;
-		auto vw = rng.try_begin_write(1);
-
-		auto prefix = (&rng != &(output_rings.front().get())) ? "                             " : " ";
- 
-		if(vw) {
-			time_unit t = vw.start_time();
-			
-			time_unit old_t = current_time();
-			set_current_time(t);
-			
-			if(input_view_.is_null()) {
-				input_.pull(t);
-				input_view_.reset(input_.begin_read_frame(t));
-			} else if(! input_view_.span().includes(t)) {
-				input_.end_read_frame(old_t);
-				input_.pull(t);
-				input_view_.reset(input_.begin_read_frame(t));
-			}
-			
-			
-			MF_DEBUG(t, " <<<in?<<< ", input_view_.span());
-			
-			//if(t >= input_view_.end_time()) {
-			//	input_->end_read_frame(t);
-			//	input_view_.reset( input_->begin_read_frame(0) );
-			//	MF_DEBUG("... ", t, " <<<in?<<< ", input_view_.span());
-			//}
-			
-			rng.end_write(1);
-			
-			std::cout << prefix << "wrote " << vw.start_time() << std::endl;
-		} else {
-			std::cout << prefix << "not wrote" << std::endl;
-		}
+	if(input_view_.is_null()) {
+		input_.pull(0);
+		set_current_time(0);
+		input_view_.reset( input_.begin_read_frame(0) );
+	} else if(next_pull_ != current_time()) {
+		MF_DEBUG("pulling ", next_pull_.load(), "...");
+		input_.end_read_frame(current_time());
+		set_current_time(next_pull_);
+		input_.pull(next_pull_);
+		input_view_.reset( input_.begin_read_frame(next_pull_) );
 	}
-				usleep(100000);
-		
 	return true;
 }
 
 void multiplex_node::thread_main_() {
-	const node& suc = first_successor();
-	time_unit min_off = minimal_offset_to(suc);
-	time_unit max_off = maximal_offset_to(suc);
-
 	for(;;) process_next_frame();
 }
 
 
 void multiplex_node::pre_setup() {
-	const node& suc = first_successor();
-	time_unit min_off = minimal_offset_to(suc);
-	time_unit max_off = maximal_offset_to(suc);
+	common_successor_ = &first_successor();
 
-	MF_DEBUG_EXPR(min_off, max_off, max_off-min_off);	
-
-	input_.set_past_window(-min_off + 1);
-	input_.set_future_window(max_off + 1);
+	time_unit min_off = minimal_offset_to(*common_successor_);
+	time_unit max_off = maximal_offset_to(*common_successor_);
+	
+	input_.set_past_window(-min_off);
+	input_.set_future_window(max_off);
 }
 
 
@@ -106,50 +71,48 @@ void multiplex_node::stop() {
 
 
 void multiplex_node_output::setup() {
-	node& connected_node = connected_input().this_node();
-
-	time_unit required_capacity = 1 + this_node().maximal_offset_to(connected_node) - this_node().minimal_offset_to(connected_node);
-
-	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
-	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
 }	
 
 
 void multiplex_node_output::pull(time_span span, bool reactivate) {
-	time_unit t = span.start_time();
-	time_unit ring_read_t = ring_->read_start_time();
-	if(t != ring_read_t) {
-		if(ring_->is_seekable()) ring_->seek(t);
-		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
-		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
-	}
+	multiplex_node& nd = (multiplex_node&)this_node();
+	time_span exp_span(
+		nd.common_successor_->current_time()+nd.minimal_offset_to(*nd.common_successor_),
+		nd.common_successor_->current_time()+nd.maximal_offset_to(*nd.common_successor_)+1
+	);
+	
+	nd.next_pull_ = nd.common_successor_->current_time();
+	
+	MF_DEBUG(exp_span.includes(span), " = ", span, " in? ", exp_span);
+	
+	MF_ASSERT(exp_span.includes(span));
+		
+	pull_time_ = span.start_time();
 }
 
 
 timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
-	event& stop_event = this_node().this_graph().stop_event();
-	
-	for(;;) {
-		bool status = ring_->wait_readable(stop_event);
-		if(! status) break;
-		
-		timed_frame_array_view view = ring_->try_begin_read(duration);
-		if(view.is_null()) continue;
-		
-		return view;
+	multiplex_node& nd = (multiplex_node&)this_node();
+
+	while(nd.input_view_.is_null() ||
+	! nd.input_view_.span().includes( time_span(pull_time_, pull_time_+duration+1) )) {
+		usleep(100);
 	}
 	
-	return timed_frame_array_view::null();
+	MF_DEBUG("begin_read... ", nd.input_view_.span());
+	MF_ASSERT(nd.input_view_.span().includes( time_span(pull_time_, pull_time_+duration+1) ));
+	
+	return nd.input_view_;
 }
 
 
 void multiplex_node_output::end_read(time_unit duration) {
-	ring_->end_read(duration);
+
 }
 
 
 time_unit multiplex_node_output::end_time() const {
-	return ring_->end_time();
+	return 100;
 }
 
 

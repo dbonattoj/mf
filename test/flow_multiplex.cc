@@ -27,9 +27,10 @@ TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 	const std::vector<bool>& act2     { 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1,  0,  0 };
 
 	
-	auto& filt1 = gr.add_filter<passthrough_filter, flow::async_node>(0, 0);
-	auto& filt2 = gr.add_filter<passthrough_filter, flow::sync_node>(0, 0);
-	filt1.this_node().set_prefetch_duration(3);
+	auto& filt1 = gr.add_filter<passthrough_filter, flow::async_node>(3, 4);
+	auto& filt2 = gr.add_filter<passthrough_filter, flow::async_node>(5, 2);
+	filt1.this_node().set_prefetch_duration(4);
+	filt2.this_node().set_prefetch_duration(2);
 	//filt1.activation = act1;
 	filt1.input.connect(mout1);
 	//filt2.activation = act1;
@@ -46,7 +47,7 @@ TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 	gr.setup();
 	MF_DEBUG("run...");
 	gr.callback_function = [&](time_unit t) {
-		std::cout << "..." << std::endl;
+		//std::cout << "..." << std::endl;
 	};
 	gr.run();
 }

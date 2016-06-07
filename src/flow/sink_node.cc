@@ -20,6 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "sink_node.h"
 #include "node_job.h"
+#include <unistd.h>
 
 namespace mf { namespace flow {
 	
@@ -40,6 +41,8 @@ void sink_node::stop() { }
 
 
 void sink_node::pull(time_unit t) {
+//	usleep(10000);
+	
 	// fail if reading past current_time, but end already reached
 	if(t > current_time() && reached_end())
 		throw std::invalid_argument("cannot pull frame beyond end");
