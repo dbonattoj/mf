@@ -18,7 +18,7 @@ multiplex_node::output_rings_vector_type multiplex_node::output_rings_() {
 */
 
 bool multiplex_node::process_next_frame() {
-	usleep(10000);
+	usleep(100000);
 	
 	if(input_view_.is_null()) {
 		input_.pull(0);
@@ -82,9 +82,7 @@ void multiplex_node_output::pull(time_span span, bool reactivate) {
 	);
 	
 	nd.next_pull_ = nd.common_successor_->current_time();
-	
-	MF_DEBUG(exp_span.includes(span), " = ", span, " in? ", exp_span);
-	
+		
 	MF_ASSERT(exp_span.includes(span));
 		
 	pull_time_ = span.start_time();
@@ -94,12 +92,14 @@ void multiplex_node_output::pull(time_span span, bool reactivate) {
 timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 	multiplex_node& nd = (multiplex_node&)this_node();
 
+	if(end_time() != -1 && pull_time_ + duration > end_time())
+		duration = end_time() - pull_time_;
+	
 	while(nd.input_view_.is_null() ||
 	! nd.input_view_.span().includes( time_span(pull_time_, pull_time_+duration+1) )) {
 		usleep(100);
 	}
-	
-	MF_DEBUG("begin_read... ", nd.input_view_.span());
+
 	MF_ASSERT(nd.input_view_.span().includes( time_span(pull_time_, pull_time_+duration+1) ));
 	
 	time_span sp = nd.input_view_.span();
@@ -114,7 +114,8 @@ void multiplex_node_output::end_read(time_unit duration) {
 
 
 time_unit multiplex_node_output::end_time() const {
-	return 100;
+	multiplex_node& nd = (multiplex_node&)this_node();
+	return nd.input_.end_time();
 }
 
 
