@@ -204,7 +204,15 @@ bool async_node_output::pull(time_span span, bool reconnected) {
 	}
 	
 	event& stop_event = this_node().this_graph().stop_event();
-	return ring_->wait_readable(span.duration(), stop_event);
+	
+	while(ring_->readable_duration() < span.duration()) {
+		bool cont = ring_->wait_readable(stop_event);
+		if(! cont) return false;
+		
+		if(ring_->writer_reached_end()) return true;
+	}
+	
+	return true;
 }
 
 

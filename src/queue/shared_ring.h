@@ -149,19 +149,12 @@ public:
 	/// Must be called by the reader thread only.
 	///@{
 
-	bool wait_readable(time_unit duration, event& break_event);
-
 	/// Wait until a frame become readable, or \a break_event occurs.
 	/** If no frame is readable (either because writer has not written enough frames from the ring buffer yet or read
 	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
 	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
 	 ** Also waits if write start position is at end time, until \a break_event occurs. */
-	bool wait_readable(event& break_event) {
-		return wait_readable(1, break_event);
-	}
-
-
-
+	bool wait_readable(event& break_event);
 
 	//template<typename Iterator>
 	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);
