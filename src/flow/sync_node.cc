@@ -58,7 +58,8 @@ bool sync_node::process_next_frame() {
 	bool stopped = false;
 	for(auto&& in : inputs()) {	
 		if(in->is_activated()) {
-			in->pull(t);
+			bool pulled = in->pull(t);
+			if(! pulled) return false;
 			
 			timed_frame_array_view in_view = in->begin_read_frame(t);
 			MF_ASSERT(in_view.span().includes(t));
@@ -105,17 +106,22 @@ void sync_node_output::setup() {
 }
 
 
-void sync_node_output::pull(time_span span, bool reactivate) {
+bool sync_node_output::pull(time_span span, bool reconnected) {
 	// if non-sequential: seek ring to new position
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
 	
-	if(reactivate) this_node().set_active();
+	if(reconnected) {
+		this_node().set_current_time(span.start_time());
+		this_node().set_online();
+	}
 
 	// pull frames from node until requested span filled, or end reached	
 	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != this_node().end_time()) {
-		this_node().process_next_frame();
+		bool ok = this_node().process_next_frame();
+		if(! ok) return false;
 	}
+	return true;
 }
 
 

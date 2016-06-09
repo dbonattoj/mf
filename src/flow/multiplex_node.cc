@@ -6,23 +6,11 @@
 #include <unistd.h>
 
 namespace mf { namespace flow {
-/*
-multiplex_node::output_rings_vector_type multiplex_node::output_rings_() {
-	output_rings_vector_type rings;
-	for(auto&& base_out : outputs()) {
-		multiplex_node_output& out = dynamic_cast<multiplex_node_output&>(*base_out);
-		rings.emplace_back(out.ring());
-	}
-	return rings;
-}
-*/
 
-bool multiplex_node::process_next_frame() {
-	usleep(100000);
-	
+bool multiplex_node::process_next_frame() {	
 	if(input_view_.is_null()) {
-		input_.pull(0);
 		set_current_time(0);
+		input_.pull(0);
 		input_view_.reset( input_.begin_read_frame(0) );
 	} else if(next_pull_ != current_time()) {
 		MF_DEBUG("pulling ", next_pull_.load(), "...");
@@ -74,7 +62,7 @@ void multiplex_node_output::setup() {
 }	
 
 
-void multiplex_node_output::pull(time_span span, bool reactivate) {
+bool multiplex_node_output::pull(time_span span, bool reconnect) {
 	multiplex_node& nd = (multiplex_node&)this_node();
 	time_span exp_span(
 		nd.common_successor_->current_time()+nd.minimal_offset_to(*nd.common_successor_),
@@ -83,9 +71,12 @@ void multiplex_node_output::pull(time_span span, bool reactivate) {
 	
 	nd.next_pull_ = nd.common_successor_->current_time();
 		
-	MF_ASSERT(exp_span.includes(span));
-		
-	pull_time_ = span.start_time();
+	if(exp_span.includes(span)) {
+		pull_time_ = span.start_time();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 

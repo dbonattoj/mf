@@ -204,26 +204,26 @@ void node::setup_sink() {
 }
 
 
-void node::propagate_inactive() {
-	if(activation_ == inactive) return;
-	if(std::none_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_active(); })) {
-		activation_ = inactive;
-		for(auto&& in : inputs_) in->connected_node().propagate_inactive();
+void node::propagate_offline_state() {
+	if(state_ == offline) return;
+	if(std::none_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_online(); })) {
+		state_ = offline;
+		for(auto&& in : inputs_) in->connected_node().propagate_offline_state();
 	}
 }
 
 
-void node::propagate_reactivating() {
-	if(activation_ != inactive) return;
-	if(std::any_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_active(); })) {
-		activation_ = reactivating;
-		for(auto&& in : inputs_) in->connected_node().propagate_reactivating();
+void node::propagate_reconnecting_state() {
+	if(state_ != offline) return;
+	if(std::any_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_online(); })) {
+		state_ = reconnecting;
+		for(auto&& in : inputs_) in->connected_node().propagate_reconnecting_state();
 	}
 }
 
 
-void node::set_active() {
-	activation_ = active;
+void node::set_online() {
+	state_ = online;
 }
 
 
@@ -258,9 +258,9 @@ void node_output::input_has_connected(node_input& input) {
 }
 
 
-bool node_output::is_active() const {
+bool node_output::is_online() const {
 	if(connected_input_->is_activated() == false) return false;
-	else return (connected_input_->this_node().activation() == node::active);
+	else return (connected_input_->this_node().state() == node::online);
 }
 
 
@@ -284,15 +284,15 @@ void node_input::connect(node_remote_output& output) {
 }
 
 
-void node_input::pull(time_unit t) {
+bool node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
 	
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 	
-	bool reactivate = (this_node().activation() == node::active) && (connected_node().activation() == node::reactivating);
+	bool reconnect = (this_node().state() == node::online) && (connected_node().state() == node::reconnecting);
 	
-	connected_output_->pull(time_span(start_time, end_time), reactivate);
+	return connected_output_->pull(time_span(start_time, end_time), reconnect);
 }
 
 
@@ -315,10 +315,11 @@ void node_input::cancel_read_frame() {
 
 
 void node_input::set_activated(bool activated) {
-	if(activated_ != activated) activated_ = activated;
-	
-	if(activated) connected_node().propagate_reactivating();
-	else connected_node().propagate_inactive();
+	if(activated_ != activated) {
+		activated_ = activated;
+		if(activated) connected_node().propagate_reconnecting_state();
+		else connected_node().propagate_offline_state();
+	}
 }
 
 }}

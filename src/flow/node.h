@@ -38,14 +38,14 @@ class node_job;
 /// Node in flow graph, base class.
 class node {
 public:
-	enum activation_state { active, inactive, reactivating };
+	enum online_state { online, offline, reconnecting };
 
 private:
 	graph& graph_; ///< Graph to which this node belongs.
 	std::vector<std::unique_ptr<node_output>> outputs_; ///< Outputs, by reference.
 	std::vector<std::unique_ptr<node_input>> inputs_; ///< Inputs, by reference.
 
-	std::atomic<activation_state> activation_ {active};
+	std::atomic<online_state> state_ {online};
 
 	bool was_pre_setup_ = false;
 	bool was_setup_ = false; ///< True after node was set up.
@@ -69,14 +69,14 @@ public:
 
 	const node& first_successor() const;
 
-	activation_state activation() const { return activation_; }
+	online_state state() const { return state_; }
 	
-	void propagate_inactive();
-	void propagate_reactivating();
-	void set_active();
+	void propagate_offline_state();
+	void propagate_reconnecting_state();
+	void set_online();
 
 
-protected:	
+public:	
 	explicit node(graph& gr) : graph_(gr) { }
 	node(const node&) = delete;
 	node& operator=(const node&) = delete;
@@ -126,7 +126,7 @@ public:
 	virtual bool process_next_frame() = 0;
 	
 	time_unit end_time() const noexcept { return end_time_; }
-	[[deprecated]] bool reached_end() const noexcept;
+	bool reached_end() const noexcept;
 
 	bool was_setup() const noexcept { return was_setup_; }
 
@@ -136,7 +136,7 @@ public:
 	bool is_seekable() const noexcept { return seekable_; }
 	bool is_bounded() const;
 
-	[[deprecated]] time_unit current_time() const noexcept { return current_time_; }
+	time_unit current_time() const noexcept { return current_time_; }
 };
 
 /// Output port of another node, read interface for connected node.
@@ -146,15 +146,13 @@ public:
 class node_remote_output {
 public:
 	virtual node_output& this_output() noexcept = 0;
-
-	virtual bool may_pull() const { return true; }
 	
 	/// Pull the frames for time span \a span from the node.
 	/** Must be called prior to begin_read(). Ensures that `span.duration()` frames can be read using begin_read()
 	 ** afterwards, and that the timed span returned by begin_read() will start at `span.start_time()`. If near
 	 ** and, only pulls to end, and span returned by begin_read() will be truncated.
 	 ** For synchronous node types, this recursively pulls and processes frames, while begin_read() just reads them. */
-	virtual void pull(time_span span, bool reactivate) = 0;
+	virtual bool pull(time_span span, bool reconnect) = 0;
 	
 	/// Begin reading `duration` frames pulled previously.
 	/** Returns timed frame array view `vw` with `vw.duration() == duration` and `vw.start_time() == span.start_time()`
@@ -211,7 +209,7 @@ public:
 	node& connected_node() const noexcept;
 	void input_has_connected(node_input&);
 	
-	bool is_active() const;
+	bool is_online() const;
 
 	virtual void setup() = 0;
 			
@@ -263,7 +261,7 @@ public:
 	
 	/// \name Read interface, used by node.
 	///@{
-	void pull(time_unit t);
+	bool pull(time_unit t);
 	timed_frame_array_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
 	void cancel_read_frame();

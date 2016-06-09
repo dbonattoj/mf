@@ -22,7 +22,7 @@ public:
 	
 	/// \name Read interface, used by connected input.
 	///@{
-	void pull(time_span, bool reactivate) override;
+	bool pull(time_span, bool reactivate) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
@@ -39,9 +39,7 @@ public:
 
 
 class multiplex_node final : public node {
-public:
-	//using output_rings_vector_type = std::vector<std::reference_wrapper<shared_ring>>;
-	
+public:	
 	node_input& input_;
 	timed_frame_array_view input_view_;
 	
@@ -50,9 +48,7 @@ public:
 	const node* common_successor_ = nullptr;
 		
 	std::thread thread_;
-		
-	//output_rings_vector_type output_rings_();
-		
+			
 	void thread_main_();
 
 public:

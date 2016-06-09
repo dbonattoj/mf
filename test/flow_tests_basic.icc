@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 flow::graph gr;
 auto shp = make_ndsize(10, 10);
 
+
 SECTION("basic") {		
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
@@ -362,6 +363,7 @@ SECTION("basic") {
 	}
 }
 
+
 SECTION("activation") {
 	constexpr int n = noframe;
 	
@@ -395,7 +397,7 @@ SECTION("activation") {
 		REQUIRE(gr.current_time() == last);
 	}
 
-	SECTION("source -> sink") {
+	SECTION("source -> sink 2") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
 		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_and);
 		sink.input.connect(source.output);
@@ -405,6 +407,7 @@ SECTION("activation") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
+
 
 
 	SECTION("source -> passthrough -> sink") {
@@ -435,7 +438,6 @@ SECTION("activation") {
 			REQUIRE(gr.current_time() == last);
 		}
 	}
-
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
@@ -478,6 +480,6 @@ SECTION("activation") {
 		gr.run_until(last);
 		
 		REQUIRE(sink.check());
-	}	
+	}
 }
 

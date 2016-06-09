@@ -46,7 +46,7 @@ public:
 
 	/// \name Read interface, used by connected input.
 	///@{
-	void pull(time_span span, bool reactivate) override;
+	bool pull(time_span span, bool reconnected) override;
 	
 	/// Begin reading `duration` frames pulled previously.
 	/** For asynchronous views, thje function waits until the frames become available (or end of stream occurs), and
@@ -72,9 +72,11 @@ public:
  ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
  ** in graph. */
 class async_node final : public filter_node {
-private:
+public:
 	bool running_ = false;
 	std::thread thread_;
+	
+	std::atomic<bool> reconnect_flag_ {false};
 	
 	void thread_main_();
 			

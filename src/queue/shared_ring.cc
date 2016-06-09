@@ -132,6 +132,8 @@ bool shared_ring::wait_writable(event& break_event) {
 
 	while(writable_time_span_().duration() == 0) {
 		writer_state_ = 1;
+
+			MF_DEBUG("wait_writable........ broke:", ((sticky_event&)break_event).was_notified());
 		
 		lock.unlock();
 		event& ev = event::wait_any(reader_idle_event_, reader_seek_event_, break_event);
@@ -158,7 +160,7 @@ void shared_ring::end_write(time_unit written_duration, bool mark_end) {
 		if(mark_end) end_time_ = ring_.write_start_time();
 	}
 	
-	writer_state_ = idle;
+	writer_state_ = idle;	
 	writer_idle_event_.notify();
 	
 	// notify even if no frame was written:
@@ -256,17 +258,26 @@ auto shared_ring::try_begin_read(time_unit original_duration) -> section_view_ty
 }
 
 
-
-bool shared_ring::wait_readable(event& break_event) {
+bool shared_ring::wait_readable(time_unit original_duration, event& break_event) {
+	if(original_duration > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
 	if(reader_state_ != idle) throw sequencing_error("read not idle");
 	
 	std::unique_lock<std::mutex> lock(mutex_);
+
+	time_unit duration = original_duration;
+	if(end_time_ != -1)
+		if(read_start_time_ + duration > end_time_) duration = end_time_ - read_start_time_;
 	
-	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() == 0)
+	if(duration == 0) return true;
+	
+	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() < duration)
 		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
 
-	while(ring_.readable_duration() == 0) {
-		reader_state_ = 1;
+	while(ring_.readable_duration() < duration) {		
+		reader_state_ = duration;
+	
+			MF_DEBUG("wait_readable........ orig=", original_duration, " dur=", duration, " broke:", ((sticky_event&)break_event).was_notified());
+
 		
 		lock.unlock();
 		event& ev = event::wait_any(writer_idle_event_, break_event);
@@ -274,8 +285,17 @@ bool shared_ring::wait_readable(event& break_event) {
 		
 		reader_state_ = idle;
 		
-		if(ev == break_event) return false;
+		if(ev == break_event) {
+		//	MF_DEBUG("broke during wait_readable");
+			return false;
+		}
+		
+		if(end_time_ != -1 && read_start_time_ + duration >= end_time_)
+			duration = end_time_ - read_start_time_;
 	}
+	
+	//	MF_DEBUG("ring_.readable_duration() = ", ring_.readable_duration());
+
 	
 	return true;
 }

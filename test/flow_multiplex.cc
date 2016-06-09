@@ -29,14 +29,14 @@ TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 
 	
 	auto& filt1 = gr.add_filter<passthrough_filter, flow::async_node>(3, 4);
-	auto& filt2 = gr.add_filter<passthrough_filter, flow::sync_node>(5, 2);
+	auto& filt2 = gr.add_filter<passthrough_filter, flow::async_node>(5, 2);
 	auto& filt3 = gr.add_filter<passthrough_filter, flow::async_node>(1, 1);
 	filt1.this_node().set_prefetch_duration(4);
 //	filt2.this_node().set_prefetch_duration(0);
 	filt3.this_node().set_prefetch_duration(5);
-	//filt1.activation = act1;
+	filt1.activation = act1;
 	filt1.input.connect(mout1);
-	//filt2.activation = act1;
+	filt2.activation = act1;
 	filt2.input.connect(mout2);
 	filt3.input.connect(filt2.output);
 	

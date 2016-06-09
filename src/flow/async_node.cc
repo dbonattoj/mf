@@ -22,11 +22,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_job.h"
 #include "graph.h"
 #include <unistd.h>
+#include <cstdlib>
 
 namespace mf { namespace flow {
 
 bool async_node::process_next_frame() {
-	//usleep(200000);
+	//usleep(std::rand() % 200000);
 
 	node_job job = make_job();
 	time_unit t;
@@ -38,14 +39,15 @@ bool async_node::process_next_frame() {
 	if(out_view.is_null()) return false; // stopped
 
 	async_node_output& out_ = (async_node_output&)*out;
-			
+		/*
 	if(! out_.allowed_span_.includes(t)) {
 					
 		out->cancel_write_frame();
-		//usleep(100000);
-		return ! this_graph().stop_event().was_notified();
+		usleep(100);
+		MF_DEBUG(t, " not in ", out_.allowed_span_);
+		return ! this_graph().stop_event().was_notified(); // may change
 	}
-	
+	*/
 /*
 	if(activation() == active) {
 		MF_ASSERT(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration());
@@ -54,6 +56,12 @@ bool async_node::process_next_frame() {
 */
 	set_current_time(t);
 	job.define_time(t);
+	
+	
+	if(state() == reconnecting && reconnect_flag_) {
+		set_online();
+		reconnect_flag_ = false;
+	}
 
 	// with time defined, run preprocess
 	// concrete node may activate/desactivate inputs now
@@ -68,7 +76,13 @@ bool async_node::process_next_frame() {
 		if(in->is_activated()) {
 			// pull frame t from input
 			// for sequential node: frame is now processed
-			in->pull(t);
+			bool pulled = in->pull(t);
+			if(! pulled) {
+				stopped = true; break;
+				
+				//out_.allowed_span_ = time_span(out_.allowed_span_.start_time(), t);
+				//return true; // TODO handle correctly
+			}
 			
 			// begin reading frame 
 			timed_frame_array_view in_view = in->begin_read_frame(t);
@@ -111,6 +125,8 @@ bool async_node::process_next_frame() {
 	job.pop_output()->end_write_frame(reached_end);
 	
 	if(reached_end) mark_end();
+	
+	//MF_DEBUG("processed ", t);
 		
 	return true;
 }
@@ -167,7 +183,7 @@ void async_node_output::setup() {
 }	
 
 
-void async_node_output::pull(time_span span, bool reactivate) {
+bool async_node_output::pull(time_span span, bool reconnected) {
 	allowed_span_ = time_span(span.start_time(), span.end_time() + this_node().prefetch_duration());
 	
 	time_unit t = span.start_time();
@@ -181,24 +197,21 @@ void async_node_output::pull(time_span span, bool reactivate) {
 		}
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
 	}
-	if(reactivate) this_node().set_active();
+	
+	if(reconnected) {
+		async_node& nd = (async_node&)this_node();
+		nd.reconnect_flag_ = true;
+	}
+	
+	event& stop_event = this_node().this_graph().stop_event();
+	return ring_->wait_readable(span.duration(), stop_event);
 }
 
 
 timed_frame_array_view async_node_output::begin_read(time_unit duration) {
-	event& stop_event = this_node().this_graph().stop_event();
-	
-	for(;;) {
-		bool status = ring_->wait_readable(stop_event);
-		if(! status) break;
-		
-		timed_frame_array_view view = ring_->try_begin_read(duration);
-		if(view.is_null()) continue;
-		
-		return view;
-	}
-	
-	return timed_frame_array_view::null();
+	auto vw = ring_->try_begin_read(duration);
+	MF_ASSERT(! vw.is_null());
+	return vw;
 }
 
 

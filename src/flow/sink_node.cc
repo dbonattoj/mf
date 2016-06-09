@@ -64,7 +64,9 @@ void sink_node::pull(time_unit t) {
 	bool stopped = false;
 	for(auto&& in : inputs()) {
 		if(in->is_activated()) {
-			in->pull(t);
+			bool pulled = in->pull(t);
+			if(! pulled) return;
+			
 			timed_frame_array_view in_view = in->begin_read_frame(t);
 			if(in_view.is_null()) { stopped = true; break; }
 			

@@ -51,8 +51,8 @@ public:
 		return remote_output_.frame_shape();
 	}
 	
-	void pull(time_span span, bool reactivate) override {
-		this_output().pull(span, reactivate);
+	bool pull(time_span span, bool reactivate) override {
+		return this_output().pull(span, reactivate);
 	}
 	
 	timed_frame_array_view begin_read(time_unit duration) override {

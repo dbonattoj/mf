@@ -44,7 +44,7 @@ public:
 	
 	/// \name Read interface, used by connected input.
 	///@{
-	void pull(time_span, bool reactivate) override;
+	bool pull(time_span, bool reconnected) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
