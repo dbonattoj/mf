@@ -40,6 +40,12 @@ class node {
 public:
 	enum online_state { online, offline, reconnecting };
 
+	enum : time_unit {
+		pull_stopped = -1,
+		pull_temporary_failure = -2
+	};
+
+
 private:
 	graph& graph_; ///< Graph to which this node belongs.
 	std::vector<std::unique_ptr<node_output>> outputs_; ///< Outputs, by reference.
@@ -152,7 +158,7 @@ public:
 	 ** afterwards, and that the timed span returned by begin_read() will start at `span.start_time()`. If near
 	 ** and, only pulls to end, and span returned by begin_read() will be truncated.
 	 ** For synchronous node types, this recursively pulls and processes frames, while begin_read() just reads them. */
-	virtual bool pull(time_span span, bool reconnect) = 0;
+	virtual time_unit pull(time_span span, bool reconnect) = 0;
 	
 	/// Begin reading `duration` frames pulled previously.
 	/** Returns timed frame array view `vw` with `vw.duration() == duration` and `vw.start_time() == span.start_time()`
@@ -261,7 +267,7 @@ public:
 	
 	/// \name Read interface, used by node.
 	///@{
-	bool pull(time_unit t);
+	time_unit pull(time_unit t);
 	timed_frame_array_view begin_read_frame(time_unit t);
 	void end_read_frame(time_unit t);
 	void cancel_read_frame();

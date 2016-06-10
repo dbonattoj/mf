@@ -62,7 +62,7 @@ void multiplex_node_output::setup() {
 }	
 
 
-bool multiplex_node_output::pull(time_span span, bool reconnect) {
+time_unit multiplex_node_output::pull(time_span span, bool reconnect) {
 	multiplex_node& nd = (multiplex_node&)this_node();
 	time_span exp_span(
 		nd.common_successor_->current_time()+nd.minimal_offset_to(*nd.common_successor_),
@@ -73,9 +73,9 @@ bool multiplex_node_output::pull(time_span span, bool reconnect) {
 		
 	if(exp_span.includes(span)) {
 		pull_time_ = span.start_time();
-		return true;
+		return span.duration(); // todo trunc
 	} else {
-		return false;
+		return node::pull_temporary_failure;
 	}
 }
 

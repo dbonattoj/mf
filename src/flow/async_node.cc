@@ -72,32 +72,33 @@ bool async_node::process_next_frame() {
 	
 	// pull & begin reading from activated inputs
 	bool stopped = false;
-	for(auto&& in : inputs()) {
-		if(in->is_activated()) {
-			// pull frame t from input
-			// for sequential node: frame is now processed
-			bool pulled = in->pull(t);
-			if(! pulled) {
-				stopped = true; break;
-				
-				//out_.allowed_span_ = time_span(out_.allowed_span_.start_time(), t);
-				//return true; // TODO handle correctly
-			}
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		// pull frame t from input
+		// for sequential node: frame is now processed
+		time_unit pull_result = in->pull(t);
+		if(pull_result == node::pull_stopped) {
+			stopped = true; break;
+		} else if(pull_result == node::pull_temporary_failure) { 
 			
-			// begin reading frame 
-			timed_frame_array_view in_view = in->begin_read_frame(t);
-			if(in_view.is_null()) { stopped = true; break; }
-			MF_ASSERT(in_view.span().includes(t));
-			
-			// add to job
-			job.push_input(*in, in_view);
+			//out_.allowed_span_ = time_span(out_.allowed_span_.start_time(), t);
+			//return true; // TODO handle correctly
 		}
 	}
 	
 	if(stopped) {
 		// stopped while reading from input:
-		// need to cancel output and already-opened inputs, and then quit
+		// need to cancel output and then quit
 		return false;
+	}
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		// begin reading frame 
+		timed_frame_array_view in_view = in->begin_read_frame(t);
+		MF_ASSERT(! in_view.is_null());
+		MF_ASSERT(in_view.span().includes(t));
+		
+		// add to job
+		job.push_input(*in, in_view);
 	}
 	
 	// process frame in concrete subclass
@@ -183,7 +184,7 @@ void async_node_output::setup() {
 }	
 
 
-bool async_node_output::pull(time_span span, bool reconnected) {
+time_unit async_node_output::pull(time_span span, bool reconnected) {
 	allowed_span_ = time_span(span.start_time(), span.end_time() + this_node().prefetch_duration());
 	
 	time_unit t = span.start_time();
@@ -207,12 +208,12 @@ bool async_node_output::pull(time_span span, bool reconnected) {
 	
 	while(ring_->readable_duration() < span.duration()) {
 		bool cont = ring_->wait_readable(stop_event);
-		if(! cont) return false;
+		if(! cont) return node::pull_stopped;
 		
-		if(ring_->writer_reached_end()) return true;
+		if(ring_->writer_reached_end()) return ring_->readable_duration();
 	}
 	
-	return true;
+	return ring_->readable_duration();
 }
 
 

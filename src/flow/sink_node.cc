@@ -62,21 +62,24 @@ void sink_node::pull(time_unit t) {
 
 	// pull & begin reading from activated inputs
 	bool stopped = false;
-	for(auto&& in : inputs()) {
-		if(in->is_activated()) {
-			bool pulled = in->pull(t);
-			if(! pulled) return;
-			
-			timed_frame_array_view in_view = in->begin_read_frame(t);
-			if(in_view.is_null()) { stopped = true; break; }
-			
-			job.push_input(*in, in_view);
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		time_unit pull_result = in->pull(t);
+		if(pull_result == pull_stopped) {
+			return;
+		} else if(pull_result == pull_temporary_failure) {
+			return;
 		}
 	}
 	
 	if(stopped) {
-		// if stopped, close already-openned inputs and quit
 		return;
+	}
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {		
+		timed_frame_array_view in_view = in->begin_read_frame(t);
+		if(in_view.is_null()) { stopped = true; break; }
+		
+		job.push_input(*in, in_view);
 	}
 
 	// process frame in concrete subclass

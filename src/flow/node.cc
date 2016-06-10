@@ -284,7 +284,7 @@ void node_input::connect(node_remote_output& output) {
 }
 
 
-bool node_input::pull(time_unit t) {
+time_unit node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
 	
 	time_unit start_time = std::max(time_unit(0), t - past_window_);

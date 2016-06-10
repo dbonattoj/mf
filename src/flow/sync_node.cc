@@ -55,22 +55,22 @@ bool sync_node::process_next_frame() {
 
 	job.push_output(*out, out_view);
 	
-	bool stopped = false;
-	for(auto&& in : inputs()) {	
-		if(in->is_activated()) {
-			bool pulled = in->pull(t);
-			if(! pulled) return false;
-			
-			timed_frame_array_view in_view = in->begin_read_frame(t);
-			MF_ASSERT(in_view.span().includes(t));
-			if(in_view.is_null()) { stopped = true; break; }
-			
-			job.push_input(*in, in_view);
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		time_unit pull_result = in->pull(t);
+		if(pull_result == pull_stopped) {
+			return false;
+		} else if(pull_result == pull_temporary_failure) {
+			//
+			return false;
 		}
 	}
 	
-	if(stopped) {
-		return false;
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		timed_frame_array_view in_view = in->begin_read_frame(t);
+		MF_ASSERT(! in_view.is_null());
+		MF_ASSERT(in_view.span().includes(t));
+		
+		job.push_input(*in, in_view);
 	}
 
 	process_filter(job);
@@ -106,7 +106,7 @@ void sync_node_output::setup() {
 }
 
 
-bool sync_node_output::pull(time_span span, bool reconnected) {
+time_unit sync_node_output::pull(time_span span, bool reconnected) {
 	// if non-sequential: seek ring to new position
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
@@ -119,9 +119,9 @@ bool sync_node_output::pull(time_span span, bool reconnected) {
 	// pull frames from node until requested span filled, or end reached	
 	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != this_node().end_time()) {
 		bool ok = this_node().process_next_frame();
-		if(! ok) return false;
+		if(! ok) return node::pull_temporary_failure;
 	}
-	return true;
+	return ring_->readable_time_span().duration();
 }
 
 
