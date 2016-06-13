@@ -19,10 +19,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include "../src/flow/graph.h"
-#include "../src/flow/async_node.h"
-#include "support/ndarray.h"
-#include "support/flow.h"
+#include <mf/flow/graph.h>
+#include <mf/flow/async_node.h>
+#include "../support/ndarray.h"
+#include "../support/flow.h"
 
 using namespace mf;
 using namespace mf::test;

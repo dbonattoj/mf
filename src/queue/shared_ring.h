@@ -28,6 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include <atomic>
 #include <ostream>
+#include <tuple>
 
 namespace mf {
 
@@ -55,6 +56,13 @@ namespace mf {
 class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
+
+	struct wait_result {
+		bool success;
+		event_id break_event;
+	
+		wait_result(bool suc, event_id ev = -1) : success(suc), break_event(ev) { }
+	};
 
 private:
 	/// Indicates current state of reader and writer.
@@ -103,7 +111,7 @@ public:
 	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
 	 ** If \a break_event occured, returns false. Also waits if write start position is at end time, until
 	 ** seek occurs or \a break_event occurs. */
-	bool wait_writable(event& break_event);
+	wait_result wait_writable(const event_set& break_events);
 	
 	/// Wait until a frame in any of the given \ref shared_ring buffers becomes writable.
 	/** `Iterator` is an iterator type whose value type is convertible to `shared_ring&`. Returns the iterator pointing
@@ -111,8 +119,8 @@ public:
 	 ** became writable. If any `shared_ring` is already writable, returns it immediatly, before waiting for any
 	 ** other `shared_ring` or for \a break_event.
 	 ** Also waits if write start position is at end time, until seek occurs or \a break_event occurs. */
-	template<typename Iterator>
-	static Iterator wait_any_writable(Iterator begin, Iterator end, event& break_event);
+	//template<typename Iterator>
+	//wait_result wait_any_writable(Iterator begin, Iterator end, const event_set& break_events);
 
 	/// Begin writing \a write_duration frames at current write start time, if they are available.
 	/** Like begin_write(), but never waits. Instead returns null view when the frames are not available. */
@@ -154,7 +162,7 @@ public:
 	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
 	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
 	 ** Also waits if write start position is at end time, until \a break_event occurs. */
-	bool wait_readable(event& break_event);
+	wait_result wait_readable(const event_set& break_events);
 
 	//template<typename Iterator>
 	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);

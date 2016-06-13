@@ -68,6 +68,9 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 	if(ring_.writable_duration() < duration && ring_.readable_duration() < reader_state_)
 		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
 
+	event_set evs;
+	evs.add_event(reader_idle_event_);
+	evs.add_event(reader_seek_event_);
 
 	while(ring_.writable_duration() < duration) {
 		// wait for more frames to become available
@@ -75,7 +78,7 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 		
 		lock.unlock();
 		// reader may send notification before wait starts: it gets stored in event
-		event::wait_any(reader_idle_event_, reader_seek_event_);
+		event_id ev = evs.receive_any();
 		lock.lock();
 		
 		// received event: 1+ frame was read, or reader seeked
@@ -122,8 +125,12 @@ auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_t
 }
 
 
-bool shared_ring::wait_writable(event& break_event) {
+auto shared_ring::wait_writable(const event_set& break_events_original) -> wait_result {
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
+
+	event_set break_events = break_events_original;
+	break_events.add_event(reader_idle_event_);
+	break_events.add_event(reader_seek_event_);
 	
 	std::unique_lock<std::mutex> lock(mutex_);
 	
@@ -134,15 +141,15 @@ bool shared_ring::wait_writable(event& break_event) {
 		writer_state_ = 1;
 		
 		lock.unlock();
-		event& ev = event::wait_any(reader_idle_event_, reader_seek_event_, break_event);
+		event_id ev = break_events.receive_any();
 		lock.lock();
 		
 		writer_state_ = idle;
 		
-		if(ev == break_event) return false;
+		if(ev != reader_idle_event_.id() && ev != reader_seek_event_.id()) return wait_result(false, ev);
 	}
 		
-	return true;
+	return wait_result(true);
 }
 
 
@@ -159,7 +166,7 @@ void shared_ring::end_write(time_unit written_duration, bool mark_end) {
 	}
 	
 	writer_state_ = idle;
-	writer_idle_event_.notify();
+	writer_idle_event_.send();
 	
 	// notify even if no frame was written:
 	// seek() waits for writer to finish
@@ -218,7 +225,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 				
 		lock.unlock();
-		writer_idle_event_.wait();
+		writer_idle_event_.receive();
 		lock.lock();
 		
 		// writer might have marked end while reader was waiting
@@ -256,8 +263,11 @@ auto shared_ring::try_begin_read(time_unit original_duration) -> section_view_ty
 }
 
 
-bool shared_ring::wait_readable(event& break_event) {
+auto shared_ring::wait_readable(const event_set& break_events_original) -> wait_result {
 	if(reader_state_ != idle) throw sequencing_error("read not idle");
+	
+	event_set break_events = break_events_original;
+	break_events.add_event(writer_idle_event_);
 	
 	std::unique_lock<std::mutex> lock(mutex_);
 	
@@ -268,15 +278,15 @@ bool shared_ring::wait_readable(event& break_event) {
 		reader_state_ = 1;
 		
 		lock.unlock();
-		event& ev = event::wait_any(writer_idle_event_, break_event);
+		event_id ev = break_events.receive_any();
 		lock.lock();
 		
 		reader_state_ = idle;
 		
-		if(ev == break_event) return false;
+		if(ev != writer_idle_event_.id()) return wait_result(false, ev);
 	}
 	
-	return true;
+	return wait_result(true);
 }
 
 
@@ -293,7 +303,7 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 	if(shift_duration > 0) {
 		ring_.end_read(shift_duration);
 		read_start_time_ += shift_duration;
-		reader_idle_event_.notify(); // new frames have become writable...
+		reader_idle_event_.send(); // new frames have become writable...
 	} else {
 		ring_.end_read(0);
 	}
@@ -328,7 +338,7 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 				
 		lock.unlock();
-		writer_idle_event_.wait();
+		writer_idle_event_.receive();
 		lock.lock();
 		
 		// writer might have marked end while reader was waiting
@@ -355,7 +365,7 @@ void shared_ring::end_read(time_unit read_duration) {
 		MF_ASSERT(read_start_time_ == ring_.read_start_time());	
 	}
 	reader_state_ = idle;
-	reader_idle_event_.notify();
+	reader_idle_event_.send();
 }
 
 
@@ -428,7 +438,7 @@ void shared_ring::skip_available_(time_unit skip_duration) {
 		read_start_time_ += skip_duration;
 		MF_ASSERT(read_start_time_ == ring_.read_start_time());
 	}
-	reader_idle_event_.notify();
+	reader_idle_event_.send();
 }
 
 
@@ -461,7 +471,7 @@ void shared_ring::seek(time_unit t) {
 				
 		while(writer_state_ == accessing) {			
 			lock.unlock();
-			writer_idle_event_.wait();
+			writer_idle_event_.receive();
 			lock.lock();
 		}
 		// mutex is now locked again
@@ -493,7 +503,7 @@ void shared_ring::seek(time_unit t) {
 	// if it was idle, notification is ignored
 	// if it was waiting, begin_write() notices that write position has changed
 	lock.unlock();
-	reader_seek_event_.notify();
+	reader_seek_event_.send();
 }
 
 

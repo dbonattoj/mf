@@ -36,27 +36,10 @@ bool async_node::process_next_frame() {
 	// output determines time t of frame to write
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
-	if(out_view.is_null()) return false; // stopped
+	if(out_view.is_null()) return false; // stopped or paused
 
-	async_node_output& out_ = (async_node_output&)*out;
-		/*
-	if(! out_.allowed_span_.includes(t)) {
-					
-		out->cancel_write_frame();
-		usleep(100);
-		MF_DEBUG(t, " not in ", out_.allowed_span_);
-		return ! this_graph().stop_event().was_notified(); // may change
-	}
-	*/
-/*
-	if(activation() == active) {
-		MF_ASSERT(t >= out->connected_input().this_node().current_time() - out->connected_input().past_window_duration());
-		MF_ASSERT(t <= out->connected_input().this_node().current_time() + out->connected_input().future_window_duration() + prefetch_duration());
-	}
-*/
 	set_current_time(t);
 	job.define_time(t);
-	
 	
 	if(state() == reconnecting && reconnect_flag_) {
 		set_online();
@@ -71,24 +54,15 @@ bool async_node::process_next_frame() {
 	job.push_output(*out, out_view);
 	
 	// pull & begin reading from activated inputs
-	bool stopped = false;
 	for(auto&& in : inputs()) if(in->is_activated()) {
 		// pull frame t from input
 		// for sequential node: frame is now processed
 		time_unit pull_result = in->pull(t);
 		if(pull_result == node::pull_stopped) {
-			stopped = true; break;
+			return false;
 		} else if(pull_result == node::pull_temporary_failure) { 
-			
-			//out_.allowed_span_ = time_span(out_.allowed_span_.start_time(), t);
-			//return true; // TODO handle correctly
+			return false;
 		}
-	}
-	
-	if(stopped) {
-		// stopped while reading from input:
-		// need to cancel output and then quit
-		return false;
 	}
 	
 	for(auto&& in : inputs()) if(in->is_activated()) {
@@ -134,9 +108,13 @@ bool async_node::process_next_frame() {
 
 
 void async_node::thread_main_() {
-	bool continuing = true;
-	while(continuing) {
-		continuing = process_next_frame();
+	for(;;) {
+		bool continuing = process_next_frame();
+		if(! continuing) {
+			if(this_graph().stop_event().was_sent()) return;
+			else usleep(1000);
+			//else pull_event_.wait();
+		}
 	}
 }
 
@@ -185,17 +163,13 @@ void async_node_output::setup() {
 
 
 time_unit async_node_output::pull(time_span span, bool reconnected) {
-	allowed_span_ = time_span(span.start_time(), span.end_time() + this_node().prefetch_duration());
-	
+	time_limit_ = span.end_time() + this_node().prefetch_duration();
+			
 	time_unit t = span.start_time();
 	time_unit ring_read_t = ring_->read_start_time();
 	if(t != ring_read_t) {
 		if(ring_->is_seekable()) ring_->seek(t);
-		else if(t > ring_read_t) {
-			allowed_span_ = time_span(ring_read_t, span.end_time() + this_node().prefetch_duration());
-			ring_->skip(t - ring_read_t);
-			allowed_span_ = time_span(span.start_time(), span.end_time() + this_node().prefetch_duration());
-		}
+		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
 		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
 	}
 	
@@ -206,9 +180,11 @@ time_unit async_node_output::pull(time_span span, bool reconnected) {
 	
 	event& stop_event = this_node().this_graph().stop_event();
 	
+	((async_node&)this_node()).pull_event_.send();
+	
 	while(ring_->readable_duration() < span.duration()) {
-		bool cont = ring_->wait_readable(stop_event);
-		if(! cont) return node::pull_stopped;
+		auto cont = ring_->wait_readable(stop_event);
+		if(! cont.success) return node::pull_stopped;
 		
 		if(ring_->writer_reached_end()) return ring_->readable_duration();
 	}
@@ -238,16 +214,26 @@ frame_view async_node_output::begin_write_frame(time_unit& t) {
 	event& stop_event = this_node().this_graph().stop_event();
 
 	for(;;) {
-		bool status = ring_->wait_writable(stop_event);
-		if(! status) return frame_view::null();
-		
+		// wait until 1+ frame is writable, or stopped
+		// keep waiting if at end
+		auto cont = ring_->wait_writable(stop_event);
+		if(! cont.success) return frame_view::null();
+		// A
+		// try begin write
+		// null if frame now no longer writable (seeked in A),
+		// or duration = 0 (seeked to end in A)
 		timed_frame_array_view view = ring_->try_begin_write(1);
-		if(view.is_null()) continue;
-
-		MF_ASSERT(! view.is_null());
+		if(view.is_null() || view.duration() != 1) continue;
+		
 		MF_ASSERT(view.duration() == 1);
 		t = view.start_time();
-		return view[0];
+		
+		if(t < time_limit_) {
+			return view[0];
+		} else {
+			ring_->end_write(0);
+			break;
+		}
 	}
 	
 	return frame_view::null();

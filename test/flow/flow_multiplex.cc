@@ -1,11 +1,10 @@
 #include <catch.hpp>
-#include "support/flow.h"
-#include "support/ndarray.h"
+#include "../support/flow.h"
+#include "../support/ndarray.h"
 #include <mf/flow/graph.h>
 #include <mf/flow/sync_node.h>
 #include <mf/flow/async_node.h>
 #include <mf/flow/multiplex_node.h>
-#include <iostream>
 
 using namespace mf;
 using namespace mf::test;

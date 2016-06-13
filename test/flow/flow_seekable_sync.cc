@@ -19,29 +19,19 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include "../src/flow/graph.h"
-#include "../src/flow/sync_node.h"
-#include "../src/flow/async_node.h"
-#include "support/ndarray.h"
-#include "support/flow.h"
+#include <mf/flow/graph.h>
+#include <mf/flow/sync_node.h>
+#include "../support/ndarray.h"
+#include "../support/flow.h"
 
 using namespace mf;
 using namespace mf::test;
 
-TEST_CASE("flow graph test: seekable, mixed", "[flow_graph]" "[sync+async][seekable]") {
-	using node_type = flow::sync_node;
-	using node_type2 = flow::async_node;
-	constexpr bool seekable = false;
+using node_type = flow::sync_node;
+using node_type2 = flow::sync_node;
+constexpr bool seekable = true;
 
-	#include "flow_tests_basic.icc"
-	#include "flow_tests_seek.icc"
-}
-
-TEST_CASE("flow graph test: seekable, mixed alt.", "[flow_graph]" "[sync+async][seekable]") {
-	using node_type = flow::async_node;
-	using node_type2 = flow::sync_node;
-	constexpr bool seekable = false;
-
+TEST_CASE("flow graph test: seekable, sync", "[flow_graph]" "[sync][seekable]") {
 	#include "flow_tests_basic.icc"
 	#include "flow_tests_seek.icc"
 }

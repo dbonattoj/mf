@@ -31,69 +31,72 @@ TEST_CASE("event", "[event]") {
 	event ev2;
 	sticky_event ev3;
 	
-	SECTION("notify, wait") {
-		ev1.notify();
-		ev1.wait();
+	event_set ev12({ev1, ev2});
+	event_set ev13({ev1, ev3});
+	
+	SECTION("send, receive") {
+		ev1.send();
+		ev1.receive();
 		
-		ev2.notify();
-		ev2.wait();
+		ev2.send();
+		ev2.receive();
 		
-		ev1.notify();
-		ev1.wait();
+		ev1.send();
+		ev1.receive();
 	}
 	
-	SECTION("sticky notify, wait") {
-		ev3.notify();
+	SECTION("sticky send, receive") {
+		ev3.send();
 		
-		ev3.wait();
-		ev3.wait();
-		ev3.wait();
+		ev3.receive();
+		ev3.receive();
+		ev3.receive();
 		
 		ev3.reset();
-		ev3.notify();
+		ev3.send();
 		
-		ev3.wait();
+		ev3.receive();
 	}
 	
-	SECTION("wait_any") {
-		ev1.notify();
-		event& ev_1 = event::wait_any(ev1, ev2);
-		REQUIRE(ev_1 == ev1);
+	SECTION("receive_any") {		
+		ev1.send();
+		event_id ev_1 = ev12.receive_any();
+		REQUIRE(ev_1 == ev1.id());
 		
-		ev2.notify();
-		event& ev_2 = event::wait_any(ev1, ev2);
-		REQUIRE(ev_2 == ev2);
+		ev2.send();
+		event_id ev_2 = ev12.receive_any();
+		REQUIRE(ev_2 == ev2.id());
 
-		ev1.notify();
-		ev2.notify();
-		event& ev = event::wait_any(ev1, ev2);
-		REQUIRE( (ev == ev1 || ev == ev2) );
+		ev1.send();
+		ev2.send();
+		event_id ev = ev12.receive_any();
+		REQUIRE( (ev == ev1.id() || ev == ev2.id()) );
 		
-		if(ev == ev1) {
-			event& ev = event::wait_any(ev1, ev2);
-			REQUIRE(ev == ev2);
+		if(ev == ev1.id()) {
+			event_id ev = ev12.receive_any();
+			REQUIRE(ev == ev2.id());
 		} else {
-			event& ev = event::wait_any(ev1, ev2);
-			REQUIRE(ev == ev1);		
+			event_id ev = ev12.receive_any();
+			REQUIRE(ev == ev1.id());		
 		}
 	}
 	
-	SECTION("wait_any") {
-		ev1.notify();
-		event& ev_1 = event::wait_any(ev1, ev3);
-		REQUIRE(ev_1 == ev1);
-		
-		ev3.notify();
-		event& ev_2 = event::wait_any(ev1, ev3);
-		REQUIRE(ev_2 == ev3);	
+	SECTION("receive_any, sticky") {
+		ev1.send();
+		event_id ev_1 = ev13.receive_any();
+		REQUIRE(ev_1 == ev1.id());
 
-		event& ev_3 = event::wait_any(ev1, ev3);
-		REQUIRE(ev_3 == ev3);	
+		ev3.send();
+		event_id ev_2 = ev13.receive_any();
+		REQUIRE(ev_2 == ev3.id());	
 
-		ev1.notify();
+		event_id ev_3 = ev13.receive_any();
+		REQUIRE(ev_3 == ev3.id());	
+
+		ev1.send();
 		ev3.reset();
-		event& ev_4 = event::wait_any(ev1, ev3);
-		REQUIRE(ev_4 == ev1);
+		event_id ev_4 = ev13.receive_any();
+		REQUIRE(ev_4 == ev1.id());
 	}
 	
 	SECTION("thread") {
@@ -101,10 +104,10 @@ TEST_CASE("event", "[event]") {
 		mut.lock();
 		MF_TEST_THREAD() {
 			mut.lock();
-			ev1.notify();
+			ev1.send();
 		};
 		
 		mut.unlock();
-		ev1.wait();
+		ev1.receive();
 	}
 }

@@ -1,6 +1,6 @@
 #include <vector>
 #include <map>
-
+/*
 namespace mf {
 
 template<typename Iterator>
@@ -59,3 +59,4 @@ Iterator shared_ring::wait_any_writable(Iterator begin, Iterator end, event& bre
 
 
 }
+*/

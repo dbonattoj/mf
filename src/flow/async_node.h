@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "filter_node.h"
 #include "../queue/shared_ring.h"
+#include "../os/event.h"
 #include <thread>
 
 namespace mf { namespace flow {
@@ -35,7 +36,7 @@ class async_node_output : public node_output {
 public:
 	std::unique_ptr<shared_ring> ring_;
 
-	time_span allowed_span_;
+	std::atomic<time_unit> time_limit_ {-1};
 
 public:
 	using node_type = async_node;
@@ -77,6 +78,7 @@ public:
 	std::thread thread_;
 	
 	std::atomic<bool> reconnect_flag_ {false};
+	event pull_event_;
 	
 	void thread_main_();
 			
