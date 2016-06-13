@@ -24,6 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <unistd.h>
 #include <cstdlib>
 
+#include <iostream>
+
 namespace mf { namespace flow {
 
 bool async_node::process_next_frame() {
@@ -36,8 +38,12 @@ bool async_node::process_next_frame() {
 	// output determines time t of frame to write
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
-	if(out_view.is_null()) return false; // stopped or paused
-
+	if(out_view.is_null()) {
+		return false; // stopped or paused
+	}
+	
+MF_DEBUG("async: ", t);
+	
 	set_current_time(t);
 	job.define_time(t);
 	
@@ -60,7 +66,7 @@ bool async_node::process_next_frame() {
 		time_unit pull_result = in->pull(t);
 		if(pull_result == node::pull_stopped) {
 			return false;
-		} else if(pull_result == node::pull_temporary_failure) { 
+		} else if(pull_result == node::pull_temporary_failure) {
 			return false;
 		}
 	}
@@ -111,16 +117,25 @@ void async_node::thread_main_() {
 	for(;;) {
 		bool continuing = process_next_frame();
 		if(! continuing) {
-			if(this_graph().stop_event().was_sent()) return;
-			else usleep(1000);
-			//else pull_event_.wait();
+			if(this_graph().stop_event().was_sent()) {
+				return;
+			} else {
+							MF_DEBUG("pause");
+
+				paused_ = true;
+				paused_event_.send();
+
+
+				event_set({pull_event_, this_graph().stop_event()}).receive_any();
+				paused_ = false;
+			}
 		}
 	}
 }
 
 
 async_node::async_node(graph& gr) : filter_node(gr) {
-	set_prefetch_duration(5);
+	set_prefetch_duration(1);
 }
 
 
@@ -179,12 +194,24 @@ time_unit async_node_output::pull(time_span span, bool reconnected) {
 	}
 	
 	event& stop_event = this_node().this_graph().stop_event();
+	event& paused_event = ((async_node&)this_node()).paused_event_;
 	
+	((async_node&)this_node()).paused_=false;
 	((async_node&)this_node()).pull_event_.send();
 	
 	while(ring_->readable_duration() < span.duration()) {
-		auto cont = ring_->wait_readable(stop_event);
-		if(! cont.success) return node::pull_stopped;
+		auto cont = ring_->wait_readable({stop_event, paused_event});
+		if(! cont.success) {
+			if(cont.break_event == stop_event.id()) {
+				return node::pull_stopped;
+			} else if(cont.break_event == paused_event.id()) {
+				if(((async_node&)this_node()).paused_) {
+					return node::pull_temporary_failure;
+				} else {
+					continue;
+				}
+			}
+		}
 		
 		if(ring_->writer_reached_end()) return ring_->readable_duration();
 	}

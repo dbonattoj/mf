@@ -409,7 +409,6 @@ SECTION("activation") {
 	}
 
 
-
 	SECTION("source -> passthrough -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
 		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_and);

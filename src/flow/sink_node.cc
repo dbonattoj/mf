@@ -41,7 +41,8 @@ void sink_node::stop() { }
 
 
 void sink_node::pull(time_unit t) {
-//	usleep(10000);
+	usleep(100000);
+	MF_DEBUG(t);
 	
 	// fail if reading past current_time, but end already reached
 	if(t > current_time() && reached_end())

@@ -79,6 +79,8 @@ public:
 	
 	std::atomic<bool> reconnect_flag_ {false};
 	event pull_event_;
+	event paused_event_;
+	std::atomic<bool> paused_ {false};
 	
 	void thread_main_();
 			

@@ -166,7 +166,10 @@ event_id event_set::receive_any() {
 	}
 		
 	::epoll_event received_epev;
-	int result = ::epoll_wait(epfd, &received_epev, 1, timeout_.count());
+	int result;
+	do {
+		result = ::epoll_wait(epfd, &received_epev, 1, timeout_.count());
+	} while(result == -1 && errno == EINTR);
 	
 	::close(epfd);
 		

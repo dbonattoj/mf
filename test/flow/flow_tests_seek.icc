@@ -160,4 +160,3 @@ SECTION("seek") {
 		REQUIRE(sink.check());
 	}
 }
-
