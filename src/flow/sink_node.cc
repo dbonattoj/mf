@@ -41,8 +41,8 @@ void sink_node::stop() { }
 
 
 void sink_node::pull(time_unit t) {
-	usleep(1000);
-	MF_DEBUG(t);
+	//usleep(1000);
+	//MF_DEBUG(t);
 	
 	// fail if reading past current_time, but end already reached
 	if(t > current_time() && reached_end())
@@ -66,8 +66,10 @@ void sink_node::pull(time_unit t) {
 	for(auto&& in : inputs()) if(in->is_activated()) {
 		time_unit pull_result = in->pull(t);
 		if(pull_result == pull_stopped) {
+			stopped = true;
 			return;
 		} else if(pull_result == pull_temporary_failure) {
+			MF_DEBUG("sink received temp failure");
 			return;
 		}
 	}

@@ -50,8 +50,9 @@ private:
 	sink_node* sink_ = nullptr;
 	bool was_setup_ = false;
 	bool running_ = false;
-	sticky_event stop_event_;
 	
+	std::atomic<bool> was_stopped_ {false};
+		
 public:
 	template<typename Node, typename... Args>
 	Node& add_node_(Args&&... args) {
@@ -102,8 +103,8 @@ public:
 	bool was_setup() const { return was_setup_; }
 	bool is_running() const { return running_; }
 	
-	sticky_event& stop_event() { return stop_event_; }
-	
+	bool was_stopped() const { return was_stopped_; }
+		
 	void setup();
 	
 	void launch();

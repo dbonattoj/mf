@@ -85,7 +85,7 @@ TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable]") {
 		REQUIRE(ring.current_time() >= 8);
 		REQUIRE(ring.write_start_time() >= 9);
 		REQUIRE(ring.read_start_time() == 9);
-	
+
 		// skip 0 frames
 		ring.skip(0);
 		REQUIRE(ring.current_time() >= 8);
@@ -109,18 +109,19 @@ TEST_CASE("ndarray_shared_ring_seekable", "[ndarray_shared_ring][seekable]") {
 		REQUIRE(ring.current_time() >= 13);
 		REQUIRE(ring.write_start_time() >= 14);
 		REQUIRE(ring.read_start_time() == 12);		
-			
+
 		// read frames (20, 21)
 		// skip previous (--> seek, necessarily because inbetween frames don't fit in buffer capacity)
 		discontinuity = false;
 		r_section.reset(ring.begin_read_span(time_span(20, 22)));
+
 		REQUIRE(compare_frames(shape, r_section, {20, 21}));
 		ring.end_read(2);
 		REQUIRE(ring.current_time() >= 21);
 		REQUIRE(ring.write_start_time() >= 22);
 		REQUIRE(ring.read_start_time() == 22);
 		REQUIRE(discontinuity);
-	
+
 		// seek to future
 		discontinuity = false;
 		r_section.reset(ring.begin_read_span(time_span(150, 153)));

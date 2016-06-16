@@ -127,6 +127,8 @@ public:
 	virtual void pre_setup() { }
 	virtual void setup() = 0; ///< Called by propagate_setup_.
 	virtual void launch() = 0; ///< Called by graph for all nodes, before any frame is pulled from sink.
+	
+	virtual void pre_stop() { }
 	virtual void stop() = 0; ///< Called by graph for all node, before destruction of any node.
 	
 	virtual bool process_next_frame() = 0;

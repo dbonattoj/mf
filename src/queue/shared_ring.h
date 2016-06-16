@@ -57,13 +57,6 @@ class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
 
-	struct wait_result {
-		bool success;
-		event_id break_event;
-	
-		wait_result(bool suc, event_id ev = -1) : success(suc), break_event(ev) { }
-	};
-
 private:
 	/// Indicates current state of reader and writer.
 	/** May be `idle` or `accessing`, or a positive integer if thread is waiting for that number of frames. */
@@ -78,9 +71,11 @@ private:
 	// TODO make non-atomic? verify
 
 	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access.
-	event reader_idle_event_; ///< Event sent by reader when is becomes idle, and received by writer.
-	event reader_seek_event_; ///< Event sent by reader after is has seeked, and changed write start time.
-	event writer_idle_event_; ///< Event sent by writer when is becomes idle, and received by reader.
+
+	std::atomic_flag may_wait_;
+	
+	std::condition_variable readable_cv_;
+	std::condition_variable writable_cv_;
 
 	std::atomic<thread_state> reader_state_{idle}; ///< Current state of reader thread. Used to prevent deadlocks.
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
@@ -95,6 +90,8 @@ public:
 	shared_ring(const frame_array_properties&, bool seekable, time_unit end_time = -1);
 		
 	void initialize();
+	
+	void break_waiting();
 	
 	const frame_format& format() const noexcept { return ring_.format(); }
 
@@ -111,7 +108,7 @@ public:
 	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
 	 ** If \a break_event occured, returns false. Also waits if write start position is at end time, until
 	 ** seek occurs or \a break_event occurs. */
-	wait_result wait_writable(const event_set& break_events);
+	bool wait_writable();
 	
 	/// Wait until a frame in any of the given \ref shared_ring buffers becomes writable.
 	/** `Iterator` is an iterator type whose value type is convertible to `shared_ring&`. Returns the iterator pointing
@@ -162,7 +159,7 @@ public:
 	 ** start time is at end), waits until at least one frame becomes available, or \a break_event occurs.
 	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
 	 ** Also waits if write start position is at end time, until \a break_event occurs. */
-	wait_result wait_readable(const event_set& break_events);
+	bool wait_readable();
 
 	//template<typename Iterator>
 	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);

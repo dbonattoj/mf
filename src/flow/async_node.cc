@@ -38,11 +38,9 @@ bool async_node::process_next_frame() {
 	// output determines time t of frame to write
 	auto&& out = outputs().front();
 	auto out_view = out->begin_write_frame(t);
-	if(out_view.is_null()) {
-		return false; // stopped or paused
-	}
+	if(out_view.is_null()) return false; // stopped or paused
 	
-MF_DEBUG("async: ", t);
+//MF_DEBUG("async: ", t);
 	
 	set_current_time(t);
 	job.define_time(t);
@@ -114,22 +112,17 @@ MF_DEBUG("async: ", t);
 
 
 void async_node::thread_main_() {
+	async_node_output& out = (async_node_output&)(outputs().front());
+
 	for(;;) {
-		bool continuing = process_next_frame();
-		if(! continuing) {
-			if(this_graph().stop_event().was_sent()) {
-				return;
-			} else {
-							MF_DEBUG("pause");
-
-				paused_ = true;
-				paused_event_.send();
-
-
-				event_set({pull_event_, this_graph().stop_event()}).receive_any();
-				paused_ = false;
-			}
-		}
+		std::unique_lock<std::mutex> lock(active_mutex_);		
+		active_cv_.wait(lock, [&] { return active_.load(); });
+		lock.unlock();
+		
+		while(process_next_frame());
+		
+		active_.store(false);
+		out.ring_->break_waiting();
 	}
 }
 
@@ -159,6 +152,13 @@ void async_node::launch() {
 }
 
 
+void async_node::pre_stop() {
+	async_node_output& out = (async_node_output&)(outputs().front());
+	
+	out.ring_->break_waiting();
+}
+
+
 void async_node::stop() {
 	MF_EXPECTS(running_);
 	MF_EXPECTS(thread_.joinable());
@@ -178,6 +178,8 @@ void async_node_output::setup() {
 
 
 time_unit async_node_output::pull(time_span span, bool reconnected) {
+	async_node& nd = (async_node&)(this_node());
+
 	time_limit_ = span.end_time() + this_node().prefetch_duration();
 			
 	time_unit t = span.start_time();
@@ -193,27 +195,20 @@ time_unit async_node_output::pull(time_span span, bool reconnected) {
 		nd.reconnect_flag_ = true;
 	}
 	
-	event& stop_event = this_node().this_graph().stop_event();
-	event& paused_event = ((async_node&)this_node()).paused_event_;
 	
-	((async_node&)this_node()).paused_=false;
-	((async_node&)this_node()).pull_event_.send();
+	
+	nd.active_ = true;
+	nd.active_cv_.notify_one();
+	
 	
 	while(ring_->readable_duration() < span.duration()) {
-		auto cont = ring_->wait_readable({stop_event, paused_event});
-		if(! cont.success) {
-			if(cont.break_event == stop_event.id()) {
-				return node::pull_stopped;
-			} else if(cont.break_event == paused_event.id()) {
-				if(((async_node&)this_node()).paused_) {
-					return node::pull_temporary_failure;
-				} else {
-					continue;
-				}
-			}
+		bool cont = ring_->wait_readable();
+		if(cont) {
+			if(ring_->writer_reached_end()) return ring_->readable_duration();
+		} else {
+			if(this_node().this_graph().was_stopped()) return node::pull_stopped;
+			else return node::pull_temporary_failure;
 		}
-		
-		if(ring_->writer_reached_end()) return ring_->readable_duration();
 	}
 	
 	return ring_->readable_duration();
@@ -238,13 +233,12 @@ time_unit async_node_output::end_time() const {
 
 
 frame_view async_node_output::begin_write_frame(time_unit& t) {
-	event& stop_event = this_node().this_graph().stop_event();
-
 	for(;;) {
 		// wait until 1+ frame is writable, or stopped
 		// keep waiting if at end
-		auto cont = ring_->wait_writable(stop_event);
-		if(! cont.success) return frame_view::null();
+		bool got_writable = ring_->wait_writable();
+		if(! got_writable) return frame_view::null();
+
 		// A
 		// try begin write
 		// null if frame now no longer writable (seeked in A),
@@ -259,11 +253,9 @@ frame_view async_node_output::begin_write_frame(time_unit& t) {
 			return view[0];
 		} else {
 			ring_->end_write(0);
-			break;
+			return frame_view::null();
 		}
 	}
-	
-	return frame_view::null();
 }
 
 

@@ -78,9 +78,11 @@ public:
 	std::thread thread_;
 	
 	std::atomic<bool> reconnect_flag_ {false};
-	event pull_event_;
-	event paused_event_;
-	std::atomic<bool> paused_ {false};
+	
+	std::atomic<bool> active_ {false};
+	std::mutex active_mutex_;
+	std::condition_variable active_cv_;
+	
 	
 	void thread_main_();
 			
@@ -90,6 +92,7 @@ public:
 	
 	void setup() final override;
 	void launch() final override;
+	void pre_stop() final override;
 	void stop() final override;
 	bool process_next_frame() override;
 	

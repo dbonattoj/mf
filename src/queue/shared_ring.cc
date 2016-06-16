@@ -27,6 +27,7 @@ shared_ring::shared_ring
 (const frame_array_properties& prop, bool seekable, time_unit end_time) :
 	ring_(prop), seekable_(seekable), end_time_(end_time)
 {
+	may_wait_.test_and_set();
 	if(seekable && end_time == -1) throw std::invalid_argument("end time must be defined when seekable");
 }
 
@@ -37,6 +38,12 @@ void shared_ring::initialize() {
 	reader_state_ = idle;
 	writer_state_ = idle;
 	read_start_time_ = 0;
+	may_wait_.test_and_set();
+}
+
+
+void shared_ring::break_waiting() {
+	may_wait_.clear();
 }
 
 
@@ -68,20 +75,17 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 	if(ring_.writable_duration() < duration && ring_.readable_duration() < reader_state_)
 		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
 
-	event_set evs;
-	evs.add_event(reader_idle_event_);
-	evs.add_event(reader_seek_event_);
-
 	while(ring_.writable_duration() < duration) {
 		// wait for more frames to become available
 		writer_state_ = duration;
 		
-		lock.unlock();
-		// reader may send notification before wait starts: it gets stored in event
-		event_id ev = evs.receive_any();
-		lock.lock();
+		writable_cv_.wait(lock);
+		if(! may_wait_.test_and_set()) {
+			writer_state_ = idle;
+			return section_view_type::null();
+		}
 		
-		// received event: 1+ frame was read, or reader seeked
+		// writable_cv_ woke up: 1+ frame was read, or reader seeked
 		// or neither (was notified when not waiting)
 		// will recheck if enough frames are now available.
 
@@ -92,8 +96,8 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 			// then retry with the new write position
 			// only seek() changes write position (on reader thread), so no risk of repeated recursion
 			
-			writer_state_ = idle;
 			lock.unlock(); // brief unlock: reader might seek again, or start waiting
+			writer_state_ = idle;
 			return begin_write(original_duration);
 		}
 	}
@@ -125,13 +129,9 @@ auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_t
 }
 
 
-auto shared_ring::wait_writable(const event_set& break_events_original) -> wait_result {
+bool shared_ring::wait_writable() {
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
-	event_set break_events = break_events_original;
-	break_events.add_event(reader_idle_event_);
-	break_events.add_event(reader_seek_event_);
-	
 	std::unique_lock<std::mutex> lock(mutex_);
 	
 	if(ring_.writable_duration() == 0 && ring_.readable_duration() < reader_state_)
@@ -139,17 +139,16 @@ auto shared_ring::wait_writable(const event_set& break_events_original) -> wait_
 
 	while(writable_time_span_().duration() == 0) {
 		writer_state_ = 1;
+		writable_cv_.wait(lock);
 		
-		lock.unlock();
-		event_id ev = break_events.receive_any();
-		lock.lock();
-		
-		writer_state_ = idle;
-		
-		if(ev != reader_idle_event_.id() && ev != reader_seek_event_.id()) return wait_result(false, ev);
+		if(! may_wait_.test_and_set()) {
+			writer_state_ = idle;
+			return false;		
+		}
 	}
-		
-	return wait_result(true);
+	
+	writer_state_ = idle;
+	return true;
 }
 
 
@@ -166,8 +165,8 @@ void shared_ring::end_write(time_unit written_duration, bool mark_end) {
 	}
 	
 	writer_state_ = idle;
-	writer_idle_event_.send();
 	
+	readable_cv_.notify_one();	
 	// notify even if no frame was written:
 	// seek() waits for writer to finish
 }
@@ -223,10 +222,12 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 	while(ring_.readable_duration() < duration) {
 		reader_state_ = duration;
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
-				
-		lock.unlock();
-		writer_idle_event_.receive();
-		lock.lock();
+		
+		readable_cv_.wait(lock);
+		if(! may_wait_.test_and_set()) {
+			reader_state_ = idle;
+			return section_view_type::null();
+		}
 		
 		// writer might have marked end while reader was waiting
 		if(end_time_ != -1 && read_start_time_ + duration >= end_time_)
@@ -263,11 +264,8 @@ auto shared_ring::try_begin_read(time_unit original_duration) -> section_view_ty
 }
 
 
-auto shared_ring::wait_readable(const event_set& break_events_original) -> wait_result {
+bool shared_ring::wait_readable() {
 	if(reader_state_ != idle) throw sequencing_error("read not idle");
-	
-	event_set break_events = break_events_original;
-	break_events.add_event(writer_idle_event_);
 	
 	std::unique_lock<std::mutex> lock(mutex_);
 	
@@ -277,16 +275,15 @@ auto shared_ring::wait_readable(const event_set& break_events_original) -> wait_
 	while(ring_.readable_duration() == 0) {
 		reader_state_ = 1;
 		
-		lock.unlock();
-		event_id ev = break_events.receive_any();
-		lock.lock();
-		
-		reader_state_ = idle;
-		
-		if(ev != writer_idle_event_.id()) return wait_result(false, ev);
+		readable_cv_.wait(lock);
+		if(! may_wait_.test_and_set()) {
+			reader_state_ = idle;
+			return false;
+		}
 	}
 	
-	return wait_result(true);
+	reader_state_ = idle;
+	return true;
 }
 
 
@@ -303,7 +300,7 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 	if(shift_duration > 0) {
 		ring_.end_read(shift_duration);
 		read_start_time_ += shift_duration;
-		reader_idle_event_.send(); // new frames have become writable...
+		writable_cv_.notify_one();
 	} else {
 		ring_.end_read(0);
 	}
@@ -336,10 +333,12 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 	while(ring_.readable_duration() < read_duration) {
 		reader_state_ = read_duration;
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
-				
-		lock.unlock();
-		writer_idle_event_.receive();
-		lock.lock();
+		
+		readable_cv_.wait(lock);
+		if(! may_wait_.test_and_set()) {
+			reader_state_ = idle;
+			return section_view_type::null();
+		}
 		
 		// writer might have marked end while reader was waiting
 		if(end_time_ != -1 && read_start_time_ + read_duration >= end_time_)
@@ -365,7 +364,7 @@ void shared_ring::end_read(time_unit read_duration) {
 		MF_ASSERT(read_start_time_ == ring_.read_start_time());	
 	}
 	reader_state_ = idle;
-	reader_idle_event_.send();
+	writable_cv_.notify_one();
 }
 
 
@@ -438,7 +437,7 @@ void shared_ring::skip_available_(time_unit skip_duration) {
 		read_start_time_ += skip_duration;
 		MF_ASSERT(read_start_time_ == ring_.read_start_time());
 	}
-	reader_idle_event_.send();
+	writable_cv_.notify_one();
 }
 
 
@@ -469,11 +468,7 @@ void shared_ring::seek(time_unit t) {
 		// allow writer to write its frames
 		// works because end_write sets writer_state_ before notifying readable_cv_
 				
-		while(writer_state_ == accessing) {			
-			lock.unlock();
-			writer_idle_event_.receive();
-			lock.lock();
-		}
+		while(writer_state_ == accessing) readable_cv_.wait(lock);
 		// mutex is now locked again
 		// writer now idle, or waiting if it started another begin_write() in meantime
 		
@@ -503,7 +498,8 @@ void shared_ring::seek(time_unit t) {
 	// if it was idle, notification is ignored
 	// if it was waiting, begin_write() notices that write position has changed
 	lock.unlock();
-	reader_seek_event_.send();
+	
+	writable_cv_.notify_one();
 }
 
 

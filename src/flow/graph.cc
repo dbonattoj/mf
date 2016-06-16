@@ -52,14 +52,15 @@ void graph::launch() {
 	if(running_) throw std::logic_error("graph is already running");
 	for(const auto& nd : nodes_) nd->launch();
 	running_ = true;
+	// was_stopped...
 }
 
 
 void graph::stop() {
 	if(! running_) throw std::logic_error("graph is not running");
-	stop_event_.send();
+	was_stopped_.store(true);
+	for(const auto& nd : nodes_) nd->pre_stop();
 	for(const auto& nd : nodes_) nd->stop();
-	stop_event_.reset();
 	running_ = false;
 }
 
