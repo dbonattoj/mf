@@ -15,4 +15,4 @@ data type where elements may be vectors, tuples or null-able. Support for interf
 
 Developped in modern C++14. Extensively tested. Some low-level OS-specific components.
 
-[GitHub Repository]{https://github.com/timlenertz/mf}
+[GitHub Repository](https://github.com/timlenertz/mf)
