@@ -33,78 +33,80 @@ class async_node;
 
 
 class async_node_output : public node_output {
-private:
-	async_node& this_node();
-	const async_node& this_node() const;
-	
 public:
+	std::unique_ptr<shared_ring> ring_;
+
+	std::atomic<time_unit> time_limit_ {-1};
+
+public:
+	using node_type = async_node;
+
 	using node_output::node_output;
 
 	void setup() override;
-	node::pull_result pull(time_span& span, bool reconnect) override;
+
+	/// \name Read interface, used by connected input.
+	///@{
+	time_unit pull(time_span span, bool reconnected) override;
+	
+	/// Begin reading `duration` frames pulled previously.
+	/** For asynchronous views, thje function waits until the frames become available (or end of stream occurs), and
+	 ** returns the view with duration `0` to `duration` (lower than `duration` if end was reached.). If stream was
+	 ** interrupted, returns null view. */
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
+	///@}
+	
+	/// \name Write interface, used by node.
+	///@{
+	frame_view begin_write_frame(time_unit& t) override;
+	void end_write_frame(bool was_last_frame) override;
+	void cancel_write_frame() override;
+	///@}
 };
 
 
 
+/// Asynchronous node base class.
+/** Processes frames in a separate thread owned by the node. Can have multiple inputs, but only one output. Can process
+ ** frames `t+k` (`k <= 1`), at the same time that current frame `t` is being read or processed by suceeding nodes
+ ** in graph. */
 class async_node final : public filter_node {
-private:
-	using request_id_type = int;
-	
-	time_unit prefetch_duration_ = 0;
-	
+public:
+	bool running_ = false;
 	std::thread thread_;
-
-	std::unique_ptr<shared_ring> ring_;
 	
-	std::mutex continuation_mutex_;
-	std::condition_variable continuation_cv_;
-	std::atomic<time_unit> time_limit_ {-1};
-	std::atomic<request_id_type> current_request_id_ {-1};
 	std::atomic<bool> reconnect_flag_ {false};
 	
-	request_id_type failed_request_id_ = -1;
-		
-	async_node_output& output();
-	const async_node_output& output() const;
+	std::atomic<bool> active_ {false};
+	std::atomic<bool> stop_ {false};
 	
-	bool may_continue_() const;
+	std::mutex active_mutex_;
+	std::condition_variable active_cv_;
+	
+	time_unit failed_time_limit_;
 	
 	void thread_main_();
-	bool process_frames_();
-	
+			
 public:
-	async_node(graph&);
-	~async_node() override;
+	explicit async_node(graph&);
+	~async_node();
 	
-	void setup() override;
-	void launch() override;
-	void pre_stop() override;
-	void stop() override;
-
-	void output_setup();
-
-	time_unit minimal_offset_to(const node&) const override;
-	time_unit maximal_offset_to(const node&) const override;
-	
-	void set_prefetch_duration(time_unit dur) { prefetch_duration_ = dur; }
-
-	/// \name Remote output interface.
-	///@{
-	node::pull_result output_pull(time_span& span, bool reconnect);
-	timed_frame_array_view output_begin_read(time_unit duration);
-	void output_end_read(time_unit duration);
-	///@}
+	void setup() final override;
+	void launch() final override;
+	void pre_stop() final override;
+	void stop() final override;
+	bool process_next_frame() override;
 	
 	node_input& add_input(time_unit past_window, time_unit future_window) override {
 		return add_input_<node_input>(past_window, future_window);
 	}
 	
-	node_output& add_output(const frame_format& format) override;
+	async_node_output& add_output(const frame_format& format) override {
+		return add_output_<async_node_output>(format);
+	}
 };
-
 
 }}
 

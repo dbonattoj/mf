@@ -33,59 +33,52 @@ class sync_node;
 
 class sync_node_output : public node_output {
 private:
-	sync_node& this_node();
-	const sync_node& this_node() const;
-	
-public:
-	using node_output::node_output;
+	std::unique_ptr<timed_ring> ring_;
 
+public:
+	using node_type = sync_node;
+
+	using node_output::node_output;
+	
 	void setup() override;
-	node::pull_result pull(time_span& span, bool reconnect) override;
+	
+	/// \name Read interface, used by connected input.
+	///@{
+	time_unit pull(time_span, bool reconnected) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
+	///@}
+	
+	/// \name Write interface, used by node.
+	///@{
+	frame_view begin_write_frame(time_unit& t) override;
+	void end_write_frame(bool was_last_frame) override;
+	void cancel_write_frame() override;
+	///@}
 };
 
 
 /// Synchronous node base class.
 /** Processes frames synchronously when pulled from output. Can have multiple inputs, but only one output. */
 class sync_node final : public filter_node {
-private:
-	std::unique_ptr<timed_ring> ring_;
-
 public:
-	sync_node_output& output();
-	const sync_node_output& output() const;
-
 	explicit sync_node(graph& gr) : filter_node(gr) { }
-	
-	time_unit minimal_offset_to(const node&) const override;
-	time_unit maximal_offset_to(const node&) const override;
 	
 	void setup() final override;
 	void launch() final override;
 	void stop() final override;
 		
-	bool process_next_frame();
+	bool process_next_frame() override;
 
 	node_input& add_input(time_unit past_window, time_unit future_window) override {
 		return add_input_<node_input>(past_window, future_window);
 	}
 	
-	node_output& add_output(const frame_format& format) override;
-		
-	void output_setup();
-	pull_result output_pull(time_span&, bool reconnected);
-	timed_frame_array_view output_begin_read(time_unit duration);
-	void output_end_read(time_unit duration);
-	time_unit output_end_time() const;
-	
-	frame_view begin_write_frame(time_unit& t);
-	void end_write_frame(bool was_last_frame);
-	void cancel_write_frame();
+	sync_node_output& add_output(const frame_format& format) override {
+		return add_output_<sync_node_output>(format);
+	}
 };
-
-
 
 
 }}

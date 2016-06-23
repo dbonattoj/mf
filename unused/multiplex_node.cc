@@ -1,4 +1,3 @@
-/*
 #include "multiplex_node.h"
 #include "graph.h"
 #include <vector>
@@ -63,7 +62,7 @@ void multiplex_node_output::setup() {
 }	
 
 
-time_unit multiplex_node_output::pull(time_span& span, bool reconnect) {
+time_unit multiplex_node_output::pull(time_span span, bool reconnect) {
 	multiplex_node& nd = (multiplex_node&)this_node();
 	time_span exp_span(
 		nd.common_successor_->current_time()+nd.minimal_offset_to(*nd.common_successor_),
@@ -128,4 +127,4 @@ void multiplex_node_output::cancel_write_frame() {
 
 }}
 
-*/
+

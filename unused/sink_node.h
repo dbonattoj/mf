@@ -33,16 +33,13 @@ class sink_node final : public filter_node {
 public:	
 	explicit sink_node(graph& gr) : filter_node(gr) { }
 	
-	time_unit minimal_offset_to(const node&) const override { return 0; }
-	time_unit maximal_offset_to(const node&) const override { return 0; }
-	
 	void setup() final override;
 	void launch() final override;
 	void stop() final override;
+	bool process_next_frame() final override;
 	
 	void setup_graph();
 	
-	bool process_next_frame();
 	void pull(time_unit t);
 	void pull_next_frame() { process_next_frame(); }
 	

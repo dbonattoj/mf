@@ -51,7 +51,7 @@ public:
 		return remote_output_.frame_shape();
 	}
 	
-	time_unit pull(time_span span, bool reactivate) override {
+	node::pull_result pull(time_span& span, bool reactivate) override {
 		return this_output().pull(span, reactivate);
 	}
 	

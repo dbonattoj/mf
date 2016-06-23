@@ -1,4 +1,3 @@
-/*
 #ifndef MF_FLOW_MULTIPLEX_NODE_H_
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
@@ -23,7 +22,7 @@ public:
 	
 	/// \name Read interface, used by connected input.
 	///@{
-	time_unit pull(time_span&, bool reactivate) override;
+	time_unit pull(time_span, bool reactivate) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 	time_unit end_time() const override;
@@ -72,4 +71,3 @@ public:
 }}
 
 #endif
-*/

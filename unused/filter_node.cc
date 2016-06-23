@@ -18,44 +18,29 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_SINK_NODE_H_
-#define MF_FLOW_SINK_NODE_H_
-
 #include "filter_node.h"
+#include "../filter/filter.h"
 
 namespace mf { namespace flow {
 
-class graph;
+filter_node::filter_node(graph& gr) : node(gr) { }
 
-/// Sink node base class.
-/** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
-class sink_node final : public filter_node {
-public:	
-	explicit sink_node(graph& gr) : filter_node(gr) { }
-	
-	time_unit minimal_offset_to(const node&) const override { return 0; }
-	time_unit maximal_offset_to(const node&) const override { return 0; }
-	
-	void setup() final override;
-	void launch() final override;
-	void stop() final override;
-	
-	void setup_graph();
-	
-	bool process_next_frame();
-	void pull(time_unit t);
-	void pull_next_frame() { process_next_frame(); }
-	
-	void seek(time_unit t);
-	
-	node_input& add_input(time_unit past_window, time_unit future_window) override {
-		return add_input_<node_input>(past_window, future_window);
-	}
-	
-	node_output& add_output(const frame_format& format) override { throw 0; }
-};
+filter_node::~filter_node() { }
+
+void filter_node::setup_filter() {
+	MF_EXPECTS(filter_ != nullptr);
+	filter_->setup();
+}
+
+void filter_node::pre_process_filter(node_job& job) {
+	MF_EXPECTS(filter_ != nullptr);
+	filter_->pre_process(job);
+}
+
+void filter_node::process_filter(node_job& job) {
+	MF_EXPECTS(filter_ != nullptr);
+	filter_->process(job);
+}
 
 
 }}
-
-#endif

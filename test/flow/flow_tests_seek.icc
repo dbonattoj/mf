@@ -18,7 +18,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
+#if 0
 SECTION("seek") {
 	constexpr int m = missingframe;
 	std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };
@@ -160,3 +160,4 @@ SECTION("seek") {
 		REQUIRE(sink.check());
 	}
 }
+#endif

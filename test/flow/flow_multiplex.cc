@@ -9,6 +9,7 @@
 using namespace mf;
 using namespace mf::test;
 
+#if 0
 TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 	std::vector<int> seq(150);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
@@ -58,3 +59,4 @@ TEST_CASE("flow multiplex", "[.][flow_multiplex]") {
 	};
 	gr.run();
 }
+#endif

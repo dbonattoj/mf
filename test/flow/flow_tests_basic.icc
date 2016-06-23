@@ -363,7 +363,7 @@ SECTION("basic") {
 	}
 }
 
-
+#if 0
 SECTION("activation") {
 	constexpr int n = noframe;
 	
@@ -482,3 +482,4 @@ SECTION("activation") {
 	}
 }
 
+#endif

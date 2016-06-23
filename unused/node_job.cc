@@ -35,12 +35,13 @@ node_job::node_job(node& nd) :
 
 
 node_job::~node_job() {
-	MF_ASSERT(inputs_stack_.size() == 0);
-	MF_ASSERT(outputs_stack_.size() == 0);
+	cancel();
 }
 
 
 void node_job::cancel() {
+	while(node_input* in = pop_input()) in->cancel_read_frame();
+	while(node_output* out = pop_output()) out->cancel_write_frame();
 }
 	
 

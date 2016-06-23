@@ -27,7 +27,6 @@ shared_ring::shared_ring
 (const frame_array_properties& prop, bool seekable, time_unit end_time) :
 	ring_(prop), seekable_(seekable), end_time_(end_time)
 {
-	may_wait_.test_and_set();
 	if(seekable && end_time == -1) throw std::invalid_argument("end time must be defined when seekable");
 }
 
@@ -38,12 +37,16 @@ void shared_ring::initialize() {
 	reader_state_ = idle;
 	writer_state_ = idle;
 	read_start_time_ = 0;
-	may_wait_.test_and_set();
+	break_.store(false);
 }
 
 
 void shared_ring::break_waiting() {
-	may_wait_.clear();
+	MF_DEBUG("break_waiting");
+	break_.store(true);
+	writable_cv_.notify_one();
+	readable_cv_.notify_one();
+	MF_DEBUG("break_waiting.");
 }
 
 
@@ -80,7 +83,7 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 		writer_state_ = duration;
 		
 		writable_cv_.wait(lock);
-		if(! may_wait_.test_and_set()) {
+		if(break_.exchange(false)) {
 			writer_state_ = idle;
 			return section_view_type::null();
 		}
@@ -141,7 +144,7 @@ bool shared_ring::wait_writable() {
 		writer_state_ = 1;
 		writable_cv_.wait(lock);
 		
-		if(! may_wait_.test_and_set()) {
+		if(break_.exchange(false)) {
 			writer_state_ = idle;
 			return false;		
 		}
@@ -224,7 +227,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 		
 		readable_cv_.wait(lock);
-		if(! may_wait_.test_and_set()) {
+		if(break_.exchange(false)) {
 			reader_state_ = idle;
 			return section_view_type::null();
 		}
@@ -276,14 +279,11 @@ bool shared_ring::wait_readable() {
 		reader_state_ = 1;
 		
 		readable_cv_.wait(lock);
-		if(! may_wait_.test_and_set()) {
-			reader_state_ = idle;
-			return false;
-		}
+		if(break_.exchange(false)) break;
 	}
 	
 	reader_state_ = idle;
-	return true;
+	return (ring_.readable_duration() > 0);
 }
 
 
@@ -335,7 +335,7 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 		
 		readable_cv_.wait(lock);
-		if(! may_wait_.test_and_set()) {
+		if(break_.exchange(false)) {
 			reader_state_ = idle;
 			return section_view_type::null();
 		}

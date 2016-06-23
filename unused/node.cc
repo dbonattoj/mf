@@ -25,6 +25,35 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+time_unit node::minimal_offset_to(const node& target_node) const {
+	time_unit minimum = std::numeric_limits<time_unit>::max();
+	if(&target_node == this) return 0;
+	for(auto&& out : outputs_) {
+		const node_input& in = out->connected_input();
+		if(in.this_node().precedes(target_node)) {
+			time_unit off = in.this_node().minimal_offset_to(target_node) - in.past_window_duration() - 1;
+			minimum = std::min(minimum, off);
+		}
+	}
+	if(minimum != std::numeric_limits<time_unit>::max()) return minimum;
+	else throw std::invalid_argument("tried to get minimal offset to preceding node");
+}
+
+
+time_unit node::maximal_offset_to(const node& target_node) const {
+	time_unit maximum = std::numeric_limits<time_unit>::min();
+	if(&target_node == this) return 0;
+	for(auto&& out : outputs_) {
+		const node_input& in = out->connected_input();
+		if(in.this_node().precedes(target_node)) {
+			time_unit off = in.this_node().maximal_offset_to(target_node) + in.future_window_duration() + prefetch_duration();
+			maximum = std::max(maximum, off);
+		}
+	}
+	if(maximum != std::numeric_limits<time_unit>::min()) return maximum;
+	else throw std::invalid_argument("tried to get maximal offset to preceding node");
+}
+
 
 bool node::precedes(const node& nd) const {
 	if(&nd == this) return true;
@@ -156,6 +185,14 @@ void node::define_source_stream_properties(bool seekable, time_unit stream_durat
 }
 
 
+void node::set_prefetch_duration(time_unit prefetch) {
+	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(prefetch >= 0);
+	
+	prefetch_duration_ = prefetch;
+}
+
+
 void node::setup_sink() {
 	MF_EXPECTS(! was_setup_);
 	MF_EXPECTS(is_sink());
@@ -247,7 +284,7 @@ void node_input::connect(node_remote_output& output) {
 }
 
 
-node::pull_result node_input::pull(time_unit t) {
+time_unit node_input::pull(time_unit t) {
 	MF_EXPECTS(is_connected());
 	
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
@@ -255,8 +292,7 @@ node::pull_result node_input::pull(time_unit t) {
 	
 	bool reconnect = (this_node().state() == node::online) && (connected_node().state() == node::reconnecting);
 	
-	time_span span(start_time, end_time);
-	return connected_output_->pull(span, reconnect);
+	return connected_output_->pull(time_span(start_time, end_time), reconnect);
 }
 
 

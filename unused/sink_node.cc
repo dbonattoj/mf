@@ -64,11 +64,11 @@ void sink_node::pull(time_unit t) {
 	// pull & begin reading from activated inputs
 	bool stopped = false;
 	for(auto&& in : inputs()) if(in->is_activated()) {
-		time_unit res = in->pull(t);
-		if(res == pull_result::stopped) {
+		time_unit pull_result = in->pull(t);
+		if(pull_result == pull_stopped) {
 			stopped = true;
 			return;
-		} else if(res == pull_result::temporary_failure) {
+		} else if(pull_result == pull_temporary_failure) {
 			MF_DEBUG("sink received temp failure");
 			return;
 		}

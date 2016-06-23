@@ -27,246 +27,242 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <iostream>
 
 namespace mf { namespace flow {
-
-bool async_node::process_next_frame() {
-	//usleep(std::rand() % 200000);
-
-	node_job job = make_job();
-	time_unit t;
-		
-	// begin writing frame to output
-	// output determines time t of frame to write
-	auto&& out = outputs().front();
-	auto out_view = out->begin_write_frame(t);
-	if(out_view.is_null()) return false; // stopped or paused
 	
-//MF_DEBUG("async: ", t);
-	
-	set_current_time(t);
-	job.define_time(t);
-	
-	if(state() == reconnecting && reconnect_flag_) {
-		set_online();
-		reconnect_flag_ = false;
-	}
-
-	// with time defined, run preprocess
-	// concrete node may activate/desactivate inputs now
-	pre_process_filter(job);
-
-	// add output view to job
-	job.push_output(*out, out_view);
-	
-	// pull & begin reading from activated inputs
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		// pull frame t from input
-		// for sequential node: frame is now processed
-		time_unit pull_result = in->pull(t);
-		if(pull_result == node::pull_stopped) {
-			return false;
-		} else if(pull_result == node::pull_temporary_failure) {
-			return false;
-		}
-	}
-	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		// begin reading frame 
-		timed_frame_array_view in_view = in->begin_read_frame(t);
-		MF_ASSERT(! in_view.is_null());
-		MF_ASSERT(in_view.span().includes(t));
-		
-		// add to job
-		job.push_input(*in, in_view);
-	}
-	
-	// process frame in concrete subclass
-	process_filter(job);
-	
-	// check if node reached end
-	// determined by stream duration or reached_end() for source
-	// when stream duration undefined, end is reached when an input reached it
-	bool reached_end = false;
-	if(stream_duration_is_defined()) {
-		if(t == stream_duration() - 1) reached_end = true;
-		MF_ASSERT(t < stream_duration());
-	} else if(is_source()) {
-		reached_end = job.end_was_marked();
-	}
-
-	// end reading from inputs
-	while(node_input* in = job.pop_input()) {
-		in->end_read_frame(t);
-		if(t == in->end_time() - 1) reached_end = true;
-	}
-	
-	// end writing to output,
-	// indicate if last frame was reached
-	job.pop_output()->end_write_frame(reached_end);
-	
-	if(reached_end) mark_end();
-	
-	//MF_DEBUG("processed ", t);
-		
-	return true;
-}
-
-
-void async_node::thread_main_() {
-	async_node_output& out = (async_node_output&)(outputs().front());
-
-	for(;;) {
-		std::unique_lock<std::mutex> lock(active_mutex_);		
-		active_cv_.wait(lock, [&] { return active_.load(); });
-		lock.unlock();
-		
-		while(process_next_frame());
-		
-		active_.store(false);
-		out.ring_->break_waiting();
-	}
-}
-
-
-async_node::async_node(graph& gr) : filter_node(gr) {
-	set_prefetch_duration(1);
-}
-
+async_node::async_node(graph& gr) : filter_node(gr) { }
 
 async_node::~async_node() {
-	MF_EXPECTS_MSG(!running_, "async_node must have been stopped prior to destruction");
+	
 }
-
 
 void async_node::setup() {
-	if(outputs().size() != 1) throw invalid_flow_graph("async_node must have exactly 1 output");
 	setup_filter();
 }
-	
 
 void async_node::launch() {
-	MF_EXPECTS(! running_);
 	thread_ = std::move(std::thread(
 		std::bind(&async_node::thread_main_, this)
 	));
-	running_ = true;
 }
-
 
 void async_node::pre_stop() {
-	async_node_output& out = (async_node_output&)(outputs().front());
-	
-	out.ring_->break_waiting();
+	ring_->break_waiting();
+	continuation_cv_.notify_one();
 }
-
 
 void async_node::stop() {
-	MF_EXPECTS(running_);
-	MF_EXPECTS(thread_.joinable());
 	thread_.join();
-	running_ = false;
 }
 
+void async_node::output_setup() {
+	const node& connected_node = output().connected_node();
+	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 
-void async_node_output::setup() {
-	node& connected_node = connected_input().this_node();
+	ndarray_generic_properties prop(output().format(), output().frame_length(), required_capacity);
+	ring_.reset(new shared_ring(prop, is_seekable(), stream_duration()));
+}
+
+time_unit async_node::minimal_offset_to(const node& target_node) const {
+	if(&target_node == this) return 0;
+	const node_input& in = output().connected_input();
+	return in.this_node().minimal_offset_to(target_node) - in.past_window_duration();
+}
+
+time_unit async_node::maximal_offset_to(const node& target_node) const {
+	if(&target_node == this) return 0;
+	const node_input& in = output().connected_input();
+	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration() + prefetch_duration_;
+}
+
+bool async_node::may_continue_() const {
+	time_unit next_write_time = ring_->write_start_time();
+	if(current_request_id_ == failed_request_id_) return false;
+	if(next_write_time >= time_limit_) return false;
+	if(next_write_time >= ring_->end_time()) return false;
+	return true;
+}
+
+void async_node::thread_main_() {
+	bool run = false;
+	while(run) {
+		{
+			std::unique_lock<std::mutex> lock(continuation_mutex_);
+			continuation_cv_.wait(lock, [&]() { return may_continue_(); });
+		}
+		
+		run = process_frames_();
+	}
+}
+
+bool async_node::process_frames_() {
+	// request = launched by output_pull, has (UID, time_limit, start time)
+	// frames that are processed after output_pull launched request (pulled span + prefetch) belong to that request
+	// failure when processing those frames (got tfail from input pull, crossed time limit, crossed end time, stopped)
+	// break output_pull and make it return tfail only when it is waiting for readable frames in same request.
 	
-	time_unit required_capacity = 1 + this_node().maximal_offset_to(connected_node) - this_node().minimal_offset_to(connected_node);
+	request_id_type request_id;
 
-	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
-	ring_.reset(new shared_ring(prop, this_node().is_seekable(), this_node().stream_duration()));
-}	
+	// process next frames until paused
+	for(;;) {
+		// request_id = unique id of current output_pull invocation
+		request_id = current_request_id_.load();	
 
+		// wait for frame to become writable, and get view to it
+		// defines the time of frame to process, output_pull can seek to new time
+		// output_pull sets buffer time (seek) and time_limit before request_id.
+		// if now out_vw.start_time() is already set, but request_id still has old value and failure occurs,
+		// goes to pause. output_pull then notifies continuation_cv_ after setting right request_id, and then the
+		// request gets processed.
+		auto out_vw = ring_->begin_write(1);
+		if(out_vw.is_null()) return false;
+		if(out_vw.duration() == 0) break;
 
-time_unit async_node_output::pull(time_span span, bool reconnected) {
-	async_node& nd = (async_node&)(this_node());
-
-	time_limit_ = span.end_time() + this_node().prefetch_duration();
+		time_unit request_time = out_vw.start_time();
+		if(request_time >= time_limit_) break;
+		
+		time_unit t = out_vw.start_time();
+		node_job job = make_job();
+		job.define_time(t);
+		set_current_time(t);
+		
+		if(state() == reconnecting && reconnect_flag_) {
+			set_online();
+			reconnect_flag_ = false;
+		}
+		
+		pre_process_filter(job);
+		
+		job.push_output(output(), out_vw[0]);
+		
+		for(auto&& in : inputs()) if(in->is_activated()) {
+			time_unit res = in->pull(t);
+			if(res == pull_result::stopped) break;
+			else if(res == pull_result::temporary_failure) break;
+		}
+		
+		for(auto&& in : inputs()) if(in->is_activated()) {
+			timed_frame_array_view in_view = in->begin_read_frame(t);
+			MF_ASSERT(! in_view.is_null());
+			MF_ASSERT(in_view.span().includes(t));
 			
-	time_unit t = span.start_time();
-	time_unit ring_read_t = ring_->read_start_time();
-	if(t != ring_read_t) {
-		if(ring_->is_seekable()) ring_->seek(t);
-		else if(t > ring_read_t) ring_->skip(t - ring_read_t);
-		else throw std::logic_error("ring not seekable but async_node output attempted to seek to past");
-	}
+			job.push_input(*in, in_view);
+		}
+		
+		process_filter(job);
+		
+		bool reached_end = false;
+		if(stream_duration_is_defined()) {
+			if(t == stream_duration() - 1) reached_end = true;
+			MF_ASSERT(t < stream_duration());
+		} else if(is_source()) {
+			reached_end = job.end_was_marked();
+		}
 	
-	if(reconnected) {
-		async_node& nd = (async_node&)this_node();
-		nd.reconnect_flag_ = true;
-	}
-	
-	
-	
-	nd.active_ = true;
-	nd.active_cv_.notify_one();
-	
-	
-	while(ring_->readable_duration() < span.duration()) {
-		bool cont = ring_->wait_readable();
-		if(cont) {
-			if(ring_->writer_reached_end()) return ring_->readable_duration();
+		while(node_input* in = job.pop_input()) {
+			in->end_read_frame(t);
+			if(t == in->end_time() - 1) reached_end = true;
+		}
+				
+		if(reached_end) {
+			bool mark_last_frame = !ring_->is_seekable();
+			ring_->end_write(mark_last_frame);			
+			mark_end();
 		} else {
-			if(this_node().this_graph().was_stopped()) return node::pull_stopped;
-			else return node::pull_temporary_failure;
+			ring_->end_write(1);
+		}
+		
+		job.pop_output();
+	}
+	
+	// mark request_id as failed, and break output_pull waiting for readable frame
+	failed_request_id_ = request_id;
+	ring_->break_waiting();
+
+	return true;
+}
+
+node::pull_result async_node::output_pull(time_span& pull_span, bool reconnect) {
+	{
+		std::lock_guard<std::mutex> lock(continuation_mutex_);
+		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
+		
+		time_unit pull_time = pull_span.start_time();
+		if(pull_time >= ring_->read_start_time()) ring_->skip(pull_time - ring_->read_start_time());
+		else ring_->seek(pull_span.start_time());
+		
+		if(reconnect) reconnect_flag_ = true;
+		
+		current_request_id_++;
+	}
+	
+	continuation_cv_.notify_one();
+	
+	while(ring_->readable_duration() < pull_span.duration()) {
+		MF_ASSERT(ring_->read_start_time() == pull_span.start_time());
+		bool cont = ring_->wait_readable();
+		if(! cont) {
+			bool this_request_failed = (failed_request_id_ == current_request_id_);
+			if(this_graph().was_stopped())
+				return pull_result::stopped;
+			else if(this_request_failed)
+				return pull_result::temporary_failure;
+			else if(ring_->writer_reached_end())
+				pull_span = time_span(pull_span.start_time(), pull_span.start_time() + ring_->readable_duration());
+			else
+				continue;
 		}
 	}
 	
-	return ring_->readable_duration();
+	return pull_result::success;
 }
 
-
-timed_frame_array_view async_node_output::begin_read(time_unit duration) {
-	auto vw = ring_->try_begin_read(duration);
-	MF_ASSERT(! vw.is_null());
-	return vw;
+timed_frame_array_view async_node::output_begin_read(time_unit duration)  {
+	return ring_->try_begin_read(duration);
 }
 
-
-void async_node_output::end_read(time_unit duration) {
+void async_node::output_end_read(time_unit duration) {
 	ring_->end_read(duration);
 }
 
 
+async_node& async_node_output::this_node() {
+	return static_cast<async_node&>(this_node());
+}
+
+const async_node& async_node_output::this_node() const {
+	return static_cast<const async_node&>(this_node());
+}
+
+void async_node_output::setup() {
+	this_node().output_setup();
+}
+
+node::pull_result async_node_output::pull(time_span& span, bool reconnect) {
+	return this_node().output_pull(span, reconnect);
+}
+
+timed_frame_array_view async_node_output::begin_read(time_unit duration) {
+	return this_node().output_begin_read(duration);
+}
+
+void async_node_output::end_read(time_unit duration) {
+	return this_node().output_end_read(duration);
+}
+
 time_unit async_node_output::end_time() const {
-	return ring_->end_time();
+	return this_node().end_time();
 }
 
 
-frame_view async_node_output::begin_write_frame(time_unit& t) {
-	for(;;) {
-		// wait until 1+ frame is writable, or stopped
-		// keep waiting if at end
-		bool got_writable = ring_->wait_writable();
-		if(! got_writable) return frame_view::null();
+async_node_output& async_node::output() { return static_cast<async_node_output&>(*outputs().front()); }
+const async_node_output& async_node::output() const { return static_cast<const async_node_output&>(*outputs().front()); }
 
-		// A
-		// try begin write
-		// null if frame now no longer writable (seeked in A),
-		// or duration = 0 (seeked to end in A)
-		timed_frame_array_view view = ring_->try_begin_write(1);
-		if(view.is_null() || view.duration() != 1) continue;
-		
-		MF_ASSERT(view.duration() == 1);
-		t = view.start_time();
-		
-		if(t < time_limit_) {
-			return view[0];
-		} else {
-			ring_->end_write(0);
-			return frame_view::null();
-		}
-	}
+
+
+node_output& async_node::add_output(const frame_format& format) {
+	return add_output_<async_node_output>(format);
 }
 
 
-void async_node_output::end_write_frame(bool was_last_frame) {
-	bool mark_end = was_last_frame && !ring_->is_seekable();
-	ring_->end_write(1, mark_end);
-}
 
-
-void async_node_output::cancel_write_frame() {
-	ring_->end_write(0, false);
-}
 
 }}

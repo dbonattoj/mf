@@ -72,7 +72,7 @@ private:
 
 	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access.
 
-	std::atomic_flag may_wait_;
+	std::atomic<bool> break_ {false};
 	
 	std::condition_variable readable_cv_;
 	std::condition_variable writable_cv_;
@@ -224,7 +224,7 @@ public:
 	/// Presumptive start time of next write.
 	/** Value gets changed by writer. For seekable policy, if can also be changed by reader, including during a 
 	 ** begin_write() call while writer is waiting. Writer must always use start time of span returned by begin_write()
-	 ** of try_begin_write() instead. */
+	 ** or try_begin_write() instead. */
 	time_unit write_start_time() const;
 	
 	/// Read start time.
