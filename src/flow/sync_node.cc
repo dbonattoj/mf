@@ -151,11 +151,11 @@ void sync_node::output_end_read(time_unit duration) {
 }
 
 sync_node& sync_node_output::this_node() {
-	return static_cast<sync_node&>(this_node());
+	return static_cast<sync_node&>(node_output::this_node());
 }
 
 const sync_node& sync_node_output::this_node() const {
-	return static_cast<const sync_node&>(this_node());
+	return static_cast<const sync_node&>(node_output::this_node());
 }
 
 void sync_node_output::setup() {

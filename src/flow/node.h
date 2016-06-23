@@ -84,7 +84,7 @@ public:
 	void setup_sink();
 	
 	void set_current_time(time_unit t) noexcept { current_time_ = t; }
-	void mark_end() { end_time_.store(current_time_); }
+	void mark_end() { end_time_.store(current_time_ + 1); }
 	
 	node_job make_job();
 		

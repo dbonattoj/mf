@@ -73,21 +73,30 @@ time_unit async_node::maximal_offset_to(const node& target_node) const {
 	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration() + prefetch_duration_;
 }
 
-bool async_node::may_continue_() const {
+bool async_node::may_continue_() const {	
 	time_unit next_write_time = ring_->write_start_time();
-	if(current_request_id_ == failed_request_id_) return false;
+
+	MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time());
+
+	
+	if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
 	if(next_write_time >= time_limit_) return false;
-	if(next_write_time >= ring_->end_time()) return false;
+	if(ring_->end_time() != -1 && next_write_time >= ring_->end_time()) return false;
 	return true;
 }
 
 void async_node::thread_main_() {
-	bool run = false;
+	MF_DEBUG("thread");
+
+	
+	bool run = true;
 	while(run) {
 		{
 			std::unique_lock<std::mutex> lock(continuation_mutex_);
 			continuation_cv_.wait(lock, [&]() { return may_continue_(); });
 		}
+		
+		MF_DEBUG("continuation...");
 		
 		run = process_frames_();
 	}
@@ -147,6 +156,7 @@ bool async_node::process_frames_() {
 			job.push_input(*in, in_view);
 		}
 		
+		MF_DEBUG("process ", t);
 		process_filter(job);
 		
 		bool reached_end = false;
@@ -181,6 +191,7 @@ bool async_node::process_frames_() {
 }
 
 node::pull_result async_node::output_pull(time_span& pull_span, bool reconnect) {
+	MF_DEBUG("output: pull ", pull_span);
 	{
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
 		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
@@ -198,7 +209,11 @@ node::pull_result async_node::output_pull(time_span& pull_span, bool reconnect) 
 	
 	while(ring_->readable_duration() < pull_span.duration()) {
 		MF_ASSERT(ring_->read_start_time() == pull_span.start_time());
+		
+		MF_DEBUG("output: pull ", pull_span, " : wait_readable...");
+
 		bool cont = ring_->wait_readable();
+		MF_DEBUG("output: pull ", pull_span, " : wait_readable. readable=", ring_->readable_duration());
 		if(! cont) {
 			bool this_request_failed = (failed_request_id_ == current_request_id_);
 			if(this_graph().was_stopped())
@@ -225,11 +240,11 @@ void async_node::output_end_read(time_unit duration) {
 
 
 async_node& async_node_output::this_node() {
-	return static_cast<async_node&>(this_node());
+	return static_cast<async_node&>(node_output::this_node());
 }
 
 const async_node& async_node_output::this_node() const {
-	return static_cast<const async_node&>(this_node());
+	return static_cast<const async_node&>(node_output::this_node());
 }
 
 void async_node_output::setup() {
