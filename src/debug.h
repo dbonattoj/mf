@@ -46,6 +46,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 		::mf::detail::debug_print_backtrace( \
 			MF_DEBUG_HEADER(caption "\nbacktrace:", ""), \
 			::mf::detail::debug_get_backtrace())
+	
+	#define MF_RAND_SLEEP \
+		random_sleep()
 
 #else
 
@@ -54,11 +57,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 	#define MF_DEBUG_EXPR_T(...) ((void)0)
 	#define MF_DEBUG_EXPR(...) ((void)0)
 	#define MF_DEBUG_BACKTRACE() ((void)0)
+	#define MF_RAND_SLEEP ((void)0)
 
 #endif
 
 #include <set>
 #include <string>
+#include <unistd.h>
+#include <cstdlib>
 
 namespace mf {
 
@@ -74,6 +80,14 @@ void set_no_debug_filter();
 void set_debug_filter(const std::set<std::string>& tags);
 
 void initialize_debug();
+
+inline void random_sleep() {
+	int r = std::rand();
+	int r1 = r % 10;
+	if(r1 < 4) return;
+	else if(r1 < 6) ::usleep(r % 500);
+	else ::usleep(20000 + r%2000);
+}
 
 }
 

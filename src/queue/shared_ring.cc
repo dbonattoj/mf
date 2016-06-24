@@ -37,16 +37,26 @@ void shared_ring::initialize() {
 	reader_state_ = idle;
 	writer_state_ = idle;
 	read_start_time_ = 0;
-	break_.store(false);
+	reader_break_.store(true);
+	writer_break_.store(true);
 }
 
 
-void shared_ring::break_waiting() {
-	MF_DEBUG("break_waiting");
-	break_.store(true);
-	writable_cv_.notify_one();
-	readable_cv_.notify_one();
-	MF_DEBUG("break_waiting.");
+void shared_ring::break_reader() {
+	std::lock_guard<std::mutex> lock(mutex_);
+	if(reader_state_ > 0) {
+		reader_break_.store(true);
+		readable_cv_.notify_one();
+	}
+}
+
+
+void shared_ring::break_writer() {
+	std::lock_guard<std::mutex> lock(mutex_);
+	if(writer_state_ > 0) {
+		writer_break_.store(true);
+		writable_cv_.notify_one();
+	}
 }
 
 
@@ -83,7 +93,7 @@ auto shared_ring::begin_write(time_unit original_duration) -> section_view_type 
 		writer_state_ = duration;
 		
 		writable_cv_.wait(lock);
-		if(break_.exchange(false)) {
+		if(writer_break_.exchange(false)) {
 			writer_state_ = idle;
 			return section_view_type::null();
 		}
@@ -144,7 +154,7 @@ bool shared_ring::wait_writable() {
 		writer_state_ = 1;
 		writable_cv_.wait(lock);
 		
-		if(break_.exchange(false)) {
+		if(writer_break_.exchange(false)) {
 			writer_state_ = idle;
 			return false;		
 		}
@@ -227,7 +237,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 		
 		readable_cv_.wait(lock);
-		if(break_.exchange(false)) {
+		if(reader_break_.exchange(false)) {
 			reader_state_ = idle;
 			return section_view_type::null();
 		}
@@ -279,7 +289,10 @@ bool shared_ring::wait_readable() {
 		reader_state_ = 1;
 		
 		readable_cv_.wait(lock);
-		if(break_.exchange(false)) break;
+		if(reader_break_.exchange(false)) {
+			MF_DEBUG("shared_ring: wait_readable: received break");
+			break;
+		}
 	}
 	
 	reader_state_ = idle;
@@ -335,7 +348,7 @@ auto shared_ring::shift_read(time_unit original_read_duration, time_unit shift_d
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
 		
 		readable_cv_.wait(lock);
-		if(break_.exchange(false)) {
+		if(reader_break_.exchange(false)) {
 			reader_state_ = idle;
 			return section_view_type::null();
 		}

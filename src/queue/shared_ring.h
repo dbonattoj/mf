@@ -71,9 +71,10 @@ private:
 	// TODO make non-atomic? verify
 
 	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access.
-
-	std::atomic<bool> break_ {false};
 	
+	std::atomic<bool> reader_break_ {false};
+	std::atomic<bool> writer_break_ {false};
+		
 	std::condition_variable readable_cv_;
 	std::condition_variable writable_cv_;
 
@@ -91,7 +92,10 @@ public:
 		
 	void initialize();
 	
-	void break_waiting();
+	
+	void break_reader();
+	void break_writer();
+	
 	
 	const frame_format& format() const noexcept { return ring_.format(); }
 

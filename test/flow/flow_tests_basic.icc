@@ -26,6 +26,7 @@ SECTION("basic") {
 	std::vector<int> seq(20);
 	for(int i = 0; i < seq.size(); ++i) seq[i] = i;
 
+
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
 		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
@@ -34,7 +35,7 @@ SECTION("basic") {
 		gr.run();
 		REQUIRE(sink.check());
 	}
-return;
+
 	SECTION("source --> passthrough --> sink") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
 		auto& passthrough = gr.add_filter<passthrough_filter, node_type>(0, 0);
@@ -45,8 +46,7 @@ return;
 		gr.run();
 		REQUIRE(sink.check());
 	}
-	
-	
+
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(0, 3);
@@ -76,7 +76,7 @@ return;
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-	
+
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 3);
@@ -92,7 +92,7 @@ return;
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-	
+
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2' --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type>(3, 1);
@@ -110,7 +110,7 @@ return;
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-		
+	
 	SECTION("detailled time window test") { 
 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(5, shp, seekable);		
@@ -286,7 +286,6 @@ return;
 		}
 	}
 	
-	
 	SECTION("multiple inputs") {
 		auto& source1 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
 		auto& source2 = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, seekable);
@@ -363,7 +362,7 @@ return;
 	}
 }
 
-#if 0
+
 SECTION("activation") {
 	constexpr int n = noframe;
 	
@@ -397,6 +396,7 @@ SECTION("activation") {
 		REQUIRE(gr.current_time() == last);
 	}
 
+
 	SECTION("source -> sink 2") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
 		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq_and);
@@ -407,6 +407,7 @@ SECTION("activation") {
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
+
 
 
 	SECTION("source -> passthrough -> sink") {
@@ -437,6 +438,7 @@ SECTION("activation") {
 			REQUIRE(gr.current_time() == last);
 		}
 	}
+
 
 	SECTION("source -> [-3,+3]passthrough -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(last, shp, seekable);
@@ -482,4 +484,3 @@ SECTION("activation") {
 	}
 }
 
-#endif

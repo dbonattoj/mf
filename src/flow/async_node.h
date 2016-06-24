@@ -70,7 +70,7 @@ private:
 	async_node_output& output();
 	const async_node_output& output() const;
 	
-	bool may_continue_() const;
+	bool may_continue_();
 	
 	void thread_main_();
 	bool process_frames_();

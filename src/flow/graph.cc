@@ -71,6 +71,8 @@ time_unit graph::current_time() const {
 }
 
 void graph::run_until(time_unit last_frame) {
+	MF_DEBUG_BACKTRACE("graph::run_until");
+	
 	if(! was_setup_) throw std::logic_error("graph not set up");
 	
 	if(! running_) launch();
@@ -86,6 +88,7 @@ void graph::run_for(time_unit duration) {
 
 
 bool graph::run() {
+	MF_DEBUG_BACKTRACE("graph::run");
 	if(! was_setup_) throw std::logic_error("graph not set up");
 	if(! sink_->is_bounded()) throw std::logic_error("sink is not bounded");
 	if(! running_) launch();
