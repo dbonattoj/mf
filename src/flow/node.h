@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../common.h"
 #include "../queue/frame.h"
+#include "node_stream_properties.h"
 #include <vector>
 #include <atomic>
 #include <string>
@@ -42,100 +43,86 @@ public:
 	enum pull_result { success, temporary_failure, stopped };
 
 private:
+	enum stage { construction, was_pre_setup, was_setup };
+	
+	stage stage_ = construction;
+
 	graph& graph_;
 	std::vector<std::unique_ptr<node_output>> outputs_;
-	std::vector<std::unique_ptr<node_input>> inputs_;
-
+	std::vector<std::unique_ptr<node_input>> inputs_;	
+	node_stream_properties stream_properties_;
+		
 	std::atomic<online_state> state_ {online};
-
-	bool was_pre_setup_ = false;
-	bool was_setup_ = false;
-	
-	time_unit stream_duration_ = -1;
-	bool seekable_ = false;
-	
 	std::atomic<time_unit> current_time_ {-1};
-	
-	std::atomic<time_unit> end_time_ {-1}; // TODO for non-seekable (stream_duration_==-1), end_time can be reset when relaunching (new stream)
+	std::atomic<bool> reached_end_ {false};
 	
 	void propagate_pre_setup_();
 	void propagate_setup_();
 	void deduce_stream_properties_();
 
-public:
-	virtual time_unit minimal_offset_to(const node&) const = 0;
-	virtual time_unit maximal_offset_to(const node&) const = 0;
-		
-	bool precedes(const node&) const;
-	bool precedes_strict(const node&) const;
-	const node& first_successor() const;
-
-	online_state state() const { return state_; }
-	
-	void propagate_offline_state();
-	void propagate_reconnecting_state();
-	void set_online();
-
-public:	
+protected:
 	explicit node(graph& gr) : graph_(gr) { }
 	node(const node&) = delete;
 	node& operator=(const node&) = delete;
-		
-	void setup_sink();
-	
-	void set_current_time(time_unit t) noexcept { current_time_ = t; }
-	void mark_end() { end_time_.store(current_time_ + 1); }
-	
-	node_job make_job();
-		
+
 	template<typename Input>
-	Input& add_input_(time_unit past_window, time_unit future_window) {
+	Input& add_input(time_unit past_window, time_unit future_window) {
 		Input* input = new Input(*this, inputs_.size(), past_window, future_window);
 		inputs_.emplace_back(input);
 		return *input;
 	}
 
 	template<typename Output>
-	Output& add_output_(const frame_format& format) {
+	Output& add_output(const frame_format& format) {
 		Output* output = new Output(*this, outputs_.size(), format);
 		outputs_.emplace_back(output);
 		return *output;
 	}
-	
+
 public:
-	std::string name;
-
 	virtual ~node() { }
-	
-	graph& this_graph() noexcept { return graph_; }
 
-	void define_source_stream_properties(bool seekable, time_unit stream_duration = -1);
+	graph& this_graph() noexcept { return graph_; }
 
 	const auto& inputs() const noexcept { return inputs_; }
 	const auto& outputs() const noexcept { return outputs_; }
 
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
+
+	bool precedes(const node&) const;
+	bool precedes_strict(const node&) const;
+	const node& first_successor() const;
+			
+	virtual time_unit minimal_offset_to(const node&) const = 0;
+	virtual time_unit maximal_offset_to(const node&) const = 0;
+	
+	void define_source_stream_properties(const node_stream_properties&);
+	node_stream_properties stream_properties() const noexcept { return stream_properties_; }
+	
+	void setup_sink();
+
+	online_state state() const { return state_; }
+	void propagate_offline_state();
+	void propagate_reconnecting_state();
+	void set_online();
+	
+	void set_current_time_(time_unit t) noexcept { current_time_ = t; }
+	void mark_end_() { end_time_.store(current_time_ + 1); }
+	
+	node_job make_job_();
 	
 	virtual void pre_setup() { }
-	virtual void setup() = 0;
-	virtual void launch() = 0;
-	
+	virtual void setup() { }
+	virtual void launch() { }
 	virtual void pre_stop() { }
-	virtual void stop() = 0;
-		
-	time_unit end_time() const noexcept { return end_time_; }
-	bool reached_end() const noexcept;
+	virtual void stop() { }
 
-	bool was_setup() const noexcept { return was_setup_; }
-
-	bool stream_duration_is_defined() const noexcept { return (stream_duration_ != -1); }
-	time_unit stream_duration() const noexcept { return stream_duration_; }
-	bool is_seekable() const noexcept { return seekable_; }
 	bool is_bounded() const;
-
 	time_unit current_time() const noexcept { return current_time_; }
+	bool reached_end() const noexcept { return reached_end_; }
 };
+
 
 /// Output port of another node, read interface for connected node.
 class node_remote_output {
@@ -143,11 +130,8 @@ public:
 	virtual node_output& this_output() noexcept = 0;
 	
 	virtual node::pull_result pull(time_span& span, bool reconnect) = 0;
-	
 	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
-	
 	virtual void end_read(time_unit duration) = 0;
-	
 	virtual time_unit end_time() const = 0;
 };
 

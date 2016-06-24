@@ -31,7 +31,8 @@ namespace mf { namespace flow {
 async_node::async_node(graph& gr) : filter_node(gr) { }
 
 async_node::~async_node() {
-
+	MF_ASSERT(! running_);
+	MF_ASSERT(! thread_.joinable());
 }
 
 void async_node::setup() {
@@ -39,6 +40,7 @@ void async_node::setup() {
 }
 
 void async_node::launch() {
+	MF_ASSERT(! running_);
 	thread_ = std::move(std::thread(
 		std::bind(&async_node::thread_main_, this)
 	));
@@ -222,7 +224,7 @@ fail:
 	return true;
 }
 
-node::pull_result async_node::output_pull(time_span& pull_span, bool reconnect) {
+node::pull_result async_node::pull_(time_span& pull_span, bool reconnect) {
 	MF_DEBUG("output: pull ", pull_span);
 	{
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
@@ -270,11 +272,11 @@ if(this_graph().was_stopped()) return pull_result::stopped;
 	return pull_result::success;
 }
 
-timed_frame_array_view async_node::output_begin_read(time_unit duration)  {
+timed_frame_array_view async_node::begin_read_(time_unit duration)  {
 	return ring_->try_begin_read(duration);
 }
 
-void async_node::output_end_read(time_unit duration) {
+void async_node::end_read_(time_unit duration) {
 	ring_->end_read(duration);
 }
 
@@ -292,15 +294,15 @@ void async_node_output::setup() {
 }
 
 node::pull_result async_node_output::pull(time_span& span, bool reconnect) {
-	return this_node().output_pull(span, reconnect);
+	return this_node().pull_(span, reconnect);
 }
 
 timed_frame_array_view async_node_output::begin_read(time_unit duration) {
-	return this_node().output_begin_read(duration);
+	return this_node().begin_read_(duration);
 }
 
 void async_node_output::end_read(time_unit duration) {
-	return this_node().output_end_read(duration);
+	return this_node().end_read_(duration);
 }
 
 time_unit async_node_output::end_time() const {

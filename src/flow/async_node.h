@@ -50,12 +50,15 @@ public:
 
 
 class async_node final : public filter_node {
+	friend class async_node_output;
+	
 private:
 	using request_id_type = int;
 	
 	time_unit prefetch_duration_ = 0;
 	
 	std::thread thread_;
+	std::atomic<bool> running_ {false};
 
 	std::unique_ptr<shared_ring> ring_;
 	
@@ -70,10 +73,26 @@ private:
 	async_node_output& output();
 	const async_node_output& output() const;
 	
+	
+	
+	/// \name Node processing.
+	/// Process frames and write into shared ring; called from node's thread.
+	///@{
 	bool may_continue_();
 	
 	void thread_main_();
 	bool process_frames_();
+	///@}
+
+
+	/// \name Remote output interface.
+	/// Read from shared ring,; called from connected node thread.
+	///@{
+	node::pull_result pull_(time_span& span, bool reconnect);
+	timed_frame_array_view begin_read_(time_unit duration);
+	void end_read_(time_unit duration);
+	///@}
+
 	
 public:
 	async_node(graph&);
@@ -90,13 +109,6 @@ public:
 	time_unit maximal_offset_to(const node&) const override;
 	
 	void set_prefetch_duration(time_unit dur) { prefetch_duration_ = dur; }
-
-	/// \name Remote output interface.
-	///@{
-	node::pull_result output_pull(time_span& span, bool reconnect);
-	timed_frame_array_view output_begin_read(time_unit duration);
-	void output_end_read(time_unit duration);
-	///@}
 	
 	node_input& add_input(time_unit past_window, time_unit future_window) override {
 		return add_input_<node_input>(past_window, future_window);
