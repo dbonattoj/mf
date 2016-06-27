@@ -23,35 +23,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "filter_node.h"
 #include "../queue/shared_ring.h"
-#include "../os/event.h"
 #include <thread>
 
 namespace mf { namespace flow {
 
 class graph;
-class async_node;
 
-
-class async_node_output : public node_output {
-private:
-	async_node& this_node();
-	const async_node& this_node() const;
-	
-public:
-	using node_output::node_output;
-
-	void setup() override;
-	node::pull_result pull(time_span& span, bool reconnect) override;
-	timed_frame_array_view begin_read(time_unit duration) override;
-	void end_read(time_unit duration) override;
-	time_unit end_time() const override;
-};
-
-
-
-class async_node final : public filter_node {
-	friend class async_node_output;
-	
+class async_node final : public filter_node {	
 private:
 	using request_id_type = int;
 	
@@ -69,31 +47,16 @@ private:
 	std::atomic<bool> reconnect_flag_ {false};
 	
 	request_id_type failed_request_id_ = -1;
-		
-	async_node_output& output();
-	const async_node_output& output() const;
 	
-	
-	
-	/// \name Node processing.
-	/// Process frames and write into shared ring; called from node's thread.
-	///@{
-	bool may_continue_();
-	
+	bool pause_();
 	void thread_main_();
 	bool process_frames_();
-	///@}
+
+	pull_result output_pull_(time_span&, bool reconnected) override;
+	timed_frame_array_view output_begin_read_(time_unit duration) override;
+	void output_end_read_(time_unit duration) override;
 
 
-	/// \name Remote output interface.
-	/// Read from shared ring,; called from connected node thread.
-	///@{
-	node::pull_result pull_(time_span& span, bool reconnect);
-	timed_frame_array_view begin_read_(time_unit duration);
-	void end_read_(time_unit duration);
-	///@}
-
-	
 public:
 	async_node(graph&);
 	~async_node() override;
@@ -103,18 +66,8 @@ public:
 	void pre_stop() override;
 	void stop() override;
 
-	void output_setup();
-
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;
-	
-	void set_prefetch_duration(time_unit dur) { prefetch_duration_ = dur; }
-	
-	node_input& add_input(time_unit past_window, time_unit future_window) override {
-		return add_input_<node_input>(past_window, future_window);
-	}
-	
-	node_output& add_output(const frame_format& format) override;
 };
 
 

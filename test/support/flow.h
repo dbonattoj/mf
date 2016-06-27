@@ -58,7 +58,7 @@ public:
 		output.define_frame_shape(frame_shape_);
 	}
 	
-	void process(flow::node_job& job) override {
+	void process(flow::filter_job& job) override {
 		time_unit t = job.time();
 		produced_frames_.emplace(t);
 		job.out(output) = make_frame(frame_shape_, t);
@@ -77,12 +77,12 @@ private:
 		output.define_frame_shape(input.frame_shape());	
 	}
 	
-	void pre_process(flow::node_job& job) override {
+	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
 		if(t < activation.size()) input.set_activated(activation[t]);
 	}
 	
-	void process(flow::node_job& job) override {		
+	void process(flow::filter_job& job) override {		
 		auto in = job.in(input);
 		auto out = job.out(output);
 	
@@ -93,7 +93,7 @@ private:
 	}
 	
 public:
-	using callback_func = void(passthrough_filter& self, flow::node_job& job);
+	using callback_func = void(passthrough_filter& self, flow::filter_job& job);
 
 	input_type<2, int> input;
 	output_type<2, int> output;
@@ -125,13 +125,13 @@ public:
 		got_frames_(seq.size(), missingframe),
 		input(*this) { }
 	
-	void pre_process(flow::node_job& job) override {
+	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
 		if(t < activation.size())
 			input.set_activated(activation[t]);
 	}
 	
-	void process(flow::node_job& job) override {		
+	void process(flow::filter_job& job) override {		
 		auto in = job.in(input);
 		
 		int index;
@@ -176,13 +176,13 @@ public:
 		output.define_frame_shape(input1.frame_shape());
 	}
 	
-	void pre_process(flow::node_job& job) override {
+	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
 		if(t < activation1.size()) input1.set_activated(activation1[t]);
 		if(t < activation2.size()) input2.set_activated(activation2[t]);
 	}
 	
-	void process(flow::node_job& job) override {
+	void process(flow::filter_job& job) override {
 		auto in1 = job.in(input1);
 		auto in2 = job.in(input2);
 		auto out = job.out(output);

@@ -22,10 +22,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_H_
 
 #include "../flow/node.h"
-#include "../flow/node_job.h"
 #include "../flow/filter_node.h"
 #include "../queue/frame.h"
 #include "filter_parameter.h"
+#include "filter_job.h"
 #include <string>
 
 namespace mf { namespace flow {
@@ -47,7 +47,7 @@ public:
 	template<std::size_t Dim, typename Elem> using input_type = input_port<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = output_port<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
-	using job_type = node_job;
+	using job_type = filter_job;
 	using node_type = filter_node;
 
 	explicit filter(node_type& nd) : node_(nd) { }
@@ -79,7 +79,9 @@ class source_filter : public filter {
 public:
 	explicit source_filter(node_type& nd, bool seekable = false, time_unit stream_duration = -1) :
 	filter(nd) {
-		nd.define_source_stream_properties(seekable, stream_duration);
+		auto policy = seekable ? node_stream_properties::seekable : node_stream_properties::forward;
+		node_stream_properties prop(policy, stream_duration);
+		nd.define_source_stream_properties(prop);
 	}
 };
 

@@ -98,7 +98,7 @@ bool graph::run() {
 
 
 void graph::seek(time_unit target_time) {
-	if(! sink_->is_seekable()) throw std::logic_error("sink is not seekable");
+	if(! sink_->stream_properties().is_seekable()) throw std::logic_error("sink is not seekable");
 	sink_->seek(target_time);
 }
 

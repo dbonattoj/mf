@@ -34,7 +34,6 @@ namespace mf { namespace flow {
 class graph;
 class node_output;
 class node_input;
-class node_job;
 
 /// Node in flow graph, base class.
 class node {
@@ -66,18 +65,21 @@ protected:
 	node& operator=(const node&) = delete;
 
 	template<typename Input>
-	Input& add_input(time_unit past_window, time_unit future_window) {
+	Input& add_input_(time_unit past_window, time_unit future_window) {
 		Input* input = new Input(*this, inputs_.size(), past_window, future_window);
 		inputs_.emplace_back(input);
 		return *input;
 	}
 
 	template<typename Output>
-	Output& add_output(const frame_format& format) {
+	Output& add_output_(const frame_format& format) {
 		Output* output = new Output(*this, outputs_.size(), format);
 		outputs_.emplace_back(output);
 		return *output;
 	}
+	
+	void set_current_time_(time_unit t) noexcept { current_time_ = t; }
+	void mark_end_() { reached_end_ = true; }
 
 public:
 	virtual ~node() { }
@@ -98,7 +100,7 @@ public:
 	virtual time_unit maximal_offset_to(const node&) const = 0;
 	
 	void define_source_stream_properties(const node_stream_properties&);
-	node_stream_properties stream_properties() const noexcept { return stream_properties_; }
+	const node_stream_properties& stream_properties() const noexcept { return stream_properties_; }
 	
 	void setup_sink();
 
@@ -106,12 +108,7 @@ public:
 	void propagate_offline_state();
 	void propagate_reconnecting_state();
 	void set_online();
-	
-	void set_current_time_(time_unit t) noexcept { current_time_ = t; }
-	void mark_end_() { end_time_.store(current_time_ + 1); }
-	
-	node_job make_job_();
-	
+			
 	virtual void pre_setup() { }
 	virtual void setup() { }
 	virtual void launch() { }
@@ -128,11 +125,11 @@ public:
 class node_remote_output {
 public:
 	virtual node_output& this_output() noexcept = 0;
+	virtual time_unit end_time() const noexcept = 0;
 	
 	virtual node::pull_result pull(time_span& span, bool reconnect) = 0;
 	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
 	virtual void end_read(time_unit duration) = 0;
-	virtual time_unit end_time() const = 0;
 };
 
 
@@ -146,22 +143,22 @@ private:
 	frame_format format_;
 	std::size_t frame_length_;
 	
-protected:
-	node_output(const node_output&) = delete;
-
 public:
 	node_output(node& nd, std::ptrdiff_t index, const frame_format&);
+	node_output(const node_output&) = delete;
+	node_output& operator=(const node_output&) = delete;
 	
 	virtual ~node_output() { }
 
 	std::ptrdiff_t index() const noexcept { return index_; }
+
 	node& this_node() const noexcept { return node_; }
 	node_output& this_output() noexcept final override { return *this; }
+	time_unit end_time() const noexcept final override;
 	
 	void define_frame_length(std::size_t len) { frame_length_ = len; }
-	std::size_t frame_length() const noexcept { return frame_length_; }
-
 	void define_format(const frame_format& format) { format_ = format; }
+	std::size_t frame_length() const noexcept { return frame_length_; }
 	const frame_format& format() const noexcept { return format_; }
 
 	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
@@ -170,8 +167,6 @@ public:
 	void input_has_connected(node_input&);
 	
 	bool is_online() const;
-
-	virtual void setup() = 0;
 };
 
 
@@ -189,13 +184,13 @@ private:
 	bool activated_ = true;
 	
 public:
-	node_input(const node_input&) = delete;
-
 	void set_past_window(time_unit dur) { past_window_ = dur; }
 	void set_future_window(time_unit dur) { future_window_ = dur; }
 	
 public:
 	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
+	node_input(const node_input&) = delete;
+	node_input& operator=(const node_input&) = delete;
 
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }

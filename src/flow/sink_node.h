@@ -30,6 +30,11 @@ class graph;
 /// Sink node base class.
 /** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
 class sink_node final : public filter_node {
+protected:
+	pull_result output_pull_(time_span&, bool reconnected) override { throw 0; }
+	timed_frame_array_view output_begin_read_(time_unit duration) override { throw 0; }
+	void output_end_read_(time_unit duration) override { throw 0; }
+
 public:	
 	explicit sink_node(graph& gr) : filter_node(gr) { }
 	
@@ -37,8 +42,6 @@ public:
 	time_unit maximal_offset_to(const node&) const override { return 0; }
 	
 	void setup() final override;
-	void launch() final override;
-	void stop() final override;
 	
 	void setup_graph();
 	
@@ -47,12 +50,6 @@ public:
 	void pull_next_frame() { process_next_frame(); }
 	
 	void seek(time_unit t);
-	
-	node_input& add_input(time_unit past_window, time_unit future_window) override {
-		return add_input_<node_input>(past_window, future_window);
-	}
-	
-	node_output& add_output(const frame_format& format) override { throw 0; }
 };
 
 

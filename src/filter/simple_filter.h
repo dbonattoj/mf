@@ -38,7 +38,7 @@ public:
 	using output_view_type = ndarray_view<Dim, Output_elem>;
 
 protected:
-	virtual void process_frame(const input_view_type& in, const output_view_type& out, node_job& job) = 0;
+	virtual void process_frame(const input_view_type& in, const output_view_type& out, filter_job& job) = 0;
 
 public:
 	simple_filter(filter_node& nd) :

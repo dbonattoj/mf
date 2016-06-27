@@ -19,12 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "async_node.h"
-#include "node_job.h"
 #include "graph.h"
-
-#include <iostream>
-
- #include <signal.h>
 
 namespace mf { namespace flow {
 	
@@ -36,7 +31,13 @@ async_node::~async_node() {
 }
 
 void async_node::setup() {
-	setup_filter();
+	setup_filter_();
+	
+	const node& connected_node = output().connected_node();
+	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
+
+	ndarray_generic_properties prop(output().format(), output().frame_length(), required_capacity);
+	ring_.reset(new shared_ring(prop, stream_properties().is_seekable(), stream_properties().duration()));
 }
 
 void async_node::launch() {
@@ -58,13 +59,6 @@ void async_node::stop() {
 	thread_.join();
 }
 
-void async_node::output_setup() {
-	const node& connected_node = output().connected_node();
-	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
-
-	ndarray_generic_properties prop(output().format(), output().frame_length(), required_capacity);
-	ring_.reset(new shared_ring(prop, is_seekable(), stream_duration()));
-}
 
 time_unit async_node::minimal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
@@ -78,46 +72,38 @@ time_unit async_node::maximal_offset_to(const node& target_node) const {
 	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration() + prefetch_duration_;
 }
 
-bool async_node::may_continue_() {	
-	time_unit next_write_time = ring_->write_start_time();
 
-	MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time());
-
-	if(this_graph().was_stopped()) return true;
+bool async_node::pause_() {
+	auto may_continue = [&]()->bool {
+		time_unit next_write_time = ring_->write_start_time();
+		MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time());
+		if(this_graph().was_stopped()) return true;
+		else if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
+		else if(next_write_time >= time_limit_) return false;
+		else if(ring_->end_time() != -1 && next_write_time >= ring_->end_time()) return false;
+		else return true;
+	};
 	
-	if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
-	if(next_write_time >= time_limit_) return false;
-	if(ring_->end_time() != -1 && next_write_time >= ring_->end_time()) return false;
-	return true;
+	std::unique_lock<std::mutex> lock(continuation_mutex_);
+	continuation_cv_.wait(lock, may_continue);
+	return ! this_graph().was_stopped();
 }
+
 
 void async_node::thread_main_() {
 	MF_DEBUG("thread");
-
-	
-	bool run = true;
-	while(run) {
-		{
-			std::unique_lock<std::mutex> lock(continuation_mutex_);
-			continuation_cv_.wait(lock, [&]() { 
-				bool c = may_continue_();
-				MF_DEBUG_EXPR(c);
-				return c;
-				
-				});
-			MF_RAND_SLEEP;
-			if(this_graph().was_stopped()) break;
-		}
+	for(;;) {
+		MF_DEBUG("pause...");
+		bool cont = pause();
+		if(! cont) break;
 		
 		MF_DEBUG("continuation...");
-		MF_RAND_SLEEP;
-		run = process_frames_();
-		
-		MF_DEBUG("process_frames_ end. run=", run);
+		cont = process_frames_();
+		if(! cont) break;
 	}
-	
 	MF_DEBUG("thread end.");
 }
+
 
 bool async_node::process_frames_() {
 	// request = launched by output_pull, has (UID, time_limit, start time)
@@ -156,10 +142,10 @@ bool async_node::process_frames_() {
 		}
 		
 		time_unit t = out_vw.start_time();
-		node_job job = make_job();
-		job.define_time(t);
+		filter_node_job job = make_job_(t);
+		job.attach_output(out_vw[0]);
 		MF_RAND_SLEEP;
-		set_current_time(t);
+		set_current_time_(t);
 		
 		MF_RAND_SLEEP;
 		if(state() == reconnecting && reconnect_flag_) {
@@ -167,51 +153,50 @@ bool async_node::process_frames_() {
 			reconnect_flag_ = false;
 		}
 		
-		pre_process_filter(job);
-		
-		job.push_output(output(), out_vw[0]);
-		
+		pre_process_filter_(job);
+				
 		for(auto&& in : inputs()) if(in->is_activated()) {
 			time_unit res = in->pull(t);
-			if(res == pull_result::stopped) { ring_->end_write(0); job.pop_output(); goto fail; }
-			else if(res == pull_result::temporary_failure) { ring_->end_write(0); job.pop_output(); goto fail; }
+			if(res == pull_result::stopped || res == pull_result::temporary_failure) {
+				job.detach_output();
+				ring_->end_write(0);
+				goto fail;
+			}
 		}
 		
 		for(auto&& in : inputs()) if(in->is_activated()) {
-			timed_frame_array_view in_view = in->begin_read_frame(t);
-			if(in_view.is_null()) { ring_->end_write(0); job.pop_output(); return false; }
-			MF_ASSERT(in_view.span().includes(t));
-			
-			job.push_input(*in, in_view);
+			bool cont = job.push_input(*in);
+			if(! cont) {
+				job.detach_output();
+				ring_->end_write(0);
+				return false;
+			}
 		}
 		
 		MF_DEBUG("process ", t);
-		process_filter(job);
-		
+		process_filter_(job);
+
 		bool reached_end = false;
-		if(stream_duration_is_defined()) {
-			if(t == stream_duration() - 1) reached_end = true;
-			MF_ASSERT(t < stream_duration());
-		} else if(is_source()) {
-			reached_end = job.end_was_marked();
+		if(stream_properties().duration_is_defined()) {
+			if(t == stream_properties().duration() - 1) reached_end = true;
+		} else if(job.end_was_marked()) {
+			reached_end = true;
 		}
-	
-		while(node_input* in = job.pop_input()) {
-			in->end_read_frame(t);
-			if(t == in->end_time() - 1) reached_end = true;
+
+		while(job.has_inputs()) {
+			const node_input& in = job.pop_input();
+			if(t == in.end_time() - 1) reached_end = true;
 		}
-				
+		
+		job.detach_output();
 		if(reached_end) {
 			bool mark_last_frame = !ring_->is_seekable();
 			ring_->end_write(1, mark_last_frame);			
-			mark_end();
+			mark_end_();
+			break;
 		} else {
 			ring_->end_write(1);
 		}
-		
-		job.pop_output();
-		
-		if(reached_end) break;
 	}
 
 fail:
@@ -224,7 +209,8 @@ fail:
 	return true;
 }
 
-node::pull_result async_node::pull_(time_span& pull_span, bool reconnect) {
+
+node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect) {
 	MF_DEBUG("output: pull ", pull_span);
 	{
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
@@ -248,10 +234,10 @@ node::pull_result async_node::pull_(time_span& pull_span, bool reconnect) {
 		
 		MF_DEBUG("output: pull ", pull_span, " : wait_readable...");
 
-if(this_graph().was_stopped()) return pull_result::stopped;
+		if(this_graph().was_stopped()) return pull_result::stopped;
 		bool became_readable = ring_->wait_readable();
 		MF_DEBUG("output: pull ", pull_span, " : wait_readable. readable=", ring_->readable_duration());
-		
+
 		if(! became_readable) {
 			bool this_request_failed = (failed_request_id_ == current_request_id_);
 			if(this_graph().was_stopped()) {
@@ -264,62 +250,20 @@ if(this_graph().was_stopped()) return pull_result::stopped;
 		} else if(became_readable && ring_->writer_reached_end()) {
 			pull_span = time_span(pull_span.start_time(), pull_span.start_time() + ring_->readable_duration());
 		}
-		
 	}
-	
+
 	MF_DEBUG("output: pull -> success");
-	
 	return pull_result::success;
 }
 
-timed_frame_array_view async_node::begin_read_(time_unit duration)  {
+
+timed_frame_array_view async_node::output_begin_read_(time_unit duration)  {
 	return ring_->try_begin_read(duration);
 }
 
-void async_node::end_read_(time_unit duration) {
+void async_node::output_end_read_(time_unit duration) {
 	ring_->end_read(duration);
 }
-
-
-async_node& async_node_output::this_node() {
-	return static_cast<async_node&>(node_output::this_node());
-}
-
-const async_node& async_node_output::this_node() const {
-	return static_cast<const async_node&>(node_output::this_node());
-}
-
-void async_node_output::setup() {
-	this_node().output_setup();
-}
-
-node::pull_result async_node_output::pull(time_span& span, bool reconnect) {
-	return this_node().pull_(span, reconnect);
-}
-
-timed_frame_array_view async_node_output::begin_read(time_unit duration) {
-	return this_node().begin_read_(duration);
-}
-
-void async_node_output::end_read(time_unit duration) {
-	return this_node().end_read_(duration);
-}
-
-time_unit async_node_output::end_time() const {
-	return this_node().end_time();
-}
-
-
-async_node_output& async_node::output() { return static_cast<async_node_output&>(*outputs().front()); }
-const async_node_output& async_node::output() const { return static_cast<const async_node_output&>(*outputs().front()); }
-
-
-
-node_output& async_node::add_output(const frame_format& format) {
-	return add_output_<async_node_output>(format);
-}
-
-
 
 
 }}

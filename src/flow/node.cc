@@ -19,7 +19,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "node.h"
-#include "node_job.h"
 #include <limits>
 #include <algorithm>
 
@@ -83,87 +82,77 @@ const node& node::first_successor() const {
 }
 
 
-
 void node::deduce_stream_properties_() {
-	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(stage_ == was_setup);
 	MF_EXPECTS(! is_source());
-			
-	seekable_ = true;
-	stream_duration_ = std::numeric_limits<time_unit>::max();
-	
+
+	bool seekable = true;
+	time_unit duration = std::numeric_limits<time_unit>::max();
+
 	for(auto&& in : inputs()) {
 		node& connected_node = in->connected_node();
+		const node_stream_properties& connected_prop = connected_node.stream_properties();	
+		bool connected_node_seekable = (connected_prop.policy() == node_stream_properties::seekable);
 		
-		time_unit input_node_stream_duration = connected_node.stream_duration_;
-		bool input_node_seekable = connected_node.seekable_;
-		
-		stream_duration_ = std::min(stream_duration_, input_node_stream_duration);
-		seekable_ = seekable_ && input_node_seekable;
+		duration = std::min(duration, connected_prop.duration());
+		seekable = seekable && connected_node_seekable;
 	}
+
+	MF_ASSERT(!(seekable && (duration == -1)));
 	
-	MF_ENSURES(!(seekable_ && (stream_duration_ == -1)));
+	auto policy = (seekable ? node_stream_properties::seekable : node_stream_properties::forward);
+	stream_properties_ = node_stream_properties(policy, duration);
 }
 
 
 void node::propagate_pre_setup_() {
-	if(was_pre_setup_) return;
+	if(stage_ == was_pre_setup) return;
+		
 	for(auto&& in : inputs()) {
 		node& connected_node = in->connected_node();
 		connected_node.propagate_pre_setup_();
 	}
+	
 	this->pre_setup();
-	was_pre_setup_ = true;
+	
+	stage_ = was_pre_setup;
 }
 
 
 
 void node::propagate_setup_() {		
-	// do nothing when was_setup_ is already set:
-	// during recursive propagation it may be called multiple times on same node
-	if(was_setup_) return;
+	if(stage_ != was_setup) return;
 	
-	// first set up preceding nodes
 	for(auto&& in : inputs()) {
 		node& connected_node = in->connected_node();
 		connected_node.propagate_setup_();
 	}
 	
-	// define stream duration and seekable, based on connected input nodes
 	if(! is_source()) deduce_stream_properties_();
-	
-	// set up this node in concrete subclass
+
 	this->setup();
 	
-	// set up outputs
-	// their frame lengths are now defined
-	for(auto&& out : outputs()) out->setup();
-	
-	was_setup_ = true;
+	stage_ = was_pre_setup;
 }
 
 
 
-void node::define_source_stream_properties(bool seekable, time_unit stream_duration) {
-	MF_EXPECTS(! was_setup_);
+void node::define_source_stream_properties(const node_stream_properties& prop) {
+	MF_EXPECTS(stage_ == construction);
 	MF_EXPECTS(is_source());
 	
-	if(seekable && stream_duration == -1)
-		throw std::invalid_argument("seekable node must have defined stream duration");
-
-	seekable_ = seekable;
-	stream_duration_ = stream_duration;
-	end_time_ = stream_duration; // TODO combine end_time / stream_duration
+	stream_properties_ = prop;
 }
 
 
 void node::setup_sink() {
-	MF_EXPECTS(! was_setup_);
+	MF_EXPECTS(stage_ == construction);
 	MF_EXPECTS(is_sink());
 	
 	propagate_pre_setup_();
 	propagate_setup_();
 
-	MF_ENSURES(was_setup_);
+	MF_EXPECTS(stage_ == was_setup);
 }
 
 
@@ -191,20 +180,10 @@ void node::set_online() {
 
 
 bool node::is_bounded() const {
-	if(stream_duration_ != -1 || is_source()) return true;
+	if(stream_properties_.duration_is_defined() || is_source()) return true;
 	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](auto&& in) {
 		return (in->is_activated() && in->connected_node().is_bounded());
 	});
-}
-
-
-node_job node::make_job() {
-	return node_job(*this);
-}
-
-
-bool node::reached_end() const noexcept {
-	return (end_time_ != -1) && (current_time_ >= end_time_ - 1);
 }
 
 
@@ -229,6 +208,12 @@ bool node_output::is_online() const {
 
 node& node_output::connected_node() const noexcept {
 	return connected_input_->this_node();
+}
+
+
+time_unit node_output::end_time() const noexcept {
+	if(this_node().reached_end()) return this_node().current_time();
+	else return -1;
 }
 
 

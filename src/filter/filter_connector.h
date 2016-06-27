@@ -71,7 +71,7 @@ public:
 		this_output().end_read(duration);
 	}
 	
-	time_unit end_time() const override {
+	time_unit end_time() const noexcept override {
 		return remote_output_.this_node_output().end_time();
 	}
 };

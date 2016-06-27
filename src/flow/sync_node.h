@@ -28,61 +28,25 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class sync_node;
-
-
-class sync_node_output : public node_output {
-private:
-	sync_node& this_node();
-	const sync_node& this_node() const;
-	
-public:
-	using node_output::node_output;
-
-	void setup() override;
-	node::pull_result pull(time_span& span, bool reconnect) override;
-	timed_frame_array_view begin_read(time_unit duration) override;
-	void end_read(time_unit duration) override;
-	time_unit end_time() const override;
-};
-
-
 /// Synchronous node base class.
 /** Processes frames synchronously when pulled from output. Can have multiple inputs, but only one output. */
 class sync_node final : public filter_node {
 private:
 	std::unique_ptr<timed_ring> ring_;
 
-public:
-	sync_node_output& output();
-	const sync_node_output& output() const;
+	bool process_next_frame_();
 
+public:
 	explicit sync_node(graph& gr) : filter_node(gr) { }
 	
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;
 	
 	void setup() final override;
-	void launch() final override;
-	void stop() final override;
-		
-	bool process_next_frame();
-
-	node_input& add_input(time_unit past_window, time_unit future_window) override {
-		return add_input_<node_input>(past_window, future_window);
-	}
-	
-	node_output& add_output(const frame_format& format) override;
-		
-	void output_setup();
-	pull_result output_pull(time_span&, bool reconnected);
-	timed_frame_array_view output_begin_read(time_unit duration);
-	void output_end_read(time_unit duration);
-	time_unit output_end_time() const;
-	
-	frame_view begin_write_frame(time_unit& t);
-	void end_write_frame(bool was_last_frame);
-	void cancel_write_frame();
+			
+	pull_result output_pull_(time_span&, bool reconnected) override;
+	timed_frame_array_view output_begin_read_(time_unit duration) override;
+	void output_end_read_(time_unit duration) override;
 };
 
 

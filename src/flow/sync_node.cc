@@ -19,7 +19,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "sync_node.h"
-#include "node_job.h"
 #include "graph.h"
 #include <unistd.h>
 
@@ -39,73 +38,8 @@ time_unit sync_node::maximal_offset_to(const node& target_node) const {
 
 void sync_node::setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("sync_node must have exactly 1 output");
-	setup_filter();
-}
-
-
-void sync_node::launch() { }
-
-void sync_node::stop() { }
-
-
-bool sync_node::process_next_frame() {	
-	//usleep(200000);
-
-	node_job job = make_job();
-	time_unit t;
+	setup_filter_();
 	
-	auto out_vw = ring_->begin_write(1);
-	t = out_vw.start_time();
-
-	if(end_time() != -1) MF_ASSERT(t < end_time());
-	
-	set_current_time(t);
-	job.define_time(t);
-		
-	pre_process_filter(job);
-
-	job.push_output(output(), out_vw[0]);
-	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		pull_result res = in->pull(t);
-		if(res == pull_result::stopped) return false;
-		else if(res == pull_result::temporary_failure) return false;
-	}
-	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		timed_frame_array_view in_view = in->begin_read_frame(t);
-		MF_ASSERT(! in_view.is_null());
-		MF_ASSERT(in_view.span().includes(t));
-		
-		job.push_input(*in, in_view);
-	}
-
-	process_filter(job);
-	
-	bool reached_end = false;
-	if(stream_duration_is_defined()) {
-		if(t == stream_duration() - 1) reached_end = true;
-		MF_ASSERT(t < stream_duration());
-	} else if(is_source()) {
-		reached_end = job.end_was_marked();
-	}
-	
-	while(node_input* in = job.pop_input()) {
-		in->end_read_frame(t);
-		if(t == in->end_time() - 1) reached_end = true;
-	}
-	
-	job.pop_output();
-	
-	ring_->end_write(1);
-	
-	if(reached_end) mark_end();
-	
-	return true;
-}
-
-
-void sync_node::output_setup() {	
 	node& connected_node = output().connected_node();
 	
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
@@ -115,19 +49,19 @@ void sync_node::output_setup() {
 }
 
 
-node::pull_result sync_node::output_pull(time_span& span, bool reconnected) {
+node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
 	// if non-sequential: seek ring to new position
 	time_unit ring_read_t = ring_->read_start_time();
 	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
 	
 	if(reconnected) {
-		set_current_time(span.start_time());
+		set_current_time_(span.start_time());
 		set_online();
 	}
 
 	// pull frames from node until requested span filled, or end reached	
-	while(!ring_->readable_time_span().includes(span) && ring_->write_start_time() != end_time()) {
-		bool ok = process_next_frame();
+	while(!ring_->readable_time_span().includes(span) && ! reached_end()) {
+		bool ok = process_next_frame_();
 		if(! ok) return pull_result::temporary_failure;
 	}
 
@@ -135,9 +69,9 @@ node::pull_result sync_node::output_pull(time_span& span, bool reconnected) {
 	return pull_result::success;
 }
 
-
-timed_frame_array_view sync_node::output_begin_read(time_unit duration) {	
-	if(end_time() != -1 && ring_->read_start_time() + duration > end_time())
+	
+timed_frame_array_view sync_node::output_begin_read_(time_unit duration) {
+	if(reached_end() && ring_->read_start_time() + duration > current_time())
 		duration = ring_->readable_duration();
 
 	MF_ASSERT(duration <= ring_->readable_duration());
@@ -146,46 +80,51 @@ timed_frame_array_view sync_node::output_begin_read(time_unit duration) {
 }
 
 
-void sync_node::output_end_read(time_unit duration) {
+void sync_node::output_end_read_(time_unit duration) {
 	ring_->end_read(duration);
 }
 
-sync_node& sync_node_output::this_node() {
-	return static_cast<sync_node&>(node_output::this_node());
+
+bool sync_node::process_next_frame_() {
+	timed_frame_array_view out_vw = ring_->begin_write(1);
+	time_unit t = out_vw.start_time();
+	filter_node_job job = make_job_(t);
+	job.attach_output(out_vw[0]);
+	
+	set_current_time_(t);
+	
+	pre_process_filter_(job);
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		pull_result res = in->pull(t);
+		if(res == pull_result::stopped || res == pull_result::temporary_failure) {
+			job.detach_output();
+			return false;
+		}
+	}
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		job.push_input(*in);
+	}
+	
+	process_filter_(job);
+	
+	if(stream_properties().duration_is_defined()) {
+		if(t == stream_properties().duration() - 1) mark_end_();
+	} else if(job.end_was_marked()) {
+		mark_end_();
+	}
+	
+	while(job.has_inputs()) {
+		const node_input& in = job.pop_input();
+		if(t == in.end_time() - 1) mark_end_();
+	}
+	
+	job.detach_output();
+	ring_->end_write(1);
+	
+	return true;
 }
 
-const sync_node& sync_node_output::this_node() const {
-	return static_cast<const sync_node&>(node_output::this_node());
-}
-
-void sync_node_output::setup() {
-	this_node().output_setup();
-}
-
-node::pull_result sync_node_output::pull(time_span& span, bool reconnect) {
-	return this_node().output_pull(span, reconnect);
-}
-
-timed_frame_array_view sync_node_output::begin_read(time_unit duration) {
-	return this_node().output_begin_read(duration);
-}
-
-void sync_node_output::end_read(time_unit duration) {
-	return this_node().output_end_read(duration);
-}
-
-time_unit sync_node_output::end_time() const {
-	return this_node().end_time();
-}
-
-
-sync_node_output& sync_node::output() { return static_cast<sync_node_output&>(*outputs().front()); }
-const sync_node_output& sync_node::output() const { return static_cast<const sync_node_output&>(*outputs().front()); }
-
-
-
-node_output& sync_node::add_output(const frame_format& format) {
-	return add_output_<sync_node_output>(format);
-}
 
 }}

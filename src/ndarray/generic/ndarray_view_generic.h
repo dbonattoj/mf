@@ -51,18 +51,18 @@ public:
 	
 private:
 	frame_format format_;
+	
+public:
+	static ndarray_view_generic null() { return ndarray_view_generic(); }
 
 	ndarray_view_generic() : format_(frame_format::null()) { }
-	
-public:	
+
 	ndarray_view_generic(const base& vw, const frame_format& format) :
 		base(vw), format_(format) { }
 	
 	ndarray_view_generic(byte* start, const frame_format& format, const shape_type& shape, const strides_type& strides) :
 		base(start, shape, strides),
 		format_(format) { }
-
-	static ndarray_view_generic null() { return ndarray_view_generic(); }
 	
 	const frame_format& format() const noexcept { return format_; }
 	
