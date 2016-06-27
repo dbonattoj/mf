@@ -131,6 +131,11 @@ const timed_frame_array_view& filter_node_job::in(std::ptrdiff_t index) {
 	return inputs_slots_[index]->second;
 }
 
+bool filter_node_job::has_input(std::ptrdiff_t index) const noexcept {
+	if(index < 0 || index >= inputs_slots_.size()) return false;
+	else return (inputs_slots_[index] != nullptr);
+}
+
 const frame_view& filter_node_job::out() {
 	return output_view_;
 }

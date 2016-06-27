@@ -83,7 +83,7 @@ const node& node::first_successor() const {
 
 
 void node::deduce_stream_properties_() {
-	MF_EXPECTS(stage_ == was_setup);
+	MF_EXPECTS(stage_ == was_pre_setup);
 	MF_EXPECTS(! is_source());
 
 	bool seekable = true;
@@ -121,7 +121,7 @@ void node::propagate_pre_setup_() {
 
 
 void node::propagate_setup_() {		
-	if(stage_ != was_setup) return;
+	if(stage_ == was_setup) return;
 	
 	for(auto&& in : inputs()) {
 		node& connected_node = in->connected_node();
@@ -132,7 +132,7 @@ void node::propagate_setup_() {
 
 	this->setup();
 	
-	stage_ = was_pre_setup;
+	stage_ = was_setup;
 }
 
 

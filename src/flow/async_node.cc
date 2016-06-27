@@ -26,8 +26,8 @@ namespace mf { namespace flow {
 async_node::async_node(graph& gr) : filter_node(gr) { }
 
 async_node::~async_node() {
-	MF_ASSERT(! running_);
-	MF_ASSERT(! thread_.joinable());
+	Assert(! running_);
+	Assert(! thread_.joinable());
 }
 
 void async_node::setup() {
@@ -41,13 +41,15 @@ void async_node::setup() {
 }
 
 void async_node::launch() {
-	MF_ASSERT(! running_);
+	Assert(! running_);
 	thread_ = std::move(std::thread(
 		std::bind(&async_node::thread_main_, this)
 	));
+	running_ = true;
 }
 
 void async_node::pre_stop() {
+	Expects(running_);
 	MF_RAND_SLEEP;
 	MF_DEBUG("ring_->break_reader()");
 	ring_->break_reader();
@@ -56,7 +58,9 @@ void async_node::pre_stop() {
 }
 
 void async_node::stop() {
+	Expects(running_);
 	thread_.join();
+	running_ = false;
 }
 
 
@@ -94,7 +98,7 @@ void async_node::thread_main_() {
 	MF_DEBUG("thread");
 	for(;;) {
 		MF_DEBUG("pause...");
-		bool cont = pause();
+		bool cont = pause_();
 		if(! cont) break;
 		
 		MF_DEBUG("continuation...");

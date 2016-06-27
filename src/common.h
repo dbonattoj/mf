@@ -31,36 +31,47 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 
 #ifndef NDEBUG
-
-	#define MF_ASSERT_MSG(condition, msg) \
-		if(!(condition)) { \
-			MF_DEBUG_BACKTRACE("assertion failed: " msg); \
+	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) \
+		if(! (__condition__)) { \
+			MF_DEBUG_BACKTRACE("assertion failed: " __msg__); \
 			std::abort(); \
 		}
 
-	#define MF_ASSERT(condition) MF_ASSERT_MSG(condition, "`" #condition "`")
-	
-	#define MF_EXPECTS_MSG(condition, msg) MF_ASSERT_MSG(condition, "precondition: " msg)
-	#define MF_EXPECTS(condition) MF_EXPECTS_MSG(condition, "`" #condition "`")
-		
-	#define MF_ENSURES_MSG(condition, msg) MF_ASSERT_MSG(condition, "postcondition: " msg)
-	#define MF_ENSURES(condition) MF_EXPECTS_MSG(condition, "`" #condition "`")
-
-#else
-
-	#define MF_ASSERT_MSG(condition, msg) ((void)0)
-	#define MF_ASSERT(condition) ((void)0)
-	#define MF_EXPECTS(condition) ((void)0)
-	#define MF_EXPECTS_MSG(condition, msg) ((void)0)
-	#define MF_ENSURES(condition) ((void)0)
-	#define MF_ENSURES_MSG(condition, msg) ((void)0)
-	
+	#define MF_ASSERT_MSG_(__condition__, __msg__) \
+		if(! (__condition__)) { \
+			MF_DEBUG_BACKTRACE("assertion failed: " __msg__); \
+			throw ::mf::failed_assertion(__msg__); \
+		}
+#else 
+	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) ((void)0)
+	#define MF_ASSERT_MSG_(__condition__, __msg__) \
+		if(! (__condition__)) throw ::mf::failed_assertion(__msg__)
 #endif
 
+#define MF_GET_NARG_MACRO_2(_1, _2, NAME, ...) NAME
 
-#define MF_STATIC_ASSERT(condition) static_assert(condition, #condition)
-#define MF_STATIC_ASSERT_MSG(condition, msg) static_assert(condition, msg)
+#define MF_ASSERT_(__condition__) MF_ASSERT_MSG_(__condition__, "`" #__condition__ "`")
+#define MF_ASSERT_CRIT_(__condition__) MF_ASSERT_CRIT_MSG_(__condition__, "`" #__condition__ "`")
 
+#define MF_ASSERT(...) MF_GET_NARG_MACRO_2(__VA_ARGS__, MF_ASSERT_MSG_, MF_ASSERT_, IGNORE)(__VA_ARGS__)
+#define MF_ASSERT_CRIT(...) MF_GET_NARG_MACRO_2(__VA_ARGS__, MF_ASSERT_CRIT_MSG_, MF_ASSERT_CRIT_, IGNORE)(__VA_ARGS__)
+
+#define MF_EXPECTS MF_ASSERT
+#define MF_ENSURES MF_ASSERT
+
+#define MF_EXPECTS_CRIT MF_ASSERT_CRIT
+#define MF_ENSURES_CRIT MF_ASSERT_CRIT
+
+#define Assert MF_ASSERT
+#define Expects MF_EXPECTS
+#define Ensures MF_ENSURES
+#define Assert_crit MF_ASSERT_CRIT
+#define Expects_crit MF_EXPECTS_CRIT
+#define Ensures_crit MF_ENSURES_CRIT
+
+#define MF_ASSERT_MSG MF_ASSERT
+#define MF_EXPECTS_MSG MF_EXPECTS
+#define MF_ENSURES_MSG MF_ENSURES
 
 
 namespace mf {

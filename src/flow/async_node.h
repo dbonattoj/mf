@@ -50,6 +50,7 @@ private:
 	
 	bool pause_();
 	void thread_main_();
+		
 	bool process_frames_();
 
 	pull_result output_pull_(time_span&, bool reconnected) override;

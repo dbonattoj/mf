@@ -127,6 +127,7 @@ public:
 	void mark_end() noexcept { end_marked_ = true; }
 	
 	const timed_frame_array_view& in(std::ptrdiff_t index);
+	bool has_input(std::ptrdiff_t index) const noexcept;
 	const frame_view& out();
 };
 
