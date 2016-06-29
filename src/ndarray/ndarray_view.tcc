@@ -177,7 +177,7 @@ void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {
 template<std::size_t Dim, typename T>
 void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const {
 	// optimization: if T is POD type, and both views have default strides without padding,
-	// copy using memcpy instead of element-wise loop
+	//               then copy using memcpy instead of element-wise loop
 	if(shape() != other.shape()) throw std::invalid_argument("ndarray views must have same shape for assignment");
 	if(std::is_pod<T>::value && has_default_strides_without_padding() && strides() == other.strides())
 		std::memcpy(static_cast<void*>(start()), static_cast<const void*>(other.start()), size() * sizeof(T));

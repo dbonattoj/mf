@@ -29,26 +29,29 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "debug.h"
 #include "exceptions.h"
 
+#define MF_STRINGIZE_(X) #X
+#define MF_STRINGIZE(X) MF_STRINGIZE_(X)
+
+#define MF_GET_NARG_MACRO_2(_1, _2, NAME, ...) NAME
 
 #ifndef NDEBUG
 	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) \
 		if(! (__condition__)) { \
-			MF_DEBUG_BACKTRACE("assertion failed: " __msg__); \
+			MF_DEBUG_BACKTRACE("assertion failed at " __FILE__ ":" MF_STRINGIZE(__LINE__) "\n" __msg__); \
 			std::abort(); \
 		}
 
 	#define MF_ASSERT_MSG_(__condition__, __msg__) \
 		if(! (__condition__)) { \
-			MF_DEBUG_BACKTRACE("assertion failed: " __msg__); \
-			throw ::mf::failed_assertion(__msg__); \
+			MF_DEBUG_BACKTRACE("assertion failed at " __FILE__ ":" MF_STRINGIZE(__LINE__) "\n" __msg__); \
+			throw ::mf::failed_assertion(__msg__ " at " __FILE__ ":" MF_STRINGIZE(__LINE__)); \
 		}
 #else 
 	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) ((void)0)
 	#define MF_ASSERT_MSG_(__condition__, __msg__) \
-		if(! (__condition__)) throw ::mf::failed_assertion(__msg__)
+		if(! (__condition__)) throw ::mf::failed_assertion(__msg__ " at " __FILE__ ":" MF_STRINGIZE(__LINE__))
 #endif
 
-#define MF_GET_NARG_MACRO_2(_1, _2, NAME, ...) NAME
 
 #define MF_ASSERT_(__condition__) MF_ASSERT_MSG_(__condition__, "`" #__condition__ "`")
 #define MF_ASSERT_CRIT_(__condition__) MF_ASSERT_CRIT_MSG_(__condition__, "`" #__condition__ "`")

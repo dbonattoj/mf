@@ -27,7 +27,8 @@ namespace mf { namespace flow {
 
 bool node::precedes(const node& nd) const {
 	if(&nd == this) return true;
-	for(auto&& out : outputs_) if(out->connected_input().this_node().precedes(nd)) return true;
+	for(auto&& out : outputs_)
+		if(out->connected_node().precedes(nd)) return true;
 	return false;
 }
 
@@ -35,17 +36,21 @@ bool node::precedes(const node& nd) const {
 
 bool node::precedes_strict(const node& nd) const {
 	if(&nd == this) return false;
-	for(auto&& out : outputs_) if(out->connected_input().this_node().precedes(nd)) return true;
+	for(auto&& out : outputs_)
+		if(out->connected_node().precedes(nd)) return true;
 	return false;
 }
 
 
 
 const node& node::first_successor() const {
+	Expects(outputs_.size() > 0);
+	
 	if(outputs_.size() == 1) return outputs_.front()->connected_node();
 	
 	using nodes_vector_type = std::vector<const node*>;
 	
+	// collect_all_successors(nd, vec): adds ptrs to all successor nodes of `nd` into `vec`
 	std::function<void(const node&, nodes_vector_type&)> collect_all_successors;
 	collect_all_successors = [&](const node& nd, nodes_vector_type& vec) {
 		for(auto&& out : nd.outputs_) {
@@ -55,14 +60,18 @@ const node& node::first_successor() const {
 		}
 	};
 
+	// common_successors := successors of node connected to first output
 	nodes_vector_type common_successors;
 	collect_all_successors(outputs_.front()->connected_node(), common_successors);
 	
+	// for the other outputs...
 	for(auto it = outputs_.cbegin() + 1; it != outputs_.cend(); ++it) {
+		// out_successors := successors of node connected to output `it`
 		const node& connected_node = (*it)->connected_node();
 		nodes_vector_type out_successors;
 		collect_all_successors(connected_node, out_successors);
-				
+		
+		// common_successors := intersection(common_successors, out_successors)
 		nodes_vector_type old_common_successors = common_successors;
 		common_successors.clear();
 		std::set_intersection(
@@ -71,20 +80,26 @@ const node& node::first_successor() const {
 			std::back_inserter(common_successors)
 		);
 	}
-
-	auto it = std::min_element(
+	// common_successors = nodes that are successors of every output
+	
+	// find node in `common_successors` that is not preceded by any another
+	// (precedes_strict forms a partial order)
+	auto it = std::find_if(
 		common_successors.cbegin(), common_successors.cend(),
-		[](const node* a, const node* b) { return a->precedes(*b); }
+		[&common_successors](const node* a) { return std::none_of(
+			common_successors.cbegin(), common_successors.cend(),
+			[a](const node* b) { return b->precedes_strict(*a); }
+		); }
 	);
-	
-	
+	Assert(it != common_successors.cend());
+
 	return **it;
 }
 
 
 void node::deduce_stream_properties_() {
-	MF_EXPECTS(stage_ == was_pre_setup);
-	MF_EXPECTS(! is_source());
+	Expects(stage_ == was_pre_setup);
+	Expects(! is_source());
 
 	bool seekable = true;
 	time_unit duration = std::numeric_limits<time_unit>::max();
@@ -98,7 +113,7 @@ void node::deduce_stream_properties_() {
 		seekable = seekable && connected_node_seekable;
 	}
 
-	MF_ASSERT(!(seekable && (duration == -1)));
+	Assert(!(seekable && (duration == -1)));
 	
 	auto policy = (seekable ? node_stream_properties::seekable : node_stream_properties::forward);
 	stream_properties_ = node_stream_properties(policy, duration);
@@ -138,21 +153,21 @@ void node::propagate_setup_() {
 
 
 void node::define_source_stream_properties(const node_stream_properties& prop) {
-	MF_EXPECTS(stage_ == construction);
-	MF_EXPECTS(is_source());
+	Expects(stage_ == construction);
+	Expects(is_source());
 	
 	stream_properties_ = prop;
 }
 
 
 void node::setup_sink() {
-	MF_EXPECTS(stage_ == construction);
-	MF_EXPECTS(is_sink());
+	Expects(stage_ == construction);
+	Expects(is_sink());
 	
 	propagate_pre_setup_();
 	propagate_setup_();
 
-	MF_EXPECTS(stage_ == was_setup);
+	Ensures(stage_ == was_setup);
 }
 
 
@@ -187,6 +202,27 @@ bool node::is_bounded() const {
 }
 
 
+void node::set_current_time_(time_unit t) noexcept {
+	time_unit old_t = current_time_;
+	current_time_ = t;
+		
+	if(t < old_t) reached_end_ = false;
+}
+
+
+void node::mark_end_() {
+	reached_end_ = true;
+}
+
+
+time_unit node::end_time() const noexcept {
+	if(stream_properties().duration_is_defined()) return stream_properties().duration();
+	else if(reached_end()) return current_time() + 1;
+	else return -1;
+}
+
+
+
 /////
 
 
@@ -212,8 +248,7 @@ node& node_output::connected_node() const noexcept {
 
 
 time_unit node_output::end_time() const noexcept {
-	if(this_node().reached_end()) return this_node().current_time();
-	else return -1;
+	return this_node().end_time();
 }
 
 
@@ -227,33 +262,56 @@ node_input::node_input(node& nd, std::ptrdiff_t index, time_unit past_window, ti
 
 
 void node_input::connect(node_remote_output& output) {
+	Expects(! output.this_output().is_connected(), "cannot connect the input to an output that is already connected");
+	
 	connected_output_ = &output;
 	connected_output_->this_output().input_has_connected(*this);
 }
 
 
-node::pull_result node_input::pull(time_unit t) {
-	MF_EXPECTS(is_connected());
+node::pull_result node_input::pull() {
+	Expects(is_connected());
 	
+	time_unit t = this_node().current_time();
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 	
 	bool reconnect = (this_node().state() == node::online) && (connected_node().state() == node::reconnecting);
+	// TODO check when connected_node().state() can change
 	
-	time_span span(start_time, end_time);
-	return connected_output_->pull(span, reconnect);
+	time_span span = time_span(start_time, end_time);
+	node::pull_result result = connected_output_->pull(span, reconnect);
+	Assert(span.start_time() == start_time);
+	Assert(span.includes(t));
+	
+	pulled_span_ = span;
+	return result;
 }
 
 
-timed_frame_array_view node_input::begin_read_frame(time_unit t) {
+timed_frame_array_view node_input::begin_read_frame() {
+	Expects(pulled_span_.duration() > 0);
+
+	time_unit t = this_node().current_time();
 	time_unit duration = std::min(t, past_window_) + 1 + future_window_;
+	if(duration > pulled_span_.duration()) duration = pulled_span_.duration();
+	
+	//duration = pulled_span_.duration();
+	
 	timed_frame_array_view view = connected_output_->begin_read(duration);
+	Assert(! view.is_null());
+	
+	if(view.is_null()) return view;
+	
+	Assert(view.span().includes(t));
+	Assert(view.start_time() == pulled_span_.start_time());
+	Assert(view.duration() == duration);
 	return view;
 }
 
 
-void node_input::end_read_frame(time_unit t) {
-	time_unit duration = (t < past_window_) ? 0 : 1;
+void node_input::end_read_frame() {
+	time_unit duration = (this_node().current_time() < past_window_) ? 0 : 1;
 	connected_output_->end_read(duration);
 }
 

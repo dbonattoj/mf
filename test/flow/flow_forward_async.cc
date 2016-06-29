@@ -31,6 +31,6 @@ using node_type = flow::async_node;
 using node_type2 = flow::async_node;
 constexpr bool seekable = false;
 
-TEST_CASE("flow graph test: non-seekable, async", "[flow_graph]" "[async][nonseekable]") {
+TEST_CASE("flow graph test: non-seekable, async", "[flow_graph]" "[async][forward]") {
 	#include "flow_tests_basic.icc"
 }

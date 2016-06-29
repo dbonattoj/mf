@@ -55,7 +55,7 @@ public:
 	ndarray_timed_view(const base& vw, time_unit start_time) :
 		base(vw), start_time_(start_time)
 	{
-		MF_EXPECTS(! vw.is_null());	
+		Expects(! vw.is_null());	
 	}
 	
 	static ndarray_timed_view null() { return ndarray_timed_view(); }

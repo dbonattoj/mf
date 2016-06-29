@@ -70,6 +70,7 @@ time_unit async_node::minimal_offset_to(const node& target_node) const {
 	return in.this_node().minimal_offset_to(target_node) - in.past_window_duration();
 }
 
+
 time_unit async_node::maximal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
 	const node_input& in = output().connected_input();
@@ -78,139 +79,134 @@ time_unit async_node::maximal_offset_to(const node& target_node) const {
 
 
 bool async_node::pause_() {
+	// pause as long as either:
+	// - next write time (determined by shared_ring, and reader may seek) is beyond time limit (set by reader)
+	// - next write time is beyond end of stream (marked in shared_ring)
+	// - received temporary failure from input and reader has not made new request since
+	// not pause when graph stopped and return false instead then
+	// conditions are rechecked when continuation_cv_ is notified
+	// = when reader pulls new frame (after setting request_id)
+	//   or when graph is stopped
+	
 	auto may_continue = [&]()->bool {
 		time_unit next_write_time = ring_->write_start_time();
-		MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time());
+		MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time(), this_graph().was_stopped());
 		if(this_graph().was_stopped()) return true;
 		else if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
 		else if(next_write_time >= time_limit_) return false;
 		else if(ring_->end_time() != -1 && next_write_time >= ring_->end_time()) return false;
 		else return true;
 	};
-	
+
+	MF_DEBUG("pause..locking");
 	std::unique_lock<std::mutex> lock(continuation_mutex_);
+	MF_DEBUG("pause..waiting");
 	continuation_cv_.wait(lock, may_continue);
 	return ! this_graph().was_stopped();
 }
 
 
 void async_node::thread_main_() {
-	MF_DEBUG("thread");
+	bool pause = false;
+	
+	if(inputs().size() == 1)
+		MF_DEBUG("thread (input: -", inputs().front()->past_window_duration(), ", +", inputs().front()->future_window_duration(), ")");
+	else
+		MF_DEBUG("thread (source)");
+		
 	for(;;) {
-		MF_DEBUG("pause...");
-		bool cont = pause_();
-		if(! cont) break;
+		if(pause) {
+			MF_DEBUG("pause...");
+			bool cont = pause_();
+			if(! cont) break;
+			pause = false;
+		}
 		
 		MF_DEBUG("continuation...");
-		cont = process_frames_();
-		if(! cont) break;
+		
+		request_id_type request_id = current_request_id_.load();	
+		process_result result = process_frame_();
+		if(result == process_result::failure) {
+			failed_request_id_ = request_id;
+			ring_->break_reader();
+			pause = true;
+		} else if(result == process_result::should_pause) {
+			pause = true;
+		}
 	}
 	MF_DEBUG("thread end.");
 }
 
 
-bool async_node::process_frames_() {
-	// request = launched by output_pull, has (UID, time_limit, start time)
-	// frames that are processed after output_pull launched request (pulled span + prefetch) belong to that request
-	// failure when processing those frames (got tfail from input pull, crossed time limit, crossed end time, stopped)
-	// break output_pull and make it return tfail only when it is waiting for readable frames in same request.
+async_node::process_result async_node::process_frame_() {
+	MF_RAND_SLEEP;
+	auto out_vw = ring_->try_begin_write(1);
+	if(out_vw.is_null()) { MF_DEBUG("process: out_vw=null  --> should_pause"); return process_result::should_pause; }
+	if(out_vw.duration() == 0) { MF_DEBUG("process: out_vw=()  --> should_pause"); return process_result::should_pause; }
+
+	time_unit request_time = out_vw.start_time();
+	MF_DEBUG("process frame... request_time=", request_time, " limit=", time_limit_);
+
+	MF_RAND_SLEEP;
+	if(request_time >= time_limit_) {
+		ring_->end_write(0);
+		MF_DEBUG("process: t=", request_time, " > limit ", time_limit_.load(), " --> failure"); 
+		return process_result::failure;
+	}
 	
-	request_id_type request_id;
+	time_unit t = out_vw.start_time();
 
-	// process next frames until paused
-	for(;;) {
-		MF_DEBUG("process frame...");
-		
-		// request_id = unique id of current output_pull invocation
-		request_id = current_request_id_.load();	
+	set_current_time_(t);
+	filter_node_job job = begin_job_();
 
-		// wait for frame to become writable, and get view to it
-		// defines the time of frame to process, output_pull can seek to new time
-		// output_pull sets buffer time (seek) and time_limit before request_id.
-		// if now out_vw.start_time() is already set, but request_id still has old value and failure occurs,
-		// goes to pause. output_pull then notifies continuation_cv_ after setting right request_id, and then the
-		// request gets processed.
-		
-		MF_RAND_SLEEP;
-		auto out_vw = ring_->try_begin_write(1);
-		if(out_vw.is_null()) break;
-		if(out_vw.duration() == 0) break;
-
-		time_unit request_time = out_vw.start_time();
-		MF_DEBUG("process frame... request_time=", request_time, " limit=", time_limit_);
-
-		MF_RAND_SLEEP;
-		if(request_time >= time_limit_) {
+	job.attach_output(out_vw[0]);
+	MF_RAND_SLEEP;
+	
+	MF_RAND_SLEEP;
+	if(state() == reconnecting && reconnect_flag_) {
+		set_online();
+		reconnect_flag_ = false;
+	}
+	
+	pre_process_filter_(job);
+			
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		time_unit res = in->pull();
+		if(res == pull_result::stopped || res == pull_result::temporary_failure) {
+			job.detach_output();
 			ring_->end_write(0);
-			break;
-		}
-		
-		time_unit t = out_vw.start_time();
-		filter_node_job job = make_job_(t);
-		job.attach_output(out_vw[0]);
-		MF_RAND_SLEEP;
-		set_current_time_(t);
-		
-		MF_RAND_SLEEP;
-		if(state() == reconnecting && reconnect_flag_) {
-			set_online();
-			reconnect_flag_ = false;
-		}
-		
-		pre_process_filter_(job);
-				
-		for(auto&& in : inputs()) if(in->is_activated()) {
-			time_unit res = in->pull(t);
-			if(res == pull_result::stopped || res == pull_result::temporary_failure) {
-				job.detach_output();
-				ring_->end_write(0);
-				goto fail;
-			}
-		}
-		
-		for(auto&& in : inputs()) if(in->is_activated()) {
-			bool cont = job.push_input(*in);
-			if(! cont) {
-				job.detach_output();
-				ring_->end_write(0);
-				return false;
-			}
-		}
-		
-		MF_DEBUG("process ", t);
-		process_filter_(job);
-
-		bool reached_end = false;
-		if(stream_properties().duration_is_defined()) {
-			if(t == stream_properties().duration() - 1) reached_end = true;
-		} else if(job.end_was_marked()) {
-			reached_end = true;
-		}
-
-		while(job.has_inputs()) {
-			const node_input& in = job.pop_input();
-			if(t == in.end_time() - 1) reached_end = true;
-		}
-		
-		job.detach_output();
-		if(reached_end) {
-			bool mark_last_frame = !ring_->is_seekable();
-			ring_->end_write(1, mark_last_frame);			
-			mark_end_();
-			break;
-		} else {
-			ring_->end_write(1);
+			MF_DEBUG("process frame... t=", request_time, " in fail --> failure");
+			return process_result::failure;
 		}
 	}
-
-fail:
 	
-	// mark request_id as failed, and break output_pull waiting for readable frame
-	failed_request_id_ = request_id;
-	MF_RAND_SLEEP;
-	ring_->break_reader();
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		bool cont = job.push_input(*in);
+		if(! cont) {
+			job.detach_output();
+			ring_->end_write(0);
+			MF_DEBUG("process frame... t=", request_time, " in broke --> failure");
+			return process_result::failure;
+		}
+	}
+	
+	MF_DEBUG("process ", t);
+	process_filter_(job);
 
-	return true;
+	finish_job_(job);
+	
+	job.detach_output();
+	
+	if(reached_end()) {
+		bool mark_last_frame = !ring_->is_seekable();
+		ring_->end_write(1, mark_last_frame);
+		MF_DEBUG("process frame... t=", request_time, " --> should_pause");	
+		return process_result::should_pause;
+	} else {
+		ring_->end_write(1);
+		MF_DEBUG("process frame... t=", request_time, " --> should_continue");	
+		return process_result::should_continue;
+	}
 }
 
 
@@ -234,25 +230,28 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 	
 	while(ring_->readable_duration() < pull_span.duration()) {
 		MF_RAND_SLEEP;		
-		MF_ASSERT(ring_->read_start_time() == pull_span.start_time());
+		Assert(ring_->read_start_time() == pull_span.start_time());
+		
+		if(this_graph().was_stopped()) return pull_result::stopped;
 		
 		MF_DEBUG("output: pull ", pull_span, " : wait_readable...");
-
-		if(this_graph().was_stopped()) return pull_result::stopped;
-		bool became_readable = ring_->wait_readable();
+		ring_->wait_readable();
+		MF_RAND_SLEEP;
 		MF_DEBUG("output: pull ", pull_span, " : wait_readable. readable=", ring_->readable_duration());
-
-		if(! became_readable) {
-			bool this_request_failed = (failed_request_id_ == current_request_id_);
-			if(this_graph().was_stopped()) {
-				MF_DEBUG("output: pull -> stopped");
-				return pull_result::stopped;
-			} else if(this_request_failed) {
-				MF_DEBUG("output: pull -> tfail");
-				return pull_result::temporary_failure;
-			}
-		} else if(became_readable && ring_->writer_reached_end()) {
-			pull_span = time_span(pull_span.start_time(), pull_span.start_time() + ring_->readable_duration());
+	
+		bool this_request_failed = (failed_request_id_ == current_request_id_);
+		if(ring_->writer_reached_end()) {
+			pull_span = span_intersection(pull_span, ring_->readable_time_span());
+		}
+		if(ring_->readable_duration() >= pull_span.duration()) {
+			MF_DEBUG("output: pull -> success");
+			return pull_result::success;
+		} else if(this_graph().was_stopped()) {
+			MF_DEBUG("output: pull -> stopped");
+			return pull_result::stopped;
+		} else if(this_request_failed) {
+			MF_DEBUG("output: pull -> tfail");
+			return pull_result::temporary_failure;
 		}
 	}
 

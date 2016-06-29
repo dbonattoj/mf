@@ -78,8 +78,8 @@ protected:
 		return *output;
 	}
 	
-	void set_current_time_(time_unit t) noexcept { current_time_ = t; }
-	void mark_end_() { reached_end_ = true; }
+	void set_current_time_(time_unit t) noexcept;
+	void mark_end_();
 
 public:
 	virtual ~node() { }
@@ -118,6 +118,7 @@ public:
 	bool is_bounded() const;
 	time_unit current_time() const noexcept { return current_time_; }
 	bool reached_end() const noexcept { return reached_end_; }
+	time_unit end_time() const noexcept;
 };
 
 
@@ -180,13 +181,10 @@ private:
 	time_unit future_window_ = 0;
 	
 	node_remote_output* connected_output_ = nullptr;
-		
+	
+	time_span pulled_span_;
 	bool activated_ = true;
-	
-public:
-	void set_past_window(time_unit dur) { past_window_ = dur; }
-	void set_future_window(time_unit dur) { future_window_ = dur; }
-	
+		
 public:
 	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
 	node_input(const node_input&) = delete;
@@ -195,22 +193,26 @@ public:
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
 
+	void set_past_window(time_unit dur) { past_window_ = dur; }
+	void set_future_window(time_unit dur) { future_window_ = dur; }
+
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
 	void connect(node_remote_output&);
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_remote_output& connected_output() const noexcept { MF_EXPECTS(is_connected()); return *connected_output_; }
-	node& connected_node() const noexcept { MF_EXPECTS(is_connected()); return connected_output().this_output().this_node(); }
+	node_remote_output& connected_output() const noexcept { Expects(is_connected()); return *connected_output_; }
+	node& connected_node() const noexcept { Expects(is_connected()); return connected_output().this_output().this_node(); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);
 	
 	/// \name Read interface, used by node.
 	///@{
-	node::pull_result pull(time_unit t);
-	timed_frame_array_view begin_read_frame(time_unit t);
-	void end_read_frame(time_unit t);
+	node::pull_result pull();
+	const time_span& pulled_span() const noexcept { return pulled_span_; }
+	timed_frame_array_view begin_read_frame();
+	void end_read_frame();
 	void cancel_read_frame();
 	time_unit end_time() const { return connected_output_->end_time(); }
 	///@}

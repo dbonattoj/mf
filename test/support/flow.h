@@ -142,6 +142,7 @@ public:
 		while(t >= got_frames_.size()) got_frames_.push_back(missingframe);
 		
 		got_frames_[t] = index;
+		if(!(index == expected_frames_.at(t))) print();
 		MF_TEST_THREAD_REQUIRE(index == expected_frames_.at(t));
 	}
 

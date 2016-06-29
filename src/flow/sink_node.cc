@@ -46,10 +46,10 @@ void sink_node::pull(time_unit t) {
 
 	//if(stream_duration_is_defined()) MF_ASSERT(t < stream_duration());
 	
-	filter_node_job job = make_job_(t);
+	set_current_time_(t);
+	filter_node_job job = begin_job_();
 		
 	// set pull = current time as requested
-	set_current_time_(t);
 			
 	// preprocess, allow concrete subclass to activate/desactivate inputs
 	pre_process_filter_(job);
@@ -57,12 +57,13 @@ void sink_node::pull(time_unit t) {
 	// pull & begin reading from activated inputs
 	bool stopped = false;
 	for(auto&& in : inputs()) if(in->is_activated()) {
-		time_unit res = in->pull(t);
+		time_unit res = in->pull();
 		if(res == pull_result::stopped) {
 			stopped = true;
 			return;
 		} else if(res == pull_result::temporary_failure) {
 			MF_DEBUG("sink received temp failure");
+			throw sequencing_error("stf");
 			return;
 		}
 	}
@@ -74,7 +75,7 @@ void sink_node::pull(time_unit t) {
 	for(auto&& in : inputs()) if(in->is_activated()) {		
 		bool cont = job.push_input(*in);
 		if(! cont) {
-			job.close_all_inputs();
+			job.cancel_inputs();
 			stopped = true;
 			break;
 		}
@@ -83,14 +84,7 @@ void sink_node::pull(time_unit t) {
 	// process frame in concrete subclass
 	process_filter_(job);
 	
-
-	while(job.has_inputs()) {
-		const node_input& in = job.pop_input();
-		if(t == in.end_time() - 1) mark_end_();
-	}
-	// if no activated inputs: stream duration determines end
-	if(stream_properties().duration_is_defined())
-		if(t == stream_properties().duration() - 1) mark_end_();
+	finish_job_(job);
 }
 
 // TODO (all nodes): handle cross over end when ended input desactivated
@@ -105,6 +99,7 @@ void sink_node::seek(time_unit t) {
 	MF_EXPECTS(stream_properties().policy() == node_stream_properties::seekable);
 	if(t < 0 || t >= stream_properties().duration()) throw std::invalid_argument("seek target time out of bounds");
 	set_current_time_(t - 1);
+	
 }
 
 

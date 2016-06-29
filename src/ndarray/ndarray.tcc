@@ -35,7 +35,7 @@ auto ndarray<Dim, T, Allocator>::strides_with_padding_(const shape_type& shp, st
 
 template<std::size_t Dim, typename T, typename Allocator>
 void ndarray<Dim, T, Allocator>::allocate_() {
-	MF_ASSERT(is_nonzero_multiple_of(stride_, alignof(T)));
+	Assert(is_nonzero_multiple_of(stride_, alignof(T)));
 	
 	std::size_t frame_bytes = shape().tail().product() * stride_;
 	std::size_t bytes = (frame_bytes + padding_) * shape().front();

@@ -52,6 +52,9 @@ public:
 	
 	time_span readable_time_span() const;
 	time_span writable_time_span() const;
+
+	time_unit readable_duration() const { return readable_time_span().duration(); }
+	time_unit writable_duration() const { return writable_time_span().duration(); } 
 	
 	bool can_write_span(time_span) const;
 	bool can_read_span(time_span) const;

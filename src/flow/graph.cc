@@ -58,6 +58,7 @@ void graph::launch() {
 
 void graph::stop() {
 	if(! running_) throw std::logic_error("graph is not running");
+	MF_DEBUG("graph::stop");
 	was_stopped_.store(true);
 	for(const auto& nd : nodes_) nd->pre_stop();
 	for(const auto& nd : nodes_) nd->stop();

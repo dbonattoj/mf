@@ -53,7 +53,7 @@ public:
 	template<typename Elem>
 	static frame_format default_format(std::size_t stride = sizeof(Elem)) {
 		static_assert(sizeof(Elem) >= alignof(Elem), "sizeof always larger or equal to alignof");
-		MF_EXPECTS(stride >= sizeof(Elem) && is_nonzero_multiple_of(stride, alignof(Elem)));
+		Expects(stride >= sizeof(Elem) && is_nonzero_multiple_of(stride, alignof(Elem)));
 		frame_format format;
 		format.elem_type_ = std::type_index(typeid(Elem));
 		format.elem_size_ = sizeof(Elem);

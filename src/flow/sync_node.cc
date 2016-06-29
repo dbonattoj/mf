@@ -30,11 +30,13 @@ time_unit sync_node::minimal_offset_to(const node& target_node) const {
 	return in.this_node().minimal_offset_to(target_node) - in.past_window_duration();
 }
 
+
 time_unit sync_node::maximal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
 	const node_input& in = output().connected_input();
 	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration();
 }
+
 
 void sync_node::setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("sync_node must have exactly 1 output");
@@ -49,28 +51,84 @@ void sync_node::setup() {
 }
 
 
-node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
-	// if non-sequential: seek ring to new position
-	time_unit ring_read_t = ring_->read_start_time();
-	if(ring_read_t != span.start_time()) ring_->seek(span.start_time());
+bool sync_node::process_next_frame_() {
+	timed_frame_array_view out_vw = ring_->begin_write(1);
+	time_unit t = out_vw.start_time();
 	
-	if(reconnected) {
-		set_current_time_(span.start_time());
-		set_online();
+	if(stream_properties().duration_is_defined()) Assert(t < stream_properties().duration());
+	
+	set_current_time_(t);
+	filter_node_job job = begin_job_();
+	
+	job.attach_output(out_vw[0]);
+	
+	pre_process_filter_(job);
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		pull_result res = in->pull();
+		if(res == pull_result::stopped || res == pull_result::temporary_failure) {
+			job.detach_output();
+			return false;
+		}
+	}
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		bool cont = job.push_input(*in);
+		
+	}
+	
+	process_filter_(job);
+	
+	job.detach_output();
+	ring_->end_write(1);
+
+	finish_job_(job);
+		
+	return true;
+}
+
+
+node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {	
+	if(ring_->read_start_time() != span.start_time()) ring_->seek(span.start_time());
+	Assert(ring_->read_start_time() == span.start_time());
+	
+	if(reached_end() && span.end_time() > end_time())
+		span = time_span(span.start_time(), end_time());
+
+	if(span.duration() == 0) return pull_result::success;
+	
+	bool cont = true;
+	if(ring_->readable_time_span().includes(span)) {
+		if(reconnected) set_online();
+	} else {
+		if(reconnected) {
+			set_current_time_(ring_->write_start_time());
+			set_online();
+		}
+		do {
+			cont = process_next_frame_();
+		} while(cont && !ring_->readable_time_span().includes(span) && !reached_end());
 	}
 
-	// pull frames from node until requested span filled, or end reached	
-	while(!ring_->readable_time_span().includes(span) && ! reached_end()) {
-		bool ok = process_next_frame_();
-		if(! ok) return pull_result::temporary_failure;
-	}
+	if(reached_end() && span.end_time() > end_time())
+		span = time_span(span.start_time(), end_time());
 
-	span = time_span(span.start_time(), span.start_time() + ring_->readable_time_span().duration());
-	return pull_result::success;
+	if(cont) {
+		if(not (ring_->readable_duration() >= span.duration())) {
+			MF_DEBUG_EXPR(ring_->readable_time_span(), span);
+		}
+		Ensures(ring_->readable_duration() >= span.duration());
+		return pull_result::success;
+	} else {
+		if(this_graph().was_stopped()) return pull_result::stopped;
+		else return pull_result::temporary_failure;
+	}
 }
 
 	
 timed_frame_array_view sync_node::output_begin_read_(time_unit duration) {
+	Expects(ring_->readable_duration() >= duration);
+	
 	if(reached_end() && ring_->read_start_time() + duration > current_time())
 		duration = ring_->readable_duration();
 
@@ -83,48 +141,5 @@ timed_frame_array_view sync_node::output_begin_read_(time_unit duration) {
 void sync_node::output_end_read_(time_unit duration) {
 	ring_->end_read(duration);
 }
-
-
-bool sync_node::process_next_frame_() {
-	timed_frame_array_view out_vw = ring_->begin_write(1);
-	time_unit t = out_vw.start_time();
-	filter_node_job job = make_job_(t);
-	job.attach_output(out_vw[0]);
-	
-	set_current_time_(t);
-	
-	pre_process_filter_(job);
-	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		pull_result res = in->pull(t);
-		if(res == pull_result::stopped || res == pull_result::temporary_failure) {
-			job.detach_output();
-			return false;
-		}
-	}
-	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		job.push_input(*in);
-	}
-	
-	process_filter_(job);
-	
-	if(stream_properties().duration_is_defined()) {
-		if(t == stream_properties().duration() - 1) mark_end_();
-	} else if(job.end_was_marked()) {
-		mark_end_();
-	}
-	
-	while(job.has_inputs()) {
-		const node_input& in = job.pop_input();
-		if(t == in.end_time() - 1) mark_end_();
-	}
-	
-	job.detach_output();
-	ring_->end_write(1);
-	
-	return true;
-}
-
 
 }}

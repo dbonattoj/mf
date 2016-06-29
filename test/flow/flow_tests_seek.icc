@@ -18,11 +18,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
+#if 1
 SECTION("seek") {
 	constexpr int m = missingframe;
 	std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };
-
 
 	SECTION("source -> sink") {			
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, true);
@@ -33,7 +32,7 @@ SECTION("seek") {
 		REQUIRE(gr.current_time() == 2);
 		gr.run_until(5);
 		REQUIRE(gr.current_time() == 5);
-		
+
 		// seek forward, skipping frames [6,9]
 		gr.seek(15);
 		gr.run_for(2);
@@ -54,15 +53,15 @@ SECTION("seek") {
 		gr.seek(19);
 		gr.run();
 		REQUIRE(sink.reached_end());
-		
+	
 		// seek backward, after end was already reached
 		gr.seek(7);
 		gr.run_for(2);
+			return;
 
 		// stop, when not at end
 		REQUIRE(sink.check());
 	}
-
 
 	SECTION("source -> [-2, +1]passthrough' -> sink") {			
 		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, true);
@@ -75,7 +74,50 @@ SECTION("seek") {
 		REQUIRE(gr.current_time() == 2);
 		gr.run_until(5);
 		REQUIRE(gr.current_time() == 5);
+
+		// seek forward, skipping frames [6,9]
+		gr.seek(15);
+		gr.run_for(2);
+		REQUIRE(gr.current_time() == 16);
 		
+		// seek backward
+		gr.seek(10);
+		gr.run_for(1);
+		REQUIRE(gr.current_time() == 10);
+
+		// invalid seek
+		REQUIRE_THROWS(gr.seek(-1));
+		REQUIRE(gr.current_time() == 10);
+		REQUIRE_THROWS(gr.seek(20));
+		REQUIRE(gr.current_time() == 10);	
+
+		// seek to end
+		gr.seek(19);
+		gr.run();
+		REQUIRE(sink.reached_end());
+
+		// seek backward, after end was already reached
+		gr.seek(7);
+		gr.run_for(2);
+
+		// stop, when not at end
+		REQUIRE(sink.check());
+	}
+
+	SECTION("source -> [-2, +2]passthrough2 --> [-1, +2]passthrough1' -> sink") {			
+		auto& source = gr.add_filter<sequence_frame_source, node_type>(seq.size()-1, shp, true);
+		auto& passthrough2 = gr.add_filter<passthrough_filter, node_type>(2, 2);
+		auto& passthrough1 = gr.add_filter<passthrough_filter, node_type2>(1, 2);
+		auto& sink = gr.add_sink_filter<expected_frames_sink>(seq);
+		passthrough2.input.connect(source.output);
+		passthrough1.input.connect(passthrough2.output);
+		sink.input.connect(passthrough1.output);
+		gr.setup();
+		gr.run_for(3);
+		REQUIRE(gr.current_time() == 2);
+		gr.run_until(5);
+		REQUIRE(gr.current_time() == 5);
+
 		// seek forward, skipping frames [6,9]
 		gr.seek(15);
 		gr.run_for(2);
@@ -91,7 +133,7 @@ SECTION("seek") {
 		REQUIRE(gr.current_time() == 10);
 		REQUIRE_THROWS(gr.seek(20));
 		REQUIRE(gr.current_time() == 10);	
-		
+
 		// seek to end
 		gr.seek(19);
 		gr.run();
@@ -104,7 +146,6 @@ SECTION("seek") {
 		// stop, when not at end
 		REQUIRE(sink.check());
 	}
-
 
 	SECTION("graph 2") {
 		/*
@@ -162,3 +203,4 @@ SECTION("seek") {
 		REQUIRE(sink.check());
 	}
 }
+#endif

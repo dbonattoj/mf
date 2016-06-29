@@ -27,8 +27,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class filter;
 class graph;
+class filter;
 class filter_node;
 class filter_node_job;
 
@@ -47,6 +47,7 @@ public:
 };
 
 
+/// Node containing a filter, base class.
 class filter_node : public node {
 	friend class filter_node_output;
 
@@ -58,7 +59,8 @@ protected:
 	void pre_process_filter_(filter_node_job&);
 	void process_filter_(filter_node_job&);
 	
-	filter_node_job make_job_(time_unit t);
+	filter_node_job begin_job_();
+	void finish_job_(filter_node_job&);
 
 	virtual pull_result output_pull_(time_span&, bool reconnected) = 0;
 	virtual timed_frame_array_view output_begin_read_(time_unit duration) = 0;
@@ -73,16 +75,16 @@ public:
 	filter_node_output& output() { return static_cast<filter_node_output&>(*outputs().front()); }
 	const filter_node_output& output() const { return static_cast<const filter_node_output&>(*outputs().front()); }
 	
-	template<typename Filter, typename... Args>
-	Filter& set_filter(Args&&... args) {
-		Filter* filter = new Filter(*this, std::forward<Args>(args)...);
-		filter_.reset(filter);
-		return *filter;
-	}
-	
 	filter& this_filter() { return *filter_; }
 	const filter& this_filter() const { return *filter_; }
 	
+	template<typename Filter, typename... Args>
+	Filter& set_filter(Args&&... args) {
+		Filter* filt = new Filter(*this, std::forward<Args>(args)...);
+		filter_.reset(filt);
+		return *filt;
+	}
+		
 	node_input& add_input(time_unit past_window, time_unit future_window);
 	node_output& add_output(const frame_format& format);
 };
@@ -105,30 +107,30 @@ private:
 	time_unit time_ = -1;
 	std::vector<input_view_handle> inputs_stack_;
 	std::vector<input_view_handle*> inputs_slots_;
-	
+bool det=true;
 	frame_view output_view_;
 	bool end_marked_ = false;
 
 public:
-	filter_node_job(filter_node& nd, time_unit t);
+	explicit filter_node_job(filter_node& nd);
 	~filter_node_job();
 	
-	bool output_detached() const noexcept { return output_view_.is_null(); }
 	void attach_output(const frame_view& output_view);
 	void detach_output();
+	bool has_output() const { return !det;/*return ! output_view_.is_null();*/ }
 	
 	bool push_input(node_input&);
 	node_input& pop_input();
-	void close_all_inputs();
 	bool has_inputs() const { return (inputs_stack_.size() > 0); }
-	bool end_was_marked() const noexcept { return end_marked_; }
-	
+	void cancel_inputs();
+		
 	time_unit time() const noexcept { return time_; }
 	void mark_end() noexcept { end_marked_ = true; }
 	
-	const timed_frame_array_view& in(std::ptrdiff_t index);
-	bool has_input(std::ptrdiff_t index) const noexcept;
-	const frame_view& out();
+	bool has_input_view(std::ptrdiff_t index) const noexcept;
+	const timed_frame_array_view& input_view(std::ptrdiff_t index);
+	const frame_view& output_view();
+	bool end_was_marked() const noexcept { return end_marked_; }
 };
 
 

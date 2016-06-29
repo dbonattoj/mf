@@ -18,3 +18,8 @@ interal_do()  --> virtual function overriden by subbase (Base --> Subbase --> Co
 make_x(a, b, c) = like constructor
 to_x(y) = like (implicit) copy constructor (y = object representing same thing)
 
+member functions:
+public()
+protected_()
+private_()
+

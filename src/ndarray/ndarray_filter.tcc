@@ -41,15 +41,15 @@ kernel_placement<Dim, Elem, Kernel_elem> place_kernel_at(
 		
 	auto kernel_span = make_ndspan(view_span.start_pos() - pos + margin, view_span.end_pos() - pos + margin);
 
-	MF_ASSERT(kernel.full_span().includes(kernel_span));
+	Assert_crit(kernel.full_span().includes(kernel_span));
 	
 	placement.view_section.reset(view.section(view_span));
 	placement.kernel_section.reset(kernel.section(kernel_span));
-	MF_ASSERT(placement.view_section.shape() == placement.kernel_section.shape());
+	Assert_crit(placement.view_section.shape() == placement.kernel_section.shape());
 	
 	placement.section_position = pos - view_span.start_pos();
-	MF_ASSERT(placement.view_section.full_span().includes(placement.section_position));
-	MF_ASSERT(&placement.view_section.at(placement.section_position) == &view.at(pos));
+	Assert_crit(placement.view_section.full_span().includes(placement.section_position));
+	Assert_crit(&placement.view_section.at(placement.section_position) == &view.at(pos));
 
 	return placement;
 }
@@ -62,7 +62,7 @@ void apply_kernel(
 	const ndarray_view<Dim, Out_elem>& out_view,
 	const ndarray_view<Dim, Kernel_elem> kernel
 ) {
-	MF_EXPECTS(in_view.shape() == out_view.shape());
+	Expects_crit(in_view.shape() == out_view.shape());
 	
 	for(auto it = out_view.begin(); it != out_view.end(); ++it) {
 		auto pos = it.coordinates();

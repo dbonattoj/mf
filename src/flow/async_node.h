@@ -31,9 +31,11 @@ class graph;
 
 class async_node final : public filter_node {	
 private:
+	enum class process_result { should_continue, should_pause, failure };
+
 	using request_id_type = int;
 	
-	time_unit prefetch_duration_ = 0;
+	time_unit prefetch_duration_ = 5;
 	
 	std::thread thread_;
 	std::atomic<bool> running_ {false};
@@ -49,9 +51,8 @@ private:
 	request_id_type failed_request_id_ = -1;
 	
 	bool pause_();
+	process_result process_frame_();
 	void thread_main_();
-		
-	bool process_frames_();
 
 	pull_result output_pull_(time_span&, bool reconnected) override;
 	timed_frame_array_view output_begin_read_(time_unit duration) override;
