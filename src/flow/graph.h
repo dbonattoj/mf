@@ -22,7 +22,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_GRAPH_H_
 
 #include "../common.h"
-#include "../os/event.h"
 #include "filter_node.h"
 #include "sink_node.h"
 #include "../filter/convert_filter.h"

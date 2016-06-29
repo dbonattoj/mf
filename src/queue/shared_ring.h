@@ -22,7 +22,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_SHARED_RING_H_
 
 #include "timed_ring.h"
-#include "../os/event.h"
 #include <mutex>
 #include <condition_variable>
 #include <stdexcept>

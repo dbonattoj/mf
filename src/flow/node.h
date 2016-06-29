@@ -39,7 +39,7 @@ class node_input;
 class node {
 public:
 	enum online_state { online, offline, reconnecting };
-	enum pull_result { success, temporary_failure, stopped };
+	enum pull_result { success, transitory_failure, stopped };
 
 private:
 	enum stage { construction, was_pre_setup, was_setup };

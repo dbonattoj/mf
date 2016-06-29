@@ -66,7 +66,7 @@ bool sync_node::process_next_frame_() {
 	
 	for(auto&& in : inputs()) if(in->is_activated()) {
 		pull_result res = in->pull();
-		if(res == pull_result::stopped || res == pull_result::temporary_failure) {
+		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
 			job.detach_output();
 			return false;
 		}
@@ -121,7 +121,7 @@ node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
 		return pull_result::success;
 	} else {
 		if(this_graph().was_stopped()) return pull_result::stopped;
-		else return pull_result::temporary_failure;
+		else return pull_result::transitory_failure;
 	}
 }
 

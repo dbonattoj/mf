@@ -61,7 +61,7 @@ void sink_node::pull(time_unit t) {
 		if(res == pull_result::stopped) {
 			stopped = true;
 			return;
-		} else if(res == pull_result::temporary_failure) {
+		} else if(res == pull_result::transitory_failure) {
 			MF_DEBUG("sink received temp failure");
 			throw sequencing_error("stf");
 			return;

@@ -172,7 +172,7 @@ async_node::process_result async_node::process_frame_() {
 			
 	for(auto&& in : inputs()) if(in->is_activated()) {
 		time_unit res = in->pull();
-		if(res == pull_result::stopped || res == pull_result::temporary_failure) {
+		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
 			job.detach_output();
 			ring_->end_write(0);
 			MF_DEBUG("process frame... t=", request_time, " in fail --> failure");
@@ -215,10 +215,8 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 	{
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
 		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
-		
-		time_unit pull_time = pull_span.start_time();
-		if(pull_time >= ring_->read_start_time()) ring_->skip(pull_time - ring_->read_start_time());
-		else ring_->seek(pull_span.start_time());
+				
+		if(stream_properties().is_seekable()) ring_->seek(pull_span.start_time());
 		
 		if(reconnect) reconnect_flag_ = true;
 		
@@ -228,6 +226,11 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 	MF_RAND_SLEEP;
 	continuation_cv_.notify_one();
 	
+	if(! stream_properties().is_seekable()) {
+		throw std::logic_error("forward async currently unsupported");
+	}
+	
+
 	while(ring_->readable_duration() < pull_span.duration()) {
 		MF_RAND_SLEEP;		
 		Assert(ring_->read_start_time() == pull_span.start_time());
@@ -251,7 +254,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 			return pull_result::stopped;
 		} else if(this_request_failed) {
 			MF_DEBUG("output: pull -> tfail");
-			return pull_result::temporary_failure;
+			return pull_result::transitory_failure;
 		}
 	}
 
