@@ -1,75 +1,66 @@
-/*
 #ifndef MF_FLOW_MULTIPLEX_NODE_H_
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
 #include "node.h"
 #include <thread>
-#include <memory>
+#include <condition_variable>
 
 namespace mf { namespace flow {
 
-class multiplex_node;
-
-
-class multiplex_node_output : public node_output {
-public:
-	using node_type = multiplex_node;
-
-	time_unit pull_time_;
-
-	using node_output::node_output;
-	
-	void setup() override;
-	
-	/// \name Read interface, used by connected input.
-	///@{
-	time_unit pull(time_span&, bool reactivate) override;
-	timed_frame_array_view begin_read(time_unit duration) override;
-	void end_read(time_unit duration) override;
-	time_unit end_time() const override;
-	///@}
-	
-	/// \name Write interface, used by node.
-	///@{
-	frame_view begin_write_frame(time_unit& t) override;
-	void end_write_frame(bool was_last_frame) override;
-	void cancel_write_frame() override;
-	///@}
-};
-
+class graph;
 
 
 class multiplex_node final : public node {
-public:	
-	node_input& input_;
-	timed_frame_array_view input_view_;
+private:
+	const node* successor_node_ = nullptr;
 	
-	std::atomic<time_unit> next_pull_ {-1};
-	
-	const node* common_successor_ = nullptr;
-		
 	std::thread thread_;
-			
+	std::atomic<time_unit> pull_request_time_ = -1;
+	std::condition_variable request_time_change_;
+	
 	void thread_main_();
-
+	
 public:
-	explicit multiplex_node(graph& gr) : node(gr), input_(add_input_<node_input>(0, 0)) { }
+	explicit multiplex_node(graph&);
+	~multiplex_node() override;
+
+	time_unit minimal_offset_to(const node&) const override;
+	time_unit maximal_offset_to(const node&) const override;
 	
-	void pre_setup() final override;
-	void setup() final override;
-	void launch() final override;
-	void stop() final override;
+	void launch() override;
+	void stop() override;
+	void pre_setup() override;
 	
-	node_input& input() { return input_; }
-		
-	bool process_next_frame() override;
-	
-	multiplex_node_output& add_output(const frame_format& format) {
-		return add_output_<multiplex_node_output>(format);
-	}
+	node_input& input();
+	multiplex_node_output& add_output();
 };
+
+
+class multiplex_node_output final : public node_output {
+	multiplex_node& this_node() noexcept;
+	const multiplex_node& this_node() const noexcept;
+	
+public:
+	using node_output::node_output;
+	
+	node::pull_result pull(time_span& span, bool reconnect) override;
+	timed_frame_array_view begin_read(time_unit duration) override;
+	void end_read(time_unit duration) override;
+};
+
+
+inline multiplex_node& multiplex_node_output::this_node() noexcept {
+	return static_cast<multiplex_node&>(node_output::this_node());
+}
+
+
+inline const multiplex_node& multiplex_node_output::this_node() const noexcept {
+	return static_cast<const multiplex_node&>(node_output::this_node());
+}
+
+
 
 }}
 
 #endif
-*/
+
