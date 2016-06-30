@@ -4,20 +4,48 @@
 #include "node.h"
 #include <thread>
 #include <condition_variable>
+#include <mutex>
+#include <shared_mutex>
 
 namespace mf { namespace flow {
 
 class graph;
+class multiplex_node;
+
+class multiplex_node_output final : public node_output {
+private:
+	std::shared_lock<std::shared_timed_mutex> input_view_shared_lock_;
+	
+	multiplex_node& this_node() noexcept;
+	const multiplex_node& this_node() const noexcept;
+	
+public:
+	multiplex_node_output(node& nd, std::ptrdiff_t index, const frame_format&);
+	
+	node::pull_result pull(time_span& span, bool reconnect) override;
+	timed_frame_array_view begin_read(time_unit duration) override;
+	void end_read(time_unit duration) override;
+};
 
 
 class multiplex_node final : public node {
+	friend class multiplex_node_output;
+
 private:
 	const node* successor_node_ = nullptr;
-	
+
 	std::thread thread_;
-	std::atomic<time_unit> pull_request_time_ = -1;
-	std::condition_variable request_time_change_;
+
+	time_unit successor_time_of_input_view_ = -1;
+	timed_frame_array_view input_view_;
 	
+	std::mutex successor_time_mutex_;
+	std::condition_variable successor_time_changed_cv_;
+
+	std::shared_timed_mutex input_view_mutex_;
+	std::condition_variable_any input_view_updated_cv_;
+	
+	void load_input_view_(time_unit t);
 	void thread_main_();
 	
 public:
@@ -30,29 +58,16 @@ public:
 	void launch() override;
 	void stop() override;
 	void pre_setup() override;
+	void setup() override;
 	
 	node_input& input();
 	multiplex_node_output& add_output();
 };
 
 
-class multiplex_node_output final : public node_output {
-	multiplex_node& this_node() noexcept;
-	const multiplex_node& this_node() const noexcept;
-	
-public:
-	using node_output::node_output;
-	
-	node::pull_result pull(time_span& span, bool reconnect) override;
-	timed_frame_array_view begin_read(time_unit duration) override;
-	void end_read(time_unit duration) override;
-};
-
-
 inline multiplex_node& multiplex_node_output::this_node() noexcept {
 	return static_cast<multiplex_node&>(node_output::this_node());
 }
-
 
 inline const multiplex_node& multiplex_node_output::this_node() const noexcept {
 	return static_cast<const multiplex_node&>(node_output::this_node());

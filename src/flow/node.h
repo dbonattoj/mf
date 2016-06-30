@@ -148,7 +148,6 @@ public:
 	node_output(node& nd, std::ptrdiff_t index, const frame_format&);
 	node_output(const node_output&) = delete;
 	node_output& operator=(const node_output&) = delete;
-	
 	virtual ~node_output() { }
 
 	std::ptrdiff_t index() const noexcept { return index_; }
@@ -189,6 +188,7 @@ public:
 	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
 	node_input(const node_input&) = delete;
 	node_input& operator=(const node_input&) = delete;
+	virtual ~node_input() { }
 
 	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }

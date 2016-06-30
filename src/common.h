@@ -29,6 +29,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "debug.h"
 #include "exceptions.h"
 
+#define MF_VERIFY_ASSERTIONS 1
+
 #define MF_STRINGIZE_(X) #X
 #define MF_STRINGIZE(X) MF_STRINGIZE_(X)
 
@@ -48,8 +50,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 		}
 #else 
 	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) ((void)0)
-	#define MF_ASSERT_MSG_(__condition__, __msg__) \
-		if(! (__condition__)) throw ::mf::failed_assertion(__msg__ " at " __FILE__ ":" MF_STRINGIZE(__LINE__))
+	
+	#if MF_VERIFY_ASSERTIONS
+		#define MF_ASSERT_MSG_(__condition__, __msg__) \
+			if(! (__condition__)) throw ::mf::failed_assertion(__msg__ " at " __FILE__ ":" MF_STRINGIZE(__LINE__))
+	#else
+		#define MF_ASSERT_MSG_(__condition__, __msg__) ((void)0)
+	#endif
 #endif
 
 
