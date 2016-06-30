@@ -35,7 +35,7 @@ private:
 
 	using request_id_type = int;
 	
-	time_unit prefetch_duration_ = 5;
+	time_unit prefetch_duration_ = 10;
 	
 	std::thread thread_;
 	std::atomic<bool> running_ {false};

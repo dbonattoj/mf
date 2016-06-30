@@ -15,15 +15,30 @@ multiplex_node::~multiplex_node() {
 }
 
 
+time_span multiplex_node::expected_input_span_() const {
+	time_unit successor_time = successor_node_->current_time();
+	return time_span(
+		std::max(successor_time - input_past_window_, time_unit(0)),
+		std::min(successor_time + input_future_window_ + 1, stream_properties().duration())
+	);	
+}
+
+
 void multiplex_node::load_input_view_(time_unit t) {
-	set_current_time_(t);
 	std::lock_guard<std::shared_timed_mutex> view_lock(input_view_mutex_);
+
+	set_current_time_(t);
 	
 	if(successor_time_of_input_view_ != -1)	input().end_read_frame();
 	
 	pull_result result = input().pull();
-	successor_time_of_input_view_ = t;
-	input_view_.reset(input().begin_read_frame());
+	if(result == pull_result::success) {
+		successor_time_of_input_view_ = t;
+		input_view_.reset(input().begin_read_frame());
+
+	} else if(result == pull_result::transitory_failure) {
+		successor_time_of_input_view_ = -1;
+	}
 }
 
 
@@ -69,18 +84,32 @@ void multiplex_node::stop() {
 
 void multiplex_node::pre_setup() {
 	successor_node_ = &first_successor();
-	
-	const frame_format& format = input().connected_output().this_output().format();
-	for(auto&& out : outputs()) out->define_format(format);
+
+	input_past_window_ = input_future_window_ = 0;
+	for(auto&& out : outputs()) {
+		const node_input& in = out->connected_input();
+		time_unit min_offset = in.this_node().minimal_offset_to(*successor_node_) - in.past_window_duration();
+		time_unit max_offset = in.this_node().maximal_offset_to(*successor_node_) + in.future_window_duration();
+		Assert(min_offset <= 0);
+		Assert(max_offset >= 0);
+		input_past_window_ = std::max(input_past_window_, -min_offset);
+		input_future_window_ = std::max(input_future_window_, max_offset);		
+	}
+	input().set_past_window(input_past_window_);
+	input().set_future_window(input_future_window_);
 }
 
 
 void multiplex_node::setup() {
-	std::size_t frame_length = input().connected_output().this_output().frame_length();
-	for(auto&& out : outputs()) out->define_frame_length(frame_length);
+	Assert(stream_properties().is_seekable());
 
+	std::size_t frame_length = input().connected_output().this_output().frame_length();
 	const frame_format& format = input().connected_output().this_output().format();
-	for(auto&& out : outputs()) out->define_format(format);
+
+	for(auto&& out : outputs()) {
+		out->define_frame_length(frame_length);
+		out->define_format(format);
+	}
 }
 
 	
@@ -101,6 +130,15 @@ multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t index, con
 
 
 node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
+	time_unit end_time = this_node().end_time();
+	span = time_span(span.start_time(), std::min(span.end_time(), end_time));
+	
+	time_span expected_input_span = this_node().expected_input_span_();
+	if(! expected_input_span.includes(span)) {
+		MF_DEBUG_T("multiplex", "tfail1");
+		return node::pull_result::transitory_failure;
+	}
+	
 	input_view_shared_lock_.lock();
 	while(this_node().successor_time_of_input_view_ != this_node().successor_node_->current_time()) {
 		this_node().successor_time_changed_cv_.notify_one();
@@ -109,9 +147,15 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 	time_span input_span = this_node().input_view_.span();
 	input_view_shared_lock_.unlock();
 	
-	if(input_span.includes(span)) return node::pull_result::success;
-	else return node::pull_result::transitory_failure;
+	if(input_span.includes(span)) {
+		MF_DEBUG_T("multiplex", "success");
+		return node::pull_result::success;
+	} else {
+		MF_DEBUG_T("multiplex", "tfail2");
+		return node::pull_result::transitory_failure;
+	}
 }
+
 
 timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 	Assert(! input_view_shared_lock_);
@@ -119,7 +163,9 @@ timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 	
 	timed_frame_array_view& input_view = this_node().input_view_;
 	const time_span& pulled_span = connected_input().pulled_span();
+	Assert(duration == pulled_span.duration());
 	
+	Assert(! input_view.is_null());
 	Assert(input_view.span().includes(pulled_span)); // ???
 	
 	std::ptrdiff_t start_index = input_view.time_index(pulled_span.start_time());

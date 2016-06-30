@@ -28,7 +28,7 @@ template<std::size_t Dim, typename T>
 ndspan<Dim, T>::ndspan(const coordinates_type& start, const coordinates_type& end):
 	start_(start), end_(end)
 {
-	for(std::ptrdiff_t i = 0; i < Dim; ++i) assert(end_[i] >= start_[i]);
+	for(std::ptrdiff_t i = 0; i < Dim; ++i) Assert_crit(end_[i] >= start_[i]);
 }
 
 

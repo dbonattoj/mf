@@ -33,6 +33,8 @@ class multiplex_node final : public node {
 
 private:
 	const node* successor_node_ = nullptr;
+	time_unit input_past_window_ = -1;
+	time_unit input_future_window_ = -1;
 
 	std::thread thread_;
 
@@ -45,6 +47,7 @@ private:
 	std::shared_timed_mutex input_view_mutex_;
 	std::condition_variable_any input_view_updated_cv_;
 	
+	time_span expected_input_span_() const;
 	void load_input_view_(time_unit t);
 	void thread_main_();
 	
