@@ -63,6 +63,8 @@ public:
 		produced_frames_.emplace(t);
 		job.out(output) = make_frame(frame_shape_, t);
 		if(t == last_frame_) job.mark_end();
+		
+		std::cout << "       >> " << t << std::endl;
 	}
 	
 	bool has_produced_frame(int i) const {
@@ -105,6 +107,18 @@ public:
 		flow::filter(nd),
 		input(*this, past_window, future_window),
 		output(*this) { }
+};
+
+
+class simple_sink : public flow::sink_filter {
+public:
+	input_type<2, int> input;
+	
+	explicit simple_sink(flow::filter_node& nd) :
+		flow::sink_filter(nd),
+		input(*this) { }
+	
+	void process(flow::filter_job& job) override { }
 };
 
 

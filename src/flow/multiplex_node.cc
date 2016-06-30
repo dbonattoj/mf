@@ -47,14 +47,18 @@ void multiplex_node::thread_main_() {
 		time_unit successor_time = successor_node_->current_time();
 		std::unique_lock<std::mutex> lock(successor_time_mutex_);
 		successor_time_changed_cv_.wait(lock, [&] {
+			if(this_graph().was_stopped()) return true;
 			successor_time = successor_node_->current_time();
 			return (successor_time_of_input_view_ != successor_time);
 		});
 		lock.unlock();
+		if(this_graph().was_stopped()) break;
 		
 		load_input_view_(successor_time);
 		input_view_updated_cv_.notify_all();
 	}
+	
+	input_view_updated_cv_.notify_all();
 }
 
 
@@ -78,6 +82,7 @@ void multiplex_node::launch() {
 void multiplex_node::stop() {
 	Assert(this_graph().was_stopped());
 	Assert(thread_.joinable());
+	successor_time_changed_cv_.notify_one();
 	thread_.join();
 }
 
@@ -144,6 +149,11 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 		this_node().successor_time_changed_cv_.notify_one();
 		this_node().input_view_updated_cv_.wait(input_view_shared_lock_);
 	}
+	if(this_node().this_graph().was_stopped()) {
+		input_view_shared_lock_.unlock();
+		return node::pull_result::stopped;
+	}
+	
 	time_span input_span = this_node().input_view_.span();
 	input_view_shared_lock_.unlock();
 	
