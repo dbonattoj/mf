@@ -11,7 +11,7 @@ multiplex_node::multiplex_node(graph& gr) : node(gr) {
 
 
 multiplex_node::~multiplex_node() {
-	
+	Assert(! thread_.joinable());
 }
 
 
@@ -47,18 +47,16 @@ void multiplex_node::thread_main_() {
 		time_unit successor_time = successor_node_->current_time();
 		std::unique_lock<std::mutex> lock(successor_time_mutex_);
 		successor_time_changed_cv_.wait(lock, [&] {
-			if(this_graph().was_stopped()) return true;
+			if(stopped_) return true;
 			successor_time = successor_node_->current_time();
 			return (successor_time_of_input_view_ != successor_time);
 		});
 		lock.unlock();
-		if(this_graph().was_stopped()) break;
+		if(stopped_) break;
 		
 		load_input_view_(successor_time);
 		input_view_updated_cv_.notify_all();
 	}
-	
-	input_view_updated_cv_.notify_all();
 }
 
 
@@ -73,6 +71,7 @@ time_unit multiplex_node::maximal_offset_to(const node& target_node) const {
 
 	
 void multiplex_node::launch() {
+	stopped_ = false;
 	thread_ = std::move(std::thread(
 		std::bind(&multiplex_node::thread_main_, this)
 	));
@@ -82,7 +81,15 @@ void multiplex_node::launch() {
 void multiplex_node::stop() {
 	Assert(this_graph().was_stopped());
 	Assert(thread_.joinable());
+	
+	{
+		std::lock_guard<std::mutex> lock1(successor_time_mutex_);
+		std::lock_guard<std::shared_timed_mutex> lock2(input_view_mutex_);
+		stopped_ = true;
+	}
 	successor_time_changed_cv_.notify_one();
+	input_view_updated_cv_.notify_all();
+	
 	thread_.join();
 }
 
@@ -144,18 +151,16 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 		return node::pull_result::transitory_failure;
 	}
 	
-	input_view_shared_lock_.lock();
+	std::shared_lock<std::shared_timed_mutex> lock(this_node().input_view_mutex_);
+	
 	while(this_node().successor_time_of_input_view_ != this_node().successor_node_->current_time()) {
 		this_node().successor_time_changed_cv_.notify_one();
-		this_node().input_view_updated_cv_.wait(input_view_shared_lock_);
+		if(this_node().stopped_) return node::pull_result::stopped;
+		this_node().input_view_updated_cv_.wait(lock);
 	}
-	if(this_node().this_graph().was_stopped()) {
-		input_view_shared_lock_.unlock();
-		return node::pull_result::stopped;
-	}
-	
+	if(this_node().stopped_) return node::pull_result::stopped;
+		
 	time_span input_span = this_node().input_view_.span();
-	input_view_shared_lock_.unlock();
 	
 	if(input_span.includes(span)) {
 		MF_DEBUG_T("multiplex", "success");

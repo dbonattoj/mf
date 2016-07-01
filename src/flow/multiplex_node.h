@@ -38,6 +38,7 @@ private:
 
 	std::thread thread_;
 
+	bool stopped_ = false;
 	time_unit successor_time_of_input_view_ = -1;
 	timed_frame_array_view input_view_;
 	

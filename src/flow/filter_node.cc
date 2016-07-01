@@ -30,6 +30,7 @@ filter_node::~filter_node() { }
 
 
 void filter_node::setup_filter_() {
+	Assert(outputs().size() <= 1, "filter node must have at most one output");
 	filter_->setup();
 }
 

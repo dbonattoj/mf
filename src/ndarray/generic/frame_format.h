@@ -49,7 +49,7 @@ public:
 	frame_format& operator=(const frame_format&) = default;
 
 	static frame_format null() { return frame_format(); }
-
+	
 	template<typename Elem>
 	static frame_format default_format(std::size_t stride = sizeof(Elem)) {
 		static_assert(sizeof(Elem) >= alignof(Elem), "sizeof always larger or equal to alignof");
