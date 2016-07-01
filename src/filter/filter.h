@@ -173,13 +173,9 @@ public:
 	bool is_activated() {
 		return node_input_.is_activated();
 	}
-	
-	template<std::size_t Output_dim, typename Output_elem>
-	void connect(output_port<Output_dim, Output_elem>& output);
-	
-	void connect(node_remote_output& remote_output) { // TODO remove
-		node_input_.connect(remote_output);
-	}
+
+	template<typename Connector, typename... Args>
+	void set_connector(Args&&... args);
 
 	const frame_shape_type& frame_shape() const;
 };

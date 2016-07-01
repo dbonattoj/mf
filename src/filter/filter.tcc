@@ -2,19 +2,16 @@
 
 namespace mf { namespace flow {
 
-template<std::size_t Dim, typename Elem> template<std::size_t Output_dim, typename Output_elem>
-void filter::input_port<Dim, Elem>::connect(output_port<Output_dim, Output_elem>& output) {
-	using connector_type = filter_connector<Dim, Elem, Output_dim, Output_elem>;
-	connector_.reset(new connector_type(output));
-	node_input_.connect(*connector_);
+template<std::size_t Dim, typename Elem> template<typename Connector, typename... Args>
+void filter::input_port<Dim, Elem>::set_connector(Args&&... args) {
+	Connector* connector = new Connector(std::forward<Args>(args)...);
+	connector_.reset(connector);
+	node_input_.connect(*connector);
 }
 
 
 template<std::size_t Dim, typename Elem>
 auto filter::input_port<Dim, Elem>::frame_shape() const -> const frame_shape_type& {
-	static auto shp = make_ndsize(1, 256);
-	
-if(!connector_) return shp; //TODO remove
 	return connector_->frame_shape();
 }
 

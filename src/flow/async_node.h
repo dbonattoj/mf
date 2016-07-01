@@ -58,7 +58,6 @@ private:
 	timed_frame_array_view output_begin_read_(time_unit duration) override;
 	void output_end_read_(time_unit duration) override;
 
-
 public:
 	async_node(graph&);
 	~async_node() override;

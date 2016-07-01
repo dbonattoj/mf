@@ -52,7 +52,6 @@ ndarray_view<Concrete_dim, Concrete_elem> from_generic(
 
 	if(vw.is_null()) return ndarray_view<Concrete_dim, Concrete_elem>::null(); // passthrough null view
 	
-	if(! vw.format().template is_type<Concrete_elem>()) throw std::invalid_argument("elem type mismatch");	
 	if(frame_shape.product() != vw.shape().back()) throw std::invalid_argument("frame shape mismatch");
 	
 	ndptrdiff<frame_dim> concrete_frame_strides =
