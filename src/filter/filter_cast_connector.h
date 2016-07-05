@@ -1,6 +1,8 @@
 #ifndef MF_FLOW_FILTER_CAST_CONNECTOR_H_
 #define MF_FLOW_FILTER_CAST_CONNECTOR_H_
 
+#include "../flow/node.h"
+
 namespace mf { namespace flow {
 
 template<std::size_t Input_dim, typename Input_elem, std::size_t Output_dim, typename Output_elem>

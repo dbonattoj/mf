@@ -30,7 +30,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <memory>
 
 namespace mf { namespace flow {
-	
+
+class graph;
 class filter_input_base;
 class filter_output_base;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
@@ -55,6 +56,7 @@ private:
 	filter_node* node_ = nullptr;
 	
 public:
+	filter() = default;
 	filter(const filter&) = delete;
 	filter& operator=(const filter&) = delete;
 	virtual ~filter() = default;
@@ -73,6 +75,8 @@ public:
 	virtual void setup() { }
 	virtual void pre_process(job_type&) { }
 	virtual void process(job_type&) = 0;
+	
+	time_unit current_time() const;
 };
 
 

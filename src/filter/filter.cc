@@ -88,4 +88,10 @@ void source_filter::install(graph& gr) {
 	Ensures(was_installed());
 }
 
+
+time_unit filter::current_time() const {
+	Expects(was_installed());
+	return node_->current_time();
+}
+
 }}

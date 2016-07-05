@@ -1,6 +1,46 @@
+#include "../flow/node.h"
+#include "../flow/filter_node.h"
 #include "../flow/multiplexer_node.h"
 
 namespace mf { namespace flow {
+
+template<std::size_t Output_dim, typename Output_elem>
+void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& edge) {
+	edges_.push_back(&edge);
+}
+
+
+template<std::size_t Output_dim, typename Output_elem>
+void filter_output<Output_dim, Output_elem>::install(filter_node& nd) {
+	node_output_ = &nd.output();
+	node_output_.define_format(frame_format::default_format<Output_elem>(););
+	
+	if(edges_.size() > 1) {
+		multiplex_node_.reset(new multiplex_node);
+		multiplex_node_->input().connect(node_output_);
+		for(edge_base_type* edge : edges_) {
+			multiplex_node_output& mlpx_out = multiplex_node_->add_output();
+			edge->set_node_output(mlpx_out);
+		}
+	} else if(edges_.size() == 1) {
+		edges_.front()->set_node_output(*node_output_);
+	}
+}
+
+
+void define_frame_shape(const frame_shape_type& shp) {
+	frame_shape_ = shp;
+	node_output_->define_frame_length(shp.product());
+}
+
+const frame_shape_type& frame_shape() const {
+	return frame_shape_;
+}
+
+
+////////////////////
+
+
 
 template<std::size_t Input_dim, typename Input_elem> template<std::size_t Output_dim, typename Output_elem>
 void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out) {
@@ -37,45 +77,5 @@ template<std::size_t Input_dim, typename Input_elem>
 bool filter_input<Input_dim, Input_elem>::is_activated() {
 	return node_input_->is_activated();
 }
-
-
-
-///////////////
-
-
-template<std::size_t Output_dim, typename Output_elem>
-void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& edge) {
-	edges_.push_back(&edge);
-}
-
-
-template<std::size_t Output_dim, typename Output_elem>
-void filter_output<Output_dim, Output_elem>::install(filter_node& nd) {
-	node_output_ = &nd.output();
-	node_output_.define_format(frame_format::default_format<Output_elem>(););
-	
-	if(edges_.size() > 1) {
-		multiplex_node_.reset(new multiplex_node);
-		multiplex_node_->input().connect(node_output_);
-		for(edge_base_type* edge : edges_) {
-			multiplex_node_output& mlpx_out = multiplex_node_->add_output();
-			edge->set_node_output(mlpx_out);
-		}
-	} else if(edges_.size() == 1) {
-		edges_.front()->set_node_output(*node_output_);
-	}
-}
-
-
-void define_frame_shape(const frame_shape_type& shp) {
-	frame_shape_ = shp;
-	node_output_->define_frame_length(shp.product());
-}
-
-const frame_shape_type& frame_shape() const {
-	return frame_shape_;
-}
-
-
 
 }}

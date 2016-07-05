@@ -41,8 +41,7 @@ protected:
 	virtual void process_frame(const input_view_type& in, const output_view_type& out, filter_job& job) = 0;
 
 public:
-	simple_filter(filter_node& nd) :
-		filter(nd), input(*this), output(*this) { }
+	simple_filter() : input(*this), output(*this) { }
 
 	void setup() final override {
 		output.define_frame_shape(input.frame_shape());

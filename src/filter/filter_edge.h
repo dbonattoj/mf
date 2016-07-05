@@ -2,7 +2,6 @@
 #define MF_FLOW_FILTER_EDGE_H_
 
 #include "filter_cast_connector.h"
-#include <type_traits>
 
 namespace mf { namespace flow {
 	
@@ -47,7 +46,6 @@ public:
 	using typename base_out::output_frame_shape_type;
 	using cast_connector_type = filter_cast_connector<Input_dim, Input_elem, Output_dim, Output_elem>;
 
-	
 private:
 	input_type& input_;
 	output_type& output_;
