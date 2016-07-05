@@ -18,40 +18,37 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_SIMPLE_FILTER_H_
-#define MF_FLOW_SIMPLE_FILTER_H_
+#ifndef MF_EXPORTER_FILTER_H_
+#define MF_EXPORTER_FILTER_H_
 
+#include <utility>
 #include "filter.h"
+#include "../io/frame_exporter.h"
 
 namespace mf { namespace flow {
 
-/// Filter with most basic configuration, base class
-/** Takes one input and one output, of same dimension. Takes no time window on input. Does not deactivate the input.
- ** Sets output to same frame shape as input. */
-template<std::size_t Dim, typename Input_elem, typename Output_elem>
-class simple_filter : public filter {
-public:
-	input_type<Dim, Input_elem> input;
-	output_type<Dim, Output_elem> output;
-
-	using input_view_type = ndarray_view<Dim, const Input_elem>;
-	using output_view_type = ndarray_view<Dim, Output_elem>;
-
-protected:
-	virtual void process_frame(const input_view_type& in, const output_view_type& out, filter_job& job) = 0;
+/// Exporter sink filter, writes frames to associated \ref frame_exporter.
+template<typename Exporter>
+class exporter_filter : public sink_filter {
+private:
+	Exporter exporter_;
 
 public:
-	simple_filter(filter_node& nd) :
-		filter(nd), input(*this), output(*this) { }
-
-	void setup() final override {
-		output.define_frame_shape(input.frame_shape());
+	input_type<Exporter::dimension, typename Exporter::elem_type> input;
+	
+	template<typename... Args>
+	explicit exporter_filter(filter_node& nd, Args&&... args) :
+		sink_filter(nd),
+		exporter_(std::forward<Args>(args)...),
+		input(*this) { }
+	
+	void setup() override {
+		exporter_.setup(input.frame_shape());
 	}
 	
-	void pre_process(job_type&) final override { }
-	
-	void process(job_type& job) final override {
-		this->process_frame(job.in(input), job.out(output), job);
+	void process(node_job& job) override {
+		auto in = job.in(input);
+		exporter_.write_frame(in);
 	}
 };
 

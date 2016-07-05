@@ -55,7 +55,7 @@ private:
 public:
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
 
-	ndarray_view_generic() : format_(frame_format::null()) { }
+	ndarray_view_generic() { }
 
 	ndarray_view_generic(const base& vw, const frame_format& format) :
 		base(vw), format_(format) { }

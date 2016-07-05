@@ -6,7 +6,7 @@
 namespace mf { namespace flow {
 
 multiplex_node::multiplex_node(graph& gr) : node(gr) {
-	add_input_<node_input>(0, 0);
+	add_input_<node_input>();
 }
 
 
@@ -132,12 +132,12 @@ node_input& multiplex_node::input() {
 
 
 multiplex_node_output& multiplex_node::add_output() {
-	return node::add_output_<multiplex_node_output>(frame_format::null());
+	return node::add_output_<multiplex_node_output>();
 }
 
 
-multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t index, const frame_format& format) :
-	node_output(nd, index, format),
+multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t index) :
+	node_output(nd, index),
 	input_view_shared_lock_(this_node().input_view_mutex_, std::defer_lock) { }
 
 

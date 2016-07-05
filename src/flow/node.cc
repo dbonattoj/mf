@@ -226,13 +226,17 @@ time_unit node::end_time() const noexcept {
 /////
 
 
-node_output::node_output(node& nd, std::ptrdiff_t index, const frame_format& format) :
-	node_(nd), index_(index),
-	format_(format) { }
+node_output::node_output(node& nd, std::ptrdiff_t index) :
+	node_(nd), index_(index) { }
 	
 
 void node_output::input_has_connected(node_input& input) {
 	connected_input_ = &input;
+}
+
+
+void node_output::input_has_disconnected() {
+	connected_input_ = nullptr;
 }
 
 
@@ -255,17 +259,22 @@ time_unit node_output::end_time() const noexcept {
 /////
 
 
-node_input::node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window) :
-	node_(nd), index_(index),
-	past_window_(past_window),
-	future_window_(future_window) { }
+node_input::node_input(node& nd, std::ptrdiff_t index) :
+	node_(nd), index_(index) { }
 
 
 void node_input::connect(node_remote_output& output) {
+	Expects(connected_output_ == nullptr, "cannot connect node_input when already connected");
 	Expects(! output.this_output().is_connected(), "cannot connect the input to an output that is already connected");
-	
 	connected_output_ = &output;
 	connected_output_->this_output().input_has_connected(*this);
+}
+
+
+void node_input::disconnect() {
+	Expects(connected_output_ != nullptr, "cannot disconnect node_input when not connected");
+	connected_output_->this_output().input_has_disconnected();
+	connected_output_ = nullptr;
 }
 
 

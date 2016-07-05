@@ -51,11 +51,18 @@ private:
 	bool running_ = false;
 	
 	std::atomic<bool> was_stopped_ {false};
-		
+
+	void pull_next_frame_();
+
 public:
+	std::function<frame_callback_function_type> callback_function;
+
+	graph() = default;
+	~graph();
+	
 	template<typename Node, typename... Args>
-	Node& add_node_(Args&&... args) {
-		static_assert(std::is_base_of<node, Node>::value, "");
+	Node& add_node(Args&&... args) {
+		static_assert(std::is_base_of<node, Node>::value, "node must be derived class from `node`");
 		if(was_setup_) throw std::logic_error("cannot add node after graph already set up");
 		Node* nd = new Node(*this, std::forward<Args>(args)...);
 		nodes_.emplace_back(nd);
@@ -63,42 +70,13 @@ public:
 	}
 	
 	template<typename Node, typename... Args>
-	Node& add_sink_(Args&&... args) {
-		static_assert(std::is_base_of<sink_node, Node>::value, "");
-		Node& sink = add_node_<Node>(std::forward<Args>(args)...);
+	Node& add_sink(Args&&... args) {
+		static_assert(std::is_base_of<sink_node, Node>::value, "sink node must be derived class from `sink_node`");
+		Node& sink = add_node<Node>(std::forward<Args>(args)...);
 		sink_ = &sink;
 		return sink;
 	}
-	
-	void pull_next_frame_();
 
-
-public:
-	std::function<frame_callback_function_type> callback_function;
-
-	~graph();
-	
-	template<typename Filter, typename Node = sync_node, typename... Args>
-	Filter& add_filter(Args&&... args) {
-		static_assert(std::is_base_of<filter, Filter>::value, "");
-		static_assert(std::is_base_of<filter_node, Node>::value, "");
-		filter_node& nd = add_node_<Node>();
-		return nd.set_filter<Filter>(std::forward<Args>(args)...);
-	}
-	
-	template<std::size_t Dim, typename Input_elem, typename Output_elem, typename Element_function>
-	auto& add_convert_filter(Element_function func) {
-		using filter_type = convert_filter<Dim, Input_elem, Output_elem, Element_function>;
-		return add_filter<filter_type>(func);
-	}
-		
-	template<typename Filter, typename... Args>
-	Filter& add_sink_filter(Args&&... args) {
-		static_assert(std::is_base_of<sink_filter, Filter>::value, "");
-		filter_node& nd = add_sink_<sink_node>();
-		return nd.set_filter<Filter>(std::forward<Args>(args)...);
-	}
-	
 	bool was_setup() const { return was_setup_; }
 	bool is_running() const { return running_; }
 	

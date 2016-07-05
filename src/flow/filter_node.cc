@@ -29,6 +29,12 @@ filter_node::filter_node(graph& gr) : node(gr) { }
 filter_node::~filter_node() { }
 
 
+void filter_node::set_filter(filter& filt) {
+	Expects(filter_ == nullptr);
+	filter_ = &filt;
+}
+
+
 void filter_node::setup_filter_() {
 	Assert(outputs().size() <= 1, "filter node must have at most one output");
 	filter_->setup();
@@ -68,13 +74,13 @@ void filter_node::finish_job_(filter_node_job& job) {
 }
 
 
-node_input& filter_node::add_input(time_unit past_window, time_unit future_window) {
-	return add_input_<node_input>(past_window, future_window);
+node_input& filter_node::add_input() {
+	return add_input_<node_input>();
 }
 
 
-node_output& filter_node::add_output(const frame_format& format) {
-	return add_output_<filter_node_output>(format);
+node_output& filter_node::add_output() {
+	return add_output_<filter_node_output>();
 }
 
 

@@ -18,41 +18,33 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_SIMPLE_FILTER_H_
-#define MF_FLOW_SIMPLE_FILTER_H_
+#ifndef MF_FLOW_CONVERT_FILTER_H_
+#define MF_FLOW_CONVERT_FILTER_H_
 
-#include "filter.h"
+#include "simple_filter.h"
+#include <algorithm>
 
 namespace mf { namespace flow {
 
-/// Filter with most basic configuration, base class
-/** Takes one input and one output, of same dimension. Takes no time window on input. Does not deactivate the input.
- ** Sets output to same frame shape as input. */
-template<std::size_t Dim, typename Input_elem, typename Output_elem>
-class simple_filter : public filter {
-public:
-	input_type<Dim, Input_elem> input;
-	output_type<Dim, Output_elem> output;
+template<std::size_t Dim, typename Input_elem, typename Output_elem, typename Element_function>
+class convert_filter : public simple_filter<Dim, Input_elem, Output_elem> {
+	using base = simple_filter<Dim, Input_elem, Output_elem>;
 
-	using input_view_type = ndarray_view<Dim, const Input_elem>;
-	using output_view_type = ndarray_view<Dim, Output_elem>;
+	using input_view_type = typename base::input_view_type;
+	using output_view_type = typename base::output_view_type;
+	using job_type = typename base::job_type;
+	
+private:
+	Element_function function_;
 
 protected:
-	virtual void process_frame(const input_view_type& in, const output_view_type& out, filter_job& job) = 0;
+	void process_frame(const input_view_type& in, const output_view_type& out, job_type&) override {
+		std::transform(in.begin(), in.end(), out.begin(), function_);
+	}
 
 public:
-	simple_filter(filter_node& nd) :
-		filter(nd), input(*this), output(*this) { }
-
-	void setup() final override {
-		output.define_frame_shape(input.frame_shape());
-	}
-	
-	void pre_process(job_type&) final override { }
-	
-	void process(job_type& job) final override {
-		this->process_frame(job.in(input), job.out(output), job);
-	}
+	convert_filter(flow::filter_node& nd, Element_function func) :
+		base(nd), function_(func) { }
 };
 
 }}

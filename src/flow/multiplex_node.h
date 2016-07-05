@@ -20,7 +20,7 @@ private:
 	const multiplex_node& this_node() const noexcept;
 	
 public:
-	multiplex_node_output(node& nd, std::ptrdiff_t index, const frame_format&);
+	multiplex_node_output(node& nd, std::ptrdiff_t index);
 	
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration) override;

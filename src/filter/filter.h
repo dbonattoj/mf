@@ -26,160 +26,159 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../queue/frame.h"
 #include "filter_parameter.h"
 #include "filter_job.h"
-#include <string>
+#include <vector>
+#include <memory>
 
 namespace mf { namespace flow {
 	
-template<std::size_t Dim, typename Elem> class filter_connector_base;
+class filter_input_base;
+class filter_output_base;
+template<std::size_t Output_dim, typename Output_elem> class filter_output;
+template<std::size_t Input_dim, typename Input_elem> class filter_input;
 
 /// Filter which performs concrete processing, base class.
 /** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
-class filter {
+class filter {			
 public:
-	template<std::size_t Dim, typename Elem> class port;
-	template<std::size_t Dim, typename Elem> class input_port;
-	template<std::size_t Dim, typename Elem> class output_port;
-	
-private:
-	flow::filter_node& node_;
-		
-public:
-	template<std::size_t Dim, typename Elem> using input_type = input_port<Dim, Elem>;
-	template<std::size_t Dim, typename Elem> using output_type = output_port<Dim, Elem>;
+	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
+	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = filter_job;
-	using node_type = filter_node;
 
-	explicit filter(node_type& nd) : node_(nd) { }
+private:
+	std::vector<filter_input_base*> inputs_;
+	std::vector<filter_output_base*> outputs_;
+
+	bool asynchronous_ = false;
+	time_unit prefetch_duration_ = 0;
 	
+	filter_node* node_ = nullptr;
+	
+public:
 	filter(const filter&) = delete;
 	filter& operator=(const filter&) = delete;
+	virtual ~filter() = default;
 	
-	filter_node& this_node() noexcept { return node_; }
-	const filter_node& this_node() const noexcept { return node_; }
+	void register_input(filter_input_base&);
+	void register_output(filter_output_base&);
 	
-	bool reached_end() const { return node_.reached_end(); }
+	void set_asynchonous(bool);
+	bool is_asynchonous() const;
+	void set_prefetch_duration(time_unit);
+	time_unit prefetch_duration() const;
 	
-	virtual ~filter() { }
+	bool was_installed() const { return (node_ != nullptr); }
+	virtual void install(graph&);
 
-	/// Set up the filter, called prior to any frame being processed.
 	virtual void setup() { }
-	
-	/// Prepare for processing a frame.
 	virtual void pre_process(job_type&) { }
-	
-	/// Process a frame.
 	virtual void process(job_type&) = 0;
 };
 
 
-/// Source filter.
-/** For source nodes, has no inputs, and specifies stream properties upon construction. */
+class sink_filter : public filter {
+public:
+	void install(graph&) override;
+};
+
+
 class source_filter : public filter {
 public:
-	explicit source_filter(node_type& nd, bool seekable = false, time_unit stream_duration = -1) :
-	filter(nd) {
+	explicit source_filter(bool seekable = false, time_unit stream_duration = -1) {
 		auto policy = seekable ? node_stream_properties::seekable : node_stream_properties::forward;
 		node_stream_properties prop(policy, stream_duration);
 		nd.define_source_stream_properties(prop);
 	}
+	
+	void install(graph&) override;
 };
 
 
-/// Sink filter.
-/** For sink nodes, has no outputs. Always connected with \ref sink_node. */
-class sink_filter : public filter {
+class filter_output_base {
 public:
-	explicit sink_filter(node_type& nd) : filter(nd) { }
+	virtual void install(filter_node&) = 0;
 };
 
 
-/// Filter input and output base class.
-template<std::size_t Dim, typename Elem>
-class filter::port {
+
+class filter_input_base {
 public:
-	using elem_type = Elem;
-	constexpr static std::size_t dimension = Dim;
+	virtual void install(filter_node&) = 0;
+};
+
+
+template<std::size_t Output_dim, typename Output_elem>
+class filter_output : public filter_output_base {
+public:
+	using edge_base_type = filter_edge_output_base<Output_dim, Output_elem>;
+	using frame_shape_type = ndsize<Dim>;
 
 private:
 	filter& filter_;
-
-protected:
-	static frame_format default_format() { return frame_format::default_format<Elem>(); }
-
-	explicit port(filter& filt) : filter_(filt) { }
-	port(const port&) = delete;
+	std::vector<edge_base_type*> edges_;
 	
-public:
-	const filter& this_filter() const { return filter_; } 
-	filter& this_filter() { return filter_; }
-};
-
-
-/// Output port of filter.
-template<std::size_t Dim, typename Elem>
-class filter::output_port : public filter::port<Dim, Elem> {
-	using base = filter::port<Dim, Elem>;
-	
-public:
-	using frame_shape_type = ndsize<Dim>;
-
-private:
-	flow::node_output& node_output_;
 	frame_shape_type frame_shape_;
+	
+	filter_node_output* node_output_ = nullptr;
+	std::unique_ptr<multiplex_node> multiplex_node_;
+		
 
 public:
-	explicit output_port(filter& filt) :
-		base(filt),
-		node_output_(filt.this_node().add_output(base::default_format())) { }
-
-	node_output& this_node_output() { return node_output_; }
-	std::ptrdiff_t index() const { return node_output_.index(); }
-
-	void define_frame_shape(const frame_shape_type& shp) {
-		frame_shape_ = shp;
-		node_output_.define_frame_length(shp.product());
-	}
+	explicit filter_output(filter&);
 	
-	const frame_shape_type& frame_shape() const { return frame_shape_; }
-};
-
-
-/// Input port of filter.
-template<std::size_t Dim, typename Elem>
-class filter::input_port : public filter::port<Dim, Elem> {
-	using base = filter::port<Dim, Elem>;
-	using connector_type = filter_connector_base<Dim, Elem>;
+	filter& this_filter() { return filter_; }
+	const filter& this_filter() const { return filter_; }
 	
-public:
-	using frame_shape_type = ndsize<Dim>;
+	filter_node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
+	const filter_node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
+	std::ptrdiff_t index() const { return this_node_output().index(); }
 	
-private:
-	flow::node_input& node_input_;
-	std::unique_ptr<connector_type> connector_;
+	void edge_has_connected(edge_base_type&);
+		
+	bool was_installed() const { return (node_output_ != nullptr); }
+	void install(filter_node&) override;
 
-public:
-	explicit input_port(filter& filt, time_unit past_window = 0, time_unit future_window = 0) :
-		base(filt),
-		node_input_(filt.this_node().add_input(past_window, future_window)) { }
-
-	node_input& this_node_input() { return node_input_; }
-	std::ptrdiff_t index() const { return node_input_.index(); }
-
-	void set_activated(bool activated) {
-		node_input_.set_activated(activated);
-	}
-	
-	bool is_activated() {
-		return node_input_.is_activated();
-	}
-
-	template<typename Connector, typename... Args>
-	void set_connector(Args&&... args);
-
+	void define_frame_shape(const frame_shape_type& shp);
 	const frame_shape_type& frame_shape() const;
 };
 
+
+template<std::size_t Input_dim, typename Input_elem>
+class filter_input : public filter_input_base {
+public:
+	using edge_base_type = filter_edge_input_base<Input_dim, Input_elem>;
+	using frame_shape_type = ndsize<Dim>;
+
+private:
+	filter& filter_;
+	std::unique_ptr<edge_base_type> edge_;
+	
+	node_input* node_input_ = nullptr;
+
+public:
+	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
+	
+	filter& this_filter() { return filter_; }
+	const filter& this_filter() const { return filter_; }
+	
+	node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
+	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
+	std::ptrdiff_t index() const { return this_node_input().index(); }
+	
+	template<std::size_t Output_dim, typename Output_elem>
+	void connect(filter_output<Output_dim, Output_elem>&);
+	
+	const frame_shape_type& frame_shape() const;
+	
+	bool was_installed() const { return (node_input_ != nullptr); }
+	void install(filter_node&) override;
+	
+	void set_activated(bool);
+	bool is_activated();
+	
+	void activate() { set_activated(true); }
+	void deactivate() { set_activated(false); }
+};
 
 }}
 

@@ -65,15 +65,15 @@ protected:
 	node& operator=(const node&) = delete;
 
 	template<typename Input>
-	Input& add_input_(time_unit past_window, time_unit future_window) {
-		Input* input = new Input(*this, inputs_.size(), past_window, future_window);
+	Input& add_input_() {
+		Input* input = new Input(*this, inputs_.size());
 		inputs_.emplace_back(input);
 		return *input;
 	}
 
 	template<typename Output>
-	Output& add_output_(const frame_format& format) {
-		Output* output = new Output(*this, outputs_.size(), format);
+	Output& add_output_() {
+		Output* output = new Output(*this, outputs_.size());
 		outputs_.emplace_back(output);
 		return *output;
 	}
@@ -145,7 +145,7 @@ private:
 	std::size_t frame_length_;
 	
 public:
-	node_output(node& nd, std::ptrdiff_t index, const frame_format&);
+	node_output(node& nd, std::ptrdiff_t index);
 	node_output(const node_output&) = delete;
 	node_output& operator=(const node_output&) = delete;
 	virtual ~node_output() { }
@@ -165,6 +165,7 @@ public:
 	node_input& connected_input() const noexcept { MF_EXPECTS(is_connected()); return *connected_input_; }
 	node& connected_node() const noexcept;
 	void input_has_connected(node_input&);
+	void input_has_disconnected();
 	
 	bool is_online() const;
 };
@@ -185,7 +186,7 @@ private:
 	bool activated_ = true;
 		
 public:
-	node_input(node& nd, std::ptrdiff_t index, time_unit past_window, time_unit future_window);
+	node_input(node& nd, std::ptrdiff_t index);
 	node_input(const node_input&) = delete;
 	node_input& operator=(const node_input&) = delete;
 	virtual ~node_input() { }
@@ -200,6 +201,7 @@ public:
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
 	void connect(node_remote_output&);
+	void disconnect();
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
 	node_remote_output& connected_output() const noexcept { Expects(is_connected()); return *connected_output_; }
 	node& connected_node() const noexcept { Expects(is_connected()); return connected_output().this_output().this_node(); }

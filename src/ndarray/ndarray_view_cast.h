@@ -175,6 +175,16 @@ namespace detail {
 			return ndarray_timed_view<Output_dim, Output_elem>(untimed_output_view, vw.start_time());
 		}
 	};
+	
+	template<typename Output_view, typename Input_view, typename Void = void_t<>>
+	struct ndarray_view_cast_detector : std::false_type;
+	
+	template<typename Output_view, typename Input_view>
+	struct ndarray_view_cast_detector<
+		Output_view,
+		Input_view,
+		void_t<ndarray_view_caster<Output_view, Input_view>>
+	> : std::true_type;
 }
 
 
@@ -201,6 +211,12 @@ Output_view ndarray_view_cast(const Input_view& vw) {
 	detail::ndarray_view_caster<Output_view, Input_view> caster;
 	return caster(vw);
 }
+
+
+/// Verify at compile time whether cast from `Output_view` to `Input_view` is possible.
+template<typename Output_view, typename Input_view>
+constexpr bool ndarray_view_can_cast =
+	detail::ndarray_view_cast_detector<Output_view, Input_view>::value;
 
 
 

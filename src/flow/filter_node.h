@@ -52,7 +52,7 @@ class filter_node : public node {
 	friend class filter_node_output;
 
 private:
-	std::unique_ptr<filter> filter_;
+	filter* filter_ = nullptr;
 
 protected:
 	void setup_filter_();
@@ -78,15 +78,10 @@ public:
 	filter& this_filter() { return *filter_; }
 	const filter& this_filter() const { return *filter_; }
 	
-	template<typename Filter, typename... Args>
-	Filter& set_filter(Args&&... args) {
-		Filter* filt = new Filter(*this, std::forward<Args>(args)...);
-		filter_.reset(filt);
-		return *filt;
-	}
+	void set_filter(filter& filt);
 		
-	node_input& add_input(time_unit past_window, time_unit future_window);
-	node_output& add_output(const frame_format& format);
+	node_input& add_input();
+	node_output& add_output();
 };
 
 

@@ -25,6 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <vector>
 
 namespace mf {
+	
+template<typename...> using void_t = void;
 
 /// Check if a file at `filename` exists.
 bool file_exists(const std::string& filename);
