@@ -95,6 +95,10 @@ private:
 	
 public:
 	explicit source_filter(bool seekable = false, time_unit stream_duration = -1);
+
+	void define_source_stream_properties(const node_stream_properties&);
+	const node_stream_properties& stream_properties() const noexcept;
+
 	void install(graph&) override;
 };
 

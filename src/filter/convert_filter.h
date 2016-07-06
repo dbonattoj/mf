@@ -43,8 +43,8 @@ protected:
 	}
 
 public:
-	convert_filter(flow::filter_node& nd, Element_function func) :
-		base(nd), function_(func) { }
+	convert_filter(Element_function func) :
+		function_(func) { }
 };
 
 }}

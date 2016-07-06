@@ -37,8 +37,7 @@ public:
 	input_type<Exporter::dimension, typename Exporter::elem_type> input;
 	
 	template<typename... Args>
-	explicit exporter_filter(filter_node& nd, Args&&... args) :
-		sink_filter(nd),
+	explicit exporter_filter(Args&&... args) :
 		exporter_(std::forward<Args>(args)...),
 		input(*this) { }
 	
@@ -46,7 +45,7 @@ public:
 		exporter_.setup(input.frame_shape());
 	}
 	
-	void process(node_job& job) override {
+	void process(job_type& job) override {
 		auto in = job.in(input);
 		exporter_.write_frame(in);
 	}

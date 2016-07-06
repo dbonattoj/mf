@@ -36,6 +36,7 @@ public:
 	template<typename Input> decltype(auto) in_full(Input&);
 	template<typename Input> decltype(auto) in(Input&);
 	template<typename Output> decltype(auto) out(Output&);
+	template<typename Param> decltype(auto) param(Param&);
 };
 
 }}

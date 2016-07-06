@@ -38,7 +38,7 @@ graph::~graph() {
 
 void graph::setup() {
 	Expects(! was_setup_);
-	Expects(sink_ != nullptr)
+	Expects(sink_ != nullptr);
 
 	sink_->setup_graph();
 	was_setup_ = true;

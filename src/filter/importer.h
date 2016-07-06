@@ -40,8 +40,7 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit importer_filter(filter_node& nd, Args&&... args) :
-		source_filter(nd, false),
+	explicit importer_filter(Args&&... args) :
 		importer_(std::forward<Args>(args)...),
 		output(*this) { }
 	
@@ -49,7 +48,7 @@ public:
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void process(node_job& job) override {
+	void process(job_type& job) override {
 		auto out = job.out(output);
 		return importer_.read_frame(out);
 		if(importer_.reached_end()) job.mark_end();
@@ -69,29 +68,30 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit importer_filter(filter_node& nd, Args&&... args) :
-		source_filter(nd, false),
+	explicit importer_filter(Args&&... args) :
 		importer_(std::forward<Args>(args)...),
 		output(*this)
-	{
-		set_seekable(true);
-	}
+	{ }
 	
 	void set_seekable(bool seekable) {
-		if(seekable) this_node().define_source_stream_properties(true, importer_.total_duration());
-		else this_node().define_source_stream_properties(false, -1);
+		node_stream_properties prop;
+		
+		if(seekable) prop = node_stream_properties(node_stream_properties::seekable, importer_.total_duration());
+		else prop = node_stream_properties(node_stream_properties::forward);
+		
+		define_source_stream_properties(prop); 
 	}
 	
 	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void pre_process(node_job& job) override {
+	void pre_process(job_type& job) override {
 		time_unit t = job.time();
 		if(importer_.current_time() != t) importer_.seek(t);
 	}
 	
-	void process(node_job& job) override {
+	void process(job_type& job) override {
 		MF_ASSERT(importer_.current_time() == job.time());
 		auto out = job.out(output);
 		return importer_.read_frame(out);

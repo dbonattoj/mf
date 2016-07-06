@@ -55,4 +55,9 @@ template<typename Output> decltype(auto) filter_job::out(Output& pt) {
 }
 
 
+template<typename Param> decltype(auto) filter_job::param(Param& param) {
+	return param.get(time());
+}
+
+
 }}

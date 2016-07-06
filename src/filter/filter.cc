@@ -101,6 +101,16 @@ source_filter::source_filter(bool seekable, time_unit stream_duration) {
 }
 
 
+void source_filter::define_source_stream_properties(const node_stream_properties& prop) {
+	node_stream_properties_ = prop;
+	// TODO cleanup
+}
+
+
+const node_stream_properties& source_filter::stream_properties() const noexcept { return node_stream_properties_; }
+
+
+
 void source_filter::install(graph& gr) {
 	Expects(! was_installed());
 	Expects(inputs_.size() == 0, "source filter must have no inputs");
