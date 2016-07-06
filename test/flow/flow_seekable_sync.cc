@@ -19,16 +19,16 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/flow/graph.h>
-#include <mf/flow/sync_node.h>
+#include <mf/filter/filter_graph.h>
+#include <mf/filter/filter.h>
 #include "../support/ndarray.h"
 #include "../support/flow.h"
 
 using namespace mf;
 using namespace mf::test;
 
-using node_type = flow::sync_node;
-using node_type2 = flow::sync_node;
+//using node_type = flow::sync_node;
+//using node_type2 = flow::sync_node;
 constexpr bool seekable = true;
 
 TEST_CASE("flow graph test: seekable, sync", "[flow_graph]" "[sync][seekable]") {

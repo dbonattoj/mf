@@ -35,7 +35,7 @@ private:
 
 	using request_id_type = int;
 	
-	time_unit prefetch_duration_ = 10;
+	time_unit prefetch_duration_ = 0;
 	
 	std::thread thread_;
 	std::atomic<bool> running_ {false};
@@ -61,6 +61,9 @@ private:
 public:
 	async_node(graph&);
 	~async_node() override;
+	
+	time_unit prefetch_duration() const { return prefetch_duration_; }
+	void set_prefetch_duration(time_unit dur) { prefetch_duration_ = dur; }
 	
 	void setup() override;
 	void launch() override;

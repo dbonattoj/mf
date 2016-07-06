@@ -25,15 +25,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <functional>
 #include <stdexcept>
 #include "ndarray.h"
-#include "../../src/common.h"
-#include "../../src/flow/graph.h"
-#include "../../src/filter/filter.h"
-#include "../../src/ndarray/ndcoord.h"
-#include "../../src/utility/string.h"
+#include <mf/common.h>
+#include <mf/filter/filter_graph.h>
+#include <mf/filter/filter.h>
+#include <mf/ndarray/ndcoord.h>
+#include <mf/utility/string.h>
 #include "ndarray.h"
 #include "thread.h"
-
-#include <iostream>
 
 namespace mf { namespace test {
 
@@ -50,8 +48,8 @@ private:
 public:
 	output_type<2, int> output;
 	
-	explicit sequence_frame_source(flow::filter_node& nd, time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		flow::source_filter(nd, seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
+	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
+		flow::source_filter(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
 		output(*this) { }
 	
 	void setup() override {
@@ -103,8 +101,7 @@ public:
 	std::vector<bool> activation;
 	std::function<callback_func> callback;
 
-	passthrough_filter(flow::filter_node& nd, time_unit past_window, time_unit future_window) :
-		flow::filter(nd),
+	passthrough_filter(time_unit past_window, time_unit future_window) :
 		input(*this, past_window, future_window),
 		output(*this) { }
 };
@@ -114,8 +111,7 @@ class simple_sink : public flow::sink_filter {
 public:
 	input_type<2, int> input;
 	
-	explicit simple_sink(flow::filter_node& nd) :
-		flow::sink_filter(nd),
+	simple_sink() :
 		input(*this) { }
 	
 	void process(flow::filter_job& job) override { }
@@ -133,8 +129,7 @@ public:
 
 	std::vector<bool> activation;
 	
-	explicit expected_frames_sink(flow::filter_node& nd, const std::vector<int>& seq) :
-		flow::sink_filter(nd),
+	explicit expected_frames_sink(const std::vector<int>& seq) :
 		expected_frames_(seq),
 		got_frames_(seq.size(), missingframe),
 		input(*this) { }
@@ -183,8 +178,8 @@ public:
 	std::vector<bool> activation1;
 	std::vector<bool> activation2;
 	
-	input_synchronize_test_filter(flow::filter_node& nd, time_unit prefetch = 0) :
-		flow::filter(nd), input1(*this), input2(*this), output(*this) { }
+	input_synchronize_test_filter(time_unit prefetch = 0) :
+		input1(*this), input2(*this), output(*this) { }
 
 
 	void setup() override {

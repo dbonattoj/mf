@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/node.h"
 #include "../flow/filter_node.h"
 #include "../queue/frame.h"
+#include "filter_edge.h"
 #include "filter_parameter.h"
 #include "filter_job.h"
 #include <vector>
@@ -34,6 +35,7 @@ namespace mf { namespace flow {
 class graph;
 class filter_input_base;
 class filter_output_base;
+class multiplex_node;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
 
@@ -46,7 +48,7 @@ public:
 	template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = filter_job;
 
-private:
+protected:
 	std::vector<filter_input_base*> inputs_;
 	std::vector<filter_output_base*> outputs_;
 
@@ -77,6 +79,7 @@ public:
 	virtual void process(job_type&) = 0;
 	
 	time_unit current_time() const;
+	bool reached_end() const;
 };
 
 
@@ -87,13 +90,11 @@ public:
 
 
 class source_filter : public filter {
-public:
-	explicit source_filter(bool seekable = false, time_unit stream_duration = -1) {
-		auto policy = seekable ? node_stream_properties::seekable : node_stream_properties::forward;
-		node_stream_properties prop(policy, stream_duration);
-		nd.define_source_stream_properties(prop);
-	}
+private:
+	node_stream_properties node_stream_properties_;
 	
+public:
+	explicit source_filter(bool seekable = false, time_unit stream_duration = -1);
 	void install(graph&) override;
 };
 
@@ -114,25 +115,23 @@ public:
 template<std::size_t Output_dim, typename Output_elem>
 class filter_output : public filter_output_base {
 public:
+	constexpr static std::size_t dimension = Output_dim;
+	using elem_type = Output_elem;
+
 	using edge_base_type = filter_edge_output_base<Output_dim, Output_elem>;
-	using frame_shape_type = ndsize<Dim>;
+	using frame_shape_type = ndsize<Output_dim>;
 
 private:
-	filter& filter_;
 	std::vector<edge_base_type*> edges_;
-	
-	frame_shape_type frame_shape_;
-	
+		
 	filter_node_output* node_output_ = nullptr;
 	std::unique_ptr<multiplex_node> multiplex_node_;
-		
+	
+	frame_shape_type frame_shape_;	
 
 public:
 	explicit filter_output(filter&);
-	
-	filter& this_filter() { return filter_; }
-	const filter& this_filter() const { return filter_; }
-	
+
 	filter_node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
 	const filter_node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
 	std::ptrdiff_t index() const { return this_node_output().index(); }
@@ -150,21 +149,23 @@ public:
 template<std::size_t Input_dim, typename Input_elem>
 class filter_input : public filter_input_base {
 public:
+	constexpr static std::size_t dimension = Input_dim;
+	using elem_type = Input_elem;
+
 	using edge_base_type = filter_edge_input_base<Input_dim, Input_elem>;
-	using frame_shape_type = ndsize<Dim>;
+	using frame_shape_type = ndsize<Input_dim>;
 
 private:
-	filter& filter_;
 	std::unique_ptr<edge_base_type> edge_;
 	
 	node_input* node_input_ = nullptr;
+	
+	time_unit past_window_ = 0;
+	time_unit future_window_ = 0;
 
 public:
 	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
-	
-	filter& this_filter() { return filter_; }
-	const filter& this_filter() const { return filter_; }
-	
+
 	node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
 	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
 	std::ptrdiff_t index() const { return this_node_input().index(); }

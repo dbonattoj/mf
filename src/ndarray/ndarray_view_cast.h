@@ -29,6 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../masked_elem.h"
 #include "../utility/misc.h"
 #include <cstddef>
+#include <type_traits>
 
 namespace mf {
 	
@@ -177,14 +178,14 @@ namespace detail {
 	};
 	
 	template<typename Output_view, typename Input_view, typename Void = void_t<>>
-	struct ndarray_view_cast_detector : std::false_type;
+	struct ndarray_view_cast_detector : std::false_type { };
 	
 	template<typename Output_view, typename Input_view>
 	struct ndarray_view_cast_detector<
 		Output_view,
 		Input_view,
 		void_t<ndarray_view_caster<Output_view, Input_view>>
-	> : std::true_type;
+	> : std::true_type { };
 }
 
 

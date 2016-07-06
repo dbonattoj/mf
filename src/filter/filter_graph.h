@@ -1,3 +1,23 @@
+/*
+Author : Tim Lenertz
+Date : May 2016
+
+Copyright (c) 2016, Université libre de Bruxelles
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
+publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #ifndef MF_FLOW_FILTER_GRAPH_H_
 #define MF_FLOW_FILTER_GRAPH_H_
 
@@ -22,10 +42,11 @@ public:
 
 	template<typename Filter, typename... Args>
 	Filter& add_filter(Args&&... args) {
-		static_assert(std::is_base_of<filter, Node>::value, "filter must be derived class from `filter`");
+		static_assert(std::is_base_of<filter, Filter>::value, "filter must be derived class from `filter`");
 		Expects(! was_setup());
-		filters_.emplace_back(new Filter(std::forward<Args>(args)...));
-		return *filters_.back();
+		Filter* filt = new Filter(std::forward<Args>(args)...);
+		filters_.emplace_back(filt);
+		return *filt;
 	}
 	
 	bool was_setup() const { return (node_graph_ != nullptr); }
