@@ -36,18 +36,21 @@ void filter_node::set_filter(filter& filt) {
 
 
 void filter_node::setup_filter_() {
-	Assert(outputs().size() <= 1, "filter node must have at most one output");
+	Expects(filter_ != nullptr);
+	Expects(outputs().size() <= 1, "filter node must have at most one output");
 	filter_->setup();
 }
 
 
 void filter_node::pre_process_filter_(filter_node_job& job) {
+	Expects(filter_ != nullptr);
 	filter_job fjob(job);
 	filter_->pre_process(fjob);
 }
 
 
 void filter_node::process_filter_(filter_node_job& job) {
+	Expects(filter_ != nullptr);
 	filter_job fjob(job);
 	filter_->process(fjob);
 }
@@ -79,7 +82,7 @@ node_input& filter_node::add_input() {
 }
 
 
-node_output& filter_node::add_output() {
+filter_node_output& filter_node::add_output() {
 	return add_output_<filter_node_output>();
 }
 

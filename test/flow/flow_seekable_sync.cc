@@ -27,8 +27,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 using namespace mf;
 using namespace mf::test;
 
-//using node_type = flow::sync_node;
-//using node_type2 = flow::sync_node;
+constexpr bool async1 = false;
+constexpr bool async2 = false;
 constexpr bool seekable = true;
 
 TEST_CASE("flow graph test: seekable, sync", "[flow_graph]" "[sync][seekable]") {

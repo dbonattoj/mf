@@ -23,7 +23,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 filter_graph::~filter_graph() {
+	if(! was_setup()) return;
 	// filters hold weak reference to graph (and nodes): need to first delete filters and then graph
+	// and need to stop graph (and async node threads) before deleting filters
+	node_graph_->stop();
 	filters_.clear();
 	node_graph_.reset();
 }
@@ -32,6 +35,7 @@ void filter_graph::setup() {
 	Expects(! was_setup());
 	node_graph_.reset(new graph);
 	for(auto&& filt : filters_) filt->install(*node_graph_);
+	node_graph_->setup();
 }
 
 

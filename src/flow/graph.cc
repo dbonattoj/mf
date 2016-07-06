@@ -21,62 +21,61 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "graph.h"
 #include "node.h"
 #include "sink_node.h"
-#include "../utility/stopwatch.h"
 
 namespace mf { namespace flow {
 
 
 void graph::pull_next_frame_() {
-	stopwatch watch;
-	watch.start();
-	sink_->pull_next_frame();
-	watch.stop();
-	
+	Expects(launched_);
+	sink_->pull_next_frame();	
 	if(callback_function) callback_function(sink_->current_time());
 }
 
 graph::~graph() {
-	if(running_) stop();
+	if(launched_) stop();
 }
 
 
 void graph::setup() {
-	if(was_setup_) throw std::logic_error("graph was already set up");
-	if(sink_ == nullptr) throw std::logic_error("no sink node was added to media graph");
+	Expects(! was_setup_);
+	Expects(sink_ != nullptr)
+
 	sink_->setup_graph();
 	was_setup_ = true;
 }
 
 
 void graph::launch() {
-	if(running_) throw std::logic_error("graph is already running");
+	if(launched_) return;
+		
+	was_stopped_ = false;
+	launched_ = true;
 	for(const auto& nd : nodes_) nd->launch();
-	running_ = true;
-	// was_stopped...
 }
 
 
 void graph::stop() {
-	MF_DEBUG_BACKTRACE("graph::stop");
-	if(! running_) throw std::logic_error("graph is not running");
+	if(! launched_) return;
+	
+	//MF_DEBUG_BACKTRACE("graph::stop");	
 	was_stopped_.store(true);
 	for(const auto& nd : nodes_) nd->pre_stop();
 	for(const auto& nd : nodes_) nd->stop();
-	running_ = false;
+	launched_ = false;
 }
 
 
 time_unit graph::current_time() const {
-	if(! was_setup_) throw std::logic_error("graph not set up");
+	Expects(was_setup_);
 	return sink_->current_time();
 }
 
 void graph::run_until(time_unit last_frame) {
-	MF_DEBUG_BACKTRACE("graph::run_until");
-	
-	if(! was_setup_) throw std::logic_error("graph not set up");
-	
-	if(! running_) launch();
+	Expects(was_setup_);
+
+	//MF_DEBUG_BACKTRACE("graph::run_until");
+		
+	if(! launched_) launch();
 	
 	while(sink_->current_time() < last_frame && !sink_->reached_end())
 		pull_next_frame_();
@@ -89,17 +88,21 @@ void graph::run_for(time_unit duration) {
 
 
 bool graph::run() {
-	MF_DEBUG_BACKTRACE("graph::run");
-	if(! was_setup_) throw std::logic_error("graph not set up");
-	if(! sink_->is_bounded()) throw std::logic_error("sink is not bounded");
-	if(! running_) launch();
+	Expects(was_setup_);
+	Expects(sink_->is_bounded());
+
+	//MF_DEBUG_BACKTRACE("graph::run");
+
+	if(! launched_) launch();
+
 	while(sink_->is_bounded() && !sink_->reached_end()) pull_next_frame_();
 	return sink_->is_bounded();
 }
 
 
 void graph::seek(time_unit target_time) {
-	if(! sink_->stream_properties().is_seekable()) throw std::logic_error("sink is not seekable");
+	Expects(was_setup_);
+	Expects(sink_->stream_properties().is_seekable());
 	sink_->seek(target_time);
 }
 

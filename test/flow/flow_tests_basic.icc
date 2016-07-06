@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 flow::filter_graph gr;
 auto shp = make_ndsize(10, 10);
 
+set_debug_filter({"none"});
 
 SECTION("basic") {		
 	std::vector<int> seq(20);
@@ -29,9 +30,13 @@ SECTION("basic") {
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+		
+		source.set_asynchonous(async1);
 		sink.input.connect(source.output);
+		
 		gr.setup();
 		gr.run();
+		
 		REQUIRE(sink.check());
 	}
 
@@ -39,10 +44,15 @@ SECTION("basic") {
 		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, seekable);
 		auto& passthrough = gr.add_filter<passthrough_filter>(0, 0);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+		
+		source.set_asynchonous(async1);
+		passthrough.set_asynchonous(async1);
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
+		
 		gr.setup();
 		gr.run();
+		
 		REQUIRE(sink.check());
 	}
 
@@ -50,7 +60,9 @@ SECTION("basic") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(0, 3);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
-	
+		
+		source1.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
 		
@@ -65,7 +77,9 @@ SECTION("basic") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 0);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
-	
+		
+		source1.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);	
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
 		
@@ -80,7 +94,9 @@ SECTION("basic") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 3);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
-	
+		
+		source1.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);
 		passthrough1.input.connect(source1.output);
 		sink.input.connect(passthrough1.output);
 		
@@ -98,6 +114,9 @@ SECTION("basic") {
 		auto& passthrough2 = gr.add_filter<passthrough_filter>(2, 2);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 	
+		source1.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);
+		passthrough2.set_asynchonous(async2);
 		passthrough1.input.connect(source1.output);
 		passthrough2.input.connect(passthrough1.output);
 		sink.input.connect(passthrough2.output);
@@ -112,13 +131,15 @@ SECTION("basic") {
 	
 	SECTION("detailled time window test") { 
 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
-		auto& source = gr.add_filter<sequence_frame_source>(5, shp, seekable);		
+		auto& source = gr.add_filter<sequence_frame_source>(5, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
-	
+
+		source.set_asynchonous(async1);	
 	
 		SECTION("source --> [-3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(3, 0);
-	
+
+			node.set_asynchonous(async1);	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
 			gr.setup();
@@ -174,7 +195,8 @@ SECTION("basic") {
 
 		SECTION("source --> [+3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(0, 3);
-	
+
+			node.set_asynchonous(async1);	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
 			gr.setup();
@@ -230,7 +252,8 @@ SECTION("basic") {
 
 		SECTION("source --> [-3,+3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(3, 3);
-	
+
+			node.set_asynchonous(async1);	
 			node.input.connect(source.output);
 			sink.input.connect(node.output);
 			gr.setup();
@@ -289,6 +312,10 @@ SECTION("basic") {
 		auto& source2 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		auto& merge = gr.add_filter<input_synchronize_test_filter>();
+
+		source1.set_asynchonous(async1);
+		source2.set_asynchonous(async1);
+		merge.set_asynchonous(async1);
 		
 		SECTION("graph 1") {
 			/*
@@ -297,7 +324,8 @@ SECTION("basic") {
 			*/
 			
 			auto& passthrough = gr.add_filter<passthrough_filter>(0, 5);
-		
+
+			passthrough.set_asynchonous(async1);		
 			passthrough.input.connect(source1.output);
 			merge.input1.connect(passthrough.output);
 			merge.input2.connect(source2.output);
@@ -318,7 +346,9 @@ SECTION("basic") {
 			
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
-		
+
+			passthrough1.set_asynchonous(async1);
+			passthrough2.set_asynchonous(async2);		
 			passthrough1.input.connect(source1.output);
 			passthrough2.input.connect(source2.output);
 			merge.input1.connect(passthrough1.output);
@@ -342,6 +372,9 @@ SECTION("basic") {
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
 			auto& passthrough3 = gr.add_filter<passthrough_filter>(2, 2);
 		
+			passthrough1.set_asynchonous(async1);
+			passthrough2.set_asynchonous(async2);
+			passthrough3.set_asynchonous(async1);
 			passthrough1.input.connect(source1.output);
 			passthrough3.input.connect(source2.output);
 			passthrough2.input.connect(passthrough3.output);
@@ -384,10 +417,14 @@ SECTION("activation") {
 		
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+
+		source.set_asynchonous(async1);
 		sink.input.connect(source.output);
 		sink.activation = act;
+
 		gr.setup();
 		gr.run_until(last);
+
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
@@ -395,10 +432,14 @@ SECTION("activation") {
 	SECTION("source -> sink 2") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
+
+		source.set_asynchonous(async1);
 		sink.input.connect(source.output);
 		sink.activation = act_and;
+
 		gr.setup();
 		gr.run_until(last);
+
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
@@ -408,6 +449,8 @@ SECTION("activation") {
 		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
 		auto& passthrough = gr.add_filter<passthrough_filter>(0, 0);
 
+		source.set_asynchonous(async1);
+		passthrough.set_asynchonous(async1);
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
 		
@@ -435,12 +478,17 @@ SECTION("activation") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
 		auto& passthrough = gr.add_filter<passthrough_filter>(3, 3);
+
+		source.set_asynchonous(async1);
+		passthrough.set_asynchonous(async1);
 		passthrough.input.connect(source.output);
 		sink.input.connect(passthrough.output);
 		passthrough.activation = act1;
 		sink.activation = act2;
+
 		gr.setup();
 		gr.run_until(last);
+
 		REQUIRE(sink.check());
 		REQUIRE(gr.current_time() == last);
 	}
@@ -457,7 +505,12 @@ SECTION("activation") {
 		auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
 		auto& merge = gr.add_filter<input_synchronize_test_filter>();
 		auto& sink = gr.add_filter<expected_frames_sink>(seq_or);
-		
+
+		source1.set_asynchonous(async1);
+		source2.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);
+		passthrough2.set_asynchonous(async2);
+		merge.set_asynchonous(async1);
 		passthrough1.input.connect(source1.output);
 		passthrough2.input.connect(source2.output);
 		merge.input1.connect(passthrough1.output);

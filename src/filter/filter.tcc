@@ -38,7 +38,7 @@ void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& 
 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(filter_node& nd) {
-	node_output_ = &nd.output();
+	node_output_ = &nd.add_output();
 	node_output_->define_format(frame_format::default_format<Output_elem>());
 	
 	if(edges_.size() > 1) {

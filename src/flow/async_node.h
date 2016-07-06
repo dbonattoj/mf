@@ -29,13 +29,16 @@ namespace mf { namespace flow {
 
 class graph;
 
-class async_node final : public filter_node {	
+class async_node final : public filter_node {
+public:
+	constexpr static time_unit default_prefetch = 3;
+	
 private:
 	enum class process_result { should_continue, should_pause, failure };
 
 	using request_id_type = int;
 	
-	time_unit prefetch_duration_ = 0;
+	time_unit prefetch_duration_ = default_prefetch;
 	
 	std::thread thread_;
 	std::atomic<bool> running_ {false};

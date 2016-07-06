@@ -72,8 +72,8 @@ public:
 	explicit filter_node(graph&);
 	~filter_node() override;
 	
-	filter_node_output& output() { return static_cast<filter_node_output&>(*outputs().front()); }
-	const filter_node_output& output() const { return static_cast<const filter_node_output&>(*outputs().front()); }
+	filter_node_output& output();
+	const filter_node_output& output() const;
 	
 	filter& this_filter() { return *filter_; }
 	const filter& this_filter() const { return *filter_; }
@@ -81,9 +81,20 @@ public:
 	void set_filter(filter& filt);
 		
 	node_input& add_input();
-	node_output& add_output();
+	filter_node_output& add_output();
 };
 
+
+
+inline filter_node_output& filter_node::output() {
+	Expects(outputs().size() == 1);
+	return static_cast<filter_node_output&>(*outputs().front());
+}
+
+inline const filter_node_output& filter_node::output() const {
+	Expects(outputs().size() == 1);
+	return static_cast<const filter_node_output&>(*outputs().front());
+}
 
 inline filter_node& filter_node_output::this_node() {
 	return static_cast<filter_node&>(node_output::this_node());

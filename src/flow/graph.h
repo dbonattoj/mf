@@ -40,6 +40,7 @@ class filter;
 class sink_filter;
 
 /// Graph containing interconnected nodes through which media frames flow.
+/** Low-level graph composed of \ref node objects. High-level graph of \ref filter obbjects is \ref filter_graph. */
 class graph {
 public:
 	using frame_callback_function_type = void(time_unit t);
@@ -48,7 +49,7 @@ private:
 	std::vector<std::unique_ptr<node>> nodes_;
 	sink_node* sink_ = nullptr;
 	bool was_setup_ = false;
-	bool running_ = false;
+	bool launched_ = false;
 	
 	std::atomic<bool> was_stopped_ {false};
 
@@ -63,7 +64,7 @@ public:
 	template<typename Node, typename... Args>
 	Node& add_node(Args&&... args) {
 		static_assert(std::is_base_of<node, Node>::value, "node must be derived class from `node`");
-		if(was_setup_) throw std::logic_error("cannot add node after graph already set up");
+		Expects(! was_setup_);
 		Node* nd = new Node(*this, std::forward<Args>(args)...);
 		nodes_.emplace_back(nd);
 		return *nd;
@@ -72,13 +73,14 @@ public:
 	template<typename Node, typename... Args>
 	Node& add_sink(Args&&... args) {
 		static_assert(std::is_base_of<sink_node, Node>::value, "sink node must be derived class from `sink_node`");
+		Expects(! was_setup_);
 		Node& sink = add_node<Node>(std::forward<Args>(args)...);
 		sink_ = &sink;
 		return sink;
 	}
 
 	bool was_setup() const { return was_setup_; }
-	bool is_running() const { return running_; }
+	bool is_launched() const { return launched_; }
 	
 	bool was_stopped() const { return was_stopped_; }
 		
