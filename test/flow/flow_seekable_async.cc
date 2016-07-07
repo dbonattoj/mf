@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <catch.hpp>
 #include <mf/filter/filter_graph.h>
 #include <mf/filter/filter.h>
+#include <mf/utility/misc.h>
 #include "../support/ndarray.h"
 #include "../support/flow.h"
 
@@ -33,5 +34,6 @@ constexpr bool seekable = true;
 
 TEST_CASE("flow graph test: seekable, async", "[flow_graph]" "[async][seekable]") {
 	#include "flow_tests_basic.icc"
+	#include "flow_tests_activation.icc"
 	#include "flow_tests_seek.icc"
 }

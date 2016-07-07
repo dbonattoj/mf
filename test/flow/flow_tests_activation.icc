@@ -1,0 +1,193 @@
+/*
+Author : Tim Lenertz
+Date : May 2016
+
+Copyright (c) 2016, Université libre de Bruxelles
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
+publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#if 0
+SECTION("activation") {
+	flow::filter_graph gr;
+	auto shp = make_ndsize(10, 10);
+	
+	constexpr int n = noframe;
+
+	std::size_t count = 50;
+	std::size_t last = count - 1;
+	std::vector<int> seq(count);
+	for(int i = 0; i < count; ++i) seq[i] = i;
+
+	std::vector<bool> act1(count), act2(count), act_and(count), act_or(count);
+	std::vector<int> seq1(seq), seq2(seq), seq_and(seq), seq_or(seq);
+	for(std::ptrdiff_t i = 0; i < count; ++i) {
+		act1[i] = (randint(0, 1) == 0);
+		act2[i] = (randint(0, 1) == 0);
+		act_and[i] = act1[i] && act2[i];
+		act_or[i]  = act1[i] || act2[i];
+		
+		if(!act1[i]) seq1[i] = n;
+		if(!act2[i]) seq2[i] = n;
+		if(!act_and[i]) seq_and[i] = n;
+		if(!act_or[i]) seq_or[i] = n;
+	}
+
+	SECTION("source -> * sink (on-off...off-on)") {
+		std::vector<int> seq(10, n);
+		std::vector<bool> act(10, false);
+		seq[0] = 0; act[0] = true;
+		seq[9] = 9; act[9] = true;
+		std::size_t last = 9;
+		
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+
+		source.set_asynchonous(async1);
+		sink.input.connect(source.output);
+		sink.activation = act;
+
+		gr.setup();
+		gr.run_until(last);
+
+		REQUIRE(sink.check());
+		REQUIRE(gr.current_time() == last);
+	}
+
+	SECTION("source -> *1 sink 2") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
+
+		source.set_asynchonous(async1);
+		sink.input.connect(source.output);
+		sink.activation = act_and;
+
+		gr.setup();
+		gr.run_until(last);
+
+		REQUIRE(sink.check());
+		REQUIRE(gr.current_time() == last);
+	}
+
+	SECTION("source -> *12 passthrough -> *21 sink") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
+		auto& passthrough = gr.add_filter<passthrough_filter>(0, 0);
+
+		source.set_asynchonous(async1);
+		passthrough.set_asynchonous(async1);
+		passthrough.input.connect(source.output);
+		sink.input.connect(passthrough.output);
+		
+		SECTION("test 1") {
+			passthrough.activation = act1;
+			sink.activation = act2;
+			gr.setup();
+			gr.run_until(last);
+			REQUIRE(sink.check());
+			REQUIRE(gr.current_time() == last);
+		}
+		
+		SECTION("test 2") {
+			passthrough.activation = act2;
+			sink.activation = act1;
+			gr.setup();
+			gr.run_until(last);
+			REQUIRE(sink.check());
+			REQUIRE(gr.current_time() == last);
+		}
+	}
+
+
+	SECTION("source -> *1 [-3,+3]passthrough -> *2 sink") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
+		auto& passthrough = gr.add_filter<passthrough_filter>(3, 3);
+
+		source.set_asynchonous(async1);
+		passthrough.set_asynchonous(async1);
+		passthrough.input.connect(source.output);
+		sink.input.connect(passthrough.output);
+		passthrough.activation = act1;
+		sink.activation = act2;
+
+		gr.setup();
+		gr.run_until(last);
+
+		REQUIRE(sink.check());
+		REQUIRE(gr.current_time() == last);
+	}
+
+	SECTION("two inputs") {
+		/*
+		source1 --> [-3, +1]passthrough1 ---> *1 merge --> sink
+		source2 --> [-1, +2]passthrough2' --> *2 /
+		*/
+		
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
+		auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
+		auto& merge = gr.add_filter<input_synchronize_test_filter>();
+		auto& sink = gr.add_filter<expected_frames_sink>(seq_or);
+
+		source1.set_asynchonous(async1);
+		source2.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);
+		passthrough2.set_asynchonous(async2);
+		merge.set_asynchonous(async1);
+		passthrough1.input.connect(source1.output);
+		passthrough2.input.connect(source2.output);
+		merge.input1.connect(passthrough1.output);
+		merge.input2.connect(passthrough2.output);
+		sink.input.connect(merge.output);
+	
+		merge.activation1 = act1;
+		merge.activation2 = act2;
+	
+		gr.setup();		
+		gr.run_until(last);
+		
+		REQUIRE(sink.check());
+	}
+	
+	SECTION("multiplex") {
+		SECTION("basic") {
+			/*
+			source -->   *1 merge --> sink
+			     \ --> / *2
+			*/
+			
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& merge = gr.add_filter<input_synchronize_test_filter>();
+			auto& sink = gr.add_filter<expected_frames_sink>(seq_or);
+			
+			source.set_asynchonous(async1);
+			merge.set_asynchonous(async1);
+			
+			merge.input1.connect(source.output);
+			merge.input2.connect(source.output);
+			sink.input.connect(merge.output);
+	
+			merge.activation1 = act1;
+			merge.activation2 = act2;
+
+			gr.setup();
+			gr.run();
+			
+			REQUIRE(sink.check());
+		}
+	}
+}
+#endif

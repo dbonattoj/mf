@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <string>
 #include <vector>
+#include <random>
 
 namespace mf {
 	
@@ -32,21 +33,17 @@ template<typename...> using void_t = void;
 bool file_exists(const std::string& filename);
 
 /// Compute square of a number.
-template<typename Numeric>
-Numeric sq(Numeric n) { return n * n; }
+template<typename Numeric> Numeric sq(Numeric n) { return n * n; }
 
 /// Advance a pointer `ptr` of any type by `diff` bytes.
 /** Pointer may be `void*` or any other pointer type. Does not verify alignment. */
-template<typename T>
-T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept;
+template<typename T> T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept;
 
 /// Clamp `value` between `minimum` and `maximum` value.
-template<typename T>
-T clamp(T value, T minimum, T maximum);
+template<typename T> T clamp(T value, T minimum, T maximum);
 
 /// Compute greatest common divisor of `a` and `b`.
-template<typename T>
-T gcd(T a, T b);
+template<typename T> T gcd(T a, T b);
 
 /// Check if `x` is a power of 2.
 template<typename T>
@@ -73,6 +70,19 @@ bool is_odd(T x) { return (x % 2) != 0; }
 /// Check if `x` is even.
 template<typename T>
 bool is_even(T x) { return (x % 2) == 0; }
+
+std::default_random_engine& random_engine();
+
+template<typename T>
+T randint(T a, T b) {
+	std::default_random_engine& engine = random_engine();
+	std::uniform_int_distribution<T> dist(a, b);
+	return dist(engine);
+}
+
+
+/*
+*/
 
 }
 

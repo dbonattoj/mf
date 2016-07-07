@@ -24,7 +24,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-
 template<typename T>
 inline T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept {
 	std::uintptr_t raw_ptr = reinterpret_cast<std::uintptr_t>(ptr);

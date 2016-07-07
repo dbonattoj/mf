@@ -35,4 +35,11 @@ bool file_exists(const std::string& filepath) {
 	}
 }
 
+
+std::default_random_engine& random_engine() {
+	static thread_local std::default_random_engine engine {std::default_random_engine(std::random_device{}())};
+	return engine;
+}
+
+
 }
