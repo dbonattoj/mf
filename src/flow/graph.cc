@@ -57,7 +57,7 @@ void graph::launch() {
 void graph::stop() {
 	if(! launched_) return;
 	
-	//MF_DEBUG_BACKTRACE("graph::stop");	
+	MF_DEBUG_BACKTRACE("graph::stop");	
 	was_stopped_.store(true);
 	for(const auto& nd : nodes_) nd->pre_stop();
 	for(const auto& nd : nodes_) nd->stop();
@@ -73,7 +73,7 @@ time_unit graph::current_time() const {
 void graph::run_until(time_unit last_frame) {
 	Expects(was_setup_);
 
-	//MF_DEBUG_BACKTRACE("graph::run_until");
+	MF_DEBUG_BACKTRACE("graph::run_until");
 		
 	if(! launched_) launch();
 	
@@ -91,7 +91,7 @@ bool graph::run() {
 	Expects(was_setup_);
 	Expects(sink_->is_bounded());
 
-	//MF_DEBUG_BACKTRACE("graph::run");
+	MF_DEBUG_BACKTRACE("graph::run");
 
 	if(! launched_) launch();
 

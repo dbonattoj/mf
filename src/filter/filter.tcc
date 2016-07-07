@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/node.h"
 #include "../flow/filter_node.h"
 #include "../flow/multiplex_node.h"
+#include "../flow/graph.h"
 
 namespace mf { namespace flow {
 
@@ -42,7 +43,7 @@ void filter_output<Output_dim, Output_elem>::install(filter_node& nd) {
 	node_output_->define_format(frame_format::default_format<Output_elem>());
 	
 	if(edges_.size() > 1) {
-		multiplex_node_.reset(new multiplex_node(nd.this_graph()));
+		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
 		multiplex_node_->input().connect(*node_output_);
 		for(edge_base_type* edge : edges_) {
 			multiplex_node_output& mlpx_out = multiplex_node_->add_output();

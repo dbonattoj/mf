@@ -155,6 +155,14 @@ namespace detail {
 	#endif
 }
 
+namespace detail {
+	bool random_sleep_enabled_ = true;
+}
+
+void set_random_sleep_enabled(bool enabled) {
+	detail::random_sleep_enabled_ = enabled;
+}
+
 void set_debug_mode(debug_mode mode) {
 	mode_ = mode;
 }
@@ -183,7 +191,12 @@ void initialize_debug() {
 #else
 
 namespace mf {
+	
+namespace detail {
+	bool random_sleep_enabled_ = false;
+}
 
+void set_random_sleep_enabled(bool) { }
 void set_debug_mode(debug_mode) { }
 void set_no_debug_filter() { }
 void set_debug_filter(const std::set<std::string>&) { }

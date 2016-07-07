@@ -129,7 +129,7 @@ private:
 	std::vector<edge_base_type*> edges_;
 		
 	filter_node_output* node_output_ = nullptr;
-	std::unique_ptr<multiplex_node> multiplex_node_;
+	multiplex_node* multiplex_node_ = nullptr;
 	
 	frame_shape_type frame_shape_;	
 

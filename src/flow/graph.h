@@ -22,9 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_GRAPH_H_
 
 #include "../common.h"
-#include "filter_node.h"
 #include "sink_node.h"
-#include "../filter/convert_filter.h"
 #include <utility>
 #include <vector>
 #include <memory>
@@ -36,8 +34,6 @@ namespace mf { namespace flow {
 
 class node;
 class sync_node;
-class filter;
-class sink_filter;
 
 /// Graph containing interconnected nodes through which media frames flow.
 /** Low-level graph composed of \ref node objects. High-level graph of \ref filter obbjects is \ref filter_graph. */
