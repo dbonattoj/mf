@@ -44,6 +44,9 @@ private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
 	std::set<int> produced_frames_;
+	
+	time_unit previous_frame_ = -1;
+	bool seeked_back_ = false;
 
 public:
 	output_type<2, int> output;
@@ -58,9 +61,15 @@ public:
 	
 	void process(flow::filter_job& job) override {
 		time_unit t = job.time();
+
+		if(previous_frame_ != -1 && t < previous_frame_)
+			seeked_back_ = true;
+
 		produced_frames_.emplace(t);
 		job.out(output) = make_frame(frame_shape_, t);
 		if(t == last_frame_) job.mark_end();
+		
+		previous_frame_ = t;
 		
 		std::cout << "       >> " << t << std::endl;
 	}
@@ -68,6 +77,8 @@ public:
 	bool has_produced_frame(int i) const {
 		return (produced_frames_.find(i) != produced_frames_.end());
 	}
+	
+	bool seeked_back() const { return seeked_back_; }
 };
 
 
@@ -83,13 +94,22 @@ private:
 	}
 	
 	void process(flow::filter_job& job) override {		
+		time_unit t = job.time();
+		
 		auto in = job.in(input);
+		auto in_full = job.in_full(input);
 		auto out = job.out(output);
 	
 		if(callback) callback(*this, job);
 
-		if(in) out = in;
-		else out = make_frame(input.frame_shape(), noframe);
+		if(in) {
+			MF_TEST_THREAD_REQUIRE(! in_full.is_null());
+			for(time_unit u = in_full.span().start_time(); u < in_full.span().end_time(); ++u)
+				MF_TEST_THREAD_REQUIRE(frame_index(in_full[u - in_full.span().start_time()]) == u);
+			out = in;
+		} else {
+			out = make_frame(input.frame_shape(), noframe);
+		}
 	}
 	
 public:

@@ -163,10 +163,10 @@ SECTION("seek") {
 	}
 
 	SECTION("graph 2") {
-		/*
+		INFO(R"(
 		source1 --> [-3, +1]passthrough1 ----------------------------> merge --> sink
 		source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2' --> /
-		*/
+		)");
 
 		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
 		auto& source2 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
@@ -221,7 +221,6 @@ SECTION("seek") {
 		gr.seek(7);
 		gr.run_for(2);		
 		
-		// stop, when not at end
 		// stop, when not at end
 		REQUIRE(sink.check());
 	}

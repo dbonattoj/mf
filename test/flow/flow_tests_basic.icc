@@ -18,7 +18,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#if 1
+#if 0
 SECTION("basic") {		
 	flow::filter_graph gr;
 	auto shp = make_ndsize(10, 10);
@@ -319,10 +319,10 @@ SECTION("basic") {
 		merge.set_asynchonous(async1);
 		
 		SECTION("graph 1") {
-			/*
+			INFO(R"(
 			source1 --> [+5]passthrough --> merge --> sink
 			source2 ----------------------> /
-			*/
+			)");
 			
 			auto& passthrough = gr.add_filter<passthrough_filter>(0, 5);
 
@@ -340,10 +340,10 @@ SECTION("basic") {
 		}
 	
 		SECTION("graph 2") {
-			/*
+			INFO(R"(
 			source1 --> [-3, +1]passthrough1 ---> merge --> sink
 			source2 --> [-1, +2]passthrough2' --> /
-			*/
+			)");
 			
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
@@ -364,10 +364,10 @@ SECTION("basic") {
 		}
 		
 		SECTION("graph 3") {
-			/*
+			INFO(R"(
 			source1 --> [-3, +1]passthrough1 ----------------------------> merge --> sink
 			source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2' --> /
-			*/
+			)");
 			
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
@@ -400,10 +400,10 @@ SECTION("basic") {
 		for(int i = 0; i < seq.size(); ++i) seq[i] = i;
 	
 		SECTION("basic") {
-			/*
+			INFO(R"(
 			source --> merge --> sink
 			     \ --> /
-			*/
+			)");
 			
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
@@ -423,10 +423,10 @@ SECTION("basic") {
 		}
 		
 		SECTION("time windows") {
-			/*
+			INFO(R"(
 			source --> [-3, +1]passthrough1  --> merge --> sink
 			     \ --> [-1, +2]passthrough2' --> /
-			*/
+			)");
 			
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
@@ -452,12 +452,12 @@ SECTION("basic") {
 		}
 	
 		SECTION("graph") {
-			/*
+			INFO(R"(
 			source1' --> [-3, +1]passthrough1 --> [-1, +0]passthrough2' --> merge1 --> merge2' --> sink 
 			       \ -----------------------------------------------------> /    /---> /
 			                                                                    /
 			source2  --> [-1, +2]passthrough3' --------------------------------/
-			*/
+			)");
 			
 			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
