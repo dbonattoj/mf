@@ -71,7 +71,9 @@ public:
 	explicit importer_filter(Args&&... args) :
 		importer_(std::forward<Args>(args)...),
 		output(*this)
-	{ }
+	{
+		set_seekable(true);
+	}
 	
 	void set_seekable(bool seekable) {
 		node_stream_properties prop;
