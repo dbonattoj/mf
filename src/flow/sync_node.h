@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_SYNC_NODE_H_
 
 #include <memory>
-#include "filter_node.h"
+#include "processing_node.h"
 #include "../queue/frame.h"
 #include "../queue/timed_ring.h"
 
@@ -30,14 +30,14 @@ namespace mf { namespace flow {
 
 /// Synchronous node base class.
 /** Processes frames synchronously when pulled from output. Can have multiple inputs, but only one output. */
-class sync_node final : public filter_node {
+class sync_node final : public processing_node {
 private:
 	std::unique_ptr<timed_ring> ring_;
 
 	bool process_next_frame_();
 
 public:
-	explicit sync_node(graph& gr) : filter_node(gr) { }
+	explicit sync_node(graph& gr) : processing_node(gr) { }
 	
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;

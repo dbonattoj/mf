@@ -21,6 +21,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_FILTER_EDGE_H_
 #define MF_FLOW_FILTER_EDGE_H_
 
+#include "../utility/misc.h"
+#include "../flow/processing_node.h"
+#include "../flow/sync_node.h"
+#include <type_traits>
+#include <utility>
+
 namespace mf { namespace flow {
 
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
@@ -50,15 +56,23 @@ public:
 
 
 
-template<std::size_t Input_dim, typename Input_elem, std::size_t Output_dim, typename Output_elem>
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem = Casted_elem>
 class filter_edge :
-	public filter_edge_input_base<Input_dim, Input_elem>,
-	public filter_edge_output_base<Output_dim, Output_elem>
-{
-	static_assert(Input_dim == Output_dim, "edge input and output dimension must be same (for now)");
-	
-	using base_in = filter_edge_input_base<Input_dim, Input_elem>;
-	using base_out = filter_edge_output_base<Output_dim, Output_elem>;
+	public filter_edge_input_base<Dim, Input_elem>,
+	public filter_edge_output_base<Dim, Output_elem>
+{	
+	using base_in = filter_edge_input_base<Dim, Input_elem>;
+	using base_out = filter_edge_output_base<Dim, Output_elem>;
+
+	/*
+	origin node
+	 [output_]   (Output_type)
+		|
+		|  ndarray_view_cast: Output_type -> Casted_type
+		v
+	 [input_]    (Input_type = Casted_type)
+	destination node
+	*/
 	
 public:
 	using typename base_in::input_type;
@@ -76,15 +90,24 @@ private:
 	node_output* node_output_ = nullptr;
 	std::unique_ptr<cast_connector> cast_connector_;
 	
-	void install_();
+protected:
+	virtual void install_(graph&);
+	
+	void create_cast_connector_();
+	cast_connector& this_cast_connector_() { Expects(cast_connector_); return *cast_connector_; }
+	const cast_connector& this_cast_connector_() const { Expects(cast_connector_); return *cast_connector_; }
 	
 public:
 	filter_edge(input_type& in, output_type& out) :
 		input_(in), output_(out) { }
+	filter_edge(filter_edge&&) = default;
+	filter_edge& operator=(filter_edge&&) = default;
+	virtual ~filter_edge() = default;
 		
 	void set_node_input(node_input& in) override;
 	void set_node_output(node_output& out) override;
 	
+	graph& this_graph();
 	node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
 	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
 	node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
@@ -94,6 +117,51 @@ public:
 	const output_frame_shape_type& output_frame_shape() const override { return output_.frame_shape(); }
 };
 
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem, typename Convert_function>
+class filter_converting_edge :
+	public filter_edge<Dim, Input_elem, Casted_elem, Output_elem>,
+	public processing_node_handler
+{
+	using base = filter_edge<Dim, Input_elem, Casted_elem, Output_elem>;
+
+	/*
+	origin node
+	 [output_]   (Output_type)
+		|
+		|  ndarray_view_cast: Output_type -> Casted_type
+		v
+	 [in]        (Casted_type)
+	converter node: Input_type = Convert_function(Casted_type)
+	 [out]       (Input_type)
+		|
+		|  direct
+		v
+	 [input_]    (Input_type)
+	destination node
+	*/
+
+public:
+	using typename base::input_type;
+	using typename base::input_frame_shape_type;
+	using typename base::output_type;
+	using typename base::output_frame_shape_type;
+	
+private:
+	Convert_function convert_function_;
+	sync_node* convert_node_ = nullptr;
+
+protected:
+	void install_(graph&) override;
+
+public:
+	filter_converting_edge(input_type& in, output_type& out, Convert_function&& func) :
+		base(in, out), convert_function_(std::forward<Convert_function>(func)) { }
+
+	void handler_setup() final override;
+	void handler_pre_process(processing_node_job&) final override;
+	void handler_process(processing_node_job&) final override;
+};
 
 
 

@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_H_
 
 #include "../flow/node.h"
-#include "../flow/filter_node.h"
+#include "../flow/processing_node.h"
 #include "../queue/frame.h"
 #include "filter_edge.h"
 #include "filter_parameter.h"
@@ -41,7 +41,7 @@ template<std::size_t Input_dim, typename Input_elem> class filter_input;
 
 /// Filter which performs concrete processing, base class.
 /** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
-class filter {			
+class filter : public processing_node_handler {			
 public:
 	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
@@ -55,7 +55,7 @@ protected:
 	bool asynchronous_ = false;
 	time_unit prefetch_duration_ = 0;
 	
-	filter_node* node_ = nullptr;
+	processing_node* node_ = nullptr;
 	
 public:
 	filter() = default;
@@ -73,6 +73,10 @@ public:
 	
 	bool was_installed() const { return (node_ != nullptr); }
 	virtual void install(graph&);
+	
+	void handler_setup() final override;
+	void handler_pre_process(processing_node_job&) final override;
+	void handler_process(processing_node_job&) final override;
 
 	virtual void setup() { }
 	virtual void pre_process(job_type&) { }
@@ -105,14 +109,14 @@ public:
 
 class filter_output_base {
 public:
-	virtual void install(filter_node&) = 0;
+	virtual void install(processing_node&) = 0;
 };
 
 
 
 class filter_input_base {
 public:
-	virtual void install(filter_node&) = 0;
+	virtual void install(processing_node&) = 0;
 };
 
 
@@ -128,7 +132,7 @@ public:
 private:
 	std::vector<edge_base_type*> edges_;
 		
-	filter_node_output* node_output_ = nullptr;
+	processing_node_output* node_output_ = nullptr;
 	multiplex_node* multiplex_node_ = nullptr;
 	
 	frame_shape_type frame_shape_;	
@@ -136,14 +140,14 @@ private:
 public:
 	explicit filter_output(filter&);
 
-	filter_node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
-	const filter_node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
+	processing_node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
+	const processing_node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
 	std::ptrdiff_t index() const { return this_node_output().index(); }
 	
 	void edge_has_connected(edge_base_type&);
 		
 	bool was_installed() const { return (node_output_ != nullptr); }
-	void install(filter_node&) override;
+	void install(processing_node&) override;
 
 	void define_frame_shape(const frame_shape_type& shp);
 	const frame_shape_type& frame_shape() const;
@@ -177,10 +181,16 @@ public:
 	template<std::size_t Output_dim, typename Output_elem>
 	void connect(filter_output<Output_dim, Output_elem>&);
 	
+	template<std::size_t Output_dim, typename Output_elem, typename Convert_function>
+	void connect(filter_output<Output_dim, Output_elem>&, Convert_function&&);
+
+	template<typename Casted_elem, std::size_t Output_dim, typename Output_elem, typename Convert_function>
+	void connect(filter_output<Output_dim, Output_elem>&, Convert_function&&);
+	
 	const frame_shape_type& frame_shape() const;
 	
 	bool was_installed() const { return (node_input_ != nullptr); }
-	void install(filter_node&) override;
+	void install(processing_node&) override;
 	
 	void set_activated(bool);
 	bool is_activated();

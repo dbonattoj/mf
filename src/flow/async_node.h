@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_ASYNC_NODE_H_
 #define MF_FLOW_ASYNC_NODE_H_
 
-#include "filter_node.h"
+#include "processing_node.h"
 #include "../queue/shared_ring.h"
 #include <thread>
 
@@ -29,7 +29,7 @@ namespace mf { namespace flow {
 
 class graph;
 
-class async_node final : public filter_node {
+class async_node final : public processing_node {
 public:
 	constexpr static time_unit default_prefetch = 3;
 	

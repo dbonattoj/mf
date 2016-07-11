@@ -40,7 +40,7 @@ time_unit sync_node::maximal_offset_to(const node& target_node) const {
 
 void sync_node::setup() {
 	if(outputs().size() != 1) throw invalid_flow_graph("sync_node must have exactly 1 output");
-	setup_filter_();
+	handler_setup_();
 	
 	node& connected_node = output().connected_node();
 	
@@ -58,11 +58,11 @@ bool sync_node::process_next_frame_() {
 	if(stream_properties().duration_is_defined()) Assert(t < stream_properties().duration());
 	
 	set_current_time_(t);
-	filter_node_job job = begin_job_();
+	processing_node_job job = begin_job_();
 	
 	job.attach_output(out_vw[0]);
 	
-	pre_process_filter_(job);
+	handler_pre_process_(job);
 	
 	for(auto&& in : inputs()) if(in->is_activated()) {
 		pull_result res = in->pull();
@@ -77,7 +77,7 @@ bool sync_node::process_next_frame_() {
 		
 	}
 	
-	process_filter_(job);
+	handler_process_(job);
 	
 	job.detach_output();
 	ring_->end_write(1);

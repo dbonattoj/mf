@@ -21,14 +21,16 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_FILTER_JOB_H_
 #define MF_FLOW_FILTER_JOB_H_
 
+#include "../flow/processing_node.h"
+
 namespace mf { namespace flow {
 
 class filter_job {
 private:
-	filter_node_job& node_job_;
+	processing_node_job& node_job_;
 
 public:
-	filter_job(filter_node_job& job) : node_job_(job) { }
+	filter_job(processing_node_job& job) : node_job_(job) { }
 	
 	time_unit time() const noexcept { return node_job_.time(); }
 	void mark_end() noexcept { node_job_.mark_end(); }

@@ -28,6 +28,23 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 
+void filter::handler_setup() {
+	this->setup();
+}
+
+
+void filter::handler_pre_process(processing_node_job& job) {
+	filter_job fjob(job);
+	this->pre_process(fjob);
+}
+
+
+void filter::handler_process(processing_node_job& job) {
+	filter_job fjob(job);
+	this->process(fjob);
+}
+
+
 void filter::register_input(filter_input_base& in) {
 	Expects(! was_installed());
 	inputs_.push_back(&in);
@@ -73,7 +90,7 @@ void filter::install(graph& gr) {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
 	}
-	node_->set_filter(*this);
+	node_->set_handler(*this);
 	for(filter_input_base* in : inputs_) in->install(*node_);
 	outputs_.front()->install(*node_);
 	Ensures(was_installed());
@@ -88,7 +105,7 @@ void sink_filter::install(graph& gr) {
 	
 	sink_node& nd = gr.add_sink<sink_node>();
 	node_ = &nd;
-	node_->set_filter(*this);
+	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
 	Ensures(was_installed());
@@ -123,7 +140,7 @@ void source_filter::install(graph& gr) {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
 	}
-	node_->set_filter(*this);
+	node_->set_handler(*this);
 	node_->define_source_stream_properties(node_stream_properties_);
 	outputs_.front()->install(*node_);
 	Ensures(was_installed());

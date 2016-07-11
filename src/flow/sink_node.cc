@@ -30,7 +30,7 @@ void sink_node::setup_graph() {
 
 void sink_node::setup() {
 	if(outputs().size() != 0) throw invalid_flow_graph("sink_node cannot have outputs");
-	setup_filter_();
+	handler_setup_();
 }
 
 
@@ -47,12 +47,12 @@ void sink_node::pull(time_unit t) {
 	//if(stream_duration_is_defined()) MF_ASSERT(t < stream_duration());
 	
 	set_current_time_(t);
-	filter_node_job job = begin_job_();
+	processing_node_job job = begin_job_();
 		
 	// set pull = current time as requested
 			
 	// preprocess, allow concrete subclass to activate/desactivate inputs
-	pre_process_filter_(job);
+	handler_pre_process_(job);
 
 	// pull & begin reading from activated inputs
 	bool stopped = false;
@@ -82,7 +82,7 @@ void sink_node::pull(time_unit t) {
 	}
 
 	// process frame in concrete subclass
-	process_filter_(job);
+	handler_process_(job);
 	
 	finish_job_(job);
 }

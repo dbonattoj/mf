@@ -19,38 +19,53 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "../ndarray/ndarray_view_cast.h"
+#include "../flow/graph.h"
+#include <algorithm>
 
 namespace mf { namespace flow {
 
-
-template<std::size_t Input_dim, typename Input_elem, std::size_t Output_dim, typename Output_elem>
-void filter_edge<Input_dim, Input_elem, Output_dim, Output_elem>::install_() {
-	Expects(node_input_ != nullptr && node_output_ != nullptr);
-	cast_connector_.reset(new cast_connector(*this));
-	node_input_->connect(*cast_connector_);
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem>
+void filter_edge<Dim, Input_elem, Casted_elem, Output_elem>::create_cast_connector_() {
+	Expects(node_input_ != nullptr && node_output_ != nullptr);	
+	cast_connector_.reset(new cast_connector(*this));	
 }
 
 
-template<std::size_t Input_dim, typename Input_elem, std::size_t Output_dim, typename Output_elem>
-void filter_edge<Input_dim, Input_elem, Output_dim, Output_elem>::set_node_input(node_input& in) {
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem>
+graph& filter_edge<Dim, Input_elem, Casted_elem, Output_elem>::this_graph() {
+	Expects(node_input_ != nullptr);
+	return node_input_->this_node().this_graph();
+}
+
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem>
+void filter_edge<Dim, Input_elem, Casted_elem, Output_elem>::install_(graph&) {
+	create_cast_connector_();
+	this_node_input().connect( this_cast_connector_() );
+}
+
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem>
+void filter_edge<Dim, Input_elem, Casted_elem, Output_elem>::set_node_input(node_input& in) {
 	Expects(node_input_ == nullptr);
 	node_input_ = &in;
-	if(node_input_ != nullptr && node_output_ != nullptr) install_();
+	if(node_input_ != nullptr && node_output_ != nullptr) this->install_(this_graph());
 }
 
 
-template<std::size_t Input_dim, typename Input_elem, std::size_t Output_dim, typename Output_elem>
-void filter_edge<Input_dim, Input_elem, Output_dim, Output_elem>::set_node_output(node_output& out) {
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem>
+void filter_edge<Dim, Input_elem, Casted_elem, Output_elem>::set_node_output(node_output& out) {
 	Expects(node_output_ == nullptr);
 	node_output_ = &out;
-	if(node_input_ != nullptr && node_output_ != nullptr) install_();
+	if(node_input_ != nullptr && node_output_ != nullptr) this->install_(this_graph());
 }
 
 
 ///////////////
 
-template<std::size_t Input_dim, typename Input_elem, std::size_t Output_dim, typename Output_elem>
-class filter_edge<Input_dim, Input_elem, Output_dim, Output_elem>::cast_connector : public node_remote_output {
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem>
+class filter_edge<Dim, Input_elem, Casted_elem, Output_elem>::cast_connector : public node_remote_output {
 private:
 	filter_edge& edge_;
 
@@ -73,17 +88,63 @@ public:
 		auto generic_output_view = edge_.this_node_output().begin_read(duration);
 		if(generic_output_view.is_null()) return timed_frame_array_view::null();
 				
-		auto concrete_output_view = from_generic<Output_dim + 1, Output_elem>(generic_output_view, edge_.output_frame_shape());
+		auto concrete_output_view = from_generic<Dim + 1, Output_elem>(generic_output_view, edge_.output_frame_shape());
 	
-		using concrete_input_view_type = ndarray_timed_view<Input_dim + 1, Input_elem>;
-		auto concrete_input_view = ndarray_view_cast<concrete_input_view_type>(concrete_output_view);
+		using concrete_casted_view_type = ndarray_timed_view<Dim + 1, Casted_elem>;
+		auto concrete_casted_view = ndarray_view_cast<concrete_casted_view_type>(concrete_output_view);
 	
-		return to_generic<1>(concrete_input_view);
+		return to_generic<1>(concrete_casted_view);
 	}
 
 	void end_read(time_unit duration) override {
 		edge_.this_node_output().end_read(duration);
 	}
 };
+
+
+///////////////
+
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem, typename Convert_function>
+void filter_converting_edge<Dim, Input_elem, Casted_elem, Output_elem, Convert_function>::install_(graph& gr) {
+	base::create_cast_connector_();
+	
+	convert_node_ = &gr.add_node<sync_node>();
+	convert_node_->set_handler(*this);
+	node_input& convert_node_input = convert_node_->add_input();
+	node_output& convert_node_output = convert_node_->add_output();
+	
+	convert_node_output.define_format( frame_format::default_format<Input_elem>() );
+	
+	convert_node_input.connect( base::this_cast_connector_() );
+	base::this_node_input().connect( convert_node_output );
+}
+
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem, typename Convert_function>
+void filter_converting_edge<Dim, Input_elem, Casted_elem, Output_elem, Convert_function>::handler_setup() {
+	node_input& convert_node_input = *convert_node_->inputs().front();
+	node_output& convert_node_output = convert_node_->output();
+	convert_node_output.define_frame_length( convert_node_input.connected_output().this_output().frame_length() );	
+}
+
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem, typename Convert_function>
+void filter_converting_edge<Dim, Input_elem, Casted_elem, Output_elem, Convert_function>::
+handler_pre_process(processing_node_job& job) { }
+
+
+template<std::size_t Dim, typename Input_elem, typename Casted_elem, typename Output_elem, typename Convert_function>
+void filter_converting_edge<Dim, Input_elem, Casted_elem, Output_elem, Convert_function>::
+handler_process(processing_node_job& job) {
+	auto in = job.input_view(0)[0];
+	const auto& out = job.output_view();
+	
+	auto concrete_in = from_generic<Dim, Casted_elem>(in, base::input_frame_shape());
+	auto concrete_out = from_generic<Dim, Input_elem>(out, base::input_frame_shape());
+	
+	std::transform(concrete_in.begin(), concrete_in.end(), concrete_out.begin(), convert_function_);
+}
+
 
 }}

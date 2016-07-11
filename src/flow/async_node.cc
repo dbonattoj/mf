@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 	
-async_node::async_node(graph& gr) : filter_node(gr) { }
+async_node::async_node(graph& gr) : processing_node(gr) { }
 
 async_node::~async_node() {
 	Assert(! running_);
@@ -31,7 +31,7 @@ async_node::~async_node() {
 }
 
 void async_node::setup() {
-	setup_filter_();
+	handler_setup_();
 	
 	const node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
@@ -157,7 +157,7 @@ async_node::process_result async_node::process_frame_() {
 	time_unit t = out_vw.start_time();
 
 	set_current_time_(t);
-	filter_node_job job = begin_job_();
+	processing_node_job job = begin_job_();
 
 	job.attach_output(out_vw[0]);
 	MF_RAND_SLEEP;
@@ -168,7 +168,7 @@ async_node::process_result async_node::process_frame_() {
 		reconnect_flag_ = false;
 	}
 	
-	pre_process_filter_(job);
+	handler_pre_process_(job);
 			
 	for(auto&& in : inputs()) if(in->is_activated()) {
 		time_unit res = in->pull();
@@ -191,7 +191,7 @@ async_node::process_result async_node::process_frame_() {
 	}
 	
 	MF_DEBUG("process ", t);
-	process_filter_(job);
+	handler_process_(job);
 
 	finish_job_(job);
 	

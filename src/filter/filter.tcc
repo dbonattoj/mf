@@ -19,7 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "../flow/node.h"
-#include "../flow/filter_node.h"
+#include "../flow/processing_node.h"
 #include "../flow/multiplex_node.h"
 #include "../flow/graph.h"
 
@@ -38,7 +38,7 @@ void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& 
 
 
 template<std::size_t Output_dim, typename Output_elem>
-void filter_output<Output_dim, Output_elem>::install(filter_node& nd) {
+void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
 	node_output_ = &nd.add_output();
 	node_output_->define_format(frame_format::default_format<Output_elem>());
 	
@@ -80,18 +80,8 @@ filter_input<Input_dim, Input_elem>::filter_input(filter& filt, time_unit past_w
 }
 
 
-
-template<std::size_t Input_dim, typename Input_elem> template<std::size_t Output_dim, typename Output_elem>
-void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out) {
-	using edge_type = filter_edge<Input_dim, Input_elem, Output_dim, Output_elem>;
-	edge_type* edge = new edge_type(*this, out);
-	edge_.reset(edge);
-	out.edge_has_connected(*edge);
-}
-
-
 template<std::size_t Input_dim, typename Input_elem>
-void filter_input<Input_dim, Input_elem>::install(filter_node& nd) {
+void filter_input<Input_dim, Input_elem>::install(processing_node& nd) {
 	node_input_ = &nd.add_input();
 	node_input_->set_past_window(past_window_);
 	node_input_->set_future_window(future_window_);
@@ -116,5 +106,37 @@ template<std::size_t Input_dim, typename Input_elem>
 bool filter_input<Input_dim, Input_elem>::is_activated() {
 	return node_input_->is_activated();
 }
+
+
+
+template<std::size_t Input_dim, typename Input_elem>
+template<std::size_t Output_dim, typename Output_elem>
+void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out) {
+	static_assert(Input_dim == Output_dim, "input and output connected on edge must have same dimension");
+	using edge_type = filter_edge<Input_dim, Input_elem, Output_elem>;
+	edge_type* edge = new edge_type(*this, out);
+	edge_.reset(edge);
+	out.edge_has_connected(*edge);
+}
+
+
+template<std::size_t Input_dim, typename Input_elem>
+template<std::size_t Output_dim, typename Output_elem, typename Convert_function>
+void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out, Convert_function&& cv) {
+	connect<Output_elem, Input_dim, Output_elem, Convert_function>(out, cv);
+}
+
+
+template<std::size_t Input_dim, typename Input_elem>
+template<typename Casted_elem, std::size_t Output_dim, typename Output_elem, typename Convert_function>
+void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out, Convert_function&& cv) {
+	static_assert(Input_dim == Output_dim, "input and output connected on edge must have same dimension");
+	using edge_type = filter_converting_edge<Input_dim, Input_elem, Casted_elem, Output_elem, Convert_function>;
+	edge_type* edge = new edge_type(*this, out, cv);
+	edge_.reset(edge);
+	out.edge_has_connected(*edge);
+
+}
+
 
 }}

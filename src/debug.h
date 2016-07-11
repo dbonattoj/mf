@@ -55,7 +55,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 	#define MF_DEBUG(...) ((void)0)
 	#define MF_DEBUG_EXPR_T(...) ((void)0)
 	#define MF_DEBUG_EXPR(...) ((void)0)
-	#define MF_DEBUG_BACKTRACE() ((void)0)
+	#define MF_DEBUG_BACKTRACE(...) ((void)0)
 	#define MF_RAND_SLEEP ((void)0)
 
 #endif

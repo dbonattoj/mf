@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_SINK_NODE_H_
 #define MF_FLOW_SINK_NODE_H_
 
-#include "filter_node.h"
+#include "processing_node.h"
 
 namespace mf { namespace flow {
 
@@ -29,14 +29,14 @@ class graph;
 
 /// Sink node base class.
 /** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
-class sink_node final : public filter_node {
+class sink_node final : public processing_node {
 protected:
 	pull_result output_pull_(time_span&, bool reconnected) override { throw 0; }
 	timed_frame_array_view output_begin_read_(time_unit duration) override { throw 0; }
 	void output_end_read_(time_unit duration) override { throw 0; }
 
 public:	
-	explicit sink_node(graph& gr) : filter_node(gr) { }
+	explicit sink_node(graph& gr) : processing_node(gr) { }
 	
 	time_unit minimal_offset_to(const node&) const override { return 0; }
 	time_unit maximal_offset_to(const node&) const override { return 0; }

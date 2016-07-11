@@ -214,11 +214,10 @@ Output_view ndarray_view_cast(const Input_view& vw) {
 }
 
 
-/// Verify at compile time whether cast from `Output_view` to `Input_view` is possible.
+/// Verify at compile time whether cast from `Input_view` to `Output_view` is possible.
 template<typename Output_view, typename Input_view>
 constexpr bool ndarray_view_can_cast =
 	detail::ndarray_view_cast_detector<Output_view, Input_view>::value;
-
 
 
 template<typename Output_view, typename Input_view>

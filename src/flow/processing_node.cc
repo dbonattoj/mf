@@ -18,50 +18,46 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "filter_node.h"
-#include "../filter/filter.h"
-#include "../filter/filter_job.h"
+#include "processing_node.h"
 
 namespace mf { namespace flow {
 
-filter_node::filter_node(graph& gr) : node(gr) { }
+processing_node::processing_node(graph& gr) : node(gr) { }
 
-filter_node::~filter_node() { }
+processing_node::~processing_node() { }
 
 
-void filter_node::set_filter(filter& filt) {
-	Expects(filter_ == nullptr);
-	filter_ = &filt;
+void processing_node::set_handler(processing_node_handler& handler) {
+	Expects(handler_ == nullptr);
+	handler_ = &handler;
 }
 
 
-void filter_node::setup_filter_() {
-	Expects(filter_ != nullptr);
-	Expects(outputs().size() <= 1, "filter node must have at most one output");
-	filter_->setup();
+void processing_node::handler_setup_() {
+	Expects(handler_ != nullptr);
+	Expects(outputs().size() <= 1, "processing_node must have at most one output");
+	handler_->handler_setup();
 }
 
 
-void filter_node::pre_process_filter_(filter_node_job& job) {
-	Expects(filter_ != nullptr);
-	filter_job fjob(job);
-	filter_->pre_process(fjob);
+void processing_node::handler_pre_process_(processing_node_job& job) {
+	Expects(handler_ != nullptr);
+	handler_->handler_pre_process(job);
 }
 
 
-void filter_node::process_filter_(filter_node_job& job) {
-	Expects(filter_ != nullptr);
-	filter_job fjob(job);
-	filter_->process(fjob);
+void processing_node::handler_process_(processing_node_job& job) {
+	Expects(handler_ != nullptr);
+	handler_->handler_process(job);
 }
 
 
-filter_node_job filter_node::begin_job_() {
-	return filter_node_job(*this);
+processing_node_job processing_node::begin_job_() {
+	return processing_node_job(*this);
 }
 
 
-void filter_node::finish_job_(filter_node_job& job) {
+void processing_node::finish_job_(processing_node_job& job) {
 	bool reached_end = false;
 	time_unit t = job.time();
 
@@ -77,33 +73,34 @@ void filter_node::finish_job_(filter_node_job& job) {
 }
 
 
-node_input& filter_node::add_input() {
+node_input& processing_node::add_input() {
 	return add_input_<node_input>();
 }
 
 
-filter_node_output& filter_node::add_output() {
-	return add_output_<filter_node_output>();
+processing_node_output& processing_node::add_output() {
+	Expects(outputs().size() == 0, "cannot add more than one output to processing_node");
+	return add_output_<processing_node_output>();
 }
 
 
 ////////////////////////////////
 
 
-node::pull_result filter_node_output::pull(time_span& span, bool reconnect) {
+node::pull_result processing_node_output::pull(time_span& span, bool reconnect) {
 	Expects(span.duration() > 0);
 	return this_node().output_pull_(span, reconnect);
 	Ensures(this_node().current_time() >= span.start_time());
 }
 
 
-timed_frame_array_view filter_node_output::begin_read(time_unit duration) {
+timed_frame_array_view processing_node_output::begin_read(time_unit duration) {
 	Expects(duration > 0);
 	return this_node().output_begin_read_(duration);
 }
 
 
-void filter_node_output::end_read(time_unit duration) {
+void processing_node_output::end_read(time_unit duration) {
 	this_node().output_end_read_(duration);
 }
 
@@ -111,7 +108,7 @@ void filter_node_output::end_read(time_unit duration) {
 ////////////////////////////////
 
 
-filter_node_job::filter_node_job(filter_node& nd) :
+processing_node_job::processing_node_job(processing_node& nd) :
 	time_(nd.current_time()),
 	inputs_stack_(),
 	inputs_slots_(nd.inputs().size(), nullptr)
@@ -120,23 +117,21 @@ filter_node_job::filter_node_job(filter_node& nd) :
 }
 
 
-filter_node_job::~filter_node_job() {
-	Expects(! has_output(), "filter node must detach and close output before destruction of filter_node_job");
+processing_node_job::~processing_node_job() {
+	Expects(! has_output(), "processing_node must detach and close output before destruction of processing_node_job");
 	if(has_inputs()) cancel_inputs();
 }
 
-void filter_node_job::attach_output(const frame_view& output_view) {
-	bool det = false;
+void processing_node_job::attach_output(const frame_view& output_view) {
 	output_view_.reset(output_view);
 }
 
 	
-void filter_node_job::detach_output() {
-	bool det = true;
+void processing_node_job::detach_output() {
 	output_view_.reset();
 }
 
-bool filter_node_job::push_input(node_input& in) {
+bool processing_node_job::push_input(node_input& in) {
 	std::ptrdiff_t index = in.index();
 	timed_frame_array_view vw = in.begin_read_frame();
 	if(vw.is_null()) return false;
@@ -145,7 +140,7 @@ bool filter_node_job::push_input(node_input& in) {
 	return true;
 }
 
-node_input& filter_node_job::pop_input() {
+node_input& processing_node_job::pop_input() {
 	input_view_handle handle = inputs_stack_.back();
 	inputs_stack_.pop_back();
 	std::ptrdiff_t index = handle.first->index();
@@ -154,7 +149,7 @@ node_input& filter_node_job::pop_input() {
 	return *handle.first;
 }
 
-void filter_node_job::cancel_inputs() {
+void processing_node_job::cancel_inputs() {
 	while(inputs_stack_.size() > 0) {
 		inputs_stack_.back().first->cancel_read_frame();
 		inputs_stack_.pop_back();
@@ -162,16 +157,16 @@ void filter_node_job::cancel_inputs() {
 	for(auto* slot : inputs_slots_) slot = nullptr;
 }
 
-const timed_frame_array_view& filter_node_job::input_view(std::ptrdiff_t index) {
+const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t index) {
 	return inputs_slots_[index]->second;
 }
 
-bool filter_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
+bool processing_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
 	if(index < 0 || index >= inputs_slots_.size()) return false;
 	else return (inputs_slots_[index] != nullptr);
 }
 
-const frame_view& filter_node_job::output_view() {
+const frame_view& processing_node_job::output_view() {
 	return output_view_;
 }
 
