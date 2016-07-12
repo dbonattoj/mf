@@ -76,8 +76,11 @@ struct masked_elem {
 		return !(a == b);
 	}
 	
-	operator const Elem& () const { MF_EXPECTS(mask); return elem; }
-	operator Elem& () { MF_EXPECTS(mask); return elem; }
+	const Elem& get() const { MF_EXPECTS(mask); return elem; }
+	Elem& get() { MF_EXPECTS(mask); return elem; }
+
+	operator const Elem& () const { return get(); }
+	operator Elem& () { return get(); }
 };
 
 
