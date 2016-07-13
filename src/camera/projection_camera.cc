@@ -103,8 +103,24 @@ projection_camera::projection_camera
 	projection_camera(ps, read_intrinsic_matrix_(mat, dpar, img_sz)) { }
 
 
-Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to) {
-	return to.world_to_image_ * from.image_to_world_;
+Eigen_mat3 projection_camera::intrinsic_matrix() const {
+	const Eigen_mat4& view_to_image = view_to_image_.matrix();
+	Eigen_mat3 intrinsic; intrinsic <<
+		intrinsic(0, 0), intrinsic(0, 1), intrinsic(0, 2),
+		intrinsic(1, 0), intrinsic(1, 1), intrinsic(1, 2),
+		intrinsic(3, 0), intrinsic(3, 1), intrinsic(3, 2);
+	return intrinsic;
 }
+
+
+Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to) {
+	return to.world_to_image_transformation() * from.image_to_world_transformation();
+}
+
+
+Eigen_mat3 fundamental_matrix(const projection_camera& from, const projection_camera& to) {
+	return to.intrinsic_matrix().inverse().transpose() * essential_matrix(from, to) * from.intrinsic_matrix().inverse();
+}
+
 
 }

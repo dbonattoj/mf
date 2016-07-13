@@ -82,8 +82,17 @@ public:
 		return (image_to_world_ * p.homogeneous()).eval().hnormalized();
 	}
 	
-	friend Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to);
+	Eigen_mat3 intrinsic_matrix() const;
+	const Eigen_mat4& intrinsic_matrix_with_depth() const { return view_to_image_.matrix(); }
+	
+	const Eigen_projective3& world_to_image_transformation() const { return world_to_image_; }
+	const Eigen_projective3& image_to_world_transformation() const { return image_to_world_; }
 };
+
+
+Eigen_projective3 homography_transformation(const projection_camera& from, const projection_camera& to);
+
+Eigen_mat3 fundamental_matrix(const projection_camera& from, const projection_camera& to);
 
 
 }

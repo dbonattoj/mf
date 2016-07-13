@@ -91,6 +91,10 @@ public:
 	virtual Eigen_vec3 ray_direction(const image_coordinates_type& c) const = 0;
 };
 
+
+Eigen_mat3 essential_matrix(const camera& from, const camera& to);
+
+
 }
 
 #endif

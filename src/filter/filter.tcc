@@ -123,7 +123,7 @@ void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Outp
 template<std::size_t Input_dim, typename Input_elem>
 template<std::size_t Output_dim, typename Output_elem, typename Convert_function>
 void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out, Convert_function&& cv) {
-	connect<Output_elem, Input_dim, Output_elem, Convert_function>(out, cv);
+	connect<Output_elem, Input_dim, Output_elem, Convert_function>(out, std::forward<Convert_function>(cv));
 }
 
 
@@ -132,7 +132,7 @@ template<typename Casted_elem, std::size_t Output_dim, typename Output_elem, typ
 void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out, Convert_function&& cv) {
 	static_assert(Input_dim == Output_dim, "input and output connected on edge must have same dimension");
 	using edge_type = filter_converting_edge<Input_dim, Input_elem, Casted_elem, Output_elem, Convert_function>;
-	edge_type* edge = new edge_type(*this, out, cv);
+	edge_type* edge = new edge_type(*this, out, std::forward<Convert_function>(cv));
 	edge_.reset(edge);
 	out.edge_has_connected(*edge);
 

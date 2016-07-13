@@ -51,4 +51,16 @@ Eigen_vec3 camera::point(const spherical_coordinates& s) const {
 }
 
 
+Eigen_mat3 essential_matrix(const camera& from, const camera& to) {
+	Eigen_affine3 pose_transformation = from.transformation_to(to);
+	Eigen_vec3 translation = pose_transformation.translation();
+	Eigen_mat3 translation_hat; translation_hat <<
+		0.0, -translation(2), translation(1),
+		translation(2), 0.0, -translation(0),
+		-translation(1), translation(0), 0.0;
+
+	return pose_transformation.rotation() * translation_hat;
+}
+
+
 }
