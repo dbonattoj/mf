@@ -18,19 +18,19 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "image_write.h"
+#include "image_export.h"
 #include "../opencv.h"
 
 namespace mf {
 
-void image_write(const image<rgb_color>& img, const std::string& filename) {
+void image_export(const image<rgb_color>& img, const std::string& filename) {
 	cv::Mat output_img;
 	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGR);
 	cv::imwrite(filename, output_img);
 }
 
 
-void image_write(const masked_image<rgb_color>& img, const std::string& filename) {
+void image_export(const masked_image<rgb_color>& img, const std::string& filename) {
 	cv::Mat output_img, holes;
 	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGRA);
 	cv::bitwise_not(img.cv_mask_mat(), holes);
@@ -39,7 +39,7 @@ void image_write(const masked_image<rgb_color>& img, const std::string& filename
 }
 
 
-void image_write(const masked_image<rgb_color>& img, const std::string& filename, const rgb_color& background) {
+void image_export(const masked_image<rgb_color>& img, const std::string& filename, const rgb_color& background) {
 	cv::Scalar cv_background(background.b, background.g, background.r);
 	cv::Mat output_img, holes;
 	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGR);

@@ -66,6 +66,12 @@ auto image<Pixel>::operator=(image&& img) -> image& {
 
 
 template<typename Pixel>
+auto image<Pixel>::shape() const -> shape_type {
+	return shape_type(mat_.size[0], mat_.size[1]);
+}
+
+
+template<typename Pixel>
 auto image<Pixel>::view() -> view_type {
 	return to_ndarray_view(mat_);
 }
@@ -82,6 +88,12 @@ template<typename Pixel>
 masked_image<Pixel>::masked_image(const shape_type& shape) :
 	base(shape),
 	mask_mat_(shape[0], shape[1]) { }
+
+
+template<typename Pixel>
+masked_image<Pixel>::masked_image(const const_view_type& vw) :
+	base(vw),
+	mask_mat_(vw.shape()[0], vw.shape()[1]) { }
 
 
 template<typename Pixel>
@@ -152,13 +164,13 @@ auto masked_image<Pixel>::operator=(base&& img) -> masked_image& {
 
 
 template<typename Pixel>
-void masked_image<Pixel>::read(const masked_const_view_type& vw) {
+void masked_image<Pixel>::read_masked(const masked_const_view_type& vw) {
 	copy_masked_to_opencv(vw, base::mat_, mask_mat_);
 }
 
 
 template<typename Pixel>
-void masked_image<Pixel>::write(const masked_view_type& vw) const {
+void masked_image<Pixel>::write_masked(const masked_view_type& vw) const {
 	copy_masked_to_ndarray_view(base::mat_, mask_mat_, vw);
 }
 

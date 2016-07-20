@@ -33,6 +33,7 @@ class projection_image_camera : public projection_camera, public depth_image_cam
 	using depth_image_camera_base = depth_image_camera<Depth>;
 
 public:
+	projection_image_camera(const pose&, const Eigen_mat3& intr, const depth_projection_parameters&, const ndsize<2>&);
 	projection_image_camera(const projection_camera& cam, ndsize<2> sz);
 	projection_image_camera(const projection_image_camera&) = default;
 	

@@ -94,7 +94,6 @@ Eigen_projective3 homography_transformation(const projection_camera& from, const
 
 Eigen_mat3 fundamental_matrix(const projection_camera& from, const projection_camera& to);
 
-
 }
 
 #endif

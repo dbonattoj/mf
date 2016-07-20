@@ -40,7 +40,7 @@ auto projection_camera::read_intrinsic_matrix_
 
 	if(intrinsic_mat(2, 0) != 0.0 || intrinsic_mat(2, 1) != 0.0 || intrinsic_mat(2, 2) != 1.0
 	|| intrinsic_mat(0, 1) != 0.0 || intrinsic_mat(1, 0) != 0.0)
-		throw std::invalid_argument("invalid intrinsic camera matrix");
+		throw std::invalid_argument("unsupported intrinsic camera matrix");
 	
 	real fx = intrinsic_mat(0, 0), fy = intrinsic_mat(1, 1), tx = intrinsic_mat(0, 2), ty = intrinsic_mat(1, 2);
 	
@@ -106,9 +106,9 @@ projection_camera::projection_camera
 Eigen_mat3 projection_camera::intrinsic_matrix() const {
 	const Eigen_mat4& view_to_image = view_to_image_.matrix();
 	Eigen_mat3 intrinsic; intrinsic <<
-		intrinsic(0, 0), intrinsic(0, 1), intrinsic(0, 2),
-		intrinsic(1, 0), intrinsic(1, 1), intrinsic(1, 2),
-		intrinsic(3, 0), intrinsic(3, 1), intrinsic(3, 2);
+		view_to_image(0, 0), view_to_image(0, 1), view_to_image(0, 2),
+		view_to_image(1, 0), view_to_image(1, 1), view_to_image(1, 2),
+		view_to_image(3, 0), view_to_image(3, 1), view_to_image(3, 2);
 	return intrinsic;
 }
 
@@ -122,5 +122,6 @@ Eigen_mat3 fundamental_matrix(const projection_camera& from, const projection_ca
 	return to.intrinsic_matrix().inverse().transpose() * essential_matrix(from, to) * from.intrinsic_matrix().inverse();
 }
 
-
+	
 }
+

@@ -34,6 +34,7 @@ LIB_SRC := $(shell find src -name '*.cc')
 LIB_OBJ := $(patsubst src/%.cc,$(BUILD_DIR)/src/%.o,$(LIB_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(LIB_SRC))
 
+
 # === tests ======
 TEST := $(DIST_DIR)/mf_test
 TEST_SRC := $(shell find test -name '*.cc')
@@ -43,18 +44,18 @@ TEST_SUPPORT_SRC := $(shell find test/support/. -name '*.cc')
 TEST_SUPPORT_OBJ := $(patsubst test/support/%.cc,$(BUILD_DIR)/test/support/%.o,$(TEST_SUPPORT_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
 
+
 # === programs ======
-# one executable per .cc in prog/*.cc
+# one executable per directory in prog/*.
+PROG_DIR := $(shell find prog -mindepth 1 -maxdepth 1 -type d ! -name "support")
+PROG := $(patsubst prog/%,$(DIST_DIR)/prog/%,$(PROG_DIR))
 PROG_SRC := $(shell find prog -maxdepth 1 -name '*.cc')
-PROG := $(patsubst prog/%.cc,$(DIST_DIR)/prog/%,$(PROG_SRC))
-# programs support
-PROG_SUPPORT_SRC := $(shell find prog/support prog/filter -name '*.cc')
 PROG_SUPPORT_OBJ := $(patsubst prog/%.cc,$(BUILD_DIR)/prog/%.o,$(PROG_SUPPORT_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
 # === default targets ======
-all : library prog
+all : library
 	
 
 library : $(LIB)
@@ -66,7 +67,7 @@ build_test : $(TEST)
 test : build_test
 	$(TEST)
 
-prog : $(PROG) $(PROG_FILTER)
+prog : $(PROG)
 	
 
 clean :
@@ -76,11 +77,13 @@ clean :
 
 # === internal targets ======
 
+# = library ===
+
 # shared library mf: build objects for src/../*.cc, and then link into shared library target
 # also create symlink dist/include/mf --> src/ , so that test+prog can #include <mf/...>
 # TODO improve
 $(LIB) : $(LIB_OBJ)
-	@echo building $@ && \
+	@echo linking $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_SHARED) -o $@ $(LIB_OBJ) $(LDLIBS) && \
 	mkdir -p dist/include && ln -fs ../../src dist/include/mf
@@ -94,7 +97,7 @@ $(BUILD_DIR)/src/%.o : src/%.cc
 
 
 
-
+# = test ===
 
 # test executable:  build mf, obj for test/../*.cc, test/support/*.cc, and link into test executable 
 $(TEST) : $(LIB) $(TEST_OBJ) $(TEST_SUPPORT_OBJ)
@@ -107,14 +110,16 @@ $(BUILD_DIR)/test/%.o : test/%.cc
 	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
+	
 
+# = programs ===
 
-
-# program executable: build mf, program filter shared libs, obj for program executable and program support, and link
-$(DIST_DIR)/prog/% :  $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(LIB)
-	@echo linking $@ && \
+# program executable: 
+$(DIST_DIR)/prog/% : prog/%/*.cc $(PROG_SUPPORT_OBJ) $(LIB)
+	@echo building program $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
 
 # .cc compilation in prog/: compile for program executable
 $(BUILD_DIR)/prog/%.o : prog/%.cc

@@ -29,4 +29,12 @@ projection_image_camera<Depth>::projection_image_camera(const projection_camera&
 		cam.depth_parameters().depth_max() - cam.depth_parameters().depth_min()
 	) { }
 
+
+template<typename Depth>
+projection_image_camera<Depth>::projection_image_camera
+(const pose& ps, const Eigen_mat3& intr, const depth_projection_parameters& dproj, const ndsize<2>& sz) :
+	projection_camera(ps, intr, dproj, sz),
+	depth_image_camera<Depth>(sz, dproj.depth_min(), dproj.depth_max() - dproj.depth_min()) { }
+
+
 }

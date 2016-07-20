@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_write
+std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	(const masked_image<T>& img, const std::string& filename, T min_value, T max_value, const rgb_color& background)
 {
 	cv::Mat output_img;
@@ -42,17 +42,17 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_write
 
 
 template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_write
+std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	(const masked_image<T>& img, const std::string& filename, const rgb_color& background)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos, img.cv_mask_mat());
-	image_write(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos), background);
+	image_export(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos), background);
 }
 
 
 template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_write
+std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	(const masked_image<T>& img, const std::string& filename, T min_value, T max_value)
 {
 	cv::Mat output_img;
@@ -69,17 +69,17 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_write
 
 
 template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_write
+std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	(const masked_image<T>& img, const std::string& filename)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos, img.cv_mask_mat());
-	image_write(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos));
+	image_export(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos));
 }
 
 
 template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_write
+std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	(const image<T>& img, const std::string& filename, T min_value, T max_value)
 {
 	cv::Mat output_img;
@@ -91,12 +91,12 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_write
 
 
 template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_write
+std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	(const image<T>& img, const std::string& filename)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos);
-	image_write(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos));
+	image_export(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos));
 }
 
 

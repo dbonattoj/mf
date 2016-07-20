@@ -1,11 +1,3 @@
-ACMMM
-=====
-- thin node
-- cleanup
-- vsrs demo
-
-
-
 FLOW
 - parallel node (multiple frames in parallel)
 - opencl node?

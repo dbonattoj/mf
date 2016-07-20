@@ -62,6 +62,9 @@ using Eigen_projective3 = Eigen::Transform<Eigen_scalar, 3, Eigen::Projective>;
 using Eigen_hyperplane2 = Eigen::Hyperplane<Eigen_scalar, 2>;
 using Eigen_hyperplane3 = Eigen::Hyperplane<Eigen_scalar, 3>;
 
+using Eigen_line2 = Eigen::ParametrizedLine<Eigen_scalar, 2>;
+using Eigen_line3 = Eigen::ParametrizedLine<Eigen_scalar, 3>;
+
 using Eigen_quaternion = Eigen::Quaternion<Eigen_scalar>;
 
 

@@ -56,6 +56,8 @@ public:
 	image& operator=(const image&);
 	image& operator=(image&&);
 	
+	shape_type shape() const;
+	
 	view_type view();
 	const_view_type view() const;
 	
@@ -89,6 +91,7 @@ private:
 
 public:
 	explicit masked_image(const shape_type&);
+	explicit masked_image(const const_view_type&);
 	explicit masked_image(const masked_const_view_type&);	
 	
 	masked_image(const masked_image&);
@@ -104,8 +107,8 @@ public:
 	cv_mask_mat_type& cv_mask_mat() noexcept { return mask_mat_; }
 	const cv_mask_mat_type& cv_mask_mat() const noexcept { return mask_mat_; }
 	
-	void read(const masked_const_view_type&);
-	void write(const masked_view_type&) const;
+	void read_masked(const masked_const_view_type&);
+	void write_masked(const masked_view_type&) const;
 };
 
 
