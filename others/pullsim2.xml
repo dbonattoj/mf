@@ -1,0 +1,1751 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>const int stream_duration = 4;
+const int prefetch = 1;
+const int ring_capacity = 1 + prefetch;
+
+const int seeked_max = 3;
+const bool may_skip_1 = false;
+const bool may_skip_2 = false;
+const bool may_seek = false;
+
+bool stopped = false;
+
+typedef struct {
+    int capacity;
+
+    int read_pos;
+    int write_pos;
+    bool full;
+    
+    int write_time;
+} ring;
+
+ring make_ring(int cap) {
+    ring r;
+    r.capacity = cap;
+    r.read_pos = 0;
+    r.write_pos = 0;
+    r.full = false;
+    r.write_time = -1;
+    return r;
+}
+
+
+typedef struct {
+    int start;
+    int end;
+} span;
+
+const int pull_chans = 5;
+
+const int call = 0;
+const int ret_success = 1;
+const int ret_tfail = 2;
+const int ret_stopped = 3;
+const int ret_eof = 4;
+
+const int async_bchans = 4;
+const int act = 0;
+const int r = 1;
+const int w = 2;
+const int bk = 3;
+
+chan entering;
+
+typedef struct {
+    ring r;
+} sync_nd;
+
+sync_nd make_sync_nd(int cap) {
+    sync_nd nd;
+    nd.r = make_ring(cap);
+    return nd;
+}
+
+
+typedef struct {
+    ring r;
+    bool active;
+    int time_limit;
+    bool writing;
+    int end_t;
+
+    bool act_lock;
+
+    int rid;
+    int fail_rid;
+} async_nd;
+
+async_nd make_async_nd(int cap) {
+    async_nd nd;
+    nd.r = make_ring(cap);
+    nd.active = false;
+    nd.time_limit = -1;
+    nd.writing = false;
+    nd.end_t = stream_duration;
+
+    nd.act_lock = false;
+    nd.rid = 0;
+    nd.fail_rid = -3;
+
+    return nd;
+}
+
+
+typedef struct {
+    int next_pull;
+    span input_span;
+} multiplex_nd;
+
+multiplex_nd make_multiplex_nd() {
+    multiplex_nd nd;
+    nd.next_pull = -1;
+    nd.input_span.start = -1;
+    nd.input_span.end = -1;
+    return nd;
+}
+
+
+
+bool in_span(const span&amp; sp, int t) {
+    return (t &gt;= sp.start) &amp;&amp; (t &lt; sp.end);
+}
+
+
+int readable(const ring&amp; r) {
+    if(r.full) return r.capacity;
+    else if(r.read_pos &lt;= r.write_pos) return r.write_pos - r.read_pos;
+    else return r.capacity - r.read_pos + r.write_pos;
+}
+
+int writable(const ring&amp; r) {
+    return r.capacity - readable(r);
+}
+
+void write_dur(ring&amp; r, int dur) {
+    if(dur == 0) return;
+    r.write_pos = (r.write_pos + dur) % r.capacity;
+    if(r.write_pos == r.read_pos) r.full = true;
+    r.write_time += dur;
+}
+
+void read_dur(ring&amp; r, int dur) {
+    if(dur == 0) return;
+    r.read_pos = (r.read_pos + dur) % r.capacity;
+    r.full = false;
+}
+
+int readable_start(const ring&amp; r) {
+    return r.write_time + 1 - readable(r);
+}
+
+int readable_end(const ring&amp; r) {
+    return r.write_time + 1;
+}
+
+int writable_start(const ring&amp; r) {
+    return r.write_time + 1;
+}
+
+bool is_readable(const ring&amp; r, int t) {
+    return (t &gt;= readable_start(r)) &amp;&amp; (t &lt; readable_end(r));
+}
+
+void seek(ring&amp; r, int t) {
+    if(is_readable(r, t)) {
+        read_dur(r, t - readable_start(r));
+    } else {
+        read_dur(r, readable_end(r) - readable_start(r));
+        r.write_time = t - 1;
+    }
+}</declaration>
+	<template>
+		<name x="5" y="5">Source</name>
+		<parameter>int&amp; pull_t, chan&amp; pull[pull_chans]</parameter>
+		<location id="id0" x="-1921" y="-1598">
+			<committed/>
+		</location>
+		<location id="id1" x="-1921" y="-1683">
+			<urgent/>
+		</location>
+		<location id="id2" x="-1921" y="-1785">
+			<urgent/>
+		</location>
+		<init ref="id2"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<nail x="-1921" y="-1547"/>
+			<nail x="-1742" y="-1547"/>
+			<nail x="-1742" y="-1785"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-1912" y="-1649">pull[ret_success]!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-1912" y="-1742">pull_t &lt; stream_duration</label>
+			<label kind="synchronisation" x="-1912" y="-1759">pull[call]?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Multiplexer</name>
+		<parameter>int&amp; t, chan&amp; conn_pull[pull_chans], multiplex_nd&amp; nd, broadcast chan&amp; updated, int past_win, int fut_win</parameter>
+		<location id="id3" x="-765" y="-705">
+			<committed/>
+		</location>
+		<location id="id4" x="-340" y="-773">
+			<committed/>
+		</location>
+		<location id="id5" x="-765" y="-773">
+			<urgent/>
+		</location>
+		<location id="id6" x="-927" y="-773">
+			<urgent/>
+		</location>
+		<location id="id7" x="-1088" y="-773">
+			<urgent/>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id7"/>
+			<nail x="-1088" y="-705"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-756" y="-756">conn_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-1070" y="-875">updated!</label>
+			<nail x="-340" y="-858"/>
+			<nail x="-1088" y="-858"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-739" y="-824">conn_pull[ret_success]?</label>
+			<label kind="assignment" x="-739" y="-807">nd.input_span.start = t - past_win,
+nd.input_span.end = t + fut_win + 1</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-909" y="-790">conn_pull[call]!</label>
+			<label kind="assignment" x="-909" y="-807">t = nd.next_pull</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-1071" y="-790">nd.next_pull != t</label>
+		</transition>
+	</template>
+	<template>
+		<name>MultiplexerOutput</name>
+		<parameter>int&amp; pull_t, int&amp; succ_t, chan&amp; pull[pull_chans], multiplex_nd&amp; nd, broadcast chan&amp; updated</parameter>
+		<declaration>int req_t;
+
+span exp_span;</declaration>
+		<location id="id8" x="-1122" y="-1156">
+			<committed/>
+		</location>
+		<location id="id9" x="-1011" y="-1368">
+			<name x="-1028" y="-1402">TFail</name>
+			<committed/>
+		</location>
+		<location id="id10" x="-1011" y="-1156">
+			<urgent/>
+		</location>
+		<location id="id11" x="-1011" y="-1232">
+			<committed/>
+		</location>
+		<location id="id12" x="-1445" y="-1156">
+			<urgent/>
+		</location>
+		<location id="id13" x="-1606" y="-1156">
+			<urgent/>
+		</location>
+		<init ref="id13"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-1588" y="-986">! in_span(nd.input_span, pull_t)</label>
+			<label kind="synchronisation" x="-1588" y="-969">pull[ret_tfail]!</label>
+			<nail x="-1122" y="-952"/>
+			<nail x="-1606" y="-952"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-1589" y="-1062">in_span(nd.input_span, pull_t)</label>
+			<label kind="synchronisation" x="-1588" y="-1045">pull[ret_success]!</label>
+			<nail x="-1122" y="-1028"/>
+			<nail x="-1606" y="-1028"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-1003" y="-1275">! in_span(exp_span, pull_t)</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-1088" y="-1173">updated?</label>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-1003" y="-1215">in_span(exp_span, pull_t)</label>
+			<label kind="assignment" x="-1004" y="-1198">nd.next_pull = req_t</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id13"/>
+			<label kind="synchronisation" x="-1589" y="-1385">pull[ret_tfail]!</label>
+			<nail x="-1606" y="-1368"/>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-1436" y="-1309">! in_span(nd.input_span, pull_t)</label>
+			<label kind="assignment" x="-1436" y="-1292">req_t = succ_t,
+exp_span.start = req_t - 1,
+exp_span.end = req_t + prefetch + 1</label>
+			<nail x="-1445" y="-1232"/>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-1436" y="-1139">in_span(nd.input_span, pull_t)</label>
+			<label kind="synchronisation" x="-1589" y="-1096">pull[ret_success]!</label>
+			<nail x="-1445" y="-1105"/>
+			<nail x="-1606" y="-1105"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-1581" y="-1173">pull[call]?</label>
+		</transition>
+	</template>
+	<template>
+		<name>AsyncNodeOutput</name>
+		<parameter>int&amp; pull_t, chan&amp; pull[pull_chans], async_nd&amp; nd, broadcast chan&amp; bchan[async_bchans]</parameter>
+		<location id="id14" x="-1360" y="-127">
+			<urgent/>
+		</location>
+		<location id="id15" x="-1130" y="-127">
+			<urgent/>
+		</location>
+		<location id="id16" x="-620" y="-263">
+			<committed/>
+		</location>
+		<location id="id17" x="-782" y="-263">
+			<committed/>
+		</location>
+		<location id="id18" x="-943" y="-263">
+			<urgent/>
+		</location>
+		<location id="id19" x="-1130" y="-263">
+			<name x="-1122" y="-263">Wait_readable</name>
+			<urgent/>
+		</location>
+		<location id="id20" x="-1818" y="-263">
+			<urgent/>
+		</location>
+		<location id="id21" x="-1130" y="-373">
+			<urgent/>
+		</location>
+		<location id="id22" x="-1819" y="-373">
+			<urgent/>
+		</location>
+		<location id="id23" x="-1929" y="-263">
+			<urgent/>
+		</location>
+		<location id="id24" x="-1360" y="-347">
+			<urgent/>
+		</location>
+		<location id="id25" x="-1504" y="-373">
+		</location>
+		<location id="id26" x="-1241" y="-373">
+			<urgent/>
+		</location>
+		<init ref="id23"/>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-1309" y="-144">nd.fail_rid == nd.rid</label>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-1912" y="-144">pull[ret_tfail]!</label>
+			<nail x="-1929" y="-127"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-1317" y="-212">nd.fail_rid != nd.rid</label>
+			<nail x="-1181" y="-170"/>
+			<nail x="-1181" y="-221"/>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-1122" y="-229">readable(nd.r) &lt; 1</label>
+			<label kind="synchronisation" x="-1122" y="-212">bchan[bk]?</label>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-935" y="-229">pull_t &gt;= nd.end_t</label>
+			<label kind="synchronisation" x="-1911" y="-93">pull[ret_eof]!</label>
+			<nail x="-943" y="-76"/>
+			<nail x="-1929" y="-76"/>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-1911" y="-484">pull[ret_success]!</label>
+			<nail x="-620" y="-467"/>
+			<nail x="-1929" y="-467"/>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id16"/>
+			<label kind="assignment" x="-765" y="-280">read_dur(nd.r, 1)</label>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id17"/>
+			<label kind="guard" x="-926" y="-280">pull_t &lt; nd.end_t</label>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-1113" y="-280">readable(nd.r) &gt;= 1</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-1122" y="-314">bchan[act]!</label>
+			<label kind="assignment" x="-1122" y="-331">nd.act_lock = false</label>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id22"/>
+			<label kind="guard" x="-1810" y="-340">! nd.act_lock</label>
+			<label kind="assignment" x="-1810" y="-323">nd.act_lock = true</label>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-1910" y="-280">pull[call]?</label>
+		</transition>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="-1223" y="-373">nd.rid++</label>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id25"/>
+			<label kind="assignment" x="-1801" y="-373">nd.time_limit = pull_t + prefetch + 1</label>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-1385" y="-280">nd.writing</label>
+			<label kind="synchronisation" x="-1385" y="-263">bchan[r]?</label>
+			<nail x="-1377" y="-280"/>
+			<nail x="-1343" y="-280"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id26"/>
+			<label kind="guard" x="-1325" y="-347">! nd.writing</label>
+			<label kind="synchronisation" x="-1325" y="-313">bchan[w]!</label>
+			<label kind="assignment" x="-1325" y="-330">seek(nd.r, pull_t)</label>
+			<nail x="-1266" y="-347"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-1589" y="-347">readable_start(nd.r) != pull_t</label>
+			<nail x="-1487" y="-347"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id26"/>
+			<label kind="guard" x="-1496" y="-415">readable_start(nd.r) == pull_t</label>
+			<nail x="-1487" y="-398"/>
+			<nail x="-1266" y="-398"/>
+		</transition>
+	</template>
+	<template>
+		<name>AsyncNode</name>
+		<parameter>int&amp; t, chan&amp; conn_pull[pull_chans], async_nd&amp; nd, broadcast chan&amp; bchan[async_bchans]</parameter>
+		<declaration>int req_t = -1;
+
+int cur_rid = -1;
+int cur_time_limit = -1;
+
+bool allow_active() {
+    int t = writable_start(nd.r);
+    if(nd.fail_rid == nd.rid) return false;
+    if(t &gt;= nd.time_limit) return false;
+    if(t &gt;= nd.end_t) return false;
+    return true;
+}</declaration>
+		<location id="id27" x="-544" y="-612">
+			<urgent/>
+		</location>
+		<location id="id28" x="-450" y="-527">
+			<urgent/>
+		</location>
+		<location id="id29" x="-1334" y="-986">
+			<urgent/>
+		</location>
+		<location id="id30" x="-1334" y="-1079">
+			<name x="-1377" y="-1088">End</name>
+		</location>
+		<location id="id31" x="-1113" y="-731">
+			<committed/>
+		</location>
+		<location id="id32" x="-1113" y="-841">
+			<committed/>
+		</location>
+		<location id="id33" x="-1334" y="-841">
+			<committed/>
+		</location>
+		<location id="id34" x="111" y="-595">
+			<committed/>
+		</location>
+		<location id="id35" x="111" y="-663">
+			<name x="102" y="-697">Got_tfail</name>
+			<committed/>
+		</location>
+		<location id="id36" x="111" y="-731">
+			<urgent/>
+		</location>
+		<location id="id37" x="-102" y="-731">
+			<urgent/>
+		</location>
+		<location id="id38" x="-255" y="-731">
+			<urgent/>
+		</location>
+		<location id="id39" x="-450" y="-731">
+			<urgent/>
+		</location>
+		<location id="id40" x="-680" y="-731">
+			<name x="-722" y="-714">Wait_writable</name>
+			<urgent/>
+		</location>
+		<location id="id41" x="-850" y="-731">
+			<urgent/>
+		</location>
+		<location id="id42" x="-1334" y="-731">
+			<urgent/>
+		</location>
+		<init ref="id42"/>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id42"/>
+			<label kind="assignment" x="-1317" y="-629">nd.writing = false</label>
+			<nail x="-1334" y="-612"/>
+		</transition>
+		<transition>
+			<source ref="id39"/>
+			<target ref="id27"/>
+			<label kind="guard" x="-731" y="-654">req_t &gt;= stream_duration</label>
+			<nail x="-544" y="-697"/>
+		</transition>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-1266" y="-960">bchan[act]?</label>
+			<label kind="assignment" x="-1266" y="-943">nd.act_lock = true</label>
+			<nail x="-1275" y="-986"/>
+			<nail x="-1275" y="-884"/>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id29"/>
+			<label kind="guard" x="-1445" y="-969">! allow_active()</label>
+			<label kind="assignment" x="-1479" y="-952">nd.act_lock = false</label>
+		</transition>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="guard" x="-1326" y="-1054">stopped</label>
+		</transition>
+		<transition>
+			<source ref="id31"/>
+			<target ref="id41"/>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id31"/>
+			<label kind="assignment" x="-1105" y="-799">nd.act_lock = false</label>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id32"/>
+			<label kind="guard" x="-1309" y="-858">allow_active()</label>
+		</transition>
+		<transition>
+			<source ref="id42"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-1326" y="-807">! nd.act_lock</label>
+			<label kind="assignment" x="-1326" y="-790">nd.act_lock = true</label>
+		</transition>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="-1317" y="-544">bchan[bk]!</label>
+			<label kind="assignment" x="-1317" y="-578">nd.fail_rid = cur_rid,
+nd.writing = false</label>
+			<nail x="-1334" y="-527"/>
+		</transition>
+		<transition>
+			<source ref="id34"/>
+			<target ref="id28"/>
+			<nail x="179" y="-595"/>
+			<nail x="179" y="-527"/>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id28"/>
+			<nail x="179" y="-663"/>
+			<nail x="179" y="-527"/>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id41"/>
+			<label kind="assignment" x="-85" y="-867">write_dur(nd.r, 1),
+nd.writing = false,
+nd.fail_rid = -1</label>
+			<nail x="111" y="-816"/>
+			<nail x="-850" y="-816"/>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id34"/>
+			<label kind="synchronisation" x="-85" y="-612">conn_pull[ret_stopped]?</label>
+			<nail x="-102" y="-595"/>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-85" y="-680">conn_pull[ret_tfail]?</label>
+			<nail x="-102" y="-663"/>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id36"/>
+			<label kind="synchronisation" x="-85" y="-748">conn_pull[ret_success]?</label>
+		</transition>
+		<transition>
+			<source ref="id38"/>
+			<target ref="id37"/>
+			<label kind="synchronisation" x="-238" y="-748">conn_pull[call]!</label>
+		</transition>
+		<transition>
+			<source ref="id39"/>
+			<target ref="id28"/>
+			<label kind="guard" x="-442" y="-654">req_t &gt;= nd.time_limit &amp;&amp;
+!(req_t &gt;= stream_duration)</label>
+		</transition>
+		<transition>
+			<source ref="id39"/>
+			<target ref="id38"/>
+			<label kind="guard" x="-433" y="-782">req_t &lt; nd.time_limit &amp;&amp;
+req_t &lt; stream_duration</label>
+			<label kind="assignment" x="-433" y="-748">t = req_t</label>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id39"/>
+			<label kind="guard" x="-663" y="-782">writable(nd.r) &gt;= 1</label>
+			<label kind="assignment" x="-663" y="-765">req_t = writable_start(nd.r),
+nd.writing = true</label>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id40"/>
+			<label kind="assignment" x="-824" y="-748">cur_rid = nd.rid</label>
+		</transition>
+	</template>
+	<template>
+		<name>SyncNode</name>
+		<parameter>int&amp; pull_t, int&amp; t, chan&amp; pull[pull_chans], chan&amp; conn_pull[pull_chans], sync_nd&amp; nd</parameter>
+		<location id="id43" x="-782" y="-416">
+			<name x="-816" y="-399">Stopped</name>
+		</location>
+		<location id="id44" x="-782" y="-535">
+			<committed/>
+		</location>
+		<location id="id45" x="-782" y="-476">
+			<committed/>
+		</location>
+		<location id="id46" x="-1003" y="-476">
+			<urgent/>
+		</location>
+		<location id="id47" x="-1283" y="-663">
+			<urgent/>
+		</location>
+		<location id="id48" x="-1155" y="-663">
+			<urgent/>
+		</location>
+		<location id="id49" x="-969" y="-663">
+			<committed/>
+		</location>
+		<location id="id50" x="-799" y="-773">
+			<urgent/>
+		</location>
+		<location id="id51" x="-1156" y="-476">
+			<committed/>
+		</location>
+		<location id="id52" x="-799" y="-663">
+			<committed/>
+		</location>
+		<init ref="id47"/>
+		<transition>
+			<source ref="id45"/>
+			<target ref="id47"/>
+			<label kind="synchronisation" x="-875" y="-340">pull[ret_tfail]!</label>
+			<nail x="-722" y="-476"/>
+			<nail x="-722" y="-323"/>
+			<nail x="-1283" y="-323"/>
+		</transition>
+		<transition>
+			<source ref="id44"/>
+			<target ref="id52"/>
+			<label kind="assignment" x="-714" y="-569">write_dur(nd.r, 1)</label>
+			<nail x="-722" y="-535"/>
+			<nail x="-722" y="-663"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id43"/>
+			<label kind="synchronisation" x="-985" y="-433">conn_pull[ret_stopped]?</label>
+			<nail x="-1003" y="-416"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id44"/>
+			<label kind="synchronisation" x="-985" y="-552">conn_pull[ret_success]?</label>
+			<nail x="-1003" y="-535"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id45"/>
+			<label kind="synchronisation" x="-985" y="-493">conn_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id51"/>
+			<target ref="id46"/>
+			<label kind="synchronisation" x="-1138" y="-493">conn_pull[call]!</label>
+		</transition>
+		<transition>
+			<source ref="id49"/>
+			<target ref="id52"/>
+			<label kind="assignment" x="-943" y="-680">t = pull_t</label>
+		</transition>
+		<transition>
+			<source ref="id47"/>
+			<target ref="id48"/>
+			<label kind="synchronisation" x="-1256" y="-680">pull[call]?</label>
+		</transition>
+		<transition>
+			<source ref="id48"/>
+			<target ref="id49"/>
+			<label kind="guard" x="-1198" y="-637">readable_start(nd.r) != pull_t</label>
+			<label kind="assignment" x="-1113" y="-620">seek(nd.r, pull_t)</label>
+			<nail x="-1138" y="-637"/>
+			<nail x="-995" y="-637"/>
+		</transition>
+		<transition>
+			<source ref="id48"/>
+			<target ref="id49"/>
+			<label kind="guard" x="-1207" y="-705">readable_start(nd.r) == pull_t</label>
+			<nail x="-1138" y="-688"/>
+			<nail x="-994" y="-688"/>
+		</transition>
+		<transition>
+			<source ref="id52"/>
+			<target ref="id50"/>
+			<label kind="guard" x="-943" y="-739">readable(nd.r) &gt;= 1</label>
+		</transition>
+		<transition>
+			<source ref="id50"/>
+			<target ref="id47"/>
+			<label kind="synchronisation" x="-943" y="-790">pull[ret_success]!</label>
+			<label kind="assignment" x="-935" y="-807">read_dur(nd.r, 1)</label>
+			<nail x="-1283" y="-773"/>
+		</transition>
+		<transition>
+			<source ref="id52"/>
+			<target ref="id51"/>
+			<label kind="guard" x="-926" y="-637">readable(nd.r) &lt; 1</label>
+			<nail x="-799" y="-595"/>
+			<nail x="-1156" y="-578"/>
+		</transition>
+	</template>
+	<template>
+		<name>Sync2Node</name>
+		<parameter>int&amp; pull_t, int&amp; t, chan&amp; pull[pull_chans], chan&amp; conn1_pull[pull_chans], chan&amp; conn2_pull[pull_chans], sync_nd&amp; nd</parameter>
+		<location id="id53" x="-102" y="-306">
+			<name x="-144" y="-289">Unsupported</name>
+		</location>
+		<location id="id54" x="-714" y="-153">
+			<committed/>
+		</location>
+		<location id="id55" x="-714" y="-306">
+			<committed/>
+		</location>
+		<location id="id56" x="-1215" y="-493">
+			<urgent/>
+		</location>
+		<location id="id57" x="-714" y="-365">
+			<committed/>
+		</location>
+		<location id="id58" x="-731" y="-493">
+			<committed/>
+		</location>
+		<location id="id59" x="-935" y="-306">
+			<urgent/>
+		</location>
+		<location id="id60" x="-714" y="-246">
+			<name x="-748" y="-229">Stopped1</name>
+		</location>
+		<location id="id61" x="-1088" y="-306">
+			<committed/>
+		</location>
+		<location id="id62" x="-901" y="-493">
+			<committed/>
+		</location>
+		<location id="id63" x="-1087" y="-493">
+			<urgent/>
+		</location>
+		<location id="id64" x="-731" y="-603">
+			<urgent/>
+		</location>
+		<location id="id65" x="-204" y="-306">
+			<committed/>
+		</location>
+		<location id="id66" x="-204" y="-365">
+			<committed/>
+		</location>
+		<location id="id67" x="-425" y="-306">
+			<urgent/>
+		</location>
+		<location id="id68" x="-204" y="-246">
+			<name x="-238" y="-229">Stopped2</name>
+		</location>
+		<location id="id69" x="-578" y="-306">
+			<committed/>
+		</location>
+		<init ref="id56"/>
+		<transition>
+			<source ref="id65"/>
+			<target ref="id53"/>
+		</transition>
+		<transition>
+			<source ref="id55"/>
+			<target ref="id54"/>
+			<nail x="-654" y="-306"/>
+			<nail x="-654" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id57"/>
+			<target ref="id69"/>
+			<nail x="-637" y="-365"/>
+			<nail x="-612" y="-306"/>
+		</transition>
+		<transition>
+			<source ref="id54"/>
+			<target ref="id56"/>
+			<label kind="synchronisation" x="-824" y="-170">pull[ret_tfail]!</label>
+			<nail x="-1215" y="-153"/>
+		</transition>
+		<transition>
+			<source ref="id66"/>
+			<target ref="id58"/>
+			<label kind="assignment" x="-272" y="-476">write_dur(nd.r, 1)</label>
+			<nail x="-144" y="-365"/>
+			<nail x="-144" y="-493"/>
+		</transition>
+		<transition>
+			<source ref="id59"/>
+			<target ref="id60"/>
+			<label kind="synchronisation" x="-917" y="-263">conn1_pull[ret_stopped]?</label>
+			<nail x="-935" y="-246"/>
+		</transition>
+		<transition>
+			<source ref="id59"/>
+			<target ref="id57"/>
+			<label kind="synchronisation" x="-917" y="-382">conn1_pull[ret_success]?</label>
+			<nail x="-935" y="-365"/>
+		</transition>
+		<transition>
+			<source ref="id59"/>
+			<target ref="id55"/>
+			<label kind="synchronisation" x="-917" y="-323">conn1_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id61"/>
+			<target ref="id59"/>
+			<label kind="synchronisation" x="-1070" y="-323">conn1_pull[call]!</label>
+		</transition>
+		<transition>
+			<source ref="id62"/>
+			<target ref="id58"/>
+			<label kind="assignment" x="-875" y="-510">t = pull_t</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id63"/>
+			<label kind="synchronisation" x="-1188" y="-510">pull[call]?</label>
+		</transition>
+		<transition>
+			<source ref="id63"/>
+			<target ref="id62"/>
+			<label kind="guard" x="-1130" y="-467">readable_start(nd.r) != pull_t</label>
+			<label kind="assignment" x="-1045" y="-450">seek(nd.r, pull_t)</label>
+			<nail x="-1070" y="-467"/>
+			<nail x="-927" y="-467"/>
+		</transition>
+		<transition>
+			<source ref="id63"/>
+			<target ref="id62"/>
+			<label kind="guard" x="-1139" y="-535">readable_start(nd.r) == pull_t</label>
+			<nail x="-1070" y="-518"/>
+			<nail x="-926" y="-518"/>
+		</transition>
+		<transition>
+			<source ref="id58"/>
+			<target ref="id64"/>
+			<label kind="guard" x="-875" y="-569">readable(nd.r) &gt;= 1</label>
+		</transition>
+		<transition>
+			<source ref="id64"/>
+			<target ref="id56"/>
+			<label kind="synchronisation" x="-875" y="-620">pull[ret_success]!</label>
+			<label kind="assignment" x="-867" y="-637">read_dur(nd.r, 1)</label>
+			<nail x="-1215" y="-603"/>
+		</transition>
+		<transition>
+			<source ref="id58"/>
+			<target ref="id61"/>
+			<label kind="guard" x="-858" y="-467">readable(nd.r) &lt; 1</label>
+			<nail x="-731" y="-425"/>
+			<nail x="-1088" y="-408"/>
+		</transition>
+		<transition>
+			<source ref="id67"/>
+			<target ref="id68"/>
+			<label kind="synchronisation" x="-407" y="-263">conn2_pull[ret_stopped]?</label>
+			<nail x="-425" y="-246"/>
+		</transition>
+		<transition>
+			<source ref="id67"/>
+			<target ref="id66"/>
+			<label kind="synchronisation" x="-407" y="-382">conn2_pull[ret_success]?</label>
+			<nail x="-425" y="-365"/>
+		</transition>
+		<transition>
+			<source ref="id67"/>
+			<target ref="id65"/>
+			<label kind="synchronisation" x="-407" y="-323">conn2_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id69"/>
+			<target ref="id67"/>
+			<label kind="synchronisation" x="-560" y="-323">conn2_pull[call]!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Sink</name>
+		<parameter>int&amp; t, chan&amp; conn_pull[pull_chans], broadcast chan&amp; stop1, broadcast chan&amp; stop2</parameter>
+		<declaration>int seeked_counter = 0;
+bool seq_frame = false;</declaration>
+		<location id="id70" x="-790" y="-926">
+			<urgent/>
+		</location>
+		<location id="id71" x="-1665" y="-892">
+			<committed/>
+		</location>
+		<location id="id72" x="-1665" y="-977">
+			<label kind="invariant" x="-1708" y="-960">seeked_counter &lt; seeked_max</label>
+			<committed/>
+		</location>
+		<location id="id73" x="-1385" y="-935">
+			<committed/>
+		</location>
+		<location id="id74" x="-790" y="-1020">
+			<urgent/>
+		</location>
+		<location id="id75" x="-1827" y="-935">
+			<name x="-1844" y="-918">Init</name>
+			<committed/>
+		</location>
+		<location id="id76" x="-790" y="-841">
+			<name x="-807" y="-824">End</name>
+		</location>
+		<location id="id77" x="-1028" y="-850">
+			<name x="-1053" y="-833">Stopped</name>
+		</location>
+		<location id="id78" x="-1028" y="-935">
+			<name x="-1045" y="-918">Failure</name>
+		</location>
+		<location id="id79" x="-1028" y="-1020">
+			<committed/>
+		</location>
+		<location id="id80" x="-1241" y="-935">
+			<urgent/>
+		</location>
+		<location id="id81" x="-1742" y="-935">
+			<urgent/>
+		</location>
+		<init ref="id75"/>
+		<transition>
+			<source ref="id73"/>
+			<target ref="id79"/>
+			<label kind="guard" x="-1367" y="-1037">may_skip_1</label>
+			<nail x="-1241" y="-1071"/>
+			<nail x="-1045" y="-1071"/>
+		</transition>
+		<transition>
+			<source ref="id70"/>
+			<target ref="id76"/>
+			<label kind="synchronisation" x="-782" y="-901">stop2!</label>
+		</transition>
+		<transition>
+			<source ref="id81"/>
+			<target ref="id72"/>
+			<label kind="guard" x="-1759" y="-1011">may_seek</label>
+			<nail x="-1700" y="-977"/>
+		</transition>
+		<transition>
+			<source ref="id71"/>
+			<target ref="id73"/>
+			<label kind="assignment" x="-1623" y="-892">t = t + 1,
+seq_frame = true</label>
+			<nail x="-1410" y="-892"/>
+		</transition>
+		<transition>
+			<source ref="id72"/>
+			<target ref="id73"/>
+			<label kind="select" x="-1631" y="-1011">seek_t : int[0, stream_duration - 2]</label>
+			<label kind="assignment" x="-1631" y="-994">t = seek_t, seeked_counter = seeked_counter + 1,
+seq_frame = false</label>
+			<nail x="-1410" y="-977"/>
+		</transition>
+		<transition>
+			<source ref="id81"/>
+			<target ref="id71"/>
+			<nail x="-1699" y="-892"/>
+		</transition>
+		<transition>
+			<source ref="id73"/>
+			<target ref="id80"/>
+			<label kind="synchronisation" x="-1368" y="-952">conn_pull[call]!</label>
+		</transition>
+		<transition>
+			<source ref="id74"/>
+			<target ref="id70"/>
+			<label kind="synchronisation" x="-782" y="-986">stop1!</label>
+			<label kind="assignment" x="-782" y="-1003">stopped = true</label>
+		</transition>
+		<transition>
+			<source ref="id75"/>
+			<target ref="id81"/>
+		</transition>
+		<transition>
+			<source ref="id79"/>
+			<target ref="id74"/>
+			<label kind="guard" x="-1003" y="-1037">t == stream_duration - 1</label>
+		</transition>
+		<transition>
+			<source ref="id79"/>
+			<target ref="id81"/>
+			<label kind="guard" x="-1436" y="-1122">t &lt; stream_duration - 1</label>
+			<nail x="-1028" y="-1105"/>
+			<nail x="-1742" y="-1105"/>
+		</transition>
+		<transition>
+			<source ref="id80"/>
+			<target ref="id77"/>
+			<label kind="synchronisation" x="-1224" y="-867">conn_pull[ret_stopped]?</label>
+			<nail x="-1241" y="-850"/>
+		</transition>
+		<transition>
+			<source ref="id80"/>
+			<target ref="id78"/>
+			<label kind="synchronisation" x="-1224" y="-952">conn_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id80"/>
+			<target ref="id79"/>
+			<label kind="synchronisation" x="-1224" y="-1037">conn_pull[ret_success]?</label>
+			<nail x="-1241" y="-1020"/>
+		</transition>
+	</template>
+	<template>
+		<name>Sink2</name>
+		<parameter>int&amp; t, chan&amp; a_conn_pull[pull_chans], chan&amp; b_conn_pull[pull_chans], broadcast chan&amp; stop1, broadcast chan&amp; stop2, broadcast chan&amp; stop3, broadcast chan&amp; stop4</parameter>
+		<declaration>int seeked_counter = 0;
+bool seq_frame = false;</declaration>
+		<location id="id82" x="926" y="467">
+			<committed/>
+		</location>
+		<location id="id83" x="918" y="170">
+			<committed/>
+		</location>
+		<location id="id84" x="1037" y="42">
+			<name x="1027" y="8">End_</name>
+		</location>
+		<location id="id85" x="1037" y="119">
+			<urgent/>
+		</location>
+		<location id="id86" x="1037" y="272">
+			<urgent/>
+		</location>
+		<location id="id87" x="1037" y="195">
+			<urgent/>
+		</location>
+		<location id="id88" x="196" y="213">
+			<committed/>
+		</location>
+		<location id="id89" x="196" y="128">
+			<label kind="invariant" x="153" y="145">seeked_counter &lt; seeked_max</label>
+			<committed/>
+		</location>
+		<location id="id90" x="476" y="170">
+			<urgent/>
+		</location>
+		<location id="id91" x="1037" y="348">
+			<name x="1054" y="357">End</name>
+			<urgent/>
+		</location>
+		<location id="id92" x="34" y="170">
+			<name x="17" y="187">Init</name>
+			<committed/>
+		</location>
+		<location id="id93" x="833" y="255">
+			<name x="808" y="272">Stopped1</name>
+		</location>
+		<location id="id94" x="833" y="170">
+			<name x="816" y="187">Failure1</name>
+		</location>
+		<location id="id95" x="833" y="85">
+			<urgent/>
+		</location>
+		<location id="id96" x="620" y="170">
+			<urgent/>
+		</location>
+		<location id="id97" x="119" y="170">
+			<urgent/>
+		</location>
+		<location id="id98" x="476" y="467">
+			<urgent/>
+		</location>
+		<location id="id99" x="833" y="552">
+			<name x="808" y="569">Stopped2</name>
+		</location>
+		<location id="id100" x="833" y="467">
+			<name x="816" y="484">Failure2</name>
+		</location>
+		<location id="id101" x="833" y="382">
+			<committed/>
+		</location>
+		<location id="id102" x="620" y="467">
+			<urgent/>
+		</location>
+		<init ref="id92"/>
+		<transition>
+			<source ref="id83"/>
+			<target ref="id98"/>
+			<nail x="918" y="314"/>
+			<nail x="391" y="314"/>
+			<nail x="391" y="467"/>
+		</transition>
+		<transition>
+			<source ref="id90"/>
+			<target ref="id83"/>
+			<label kind="guard" x="476" y="85">may_skip_1</label>
+			<nail x="620" y="42"/>
+			<nail x="909" y="42"/>
+		</transition>
+		<transition>
+			<source ref="id98"/>
+			<target ref="id82"/>
+			<label kind="guard" x="459" y="399">may_skip_2</label>
+			<nail x="620" y="340"/>
+			<nail x="909" y="340"/>
+		</transition>
+		<transition>
+			<source ref="id101"/>
+			<target ref="id82"/>
+			<nail x="884" y="382"/>
+		</transition>
+		<transition>
+			<source ref="id95"/>
+			<target ref="id83"/>
+			<nail x="884" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id85"/>
+			<target ref="id84"/>
+			<label kind="synchronisation" x="1046" y="68">stop4!</label>
+		</transition>
+		<transition>
+			<source ref="id87"/>
+			<target ref="id85"/>
+			<label kind="synchronisation" x="1046" y="136">stop3!</label>
+		</transition>
+		<transition>
+			<source ref="id86"/>
+			<target ref="id87"/>
+			<label kind="synchronisation" x="1046" y="212">stop2!</label>
+		</transition>
+		<transition>
+			<source ref="id97"/>
+			<target ref="id89"/>
+			<label kind="guard" x="85" y="119">may_seek</label>
+			<nail x="161" y="128"/>
+		</transition>
+		<transition>
+			<source ref="id88"/>
+			<target ref="id90"/>
+			<label kind="assignment" x="238" y="213">t++, seq_frame = true</label>
+			<nail x="451" y="213"/>
+		</transition>
+		<transition>
+			<source ref="id89"/>
+			<target ref="id90"/>
+			<label kind="select" x="229" y="76">seek_t : int[0, stream_duration - 2]</label>
+			<label kind="assignment" x="229" y="93">t = seek_t,
+seeked_counter++, seq_frame = false</label>
+			<nail x="451" y="128"/>
+		</transition>
+		<transition>
+			<source ref="id97"/>
+			<target ref="id88"/>
+			<nail x="162" y="213"/>
+		</transition>
+		<transition>
+			<source ref="id90"/>
+			<target ref="id96"/>
+			<label kind="synchronisation" x="493" y="153">a_conn_pull[call]!</label>
+		</transition>
+		<transition>
+			<source ref="id91"/>
+			<target ref="id86"/>
+			<label kind="synchronisation" x="1046" y="289">stop1!</label>
+		</transition>
+		<transition>
+			<source ref="id92"/>
+			<target ref="id97"/>
+		</transition>
+		<transition>
+			<source ref="id82"/>
+			<target ref="id91"/>
+			<label kind="guard" x="977" y="425">t == stream_duration - 1</label>
+			<label kind="assignment" x="986" y="408">stopped = true</label>
+		</transition>
+		<transition>
+			<source ref="id82"/>
+			<target ref="id97"/>
+			<label kind="guard" x="935" y="527">t &lt; stream_duration - 1</label>
+			<nail x="926" y="620"/>
+			<nail x="119" y="620"/>
+		</transition>
+		<transition>
+			<source ref="id96"/>
+			<target ref="id93"/>
+			<label kind="synchronisation" x="637" y="238">a_conn_pull[ret_stopped]?</label>
+			<nail x="620" y="255"/>
+		</transition>
+		<transition>
+			<source ref="id96"/>
+			<target ref="id94"/>
+			<label kind="synchronisation" x="637" y="153">a_conn_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id96"/>
+			<target ref="id95"/>
+			<label kind="synchronisation" x="637" y="68">a_conn_pull[ret_success]?</label>
+			<nail x="620" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id98"/>
+			<target ref="id102"/>
+			<label kind="synchronisation" x="493" y="450">b_conn_pull[call]!</label>
+		</transition>
+		<transition>
+			<source ref="id102"/>
+			<target ref="id99"/>
+			<label kind="synchronisation" x="637" y="535">b_conn_pull[ret_stopped]?</label>
+			<nail x="620" y="552"/>
+		</transition>
+		<transition>
+			<source ref="id102"/>
+			<target ref="id100"/>
+			<label kind="synchronisation" x="637" y="450">b_conn_pull[ret_tfail]?</label>
+		</transition>
+		<transition>
+			<source ref="id102"/>
+			<target ref="id101"/>
+			<label kind="synchronisation" x="637" y="365">b_conn_pull[ret_success]?</label>
+			<nail x="620" y="382"/>
+		</transition>
+	</template>
+	<system>int M_t = -1, N_t = -1, A_t = -1, B_t = -1, C_t = -1, D_t = -1, S_t = -1;
+
+
+/*
+//      G
+//      |
+//      M
+//     / \
+//    N   C
+//   / \ /
+//  B  [A]
+//   \ /
+//    S
+
+// Source G
+chan G_pull[pull_chans];
+G = Source(M_t, G_pull);
+
+// Multiplexer M
+chan MN_pull[pull_chans], MC_pull[pull_chans];
+multiplex_nd M_nd = make_multiplex_nd();
+broadcast chan M_updated;
+M = Multiplexer(M_t, G_pull, M_nd, M_updated, prefetch + 1, prefetch);
+MNout = MultiplexerOutput(N_t, S_t, MN_pull, M_nd, M_updated);
+MCout = MultiplexerOutput(C_t, S_t, MC_pull, M_nd, M_updated);
+
+// Async C
+chan C_pull[pull_chans];
+async_nd C_nd = make_async_nd(ring_capacity);
+broadcast chan C_bchan[async_bchans];
+C = AsyncNode(C_t, MC_pull, C_nd, C_bchan);
+Cout = AsyncNodeOutput(S_t, C_pull, C_nd, C_bchan);
+
+// Multiplexer N
+chan NA_pull[pull_chans], NB_pull[pull_chans];
+multiplex_nd N_nd = make_multiplex_nd();
+broadcast chan N_updated;
+N = Multiplexer(N_t, MN_pull, N_nd, N_updated, 1, prefetch);
+NAout = MultiplexerOutput(A_t, S_t, NA_pull, N_nd, N_updated);
+NBout = MultiplexerOutput(B_t, S_t, NB_pull, N_nd, N_updated);
+
+// Async B
+chan B_pull[pull_chans];
+async_nd B_nd = make_async_nd(ring_capacity);
+broadcast chan B_bchan[async_bchans];
+B = AsyncNode(B_t, NB_pull, B_nd, B_bchan);
+Bout = AsyncNodeOutput(S_t, B_pull, B_nd, B_bchan);
+
+// Two-input sync A
+chan A_pull[pull_chans];
+sync_nd A_nd = make_sync_nd(ring_capacity);
+A = Sync2Node(S_t, A_t, A_pull, NA_pull, C_pull, A_nd);
+
+// Two-input sink S
+broadcast chan unused[4];
+S = Sink2( 
+    S_t, B_pull, A_pull, 
+    C_bchan[act], C_bchan[w], B_bchan[act], B_bchan[w]
+);
+
+system G, M, MNout, MCout, C, Cout, N, NAout, NBout, A, B, Bout, S;
+*/
+
+
+
+/*
+//       G
+//      |
+//      M
+//     /\
+//    N  \
+//   /\   \
+// [A]B   C
+//  \/   /
+// [D]  /
+//  \  /
+//   \/
+//   S
+
+// Source G
+chan G_pull[pull_chans];
+G = Source(M_t, G_pull);
+
+// Multiplexer M
+chan MN_pull[pull_chans], MC_pull[pull_chans];
+multiplex_nd M_nd = make_multiplex_nd();
+broadcast chan M_updated;
+M = Multiplexer(M_t, G_pull, M_nd, M_updated, 2, prefetch);
+MNout = MultiplexerOutput(N_t, S_t, MN_pull, M_nd, M_updated);
+MCout = MultiplexerOutput(C_t, S_t, MC_pull, M_nd, M_updated);
+
+// Async C
+chan C_pull[pull_chans];
+async_nd C_nd = make_async_nd(ring_capacity);
+broadcast chan C_bchan[async_bchans];
+C = AsyncNode(C_t, MC_pull, C_nd, C_bchan);
+Cout = AsyncNodeOutput(S_t, C_pull, C_nd, C_bchan);
+
+// Multiplexer N
+chan NA_pull[pull_chans], NB_pull[pull_chans];
+multiplex_nd N_nd = make_multiplex_nd();
+broadcast chan N_updated;
+N = Multiplexer(N_t, MN_pull, N_nd, N_updated, 1, prefetch);
+NAout = MultiplexerOutput(A_t, D_t, NA_pull, N_nd, N_updated);
+NBout = MultiplexerOutput(B_t, D_t, NB_pull, N_nd, N_updated);
+
+// Sync A
+chan A_pull[pull_chans];
+sync_nd A_nd = make_sync_nd(ring_capacity);
+A = SyncNode(D_t, A_t, A_pull, NA_pull, A_nd);
+
+// Async B
+chan B_pull[pull_chans];
+async_nd B_nd = make_async_nd(ring_capacity);
+broadcast chan B_bchan[async_bchans];
+B = AsyncNode(B_t, NB_pull, B_nd, B_bchan);
+Bout = AsyncNodeOutput(D_t, B_pull, B_nd, B_bchan);
+
+// Two-input sync D
+chan D_pull[pull_chans];
+sync_nd D_nd = make_sync_nd(ring_capacity);
+D = Sync2Node(S_t, D_t, D_pull, A_pull, B_pull, D_nd);
+
+// Two-input sink S
+broadcast chan unused[4];
+S = Sink2( 
+    S_t, D_pull, C_pull, 
+    C_bchan[act], C_bchan[w], B_bchan[act], B_bchan[w]
+);
+
+system G, M, MNout, MCout, C, Cout, N, NAout, NBout, A, B, Bout, D, S;
+*/
+
+
+/*
+// Source G
+chan G_pull[pull_chans];
+G = Source(M_t, G_pull);
+
+// Multiplexer M
+chan MA_pull[pull_chans], MB_pull[pull_chans];
+multiplex_nd M_nd = { -1, {-1, -1} };
+broadcast chan M_updated;
+M = Multiplexer(M_t, G_pull, M_nd, M_updated);
+MAout = MultiplexerOutput(A_t, S_t, MA_pull, M_nd, M_updated);
+MBout = MultiplexerOutput(B_t, S_t, MB_pull, M_nd, M_updated);
+
+// Sync A
+chan A_pull[pull_chans];
+sync_nd A_nd = { {ring_capacity, 0, 0, false, -1} };
+A = SyncNode(S_t, A_t, A_pull, MA_pull, A_nd);
+
+// Async B
+chan B_pull[pull_chans];
+async_nd B_nd = { {ring_capacity, 0, 0, false, -1}, false, -1, false };
+broadcast chan B_bchan[async_bchans];
+B = AsyncNode(B_t, MB_pull, B_nd, B_bchan);
+Bout = AsyncNodeOutput(S_t, B_pull, B_nd, B_bchan);
+
+// Two-input sink S
+broadcast chan unused[4];
+S = Sink2( 
+    S_t, A_pull, B_pull, 
+    unused[0], unused[1], B_bchan[act], B_bchan[w]
+);
+
+system G, M, MAout, A, MBout, B, Bout, S;
+*/
+
+
+
+//   G
+//   |
+//   M
+//  / \
+// A   B
+//  \ /
+//   S
+
+// Source G
+chan G_pull[pull_chans];
+G = Source(M_t, G_pull);
+
+// Multiplexer M
+chan MA_pull[pull_chans], MB_pull[pull_chans];
+multiplex_nd M_nd = make_multiplex_nd();
+broadcast chan M_updated;
+M = Multiplexer(M_t, G_pull, M_nd, M_updated, 1, prefetch);
+MAout = MultiplexerOutput(A_t, S_t, MA_pull, M_nd, M_updated);
+MBout = MultiplexerOutput(B_t, S_t, MB_pull, M_nd, M_updated);
+
+// Async A
+chan A_pull[pull_chans];
+async_nd A_nd = make_async_nd(ring_capacity);
+broadcast chan A_bchan[async_bchans];
+A = AsyncNode(A_t, MA_pull, A_nd, A_bchan);
+Aout = AsyncNodeOutput(S_t, A_pull, A_nd, A_bchan);
+
+// Async B
+chan B_pull[pull_chans];
+async_nd B_nd = make_async_nd(ring_capacity);
+broadcast chan B_bchan[async_bchans];
+B = AsyncNode(B_t, MB_pull, B_nd, B_bchan);
+Bout = AsyncNodeOutput(S_t, B_pull, B_nd, B_bchan);
+
+// Two-input sink S
+broadcast chan unused[4];
+S = Sink2( 
+    S_t, A_pull, B_pull, 
+    A_bchan[act], A_bchan[w], B_bchan[act], B_bchan[w]
+);
+
+system G, M, MAout, A, Aout, MBout, B, Bout, S;
+
+
+
+/*
+//   G
+//   |
+//   M
+//  / \
+// A   B
+// |   |
+// |   C
+//  \ /
+//   S
+
+// Source G
+chan G_pull[pull_chans];
+G = Source(M_t, G_pull);
+
+// Multiplexer M
+chan MA_pull[pull_chans], MB_pull[pull_chans];
+multiplex_nd M_nd = make_multiplex_nd();
+broadcast chan M_updated;
+M = Multiplexer(M_t, G_pull, M_nd, M_updated, 1, prefetch);
+MAout = MultiplexerOutput(A_t, S_t, MA_pull, M_nd, M_updated);
+MBout = MultiplexerOutput(B_t, S_t, MB_pull, M_nd, M_updated);
+
+// Async A
+chan A_pull[pull_chans];
+async_nd A_nd = make_async_nd(ring_capacity);
+broadcast chan A_bchan[async_bchans];
+A = AsyncNode(A_t, MA_pull, A_nd, A_bchan);
+Aout = AsyncNodeOutput(S_t, A_pull, A_nd, A_bchan);
+
+// Async B
+chan B_pull[pull_chans];
+async_nd B_nd = make_async_nd(ring_capacity);
+broadcast chan B_bchan[async_bchans];
+B = AsyncNode(B_t, MB_pull, B_nd, B_bchan);
+Bout = AsyncNodeOutput(C_t, B_pull, B_nd, B_bchan);
+
+// Async C
+chan C_pull[pull_chans];
+async_nd C_nd = make_async_nd(ring_capacity);
+broadcast chan C_bchan[async_bchans];
+C = AsyncNode(C_t, B_pull, C_nd, C_bchan);
+Cout = AsyncNodeOutput(S_t, C_pull, C_nd, C_bchan);
+
+// Two-input sink S
+broadcast chan unused[4];
+S = Sink2( 
+    S_t, A_pull, C_pull, 
+    A_bchan[act], A_bchan[w], C_bchan[act], C_bchan[w]
+);
+
+system G, M, MAout, A, Aout, MBout, B, Bout, C, Cout, S;
+*/
+
+
+
+/*
+// G
+// |
+// A
+// |
+// B
+// |
+// S
+
+// Source G
+chan G_pull[pull_chans];
+G = Source(A_t, G_pull);
+
+// Async A
+chan A_pull[pull_chans];
+async_nd A_nd = make_async_nd(ring_capacity);
+broadcast chan A_bchan[async_bchans];
+A = AsyncNode(A_t, G_pull, A_nd, A_bchan);
+Aout = AsyncNodeOutput(B_t, A_pull, A_nd, A_bchan);
+
+// Async B
+chan B_pull[pull_chans];
+async_nd B_nd = make_async_nd(ring_capacity);
+broadcast chan B_bchan[async_bchans];
+B = AsyncNode(B_t, A_pull, B_nd, B_bchan);
+Bout = AsyncNodeOutput(S_t, B_pull, B_nd, B_bchan);
+
+// Sink S
+S = Sink(S_t, B_pull, B_bchan[act], B_bchan[w]);
+
+system G, A, Aout, B, Bout, S;
+*/
+
+
+/*
+// G
+// |
+// A
+// |
+// S
+
+// Source G
+chan G_pull[pull_chans];
+G = Source(A_t, G_pull);
+
+// Async A
+chan A_pull[pull_chans];
+async_nd A_nd = make_async_nd(ring_capacity);
+broadcast chan A_bchan[async_bchans];
+A = AsyncNode(A_t, G_pull, A_nd, A_bchan);
+Aout = AsyncNodeOutput(S_t, A_pull, A_nd, A_bchan);
+
+// Sink S
+S = Sink( S_t, A_pull, A_bchan[act], A_bchan[w]);
+
+system G, A, Aout, S;
+*/</system>
+	<queries>
+		<query>
+			<formula>A[] not (S.Failure1 or S.Failure2)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] not S.Failure
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; C.Got_tfail || B.Got_tfail
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; S.End
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; S_t == stream_duration - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; B.seq_frame &amp;&amp; M_t == B_t + 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; A.seq_frame &amp;&amp; M_t == A_t + 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; B.seq_frame &amp;&amp; M_t == B_t - prefetch - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; A.seq_frame &amp;&amp; M_t == A_t - prefetch - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] B.seq_frame imply M_t &gt;= B_t - prefetch - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] A.seq_frame imply M_t &gt;= A_t - prefetch - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] B.seq_frame imply M_t &lt;= B_t + 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] A.seq_frame imply M_t &lt;= A_t + 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] S.seq_frame imply A_t &lt;= S_t + prefetch
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] S.seq_frame imply A_t &gt;= S_t - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; S.seq_frame &amp;&amp; A_t == S_t - 1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; S.seq_frame &amp;&amp; A_t == S_t + prefetch
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] (not deadlock) or S.End
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>
