@@ -22,8 +22,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
 #include "node.h"
-#include "node_input.h"
-#include "node_output.h"
 #include <thread>
 #include <condition_variable>
 #include <mutex>

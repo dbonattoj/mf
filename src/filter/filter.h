@@ -128,6 +128,7 @@ public:
 
 	using edge_base_type = filter_edge_output_base<Output_dim, Output_elem>;
 	using frame_shape_type = ndsize<Output_dim>;
+	using view_type = ndarray_view<Output_dim, Output_elem>;
 
 private:
 	std::vector<edge_base_type*> edges_;
@@ -151,6 +152,8 @@ public:
 
 	void define_frame_shape(const frame_shape_type& shp);
 	const frame_shape_type& frame_shape() const;
+	
+	view_type get_output_view(const frame_view& generic_view);
 };
 
 
@@ -162,6 +165,7 @@ public:
 
 	using edge_base_type = filter_edge_input_base<Input_dim, Input_elem>;
 	using frame_shape_type = ndsize<Input_dim>;
+	using full_view_type = ndarray_timed_view<Input_dim + 1, Input_elem>;
 
 private:
 	std::unique_ptr<edge_base_type> edge_;
@@ -197,6 +201,8 @@ public:
 	
 	void activate() { set_activated(true); }
 	void deactivate() { set_activated(false); }
+	
+	full_view_type get_input_view(const timed_frame_array_view& generic_view);
 };
 
 }}

@@ -68,6 +68,13 @@ auto filter_output<Output_dim, Output_elem>::frame_shape() const -> const frame_
 }
 
 
+template<std::size_t Output_dim, typename Output_elem>
+auto filter_output<Output_dim, Output_elem>::get_output_view
+(const frame_view& generic_view) -> view_type {
+	return from_generic<Output_dim, Output_elem>(generic_view, frame_shape());
+}
+
+
 ////////////////////
 
 
@@ -113,7 +120,7 @@ template<std::size_t Input_dim, typename Input_elem>
 template<std::size_t Output_dim, typename Output_elem>
 void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Output_elem>& out) {
 	static_assert(Input_dim == Output_dim, "input and output connected on edge must have same dimension");
-	using edge_type = filter_edge<Input_dim, Input_elem, Output_elem>;
+	using edge_type = filter_direct_edge<Input_dim, Input_elem, Output_elem>;
 	edge_type* edge = new edge_type(*this, out);
 	edge_.reset(edge);
 	out.edge_has_connected(*edge);
@@ -135,7 +142,15 @@ void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Outp
 	edge_type* edge = new edge_type(*this, out, std::forward<Convert_function>(cv));
 	edge_.reset(edge);
 	out.edge_has_connected(*edge);
+}
 
+
+template<std::size_t Input_dim, typename Input_elem>
+auto filter_input<Input_dim, Input_elem>::get_input_view
+(const timed_frame_array_view& generic_view) -> full_view_type {
+	// `generic_view` must come from input of (node that is associated to this filter)
+	Expects(edge_ != nullptr);
+	return edge_->cast_node_output_full_view(generic_view);
 }
 
 
