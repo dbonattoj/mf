@@ -3,8 +3,8 @@
 
 namespace mf { namespace flow {
 
-node_input::node_input(node& nd, std::ptrdiff_t index) :
-	node_(nd), index_(index) { }
+node_input::node_input(node& nd) :
+	node_(nd) { }
 
 
 void node_input::connect(node_remote_output& output) {

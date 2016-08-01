@@ -11,7 +11,6 @@ namespace mf { namespace flow {
 class node_input {
 private:
 	node& node_;
-	std::ptrdiff_t index_ = -1;
 
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
@@ -22,12 +21,11 @@ private:
 	bool activated_ = true;
 		
 public:
-	node_input(node& nd, std::ptrdiff_t index);
+	explicit node_input(node& nd);
 	node_input(const node_input&) = delete;
 	node_input& operator=(const node_input&) = delete;
 	virtual ~node_input() { }
 
-	std::ptrdiff_t index() const noexcept { return index_; }
 	node& this_node() const noexcept { return node_; }
 
 	void set_past_window(time_unit dur) { past_window_ = dur; }

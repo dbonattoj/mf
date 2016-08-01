@@ -63,6 +63,8 @@ protected:
 	explicit node(graph& gr) : graph_(gr) { }
 	node(const node&) = delete;
 	node& operator=(const node&) = delete;
+	
+	void verify_connections_validity_() const;
 
 	template<typename Input>
 	Input& add_input_() {
@@ -77,10 +79,10 @@ protected:
 		outputs_.emplace_back(output);
 		return *output;
 	}
-	
+		
 	void set_current_time_(time_unit t) noexcept;
 	void mark_end_();
-
+	
 public:
 	virtual ~node() { }
 
@@ -98,7 +100,6 @@ public:
 			
 	virtual time_unit minimal_offset_to(const node&) const = 0;
 	virtual time_unit maximal_offset_to(const node&) const = 0;
-	//virtual bool connections_are_valid() const = 0;
 	
 	void define_source_stream_properties(const node_stream_properties&);
 	const node_stream_properties& stream_properties() const noexcept { return stream_properties_; }

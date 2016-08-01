@@ -122,6 +122,7 @@ void node::deduce_stream_properties_() {
 }
 
 
+
 void node::propagate_pre_setup_() {
 	if(stage_ == was_pre_setup) return;
 		

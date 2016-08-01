@@ -1,42 +1,46 @@
-/*
-Author : Tim Lenertz
-Date : May 2016
-
-Copyright (c) 2016, Université libre de Bruxelles
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
-publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 #include "processing_node.h"
 
 namespace mf { namespace flow {
 
-processing_node::processing_node(graph& gr) : node(gr) { }
 
-processing_node::~processing_node() { }
+std::size_t processing_node_output::channel_count() const noexcept {
+	return this_node().output_channel_count();
+}
 
 
-void processing_node::set_handler(processing_node_handler& handler) {
-	Expects(handler_ == nullptr);
-	handler_ = &handler;
+node::pull_result processing_node_output::pull(time_span& span, bool reconnect) {
+	return this_node().output_pull_(span, reconnect);
+}
+
+
+timed_frame_array_view processing_node_output::begin_read(time_unit duration, std::ptrdiff_t channel_index) {
+	return this_node().output_begin_read_(duration, channel_index);
+}
+
+
+void processing_node_output::end_read(time_unit duration, std::ptrdiff_t channel_index) {
+	return this_node().output_end_read_(duration, channel_index);
+}
+
+
+///////////////
+
+
+void processing_node::verify_connections_validity_() const {
+	if(outputs().size() > 1) throw invalid_node_graph("processing_node must have at most 1 output");
+	
+	if(has_output() && output().channel_count() > 1) {
+		node& successor = output().connected_node();
+		if(typeid(successor) != typeid(multiplex_node))
+			throw invalid_node_graph("processing_node output with >1 channel must be connected to multiplex_node");
+	}
 }
 
 
 void processing_node::handler_setup_() {
 	Expects(handler_ != nullptr);
-	Expects(outputs().size() <= 1, "processing_node must have at most one output");
 	handler_->handler_setup();
+	// TODO verify completion of setup by handler
 }
 
 
@@ -57,119 +61,126 @@ processing_node_job processing_node::begin_job_() {
 }
 
 
-void processing_node::finish_job_(processing_node_job& job) {
-	bool reached_end = false;
-	time_unit t = job.time();
-
-	if(stream_properties().duration_is_defined() && t == stream_properties().duration() - 1) reached_end = true;
-	if(job.end_was_marked()) reached_end = true;
-	
-	while(job.has_inputs()) {
-		const node_input& in = job.pop_input();
-		if(t == in.end_time() - 1) reached_end = true;
-	}
-	
-	if(reached_end) mark_end_();
+void processing_node::finish_job_(processing_node_job&) {
+	///////
 }
 
 
-node_input& processing_node::add_input() {
-	return add_input_<node_input>();
+std::size_t processing_node::output_channel_count_() const noexcept {
+	return output_channels_.size();
 }
 
 
-processing_node_output& processing_node::add_output() {
-	Expects(outputs().size() == 0, "cannot add more than one output to processing_node");
-	return add_output_<processing_node_output>();
+timed_frame_array_view processing_node::output_begin_read_(time_unit duration, std::ptrdiff_t channel_index) {
+	return output_channels_.at(channel_index)->begin_read(duration);
 }
 
 
-////////////////////////////////
-
-
-node::pull_result processing_node_output::pull(time_span& span, bool reconnect) {
-	Expects(span.duration() > 0);
-	return this_node().output_pull_(span, reconnect);
-	Ensures(this_node().current_time() >= span.start_time());
+void processing_node::output_end_read_(time_unit duration, std::ptrdiff_t channel_index) {
+	return output_channels_.at(channel_index)->end_read(duration);
 }
 
 
-timed_frame_array_view processing_node_output::begin_read(time_unit duration) {
-	Expects(duration > 0);
-	return this_node().output_begin_read_(duration);
+processing_node::processing_node(graph& gr, bool with_output) : node(gr) {
+	if(with_output) add_output_<processing_node_output>();
 }
 
 
-void processing_node_output::end_read(time_unit duration) {
-	this_node().output_end_read_(duration);
+processing_node::~processing_node() { }
+
+
+void processing_node::set_handler(processing_node_handler& handler) {
+	handler_ = &handler;
 }
 
 
-////////////////////////////////
+processing_node_input& processing_node::add_input() {
+	return add_input_<processing_node_input>();
+}
+
+
+bool processing_node::has_output() const {
+	return (output().size() == 1);
+}
+
+
+std::size_t processing_node::output_channel_count() const noexcept {
+	if(has_output()) return output().channel_count();
+	else return 0;
+}	
+
+
+
+///////////////
 
 
 processing_node_job::processing_node_job(processing_node& nd) :
 	time_(nd.current_time()),
-	inputs_stack_(),
-	inputs_slots_(nd.inputs().size(), nullptr)
-{
-	inputs_stack_.reserve(nd.inputs().size());
-}
+	inputs_(nd.inputs().size()),
+	output_channels_(nd.output_channel_count()) { }
 
 
 processing_node_job::~processing_node_job() {
-	Expects(! has_output(), "processing_node must detach and close output before destruction of processing_node_job");
-	if(has_inputs()) cancel_inputs();
+	cancel_inputs();
+	cancel_outputs();
 }
 
-void processing_node_job::attach_output(const frame_view& output_view) {
-	output_view_.reset(output_view);
-}
 
-	
-void processing_node_job::detach_output() {
-	output_view_.reset();
-}
-
-bool processing_node_job::push_input(node_input& in) {
+bool processing_node_job::open_input(processing_node_input& in) {
 	std::ptrdiff_t index = in.index();
 	timed_frame_array_view vw = in.begin_read_frame();
 	if(vw.is_null()) return false;
-	inputs_stack_.emplace_back(&in, vw);
-	inputs_slots_[index] = &inputs_stack_.back();
+	inputs_.at(index) = input_view_handle(&in, vw);
 	return true;
 }
 
-node_input& processing_node_job::pop_input() {
-	input_view_handle handle = inputs_stack_.back();
-	inputs_stack_.pop_back();
-	std::ptrdiff_t index = handle.first->index();
-	inputs_slots_[index] = nullptr;
-	handle.first->end_read_frame();
-	return *handle.first;
+
+void processing_node_job::commit_input(processing_node_input& in) {
+	std::ptrdiff_t index = in.index();
 }
+
 
 void processing_node_job::cancel_inputs() {
-	while(inputs_stack_.size() > 0) {
-		inputs_stack_.back().first->cancel_read_frame();
-		inputs_stack_.pop_back();
-	}
-	for(auto* slot : inputs_slots_) slot = nullptr;
+	
 }
 
-const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t index) {
-	return inputs_slots_[index]->second;
+
+bool processing_node_job::open_output(processing_node_output_channel& chan) {
+	std::ptrdiff_t index = out.index();
+	
 }
+
+
+void processing_node_job::commit_output(processing_node_output_channel& chan) {
+	std::ptrdiff_t index = out.index();
+	
+}
+
+
+void processing_node_job::cancel_outputs() {
+	
+}
+
 
 bool processing_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
-	if(index < 0 || index >= inputs_slots_.size()) return false;
-	else return (inputs_slots_[index] != nullptr);
-}
-
-const frame_view& processing_node_job::output_view() {
-	return output_view_;
+	return ! is_null(inputs_.at(index));
 }
 
 
+const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t index) {
+	Expects(has_input_view(index));
+	return inputs_.at(index).second;
+}
+
+
+bool processing_node_job::has_output_view(std::ptrdiff_t index) const noexcept {
+	return ! is_null(outputs_.at(index));
+}
+
+
+const frame_view& processing_node_job::output_view(std::ptrdiff_t index) {
+	Expects(has_output_view(index));
+	return output_channels_.at(index).second;	
+}
 
 }}

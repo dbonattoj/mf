@@ -34,7 +34,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 	
-MF_DEFINE_EXCEPTION_(invalid_flow_graph, std::logic_error);
+MF_DEFINE_EXCEPTION_(invalid_flow_graph, std::logic_error); // TODO remove
+
+MF_DEFINE_EXCEPTION_(invalid_node_graph, std::logic_error);
 
 MF_DEFINE_EXCEPTION_(failed_assertion, std::runtime_error);
 

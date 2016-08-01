@@ -215,7 +215,9 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 	{
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
 		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
-				
+		
+		// multi-channel: foreach. first: set next_write_time variable
+		// writer: pause if next_write_time != ring_.write_start_time for any ring
 		if(stream_properties().is_seekable()) ring_->seek(pull_span.start_time());
 		
 		if(reconnect) reconnect_flag_ = true;
