@@ -44,18 +44,26 @@ time_span multiplex_node::expected_input_span_() const {
 }
 
 
+time_span multiplex_node::current_input_span_() const {
+	return input_channel_views_.front().span();
+}
+
+
 void multiplex_node::load_input_view_(time_unit t) {
 	std::lock_guard<std::shared_timed_mutex> view_lock(input_view_mutex_);
 
 	set_current_time_(t);
 	
-	if(successor_time_of_input_view_ != -1)	input().end_read_frame();
-	
+	if(successor_time_of_input_view_ != -1)
+		for(std::ptrdiff_t i = 0; i < input().channels_count(); ++i) input().end_read_frame(i);
+		
 	pull_result result = input().pull();
 	if(result == pull_result::success) {
 		successor_time_of_input_view_ = t;
-		input_view_.reset(input().begin_read_frame());
-
+		
+		for(std::ptrdiff_t i = 0; i < input().channels_count(); ++i)
+			input_channel_views_[i].reset(input().begin_read_frame(i));
+		
 	} else if(result == pull_result::transitory_failure) {
 		successor_time_of_input_view_ = -1;
 	}
@@ -135,13 +143,7 @@ void multiplex_node::pre_setup() {
 void multiplex_node::setup() {
 	Assert(stream_properties().is_seekable());
 
-	std::size_t frame_length = input().connected_output().this_output().frame_length();
-	const frame_format& format = input().connected_output().this_output().format();
-
-	for(auto&& out : outputs()) {
-		out->define_frame_length(frame_length);
-		out->define_format(format);
-	}
+	input_channel_views_.resize(input().channels_count());
 }
 
 	
@@ -156,8 +158,9 @@ multiplex_node_output& multiplex_node::add_output() {
 }
 
 
-multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t index) :
+multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t index, std::ptrdiff_t input_channel_index) :
 	node_output(nd, index),
+	input_channel_index_(input_channel_index),
 	input_view_shared_lock_(this_node().input_view_mutex_, std::defer_lock) { }
 
 
@@ -180,7 +183,7 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 	}
 	if(this_node().stopped_) return node::pull_result::stopped;
 		
-	time_span input_span = this_node().input_view_.span();
+	time_span input_span = this_node().current_input_span_().span();
 	
 	if(input_span.includes(span)) {
 		MF_DEBUG_T("multiplex", "success");
@@ -192,11 +195,21 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 }
 
 
-timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
+std::size_t multiplex_node_output::channels_count() const noexcept {
+	// multiplex node outputs always have 1 channel.
+	// (but different outputs can be created for the different input channels)
+	return 1;
+}
+
+
+timed_frame_array_view multiplex_node_output::begin_read(time_unit duration, std::ptrdiff_t channel_index) {
+	Expects(channel_index == 0);
+	
 	Assert(! input_view_shared_lock_);
 	input_view_shared_lock_.lock();
 	
-	timed_frame_array_view& input_view = this_node().input_view_;
+	timed_frame_array_view& input_view = this_node().input_channel_views_.at(input_channel_index_);
+	
 	const time_span& pulled_span = connected_input().pulled_span();
 	Assert(duration == pulled_span.duration());
 	
@@ -209,7 +222,8 @@ timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 }
 
 
-void multiplex_node_output::end_read(time_unit duration) {
+void multiplex_node_output::end_read(time_unit duration, std::ptrdiff_t channel_index) {
+	Expects(channel_index == 0);
 	Assert(input_view_shared_lock_);
 	input_view_shared_lock_.unlock();
 }

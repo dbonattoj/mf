@@ -23,5 +23,5 @@ public()
 protected_()
 private_()
 
-thing_count() instead of number_of_thing()
-
+things_count() instead of number_of_things()
+     ^ plural

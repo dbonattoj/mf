@@ -56,6 +56,10 @@ protected:
 	time_unit prefetch_duration_ = 0;
 	
 	processing_node* node_ = nullptr;
+	multiplex_node* multiplex_node_ = nullptr;
+	
+	bool need_multiplex_node_() const;
+	void install_multiplex_node_(graph& gr);
 	
 public:
 	filter() = default;
@@ -74,9 +78,9 @@ public:
 	bool was_installed() const { return (node_ != nullptr); }
 	virtual void install(graph&);
 	
-	void handler_setup() final override;
-	void handler_pre_process(processing_node_job&) final override;
-	void handler_process(processing_node_job&) final override;
+	void handler_setup(processing_node&) final override;
+	void handler_pre_process(processing_node&, processing_node_job&) final override;
+	void handler_process(processing_node&, processing_node_job&) final override;
 
 	virtual void setup() { }
 	virtual void pre_process(job_type&) { }
@@ -109,7 +113,9 @@ public:
 
 class filter_output_base {
 public:
+	virtual std::size_t edges_count() const = 0;
 	virtual void install(processing_node&) = 0;
+	virtual void install(processing_node&, multiplex_node&) = 0;
 };
 
 
@@ -132,23 +138,25 @@ public:
 
 private:
 	std::vector<edge_base_type*> edges_;
-		
-	processing_node_output* node_output_ = nullptr;
-	multiplex_node* multiplex_node_ = nullptr;
+	processing_node_output* node_output_channel_ = nullptr;
 	
 	frame_shape_type frame_shape_;	
 
 public:
 	explicit filter_output(filter&);
 
-	processing_node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
-	const processing_node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
-	std::ptrdiff_t index() const { return this_node_output().index(); }
+	processing_node_output_channel& this_node_output_channel()
+		{ Expects(node_output_channel_ != nullptr); return *node_output_channel_; }
+	const processing_node_output_channel& this_node_output_channel() const
+		{ Expects(node_output_channel_ != nullptr); return *node_output_channel_; }
+	std::ptrdiff_t index() const { return this_node_output_channel().index(); }
 	
+	std::size_t edges_count() const override { return edges_.size(); }
 	void edge_has_connected(edge_base_type&);
 		
-	bool was_installed() const { return (node_output_ != nullptr); }
+	bool was_installed() const { return (node_output_channel_ != nullptr); }
 	void install(processing_node&) override;
+	void install(processing_node&, multiplex_node&) override;
 
 	void define_frame_shape(const frame_shape_type& shp);
 	const frame_shape_type& frame_shape() const;

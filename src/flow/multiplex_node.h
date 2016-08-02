@@ -36,17 +36,26 @@ class multiplex_node;
 
 class multiplex_node_output final : public node_output {
 private:
+	const std::ptrdiff_t input_channel_index_;
+
 	std::shared_lock<std::shared_timed_mutex> input_view_shared_lock_;
 	
 	multiplex_node& this_node() noexcept;
 	const multiplex_node& this_node() const noexcept;
 	
 public:
-	multiplex_node_output(node& nd, std::ptrdiff_t index);
+	multiplex_node_output(node& nd, std::ptrdiff_t index, std::ptrdiff_t input_channel_index);
 	
+	std::size_t channels_count() const noexcept override;
+	node::pull_result pull(time_span& span, bool reconnect) override;
+	timed_frame_array_view begin_read(time_unit duration, std::ptrdiff_t channel_index) override;
+	void end_read(time_unit duration, std::ptrdiff_t channel_index) override;
+
+	/*
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
+	*/
 };
 
 
@@ -62,8 +71,9 @@ private:
 
 	bool stopped_ = false;
 	time_unit successor_time_of_input_view_ = -1;
-	timed_frame_array_view input_view_;
 	
+	std::vector<timed_frame_array_view> input_channel_views_;
+		
 	std::mutex successor_time_mutex_;
 	std::condition_variable successor_time_changed_cv_;
 
@@ -71,6 +81,7 @@ private:
 	std::condition_variable_any input_view_updated_cv_;
 	
 	time_span expected_input_span_() const;
+	time_span current_input_span_() const;
 	void load_input_view_(time_unit t);
 	void thread_main_();
 	
@@ -87,7 +98,7 @@ public:
 	void setup() override;
 	
 	node_input& input();
-	multiplex_node_output& add_output();
+	multiplex_node_output& add_output(std::ptrdiff_t input_channel_index);
 };
 
 

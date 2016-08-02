@@ -1,70 +1,105 @@
-/*
-Author : Tim Lenertz
-Date : May 2016
-
-Copyright (c) 2016, Université libre de Bruxelles
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
-publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 #ifndef MF_NDARRAY_FRAME_FORMAT_H_
 #define MF_NDARRAY_FRAME_FORMAT_H_
 
-#include "../../common.h"
-#include "../../utility/misc.h"
+#include <vector>
+#include <stdexcept>
 #include <typeinfo>
 #include <typeindex>
 
-namespace mf {
+namespace mf { namespace flow {
 
-/// Format information of type-erased frame of `ndarray_view_generic`.
-/** Assumes the data is an array of an unknown element type. Stores element size and alignment requirement in bytes.
- ** Also stores the stride (in bytes) of the elements in the actual data. */
+class array_frame_format;
+
+/// Format of frame in \ref ndarray_view_generic, base class.
+/** Defines length (in byte) and alignment requirement of frame. If frame format is \ref composite_frame_format, also
+ ** defines \ref array_frame_format of the nested frames. */
 class frame_format {
-private:
-	std::size_t elem_size_ = 0; ///< sizeof of element.
-	std::size_t elem_alignment_ = 0; ///< alignof of elememt.
-	
-	/// Stride of elements in frame.
-	/** Must be greater or equal to `elem_size_`, and multiple of `elem_alignment_`. */
-	std::size_t stride_ = 0;
-	
-public:
+protected:
 	frame_format() = default;
+
+public:
+	virtual ~frame_format() = default;
+
+	/// Length of one frame, in bytes.
+	/** Not including inter-frame padding, if any. */
+	virtual std::size_t frame_length() const = 0;
 	
-	frame_format(const frame_format&) = default;
-	frame_format& operator=(const frame_format&) = default;
+	/// Alignment requirement of frame, in bytes.
+	/** Address of first byte of frame data must always be multiple of this. */
+	virtual std::size_t frame_alignment_requirement() const = 0;
 	
-	template<typename Elem>
-	static frame_format default_format(std::size_t stride = sizeof(Elem)) {
-		static_assert(sizeof(Elem) >= alignof(Elem), "sizeof always larger or equal to alignof");
-		Expects(stride >= sizeof(Elem) && is_nonzero_multiple_of(stride, alignof(Elem)));
-		frame_format format;
-		format.elem_size_ = sizeof(Elem);
-		format.elem_alignment_ = alignof(Elem);
-		format.stride_ = stride;
-		return format;
-	}
-	
-	std::size_t elem_size() const noexcept { return elem_size_; }
-	std::size_t elem_alignment() const noexcept { return elem_alignment_; }
-	std::size_t stride() const noexcept { return stride_; }
-	std::size_t padding() const noexcept { return stride_ - elem_size_; }
+	virtual std::size_t nested_frames_count() const { return 0; }
+	virtual const array_frame_format& nested_frame_at(std::ptrdiff_t index) const
+		{ throw std::logic_error("no nested frames"); }
 };
 
 
+/// Format of frame consisting of array of elements of same type.
+/** `elem_count` elements are stored in frame at `offset + elem_stride*i`. Also stored element type information:
+ ** element size (`sizeof`), element alignment requirement (`alignof`). */
+class array_frame_format : public frame_format {
+public:
+	struct elem_type_info {
+		std::size_t size;
+		std::size_t alignment;
+	};
+	
+private:
+	elem_type_info elem_type_;
+	std::size_t elem_count_;
+	std::size_t elem_stride_;
+	std::size_t offset_;
+
+public:
+	template<typename Elem>
+	static elem_type_info make_elem_type_info() {
+		return { sizeof(Elem), alignof(Elem) };
+	}
+
+	array_frame_format(const elem_type_info&, std::size_t elem_count, std::size_t elem_stride, std::size_t offset = 0);
+
+	std::size_t elem_count() const noexcept { return count_; }
+	std::size_t elem_stride() const noexcept { return stride_; }
+	std::size_t offset() const noexcept { return offset_; }
+	
+	std::size_t frame_length() const override { return offset_ + (elem_count_ * elem_stride_); }
+	std::size_t frame_alignment_requirement() const override { return elem_alignment_; }
+};
+
+
+template<typename Elem>
+array_frame_format make_array_frame_format(std::size_t count, std::size_t stride = sizeof(Elem), std::size_t off = 0) {
+	Expects(count > 0, "array frame format must have at least one element");
+	Expects(is_nonzero_multiple_of(stride, alignof(Elem)));
+	Expects(stride >= sizeof(Elem));
+	Expects(is_multiple_of(offset, alignof(Elem)));
+	array_frame_format::elem_type_info elem_info = array_frame_format::make_elem_type_info<Elem>();
+	return array_frame_format(elem_info, count, stride, offset);
 }
+
+
+/// Format of frame that is composed of multiple array frames.
+/** Consists of set of \ref array_frame_format frames with different offsets such that they do not overlap. */
+class composite_frame_format : public frame_format {
+private:
+	std::vector<array_frame_format> nested_frames_;
+	std::size_t total_length_ = 0;
+	std::size_t total_aligmnent_requirement_ = 1;
+	
+public:
+	composite_frame_format() = default;
+
+	void add_nested_frame(const array_frame_format&);
+	const array_frame_format& place_next_nested_frame(const array_frame_format&);
+	
+	std::size_t frame_length() const override { return total_length_; }
+	std::size_t frame_alignment_requirement() const override { return total_aligmnent_requirement_; }
+	
+	std::size_t nested_frames_count() const override { return nested_frames_.size(); }
+	const array_frame_format& nested_frame_at(std::ptrdiff_t index) const override { return nested_frames_.at(index); }
+};
+
+}}
 
 #endif
 

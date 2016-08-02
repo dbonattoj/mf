@@ -37,9 +37,9 @@ class processing_node_job;
 /// Delegate which processes frames of a \ref processing_node, interface.
 class processing_node_handler {
 public:
-	virtual void handler_setup() = 0;
-	virtual void handler_pre_process(processing_node_job&) = 0;
-	virtual void handler_process(processing_node_job&) = 0;
+	virtual void handler_setup(processing_node&) = 0;
+	virtual void handler_pre_process(processing_node&, processing_node_job&) = 0;
+	virtual void handler_process(processing_node&, processing_node_job&) = 0;
 };
 
 /// Output channel of \ref processing_node_output, base class.
@@ -56,19 +56,25 @@ private:
 	std::size_t frame_length_;
 
 protected:
-	explicit processing_node_output_channel(processing_node& nd, std::ptrdiff_t index) :
+	processing_node_output_channel(processing_node& nd, std::ptrdiff_t index) :
 		node_(nd), index_(index) { }
 	processing_node_output_channel(const processing_node_output_channel&) = delete;
 	processing_node_output_channel& operator=(const processing_node_output_channel&) = delete;
 	virtual ~processing_node_output_channel() = default;
 
 public:
+	const processing_node& this_node() const noexcept { return node_; }
+	processing_node& this_node() noexcept { return node_; }
+	std::ptrdiff_t index() const noexcept { return index_; }
+
 	void define_frame_length(std::size_t len) { frame_length_ = len; }
 	void define_format(const frame_format& format) { format_ = format; }
 	std::size_t frame_length() const noexcept { return frame_length_; }
 	const frame_format& format() const noexcept { return format_; }
-	
-	virtual void setup() = 0;
+		
+	virtual frame_view begin_write_frame(time_unit expected_time) = 0;
+	virtual void end_write_frame() = 0;
+	virtual void cancel_write_frame() = 0;
 	
 	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
 	virtual void end_read(time_unit duration) = 0;
@@ -77,7 +83,7 @@ public:
 
 /// Output of \ref processing_node.
 /** The \ref processing_node has none or one output. Its implementation is delegated to \ref processing_node. */
-class processing_node_output : public node_output {
+class processing_node_output final : public node_output {
 private:
 	processing_node& this_node();
 	const processing_node& this_node() const;	
@@ -85,7 +91,7 @@ private:
 public:
 	using node_output::node_output;
 	
-	std::size_t channel_count() override const noexcept;
+	std::size_t channels_count() override const noexcept;
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration, std::ptrdiff_t channel_index) override;
 	void end_read(time_unit duration, std::ptrdiff_t channel_index) override;
@@ -94,7 +100,7 @@ public:
 
 /// Input of \ref processing_node.
 /** Adds index value (like \ref processing_node_output_channel) for use with \ref processing_node_job. */
-class processing_node_input : public node_input {
+class processing_node_input final : public node_input {
 private:
 	const std::ptrdiff_t index_;
 
@@ -122,6 +128,7 @@ private:
 	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
 
 protected:
+	virtual void setup_() const = 0;
 	void verify_connections_validity_() const;
 
 	void handler_setup_();
@@ -136,6 +143,16 @@ protected:
 
 	virtual node::pull_result output_pull_(time_span& span, bool reconnect) = 0;
 	
+	template<typename Channel, typename... Args>
+	Channel& add_output_channel_(Args&&... args) {
+		static_assert(std::is_base_of<processing_node_output_channel, Channel>::value,
+			"Channel must be derived class of processing_node_output_channel");
+		std::ptrdiff_t index = output_channels_.size();
+		Channel* channel = new Channel(*this, index, std::forward<Args>(args)...);
+		output_channels_.emplace_back(channel);
+		return *channel;
+	}
+	
 public:
 	processing_node(graph&, bool with_output);
 	~processing_node() override;
@@ -143,20 +160,17 @@ public:
 	void set_handler(processing_node_handler&);
 	
 	processing_node_input& add_input();
+	virtual processing_node_output_channel& add_output_channel() = 0;
 	
 	bool has_output() const;
 	processing_node_output& output();
 	const processing_node_output& output() const;
-	std::size_t output_channel_count() const noexcept;	
-		
-	template<typename Channel, typename... Args>
-	Channel& add_output_channel_(Args&&... args) {
-		static_assert(std::is_base_of<processing_node_output_channel, Channel>::value,
-			"Channel must be derived class of processing_node_output_channel");
-		Channel* channel = new Channel(std::forward<Args>(args)...);
-		output_channels_.emplace_back(channel);
-		return *channel;
-	}
+	
+	std::size_t output_channels_count() const noexcept;	
+	processing_node_output_channel& output_channel_at(std::ptrdiff_t index)
+		{ return *output_channels_.at(index); }
+	const processing_node_output_channel& output_channel_at(std::ptrdiff_t index) const
+		{ return *output_channels_.at(index); }
 };
 
 
@@ -175,21 +189,24 @@ private:
 
 	bool end_marked_ = false;
 	
-	static bool is_null(const input_view_handle& in) { return (in.first == nullptr); }
-	static bool is_null(const output_view_handle& out) { return (out.first == nullptr); }
-	static void set_null(input_view_handle& in) { in = { nullptr, timed_frame_array_view::null(); }; }
-	static void set_null(input_view_handle& out) { out = { nullptr, frame_view::null(); }; }
+	static bool is_null_(const input_view_handle& in) { return (in.first == nullptr); }
+	static bool is_null_(const output_view_handle& out) { return (out.first == nullptr); }
+	static void set_null_(input_view_handle& in) { in = { nullptr, timed_frame_array_view::null(); }; }
+	static void set_null_(output_view_handle& out) { out = { nullptr, frame_view::null(); }; }
+
+	processing_node_job(const processing_node_job&) = delete;
+	processing_node_job& operator=(const processing_node_job&) = delete;
 
 public:
-	explicit processing_node_job(processing_node& nd);
+	processing_node_job(processing_node& nd);
 	~processing_node_job();
 	
-	bool open_input(processing_node_input&);
-	void commit_input(processing_node_input&);
+	bool begin_input(processing_node_input&);
+	void end_input(processing_node_input&);
 	void cancel_inputs();
 	
-	bool open_output(processing_node_output_channel&);
-	void commit_output(processing_node_output_channel&);
+	bool begin_output(processing_node_output_channel&);
+	void end_output(processing_node_output_channel&);
 	void cancel_outputs();
 
 	bool end_was_marked() const noexcept { return end_marked_; }
@@ -198,10 +215,10 @@ public:
 	void mark_end() noexcept { end_marked_ = true; }
 	
 	bool has_input_view(std::ptrdiff_t index) const noexcept;
-	const timed_frame_array_view& input_view(std::ptrdiff_t index);
+	const timed_frame_array_view& input_view(std::ptrdiff_t index) const;
 	
 	bool has_output_view(std::ptrdiff_t index) const noexcept;
-	const frame_view& output_view(std::ptrdiff_t index);
+	const frame_view& output_view(std::ptrdiff_t index) const;
 };
 
 

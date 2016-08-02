@@ -34,11 +34,16 @@ public:
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
-	void connect(node_remote_output&);
+	void connect(node_remote_output& out);
 	void disconnect();
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_remote_output& connected_output() const noexcept { Expects(is_connected()); return *connected_output_; }
-	node& connected_node() const noexcept { Expects(is_connected()); return connected_output().this_output().this_node(); }
+	node_remote_output& connected_output() const
+		{ Expects(is_connected()); return *connected_output_; }
+	node& connected_node() const
+		{ Expects(is_connected()); return connected_output().this_output().this_node(); }
+
+	std::size_t channels_count() const
+		{ Expects(is_connected()); return connected_output().channels_count();e }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);
@@ -47,9 +52,9 @@ public:
 	///@{
 	node::pull_result pull();
 	const time_span& pulled_span() const noexcept { return pulled_span_; }
-	timed_frame_array_view begin_read_frame();
-	void end_read_frame();
-	void cancel_read_frame();
+	timed_frame_array_view begin_read_frame(std::ptrdiff_t channel_index);
+	void end_read_frame(std::ptrdiff_t channel_index);
+	void cancel_read_frame(std::ptrdiff_t channel_index);
 	time_unit end_time() const { return connected_output_->end_time(); }
 	///@}
 };

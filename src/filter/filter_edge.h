@@ -85,6 +85,9 @@ private:
 	
 	node_input* node_input_ = nullptr;
 	node_output* node_output_ = nullptr;
+	std::ptrdiff_t node_output_channel_index_ = -1;
+	
+	void is_connected_() const noexcept { return (node_input_ != nullptr) && (node_output_ != nullptr); }
 	
 protected:		
 	filter_edge(input_type& in, output_type& out) :
@@ -100,13 +103,15 @@ public:
 	virtual ~filter_edge() = default;
 
 	void set_node_input(node_input& in) override;
-	void set_node_output(node_output& out) override;
+	void set_node_output(node_output& out, std::ptrdiff_t channel_index) override;
 	
 	graph& this_graph();
 	node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
 	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
 	node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
 	const node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
+	std::ptrdiff_t node_output_channel_index() const
+		{ Expects(node_output_ != nullptr); return node_output_channel_index_; }
 
 	const input_frame_shape_type& input_frame_shape() const override { return output_.frame_shape(); }
 	const output_frame_shape_type& output_frame_shape() const override { return output_.frame_shape(); }

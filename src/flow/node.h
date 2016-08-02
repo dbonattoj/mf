@@ -91,6 +91,13 @@ public:
 	const auto& inputs() const noexcept { return inputs_; }
 	const auto& outputs() const noexcept { return outputs_; }
 
+	std::size_t inputs_count() const noexcept { return inputs_.size(); }
+	node_input& input_at(std::ptrdiff_t index) { return *inputs_.at(index); }
+	const node_input& input_at(std::ptrdiff_t index) const { return *inputs_.at(index); }
+	std::size_t outputs_count() const noexcept { return outputs().size(); }
+	node_output& output_at(std::ptrdiff_t index) { return *outputs.at(index); }
+	const node_output& output_at(std::ptrdiff_t index) const { return *outputs.at(index); }
+
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 

@@ -35,15 +35,16 @@ template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename I
 void filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::set_node_input(node_input& in) {
 	Expects(node_input_ == nullptr);
 	node_input_ = &in;
-	if(node_input_ != nullptr && node_output_ != nullptr) this->install_(this_graph());
+	if(is_connected_()) this->install_(this_graph());
 }
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem>
-void filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::set_node_output(node_output& out) {
+void filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::set_node_output(node_output& out, std::ptrdiff_t channel_index) {
 	Expects(node_output_ == nullptr);
 	node_output_ = &out;
-	if(node_input_ != nullptr && node_output_ != nullptr) this->install_(this_graph());
+	node_output_channel_index_ = channel_index;
+	if(is_connected_()) this->install_(this_graph());
 }
 
 

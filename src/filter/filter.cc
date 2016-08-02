@@ -28,18 +28,21 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 
-void filter::handler_setup() {
+void filter::handler_setup(processing_node& nd) {
+	Expects(nd == node_);
 	this->setup();
 }
 
 
-void filter::handler_pre_process(processing_node_job& job) {
+void filter::handler_pre_process(processing_node& nd, processing_node_job& job) {
+	Expects(nd == node_);
 	filter_job fjob(job);
 	this->pre_process(fjob);
 }
 
 
-void filter::handler_process(processing_node_job& job) {
+void filter::handler_process(processing_node& nd, processing_node_job& job) {
+	Expects(nd == node_);
 	filter_job fjob(job);
 	this->process(fjob);
 }
@@ -78,10 +81,29 @@ time_unit filter::prefetch_duration() const {
 	return prefetch_duration_;
 }
 
+bool filter::need_multiplex_node_() const {
+	if(outputs_.size() > 1) return true;
+	else return std::any_of(outputs_.cbegin(), outputs_.cend(), [](filter_output_base* out) {
+		return (out->edges_count() > 1);
+	});
+}
+
+void filter::install_multiplex_node_(graph& gr) {
+	multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
+	
+}
+
+
+
+		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
+		multiplex_node_->input().connect(*node_output_);
+		for(edge_base_type* edge : edges_) {
+			multiplex_node_output& mlpx_out = multiplex_node_->add_output();
+			edge->set_node_output(mlpx_out);
+		}
 
 void filter::install(graph& gr) {
 	Expects(! was_installed());
-	Expects(outputs_.size() == 1, "non-sink filter must have exactly one output");
 	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
@@ -91,8 +113,17 @@ void filter::install(graph& gr) {
 		node_ = &nd;
 	}
 	node_->set_handler(*this);
+
 	for(filter_input_base* in : inputs_) in->install(*node_);
-	outputs_.front()->install(*node_);
+
+	if(need_multiplex_node_()) {
+		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
+		multiplex_node_->input().connect(node_->output());
+		for(filter_output_base* out : outputs_) out->install(*node_, *multiplex_node_);
+	} else {
+		for(filter_output_base* out : outputs_) out->install(*node_);
+	}
+
 	Ensures(was_installed());
 }
 

@@ -45,6 +45,9 @@ template<typename T> T clamp(T value, T minimum, T maximum);
 /// Compute greatest common divisor of `a` and `b`.
 template<typename T> T gcd(T a, T b);
 
+/// Compute least common multiple of `a` and `b`.
+template<typename T> T lcm(T a, T b);
+
 /// Check if `x` is a power of 2.
 template<typename T>
 bool is_power_of_two(T x) {
