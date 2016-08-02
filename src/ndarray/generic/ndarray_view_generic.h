@@ -30,19 +30,25 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Generic \ref ndarray_view where lower dimension(s) are type-erased.
-/** Elements of `ndarray_view_generic<Dim>` represent entire `k`-dimensional sections (called _frame_) of an anterior
- ** `ndarray_view<Dim + k, Elem>`. This `ndarray_view` must have default strides (possibly with padding)
- ** for the first `k` dimensions. `ndarray_view_generic` preserves type information of `T` (`std::type_info`, along with
- ** its `sizeof` and `alignof`), its actual alignment (last stride of anterior `ndarray_view`), and number of elements
- ** per frame. Dimension and shape of frame is not preserved.
- **
- ** Generic ndarray view `ndarray_view_generic<Dim>` is internally represented as `ndarray_view<Dim + 1, byte>`. The
- ** last axis corresponds to the type-erased `k`-dimensional frame, represented as raw byte array. Its shape and stride
- ** are the number and alignment of `T` elements in the frame.
- **
- ** Subscripting results in another `ndarray_view_generic` of lower dimension. */
+/** `ndarray_view_generic<Dim>` is a type-erased view of `ndarray_view<Dim + K, Elem>`, whose lower `K` dimensions must
+ ** have default strides (possibly with padding). Elements of `ndarray_view_generic<Dim>` correspond to sections of
+ ** `ndarray_view<Dim + K, Elem>` which fix these `K` dimensions, and are called *frames*.
+ ** The view is no longer templatized for the dimensionality and element type of the frames. Frame format information
+ ** is stored at runtime as \ref frame_format object.
+ ** 
+ ** Alternately, frames can be *composite*, i.e. contain data from multiple ndarrays of differing dimension and element
+ ** types.
+ ** 
+ ** `ndarray_view_generic<Dim>` derives from `ndarray_view<Dim + 1, byte>`. Lowest dimension has stride 1, and length
+ ** equal to frame length in bytes. The stride of the next dimension is set to respect the frame alignment requirement.
+ ** For example with `ndarray_view_generic<2> arr`, the expression `arr[1][2][123]` is the 123th byte of frame $(1,2)$.
+ ** 
+ ** `Dim` is the *generic dimension*, and `Dim + K` the *concrete dimension*. `K` is the *frame dimension*.
+ ** Along the generic dimensions, sectionning and slicing operations can be used and return another (lower-dimensional)
+ ** `ndarray_view_generic` with the same frame format information. Conversion to and from concrete `ndarray_view` is
+ ** done with the functions \ref to_generic() and \ref from_generic(). */
 template<std::size_t Dim>
-class ndarray_view_generic : public ndarray_view<Dim + 1, byte> {
+class ndarray_view_generic : public ndarray_view<Dim + 1, byte> {	
 	using base = ndarray_view<Dim + 1, byte>;
 
 public:
@@ -52,13 +58,13 @@ public:
 private:
 	frame_format format_;
 	
+	ndarray_view_generic(const base& vw, const frame_format& format) :
+		base(vw), format_(format) { }
+	
 public:
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
 
-	ndarray_view_generic() { }
-
-	ndarray_view_generic(const base& vw, const frame_format& format) :
-		base(vw), format_(format) { }
+	ndarray_view_generic() = default;
 	
 	ndarray_view_generic(byte* start, const frame_format& format, const shape_type& shape, const strides_type& strides) :
 		base(start, shape, strides),
@@ -91,9 +97,6 @@ public:
 
 
 /// Cast input `ndarray_view` to generic `ndarray_view_generic` with given dimension.
-/** `Generic_dim` is dimension of generic ndarray, i.e. `Dim` of `ndarray_view_generic<Dim>`.
- ** `Concrete_dim` is dimension of the typed ndarray, i.e. `Dim` of `ndarray_view<Dim>`.
- ** Always `Concrete_dim >= Generic_dim`. Dimension of frame is `Concrete_dim - Generic_dim`. */
 template<std::size_t Generic_dim, std::size_t Concrete_dim, typename Concrete_elem>
 ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw);
 
@@ -103,7 +106,8 @@ ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Co
 template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Generic_dim>
 ndarray_view<Concrete_dim, Concrete_elem> from_generic(
 	const ndarray_view_generic<Generic_dim>& vw,
-	const ndsize<Concrete_dim - Generic_dim>& frame_shape
+	const ndsize<Concrete_dim - Generic_dim>& frame_shape,
+	std::ptrdiff_t array_index = 0
 );
 
 
