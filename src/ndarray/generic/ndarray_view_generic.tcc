@@ -29,6 +29,13 @@ ndarray_view_generic<Dim>::ndarray_view_generic
 	format_(frm) { }
 
 
+template<std::size_t Dim>
+ndarray_view_generic<Dim> ndarray_view_generic<Dim>::array_at(std::ptrdiff_t array_index) const {
+	const frame_array_format& array_format = format().array_at(array_index);
+	auto new_start = base::start() + array_format.offset();
+	return ndarray_view_generic<Dim>(array_format, new_start, generic_shape(), generic_strides());
+}
+
 template<std::size_t Generic_dim, std::size_t Concrete_dim, typename Concrete_elem>
 ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw) {
 	static_assert(Generic_dim <= Concrete_dim, "generic dimension must be lower or equal to concrete dimension");
@@ -41,11 +48,11 @@ ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Co
 	std::size_t frame_size = vw.shape().template tail<frame_dim>().product() * sizeof(Concrete_elem);
 	auto frm = format(vw);
 		
-	auto generic_start = reinterpret_cast<byte*>(vw.start());
-	auto generic_shape = ndcoord_cat(vw.generic_shape(), frame_size);
-	auto generic_strides = ndcoord_cat(vw.generic_strides(), 1);
+	auto new_start = reinterpret_cast<byte*>(vw.start());
+	auto new_shape = ndcoord_cat(vw.generic_shape(), frame_size);
+	auto new_strides = ndcoord_cat(vw.generic_strides(), 1);
 	
-	return ndarray_view_generic<Generic_dim>(generic_start, frm, generic_shape, generic_strides);
+	return ndarray_view_generic<Generic_dim>(frm, new_start, new_shape, new_strides);
 }
 
 
@@ -66,11 +73,11 @@ ndarray_view<Concrete_dim, Concrete_elem> from_generic(
 	ndptrdiff<frame_dim> concrete_frame_strides =
 		ndarray_view<frame_dim, Concrete_elem>::default_strides(frame_shape, frm.padding());
 	
-	auto concrete_start = reinterpret_cast<Concrete_elem*>(gen_vw.start() + frm.offset());
-	auto concrete_shape = ndcoord_cat(gen_vw.generic_shape(), frame_shape);
-	auto concrete_strides = ndcoord_cat(gen_vw.generic_strides(), concrete_frame_strides);
+	auto new_start = reinterpret_cast<Concrete_elem*>(gen_vw.start() + frm.offset());
+	auto new_shape = ndcoord_cat(gen_vw.generic_shape(), frame_shape);
+	auto new_strides = ndcoord_cat(gen_vw.generic_strides(), concrete_frame_strides);
 		
-	return ndarray_view<Concrete_dim, Concrete_elem>(concrete_start, concrete_shape, concrete_strides);
+	return ndarray_view<Concrete_dim, Concrete_elem>(new_start, new_shape, new_strides);
 }
 
 }

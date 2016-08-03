@@ -44,7 +44,7 @@ private:
 	const multiplex_node& this_node() const noexcept;
 	
 public:
-	multiplex_node_output(node& nd, std::ptrdiff_t index, std::ptrdiff_t input_channel_index);
+	multiplex_node_output(node& nd, std::ptrdiff_t input_channel_index);
 	
 	std::size_t channels_count() const noexcept override;
 	node::pull_result pull(time_span& span, bool reconnect) override;

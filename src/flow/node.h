@@ -28,6 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <atomic>
 #include <string>
 #include <memory>
+#include <utility>
 
 namespace mf { namespace flow {
 
@@ -66,16 +67,16 @@ protected:
 	
 	void verify_connections_validity_() const;
 
-	template<typename Input>
-	Input& add_input_() {
-		Input* input = new Input(*this, inputs_.size());
+	template<typename Input, typename... Args>
+	Input& add_input_(Args&&... args) {
+		Input* input = new Input(*this, std::forward<Args>(args)...);
 		inputs_.emplace_back(input);
 		return *input;
 	}
 
-	template<typename Output>
-	Output& add_output_() {
-		Output* output = new Output(*this, outputs_.size());
+	template<typename Output, typename... Args>
+	Output& add_output_(Args&&... args) {
+		Output* output = new Output(*this, std::forward<Args>(args)...);
 		outputs_.emplace_back(output);
 		return *output;
 	}

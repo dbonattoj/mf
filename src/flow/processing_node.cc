@@ -1,4 +1,5 @@
 #include "processing_node.h"
+#include "multiplex_node.h"
 
 namespace mf { namespace flow {
 
@@ -46,7 +47,7 @@ void processing_node::verify_connections_validity_() const {
 
 void processing_node::handler_setup_() {
 	Expects(handler_ != nullptr);
-	handler_->handler_setup();
+	handler_->handler_setup(*this);
 	
 	for(const output_channel_type& chan : output_channels_)
 		if(! chan.format().is_defined()) throw invalid_node_graph("processing_node did not set output channel format");
@@ -55,17 +56,17 @@ void processing_node::handler_setup_() {
 
 void processing_node::handler_pre_process_(processing_node_job& job) {
 	Expects(handler_ != nullptr);
-	handler_->handler_pre_process(job);
+	handler_->handler_pre_process(*this, job);
 }
 
 
 void processing_node::handler_process_(processing_node_job& job) {
 	Expects(handler_ != nullptr);
-	handler_->handler_process(job);
+	handler_->handler_process(*this, job);
 }
 
 
-processing_node_job processing_node::begin_job_(time_unit t) {
+processing_node_job processing_node::begin_job_() {
 	return processing_node_job(*this);
 }
 
@@ -81,7 +82,7 @@ void processing_node::finish_job_(processing_node_job& job) {
 		if(job.has_input_view(i)) {
 			const node_input& in = *inputs().at(i);
 			if(current_time() == in.end_time() - 1) reached_end = true;
-			job.end_input(i);
+			job.end_input(in);
 		}
 	}
 		
@@ -108,7 +109,8 @@ void processing_node::set_handler(processing_node_handler& handler) {
 
 
 processing_node_input& processing_node::add_input() {
-	return add_input_<processing_node_input>();
+	std::ptrdiff_t index = inputs_count();
+	return add_input_<processing_node_input>(index);
 }
 
 

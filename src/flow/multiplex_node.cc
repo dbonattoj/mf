@@ -45,7 +45,7 @@ time_span multiplex_node::expected_input_span_() const {
 
 
 time_span multiplex_node::current_input_span_() const {
-	return input_channel_view_.span();
+	return input_view_.span();
 }
 
 
@@ -59,7 +59,7 @@ void multiplex_node::load_input_view_(time_unit t) {
 	pull_result result = input().pull();
 	if(result == pull_result::success) {
 		successor_time_of_input_view_ = t;
-		input_channel_view_.reset(input().begin_read_frame());
+		input_view_.reset(input().begin_read_frame());
 		
 	} else if(result == pull_result::transitory_failure) {
 		successor_time_of_input_view_ = -1;
@@ -139,8 +139,6 @@ void multiplex_node::pre_setup() {
 
 void multiplex_node::setup() {
 	Assert(stream_properties().is_seekable());
-
-	input_channel_views_.resize(input().channels_count());
 }
 
 	
@@ -150,13 +148,13 @@ node_input& multiplex_node::input() {
 }
 
 
-multiplex_node_output& multiplex_node::add_output() {
-	return node::add_output_<multiplex_node_output>();
+multiplex_node_output& multiplex_node::add_output(std::ptrdiff_t input_channel_index) {
+	return node::add_output_<multiplex_node_output>(input_channel_index);
 }
 
 
-multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t index, std::ptrdiff_t input_channel_index) :
-	node_output(nd, index),
+multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t input_channel_index) :
+	node_output(nd),
 	input_channel_index_(input_channel_index),
 	input_view_shared_lock_(this_node().input_view_mutex_, std::defer_lock) { }
 
@@ -180,7 +178,7 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 	}
 	if(this_node().stopped_) return node::pull_result::stopped;
 		
-	time_span input_span = this_node().current_input_span_().span();
+	time_span input_span = this_node().current_input_span_();
 	
 	if(input_span.includes(span)) {
 		MF_DEBUG_T("multiplex", "success");
@@ -203,9 +201,7 @@ timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 	Assert(! input_view_shared_lock_);
 	input_view_shared_lock_.lock();
 	
-	///!!! take out one generic view array
-	
-	timed_frame_array_view& input_view = this_node().input_channel_views_.at(input_channel_index_);
+	timed_frame_array_view input_view = this_node().input_view_.array_at(input_channel_index_);
 	
 	const time_span& pulled_span = connected_input().pulled_span();
 	Assert(duration == pulled_span.duration());

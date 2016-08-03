@@ -46,6 +46,9 @@ public:
 	static ndarray_timed_view_generic null() { return ndarray_timed_view_generic(); }
 	ndarray_timed_view_generic() = default;
 
+	generic_shape_type generic_shape() const { return base::shape().head(); }
+	generic_strides_type generic_strides() const { return base::strides().head(); }
+
 	ndarray_timed_view_generic(const ndarray_view_generic<Dim>& gen_vw, time_unit start_time) :
 		base(gen_vw, start_time), format_(gen_vw.format()) { }
 
@@ -53,7 +56,14 @@ public:
 		{ return ndarray_view_generic<Dim>(format_, *this); }
 	
 	const frame_format& format() const noexcept { return format_; }
-	
+
+	ndarray_timed_view_generic array_at(std::ptrdiff_t array_index) const {
+		const frame_array_format& array_format = format().array_at(array_index);
+		auto new_start = base::start() + array_format.offset();
+		ndarray_view_generic<Dim> new_view(array_format, new_start, generic_shape(), generic_strides());
+		return ndarray_timed_view_generic<Dim>(new_view, base::start_time());
+	}
+
 	decltype(auto) slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const
 		{ return ndarray_view_generic<Dim - 1>(format_, base::slice(c, dimension)); }
 

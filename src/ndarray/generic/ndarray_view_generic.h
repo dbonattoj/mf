@@ -77,6 +77,8 @@ public:
 	void reset() noexcept { reset(null()); }
 	
 	const frame_format& format() const noexcept { return format_; }
+
+	ndarray_view_generic array_at(std::ptrdiff_t array_index) const;
 	
 	decltype(auto) slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const
 		{ return ndarray_view_generic<Dim - 1>(format_, base::slice(c, dimension)); }
