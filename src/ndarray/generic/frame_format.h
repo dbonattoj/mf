@@ -32,6 +32,8 @@ public:
 	frame_format& operator=(const frame_format&) = default;
 	frame_format& operator=(frame_format&&) = default;
 
+	bool is_defined() const { return (total_aligmnent_requirement_ != -1); }
+
 	const frame_array_format& place_next_array(const frame_array_format&);
 	
 	std::size_t frame_size() const noexcept { return total_size_; }
@@ -48,18 +50,20 @@ public:
  ** Constitutes (possibly a sole instance) a \ref frame_format. */
 class frame_array_format {
 private:		
-	std::size_t elem_count_;
-	std::size_t elem_stride_;
-	std::size_t offset_;
+	std::size_t elem_count_ = 0;
+	std::size_t elem_stride_ = 0;
+	std::size_t offset_ = 0;
 
-	std::size_t elem_size_;
-	std::size_t elem_alignment_;
-
-	frame_array_format() = default;
+	std::size_t elem_size_ = 0;
+	std::size_t elem_alignment_ = 0;
 
 public:
 	template<typename Elem>
 	friend frame_array_format make_frame_array_format(std::size_t count, std::size_t stride, std::size_t offset);
+
+	frame_array_format() = default;
+
+	bool is_defined() const { return (elem_count_ != 0); }
 
 	std::size_t frame_size() const noexcept { return offset_ + (elem_count_ * elem_stride_); }
 	std::size_t frame_alignment_requirement() const noexcept { return elem_alignment_; }

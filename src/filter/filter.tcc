@@ -65,7 +65,10 @@ void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multip
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::define_frame_shape(const frame_shape_type& shp) {
 	frame_shape_ = shp;
-	node_output_->define_frame_length(shp.product());
+	
+	std::size_t elem_count = frame_shape_.product();
+	frame_array_format array_format = make_frame_array_format<Output_elem>(elem_count);
+	node_output_channel_->define_format(array_format);
 }
 
 
@@ -78,7 +81,8 @@ auto filter_output<Output_dim, Output_elem>::frame_shape() const -> const frame_
 template<std::size_t Output_dim, typename Output_elem>
 auto filter_output<Output_dim, Output_elem>::get_output_view
 (const frame_view& generic_view) -> view_type {
-	return from_generic<Output_dim, Output_elem>(generic_view, frame_shape());
+	std::ptrdiff_t channel_index = index();
+	return from_generic<Output_dim, Output_elem>(generic_view, frame_shape(), channel_index);
 }
 
 

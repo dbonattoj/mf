@@ -1,53 +1,28 @@
+/*
+Author : Tim Lenertz
+Date : May 2016
+
+Copyright (c) 2016, Université libre de Bruxelles
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
+publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "sync_node.h"
+#include "graph.h"
+#include <unistd.h>
 
 namespace mf { namespace flow {
-
-void sync_node_output_channel::setup(time_unit required_capacity) {
-	ndarray_generic_properties prop(format(), frame_length(), required_capacity);
-	
-}
-
-
-frame_view sync_node_output_channel::begin_write_frame(time_unit expected_time) {
-	timed_frame_array_view vw = ring_->begin_write(1);
-	if(vw.start_time() == expected_time) {
-		return vw[0];
-	} else {
-		ring_->end_write(0);
-		return frame_view::null();
-	}
-}
-
-
-void sync_node_output_channel::end_write_frame() {
-	ring_->end_write(1);
-}
-
-
-void sync_node_output_channel::cancel_write_frame() {
-	ring_->end_write(0);
-}
-
-
-timed_frame_array_view sync_node_output_channel::begin_read(time_unit duration) {
-	Expects(ring_->readable_duration() >= duration);
-	
-	if(reached_end() && ring_->read_start_time() + duration > current_time())
-		duration = ring_->readable_duration();
-
-	Assert(duration <= ring_->readable_duration());
-
-	return ring_->begin_read(duration);
-}
-
-
-void sync_node_output_channel::end_read(time_unit duration) {
-	ring_->end_read(duration);
-}
-
-
-///////////////
-
 
 time_unit sync_node::minimal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
@@ -64,44 +39,65 @@ time_unit sync_node::maximal_offset_to(const node& target_node) const {
 
 
 void sync_node::setup() {
-	const node& connected_node = output().connected_node();
+	handler_setup_();
+		
+	frame_format buffer_format;
+	for(std::ptrdiff_t i = 0; i < output_channels_count(); ++i) {
+		const processing_node_output_channel& chan = output_channel_at(i);
+		const frame_array_format& channel_array_format = chan.format();
+		Assert(channel_array_format.is_defined());
+		
+		buffer_format.place_next_array(channel_array_format);
+	}
+	Assert(buffer_format.arrays_count() == output_channel_count());
+	
+	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 	
-	lowest_capacity_channel_index_ = -1;
-	time_unit lowest_capacity_;
+	ring_.reset(new timed_ring(buffer_format, required_capacity));
+}
 
-	for(std::ptrdiff_t i = 0; i < output_channels_count(); ++i) {
-		output_channel_at(i).setup(required_capacity);
-		time_unit capacity = output_channel_at(i).this_ring().total_duration();
+
+bool sync_node::process_next_frame_() {
+	timed_frame_array_view out_vw = ring_->begin_write(1);
+	time_unit t = out_vw.start_time();
 	
-		if(lowest_capacity_channel_index_ == -1 || capacity < lowest_capacity_) {
-			lowest_capacity_ = cap;
-			lowest_capacity_channel_index_ = i;
+	if(stream_properties().duration_is_defined()) Assert(t < stream_properties().duration());
+	
+	set_current_time_(t);
+	processing_node_job job = begin_job_();
+	
+	job.attach_output(out_vw[0]);
+	
+	handler_pre_process_(job);
+	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		pull_result res = in->pull();
+		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
+			job.detach_output();
+			return false;
 		}
 	}
 	
+	for(auto&& in : inputs()) if(in->is_activated()) {
+		bool cont = job.begin_input(*in);
+		
+	}
+	
+	handler_process_(job);
+	
+	job.detach_output();
+	ring_->end_write(1);
+
+	finish_job_(job);
+		
+	return true;
 }
 
 
-time_span sync_node::readable_time_span_() const {
-	return output_channel_at(lowest_capacity_channel_index_).this_ring().readable_time_span();
-}
-
-
-time_unit sync_node::write_start_time_() const {
-	return output_channel_at(lowest_capacity_channel_index_).this_ring().write_start_time();
-}
-
-
-void sync_node::seek_(time_unit t) {
-	for(std::ptrdiff_t i = 0; i < output_channels_count(); ++i)
-		output_channel_at(i).this_ring().seek(t);
-}
-
-
-node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
-	if(readable_time_span_().start_time() != span.start_time()) seek_(span.start_time());
-	Assert(readable_time_span_().start_time() == span.start_time());
+node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {	
+	if(ring_->read_start_time() != span.start_time()) ring_->seek(span.start_time());
+	Assert(ring_->read_start_time() == span.start_time());
 	
 	if(reached_end() && span.end_time() > end_time())
 		span = time_span(span.start_time(), end_time());
@@ -109,56 +105,48 @@ node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
 	if(span.duration() == 0) return pull_result::success;
 	
 	bool cont = true;
-	if(readable_time_span_().includes(span)) {
+	if(ring_->readable_time_span().includes(span)) {
 		if(reconnected) set_online();
 	} else {
 		if(reconnected) {
-			set_current_time_(write_start_time_());
+			set_current_time_(ring_->write_start_time());
 			set_online();
 		}
 		do {
-			cont = process_next_frame_(write_start_time_());
-		} while(cont & !readable_time_span_().includes(span) && !reached_end());
+			cont = process_next_frame_();
+		} while(cont && !ring_->readable_time_span().includes(span) && !reached_end());
 	}
-	
+
 	if(reached_end() && span.end_time() > end_time())
 		span = time_span(span.start_time(), end_time());
-	
+
 	if(cont) {
+		if(not (ring_->readable_duration() >= span.duration())) {
+			MF_DEBUG_EXPR(ring_->readable_time_span(), span);
+		}
 		Ensures(ring_->readable_duration() >= span.duration());
 		return pull_result::success;
-	} else if(this_graph().was_stopped()) {
-		return pull_result::stopped;
 	} else {
-		return pull_result::transitory_failure;
+		if(this_graph().was_stopped()) return pull_result::stopped;
+		else return pull_result::transitory_failure;
 	}
 }
 
+	
+timed_frame_array_view sync_node::output_begin_read_(time_unit duration) {
+	Expects(ring_->readable_duration() >= duration);
+	
+	if(reached_end() && ring_->read_start_time() + duration > current_time())
+		duration = ring_->readable_duration();
 
-bool sync_node::process_next_frame_(time_unit t) {
-	if(stream_properties().duration_is_defined()) Assert(t < stream_properties().duration());
+	MF_ASSERT(duration <= ring_->readable_duration());
 
-	set_current_time_(t);
-	processing_node_job job = begin_job_();
-	
-	for(std::ptrdiff_t i = 0; i < output_channels_count(); ++i) {
-		bool ok = job.begin_output(output_channel_at(i));
-		Assert(ok);
-	}
-	
-	handler_pre_process_(job);
-	
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		pull_result res = input_at(i).pull();
-		if(res == pull_result::stopped || res == pull_result::transitory_failure) return false;
-	}
-	
-	handler_process_(job);
-	
-	finish_job_(job);
-	
-	return true;
+	return ring_->begin_read(duration);
 }
 
+
+void sync_node::output_end_read_(time_unit duration) {
+	ring_->end_read(duration);
+}
 
 }}

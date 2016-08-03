@@ -138,7 +138,7 @@ public:
 
 private:
 	std::vector<edge_base_type*> edges_;
-	processing_node_output* node_output_channel_ = nullptr;
+	processing_node_output_channel* node_output_channel_ = nullptr;
 	
 	frame_shape_type frame_shape_;	
 

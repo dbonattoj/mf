@@ -14,8 +14,8 @@ public:
 	
 	virtual std::size_t channels_count() const noexcept = 0;
 	virtual node::pull_result pull(time_span& span, bool reconnect) = 0;
-	virtual timed_frame_array_view begin_read(time_unit duration, std::ptrdiff_t channel_index) = 0;
-	virtual void end_read(time_unit duration, std::ptrdiff_t channel_index) = 0;
+	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
+	virtual void end_read(time_unit duration) = 0;
 };
 
 }}

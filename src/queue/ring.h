@@ -26,6 +26,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+// TODO rename total duration -> capacity
+
 /// Ring buffer.
 /** Circular buffer of *frames*. Derived from \ref ndarray_generic.
  ** FIFO interface to read/write frames to the ring buffer. */

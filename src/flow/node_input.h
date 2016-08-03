@@ -19,7 +19,7 @@ private:
 	
 	time_span pulled_span_;
 	bool activated_ = true;
-		
+			
 public:
 	explicit node_input(node& nd);
 	node_input(const node_input&) = delete;
@@ -52,9 +52,9 @@ public:
 	///@{
 	node::pull_result pull();
 	const time_span& pulled_span() const noexcept { return pulled_span_; }
-	timed_frame_array_view begin_read_frame(std::ptrdiff_t channel_index);
-	void end_read_frame(std::ptrdiff_t channel_index);
-	void cancel_read_frame(std::ptrdiff_t channel_index);
+	timed_frame_array_view begin_read_frame();
+	void end_read_frame();
+	void cancel_read_frame();
 	time_unit end_time() const { return connected_output_->end_time(); }
 	///@}
 };

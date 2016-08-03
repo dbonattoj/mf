@@ -89,7 +89,7 @@ private:
 	time_span writable_time_span_() const;
 	
 public:
-	shared_ring(const frame_array_properties&, bool seekable, time_unit end_time = -1);
+	shared_ring(const frame_format& frm, std::size_t capacity, bool seekable, time_unit end_time = -1);
 		
 	void initialize();
 	

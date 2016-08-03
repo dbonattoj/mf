@@ -19,6 +19,7 @@ frame_format& frame_format::operator=(const frame_array_format& arr_format) {
 
 
 void frame_format::add_array_frame_(const frame_array_format& arr_format) {
+	Expects(arr_format.is_defined());
 	arrays_.push_back(arr_format);
 	total_size_ = std::max(total_size_, arr_format.frame_size());
 	total_aligmnent_requirement_ = lcm(total_aligmnent_requirement_, arr_format.frame_alignment_requirement());
