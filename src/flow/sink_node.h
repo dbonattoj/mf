@@ -36,7 +36,8 @@ protected:
 	void output_end_read_(time_unit duration) override { throw 0; }
 
 public:	
-	explicit sink_node(graph& gr) : processing_node(gr) { }
+	explicit sink_node(graph& gr) :
+		processing_node(gr, false) { }
 	
 	time_unit minimal_offset_to(const node&) const override { return 0; }
 	time_unit maximal_offset_to(const node&) const override { return 0; }

@@ -29,20 +29,20 @@ namespace mf { namespace flow {
 
 
 void filter::handler_setup(processing_node& nd) {
-	Expects(nd == node_);
+	Expects(&nd == node_);
 	this->setup();
 }
 
 
 void filter::handler_pre_process(processing_node& nd, processing_node_job& job) {
-	Expects(nd == node_);
+	Expects(&nd == node_);
 	filter_job fjob(job);
 	this->pre_process(fjob);
 }
 
 
 void filter::handler_process(processing_node& nd, processing_node_job& job) {
-	Expects(nd == node_);
+	Expects(&nd == node_);
 	filter_job fjob(job);
 	this->process(fjob);
 }
@@ -88,30 +88,16 @@ bool filter::need_multiplex_node_() const {
 	});
 }
 
-void filter::install_multiplex_node_(graph& gr) {
-	multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
-	
-}
-
-
-
-		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
-		multiplex_node_->input().connect(*node_output_);
-		for(edge_base_type* edge : edges_) {
-			multiplex_node_output& mlpx_out = multiplex_node_->add_output();
-			edge->set_node_output(mlpx_out);
-		}
-
 void filter::install(graph& gr) {
 	Expects(! was_installed());
-	if(asynchronous_) {
+	/*if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
 		node_ = &nd;
-	} else {
+	} else {*/
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
-	}
+	//}
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
@@ -163,14 +149,14 @@ void source_filter::install(graph& gr) {
 	Expects(! was_installed());
 	Expects(inputs_.size() == 0, "source filter must have no inputs");
 	Expects(outputs_.size() == 1, "non-sink filter must have exactly one output");
-	if(asynchronous_) {
+	/*if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
 		node_ = &nd;
-	} else {
+	} else {*/
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
-	}
+	//}
 	node_->set_handler(*this);
 	node_->define_source_stream_properties(node_stream_properties_);
 	outputs_.front()->install(*node_);

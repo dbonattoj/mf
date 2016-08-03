@@ -188,6 +188,7 @@ public:
 private:
 	Convert_function convert_function_;
 	sync_node* convert_node_ = nullptr;
+	sync_node::output_channel_type* convert_node_output_channel_ = nullptr; 
 
 protected:
 	void install_(graph&) override;

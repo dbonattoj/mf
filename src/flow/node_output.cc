@@ -3,8 +3,8 @@
 
 namespace mf { namespace flow {
 
-node_output::node_output(node& nd, std::ptrdiff_t index) :
-	node_(nd), index_(index) { }
+node_output::node_output(node& nd) :
+	node_(nd) { }
 
 void node_output::input_has_connected(node_input& input) {
 	connected_input_ = &input;

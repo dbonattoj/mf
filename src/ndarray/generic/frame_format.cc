@@ -1,7 +1,7 @@
 #include "frame_format.h"
 #include "../../utility/misc.h"
 
-namespace mf { namespace flow {
+namespace mf {
 
 frame_format::frame_format(const frame_array_format& arr_format) {
 	add_array_frame_(arr_format);
@@ -26,23 +26,25 @@ void frame_format::add_array_frame_(const frame_array_format& arr_format) {
 }
 
 
-const array_frame_format& frame_format::place_next_array_frame(const frame_array_format& nested) {
+const frame_array_format& frame_format::place_next_array(const frame_array_format& nested) {
 	Expects(nested.offset() == 0);
 	
 	if(arrays_.size() > 0) {
-		const composite_frame_format& previous = arrays_.back();
+		const frame_array_format& previous = arrays_.back();
 		
 		std::size_t min_offset = previous.frame_size();
-		std::size_t align_requirement = nested.frame_alignment_requirement();
+		std::size_t alignment_requirement = nested.frame_alignment_requirement();
 		
 		std::size_t offset;
-		if(is_multiple_of(min_offset, align_requirement)) offset = min_offset;
-		else offset = (1 + (min_offset / align_requirement)) * alignment_requirement;
+		if(is_multiple_of(min_offset, alignment_requirement)) offset = min_offset;
+		else offset = (1 + (min_offset / alignment_requirement)) * alignment_requirement;
 		
-		Assert(is_multiple_of(offset, align_requirement));
+		Assert(is_multiple_of(offset, alignment_requirement));
 		Assert(offset >= min_offset);
 		
-		add_array_frame_(array_frame_format(nested.elem_type(), nested.elem_count(), nested.elem_stride(), offset));
+		frame_array_format new_nested = nested;
+		new_nested.set_offset(offset);
+		add_array_frame_(new_nested);
 		
 	} else {
 		add_array_frame_(nested);
@@ -52,4 +54,4 @@ const array_frame_format& frame_format::place_next_array_frame(const frame_array
 }
 
 
-}}
+}

@@ -59,7 +59,6 @@ protected:
 	multiplex_node* multiplex_node_ = nullptr;
 	
 	bool need_multiplex_node_() const;
-	void install_multiplex_node_(graph& gr);
 	
 public:
 	filter() = default;

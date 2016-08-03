@@ -7,7 +7,7 @@
 #include <typeindex>
 #include "../ndarray_view.h"
 
-namespace mf { namespace flow {
+namespace mf {
 
 class frame_array_format;
 
@@ -20,7 +20,7 @@ private:
 	std::size_t total_size_ = 0;
 	std::size_t total_aligmnent_requirement_ = 1;
 	
-	void add_array_(const frame_array_format&);
+	void add_array_frame_(const frame_array_format&);
 
 public:
 	frame_format() = default;
@@ -42,6 +42,11 @@ public:
 	std::size_t arrays_count() const noexcept { return arrays_.size(); }
 	const frame_array_format& array_at(std::ptrdiff_t index) const { return arrays_.at(index); }
 };
+
+class frame_array_format;
+template<typename Elem>
+frame_array_format make_frame_array_format(std::size_t, std::size_t = sizeof(Elem), std::size_t = 0);
+
 
 
 /// Description of frame array, homogeneous array of elements.
@@ -68,9 +73,11 @@ public:
 	std::size_t frame_size() const noexcept { return offset_ + (elem_count_ * elem_stride_); }
 	std::size_t frame_alignment_requirement() const noexcept { return elem_alignment_; }
 
-	std::size_t elem_count() const noexcept { return count_; }
-	std::size_t elem_stride() const noexcept { return stride_; }
+	std::size_t elem_count() const noexcept { return elem_count_; }
+	std::size_t elem_stride() const noexcept { return elem_stride_; }
 	std::size_t offset() const noexcept { return offset_; }
+	
+	void set_offset(std::size_t off) { offset_ = off; } // TODO better interface
 
 	std::size_t elem_size() const noexcept { return elem_size_; }
 	std::size_t elem_alignment() const noexcept { return elem_alignment_; }
@@ -80,7 +87,7 @@ public:
 
 
 template<typename Elem>
-frame_array_format make_frame_array_format(std::size_t count, std::size_t stride = sizeof(Elem), std::size_t off = 0) {
+frame_array_format make_frame_array_format(std::size_t count, std::size_t stride, std::size_t offset) {
 	Expects(count > 0, "frame array format must have at least one element");
 	Expects(is_nonzero_multiple_of(stride, alignof(Elem)));
 	Expects(stride >= sizeof(Elem));
@@ -97,7 +104,7 @@ frame_array_format make_frame_array_format(std::size_t count, std::size_t stride
 
 
 template<std::size_t Dim, typename Elem>
-frame_array_format format(const ndarray<Dim, Elem>& vw) {
+frame_array_format format(const ndarray_view<Dim, Elem>& vw) {
 	Expects(vw.has_default_strides());
 	std::size_t count = vw.shape().product();
 	std::size_t stride = vw.strides().back();
@@ -105,7 +112,7 @@ frame_array_format format(const ndarray<Dim, Elem>& vw) {
 }
 
 
-}}
+}
 
 #endif
 

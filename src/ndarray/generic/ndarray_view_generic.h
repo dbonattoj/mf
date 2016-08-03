@@ -57,15 +57,18 @@ public:
 	
 private:
 	frame_format format_;
-	
-	ndarray_view_generic(const frame_format& format, const base& vw) :
-		base(vw), format_(format) { }
-	
+		
 public:
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
 	ndarray_view_generic() = default;
+
+	ndarray_view_generic(const frame_format& format, const base& vw) :
+		base(vw), format_(format) { }
 	
 	ndarray_view_generic(const frame_format&, byte* start, const generic_shape_type&, const generic_strides_type&);
+
+	generic_shape_type generic_shape() const { return base::shape().head(); }
+	generic_strides_type generic_strides() const { return base::strides().head(); }
 
 	void reset(const ndarray_view_generic& other) noexcept {
 		base::reset(other);

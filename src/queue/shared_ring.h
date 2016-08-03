@@ -266,6 +266,4 @@ public:
 
 }
 
-#include "shared_ring.tcc"
-
 #endif

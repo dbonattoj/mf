@@ -45,7 +45,7 @@ time_span multiplex_node::expected_input_span_() const {
 
 
 time_span multiplex_node::current_input_span_() const {
-	return input_channel_views_.front().span();
+	return input_channel_view_.span();
 }
 
 
@@ -54,15 +54,12 @@ void multiplex_node::load_input_view_(time_unit t) {
 
 	set_current_time_(t);
 	
-	if(successor_time_of_input_view_ != -1)
-		for(std::ptrdiff_t i = 0; i < input().channels_count(); ++i) input().end_read_frame(i);
+	input().end_read_frame();
 		
 	pull_result result = input().pull();
 	if(result == pull_result::success) {
 		successor_time_of_input_view_ = t;
-		
-		for(std::ptrdiff_t i = 0; i < input().channels_count(); ++i)
-			input_channel_views_[i].reset(input().begin_read_frame(i));
+		input_channel_view_.reset(input().begin_read_frame());
 		
 	} else if(result == pull_result::transitory_failure) {
 		successor_time_of_input_view_ = -1;
@@ -202,11 +199,11 @@ std::size_t multiplex_node_output::channels_count() const noexcept {
 }
 
 
-timed_frame_array_view multiplex_node_output::begin_read(time_unit duration, std::ptrdiff_t channel_index) {
-	Expects(channel_index == 0);
-	
+timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {	
 	Assert(! input_view_shared_lock_);
 	input_view_shared_lock_.lock();
+	
+	///!!! take out one generic view array
 	
 	timed_frame_array_view& input_view = this_node().input_channel_views_.at(input_channel_index_);
 	
@@ -222,8 +219,7 @@ timed_frame_array_view multiplex_node_output::begin_read(time_unit duration, std
 }
 
 
-void multiplex_node_output::end_read(time_unit duration, std::ptrdiff_t channel_index) {
-	Expects(channel_index == 0);
+void multiplex_node_output::end_read(time_unit duration) {
 	Assert(input_view_shared_lock_);
 	input_view_shared_lock_.unlock();
 }

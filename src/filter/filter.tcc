@@ -40,10 +40,7 @@ void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
 	Expects(edges_.size() == 1, "installing filter output with multiple edges requires multiplex node");
-	
 	node_output_channel_ = &nd.add_output_channel();
-	node_output_channel_->define_format(frame_format::default_format<Output_elem>());
-	
 	edges_.front()->set_node_output(nd.output(), node_output_channel_->index());
 }
 
@@ -51,11 +48,10 @@ void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multiplex_node& mpx_nd) {
 	node_output_channel_ = &nd.add_output_channel();
-	node_output_channel_->define_format(frame_format::default_format<Output_elem>());
 	
 	for(edge_base_type* edge : edges_) {
 		std::ptrdiff_t channel_index = edge->node_output_channel_index();
-		multiplex_node_output& mpx_out = mpx_nd->add_output(channel_index);
+		multiplex_node_output& mpx_out = mpx_nd.add_output(channel_index);
 		edge->set_node_output(mpx_out, 0);
 	}
 }

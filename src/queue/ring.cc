@@ -31,12 +31,6 @@ ring::ring(const frame_format& frm, std::size_t capacity) :
 	base(frm, capacity, adjust_padding_(frm, capacity)) { }
 
 
-ring::ring(const frame_array_properties& prop) :
-	base(prop, adjust_padding_(prop), raw_ring_allocator()) { }
-
-
-
-
 std::size_t ring::adjust_padding_(const frame_format& frm, std::size_t capacity) {
 	std::size_t array_length = capacity; // array length, = number of frames
 	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
@@ -72,7 +66,7 @@ std::size_t ring::adjust_padding_(const frame_format& frm, std::size_t capacity)
 	std::size_t frame_padding = 0;
 	if(r != 0) frame_padding = (d - r) * a;
 	
-	Ensures(is_nonzero_multiple_of(prop.array_length() * (frame_size + frame_padding), page_size));
+	Ensures(is_nonzero_multiple_of(array_length * (frame_size + frame_padding), page_size));
 	Ensures(is_nonzero_multiple_of(frame_size + frame_padding, a));
 	return frame_padding;
 }
@@ -89,10 +83,10 @@ auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
 	if(duration > total_duration()) throw std::invalid_argument("ring section duration too large");
 	
 	auto new_start = base::start() + (base::strides().front() * start);
-	auto new_shape = make_ndsize(duration, frame_length());
-	auto new_strides = base::strides();
+	auto new_shape = make_ndsize(duration);
+	auto new_strides = base::generic_strides();
 	
-	return section_view_type(new_start, base::format(), new_shape, new_strides);
+	return section_view_type(base::format(), new_start, new_shape, new_strides);
 }
 
 

@@ -50,24 +50,24 @@ public:
 		base(gen_vw, start_time), format_(gen_vw.format()) { }
 
 	operator ndarray_view_generic<Dim> () const noexcept
-		{ return ndarray_view_generic<Dim>(*this, format_); }
+		{ return ndarray_view_generic<Dim>(format_, *this); }
 	
 	const frame_format& format() const noexcept { return format_; }
 	
 	decltype(auto) slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const
-		{ return ndarray_view_generic<Dim - 1>(base::slice(c, dimension), format_); }
+		{ return ndarray_view_generic<Dim - 1>(format_, base::slice(c, dimension)); }
 
 	decltype(auto) operator[](std::ptrdiff_t c) const
-		{ return ndarray_view_generic<Dim - 1>(base::operator[](c), format_); }
+		{ return ndarray_view_generic<Dim - 1>(format_, base::operator[](c)); }
 
 	decltype(auto) operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const
-		{ return ndarray_timed_view_generic(base::operator()(start, end, step), format_); }
+		{ return ndarray_timed_view_generic(format_, base::operator()(start, end, step)); }
 		
 	decltype(auto) operator()(std::ptrdiff_t c) const
-		{ return ndarray_timed_view_generic(base::operator()(c), format_); }
+		{ return ndarray_timed_view_generic(format_, base::operator()(c)); }
 
 	decltype(auto) operator()() const
-		{ return ndarray_timed_view_generic(base::operator()(), format_); }
+		{ return ndarray_timed_view_generic(format_, base::operator()()); }
 
 	void reset(const ndarray_timed_view_generic& other) noexcept {
 		base::reset(other);

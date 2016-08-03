@@ -26,6 +26,13 @@ void processing_node_output::end_read(time_unit duration) {
 ///////////////
 
 
+processing_node_input::processing_node_input(processing_node& nd, std::ptrdiff_t index) :
+	node_input(nd), index_(index) {}
+
+
+///////////////
+
+
 void processing_node::verify_connections_validity_() const {
 	if(outputs().size() > 1) throw invalid_node_graph("processing_node must have at most 1 output");
 	

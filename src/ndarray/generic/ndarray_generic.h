@@ -52,6 +52,9 @@ public:
 
 	const frame_format& format() const noexcept { return format_; }
 
+	generic_shape_type generic_shape() const { return base::shape().head(); }
+	generic_strides_type generic_strides() const { return base::strides().head(); }
+
 	view_type view() { return view_type(format_, base::view()); }	
 };
 

@@ -48,8 +48,8 @@ public:
 	
 	std::size_t channels_count() const noexcept override;
 	node::pull_result pull(time_span& span, bool reconnect) override;
-	timed_frame_array_view begin_read(time_unit duration, std::ptrdiff_t channel_index) override;
-	void end_read(time_unit duration, std::ptrdiff_t channel_index) override;
+	timed_frame_array_view begin_read(time_unit duration) override;
+	void end_read(time_unit duration) override;
 
 	/*
 	node::pull_result pull(time_span& span, bool reconnect) override;
@@ -72,7 +72,7 @@ private:
 	bool stopped_ = false;
 	time_unit successor_time_of_input_view_ = -1;
 	
-	std::vector<timed_frame_array_view> input_channel_views_;
+	timed_frame_array_view input_view_;
 		
 	std::mutex successor_time_mutex_;
 	std::condition_variable successor_time_changed_cv_;

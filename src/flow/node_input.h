@@ -3,7 +3,6 @@
 
 #include "node.h"
 #include "node_output.h"
-#include "node_remote_output.h"
 
 namespace mf { namespace flow {
 
@@ -15,7 +14,7 @@ private:
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
 	
-	node_remote_output* connected_output_ = nullptr;
+	node_output* connected_output_ = nullptr;
 	
 	time_span pulled_span_;
 	bool activated_ = true;
@@ -34,16 +33,16 @@ public:
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
 	
-	void connect(node_remote_output& out);
+	void connect(node_output& out);
 	void disconnect();
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_remote_output& connected_output() const
+	node_output& connected_output() const
 		{ Expects(is_connected()); return *connected_output_; }
 	node& connected_node() const
-		{ Expects(is_connected()); return connected_output().this_output().this_node(); }
+		{ Expects(is_connected()); return connected_output().this_node(); }
 
 	std::size_t channels_count() const
-		{ Expects(is_connected()); return connected_output().channels_count();e }
+		{ Expects(is_connected()); return connected_output().channels_count(); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);

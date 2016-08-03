@@ -53,7 +53,11 @@ auto filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::output_view_to_cast
 (const timed_frame_array_view& generic_output_view) const -> casted_full_view_type {
 	if(generic_output_view.is_null()) return casted_full_view_type::null();
 
-	auto concrete_output_view = from_generic<Dim + 1, Output_elem>(generic_output_view, output_frame_shape());
+	auto concrete_output_view = from_generic<Dim + 1, Output_elem>(
+		generic_output_view,
+		output_frame_shape(),
+		node_output_channel_index()
+	);
 	return ndarray_view_cast<casted_full_view_type>(concrete_output_view);
 }
 
@@ -84,13 +88,12 @@ template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename I
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::install_(graph& gr) {	
 	convert_node_ = &gr.add_node<sync_node>();
 	convert_node_->set_handler(*this);
-	node_input& convert_node_input = convert_node_->add_input();
-	node_output& convert_node_output = convert_node_->add_output();
-	
-	convert_node_output.define_format( frame_format::default_format<Input_elem>() );
-	
-	convert_node_input.connect( base::this_cast_connector_() );
-	base::this_node_input().connect( convert_node_output );
+	auto& convert_node_input = convert_node_->add_input();
+	auto& convert_node_output = convert_node_->output();
+	convert_node_output_channel_ = &convert_node_->add_output_channel();
+		
+	convert_node_input.connect(base::this_node_output());
+	base::this_node_input().connect(convert_node_output);
 }
 
 
@@ -98,7 +101,11 @@ template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename I
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::handler_setup() {
 	node_input& convert_node_input = *convert_node_->inputs().front();
 	node_output& convert_node_output = convert_node_->output();
-	convert_node_output.define_frame_length( convert_node_input.connected_output().this_output().frame_length() );	
+		
+	std::size_t elem_count = base::output_frame_shape().product();
+	frame_array_format array_format = make_frame_array_format<Input_elem>(elem_count);
+	
+	convert_node_output_channel_->define_format(array_format);
 }
 
 
@@ -113,7 +120,7 @@ handler_process(processing_node_job& job) {
 	auto in = job.input_view(0)[0];
 	const auto& out = job.output_view();
 	
-	auto concrete_in = from_generic<Dim, Casted_elem>(in, base::input_frame_shape());
+	auto concrete_in = from_generic<Dim, Casted_elem>(in, base::input_frame_shape(), base::node_output_channel_index());
 	auto concrete_out = from_generic<Dim, Input_elem>(out, base::input_frame_shape());
 	
 	std::transform(concrete_in.begin(), concrete_in.end(), concrete_out.begin(), convert_function_);
@@ -124,7 +131,7 @@ auto filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_f
 cast_connected_node_output_view(const timed_frame_array_view& generic_converted_view) const -> input_full_view_type {
 	// `generic_output_view` is reading from `convert_node_`.
 	// its format is already <Dim, Input_elem>
-	return from_generic<Dim + 1, Input_elem>(generic_converted_view, base::input_frame_shape());
+	return from_generic<Dim + 1, Input_elem>(generic_converted_view, base::input_frame_shape(), 0);
 }
 
 

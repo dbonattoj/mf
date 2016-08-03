@@ -42,8 +42,8 @@ ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Co
 	auto frm = format(vw);
 		
 	auto generic_start = reinterpret_cast<byte*>(vw.start());
-	auto generic_shape = ndcoord_cat(vw.shape().template head<Generic_dim>(), frame_size);
-	auto generic_strides = ndcoord_cat(vw.strides().template head<Generic_dim>(), 1);
+	auto generic_shape = ndcoord_cat(vw.generic_shape(), frame_size);
+	auto generic_strides = ndcoord_cat(vw.generic_strides(), 1);
 	
 	return ndarray_view_generic<Generic_dim>(generic_start, frm, generic_shape, generic_strides);
 }
@@ -66,9 +66,9 @@ ndarray_view<Concrete_dim, Concrete_elem> from_generic(
 	ndptrdiff<frame_dim> concrete_frame_strides =
 		ndarray_view<frame_dim, Concrete_elem>::default_strides(frame_shape, frm.padding());
 	
-	auto concrete_start = reinterpret_cast<Concrete_elem*>(vw.start() + frm.offset());
-	auto concrete_shape = ndcoord_cat(vw.shape().template head<Generic_dim>(), frame_shape);
-	auto concrete_strides = ndcoord_cat(vw.strides().template head<Generic_dim>(), concrete_frame_strides);
+	auto concrete_start = reinterpret_cast<Concrete_elem*>(gen_vw.start() + frm.offset());
+	auto concrete_shape = ndcoord_cat(gen_vw.generic_shape(), frame_shape);
+	auto concrete_strides = ndcoord_cat(gen_vw.generic_strides(), concrete_frame_strides);
 		
 	return ndarray_view<Concrete_dim, Concrete_elem>(concrete_start, concrete_shape, concrete_strides);
 }

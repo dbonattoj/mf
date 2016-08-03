@@ -27,6 +27,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 
+node::~node() { }
+
 bool node::precedes(const node& nd) const {
 	if(&nd == this) return true;
 	for(auto&& out : outputs_)

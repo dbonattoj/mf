@@ -57,8 +57,8 @@ public:
 	const processing_node& this_node() const { return node_; }
 	std::ptrdiff_t index() const { return index_; }
 	
-	void define_format(const frame_array_format& frm) { format_ = frm; }
-	const frame_array_format& format() const noexcept { return format_; }
+	void define_format(const frame_array_format& frm) { array_format_ = frm; }
+	const frame_array_format& format() const noexcept { return array_format_; }
 };
 
 
@@ -72,7 +72,7 @@ private:
 public:
 	using node_output::node_output;
 	
-	std::size_t channels_count() override const noexcept;
+	std::size_t channels_count() const noexcept override;
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
@@ -88,8 +88,7 @@ private:
 public:
 	using node_input::node_input;
 
-	explicit processing_node_input(processing_node& nd, std::ptrdiff_t index) :
-		node_input(nd), index_(index) {}
+	processing_node_input(processing_node&, std::ptrdiff_t index);
 	
 	std::ptrdiff_t index() const { return index_; }
 };
@@ -161,7 +160,7 @@ private:
 	bool end_marked_ = false;
 	
 	static bool is_null_(const input_view_handle& in) { return (in.first == nullptr); }
-	static void set_null_(input_view_handle& in) { in = { nullptr, timed_frame_array_view::null(); }; }
+	static void set_null_(input_view_handle& in) { in = { nullptr, timed_frame_array_view::null() }; }
 
 	processing_node_job(const processing_node_job&) = delete;
 	processing_node_job& operator=(const processing_node_job&) = delete;
@@ -179,7 +178,7 @@ public:
 	
 	bool end_was_marked() const noexcept { return end_marked_; }
 		
-	time_unit time() const noexcept { return time_; }
+	time_unit time() const noexcept { return node_.current_time(); }
 	void mark_end() noexcept { end_marked_ = true; }
 	
 	bool has_input_view(std::ptrdiff_t index) const noexcept;

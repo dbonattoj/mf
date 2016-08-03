@@ -84,7 +84,7 @@ protected:
 	void mark_end_();
 	
 public:
-	virtual ~node() { }
+	virtual ~node();
 
 	graph& this_graph() noexcept { return graph_; }
 
@@ -94,9 +94,9 @@ public:
 	std::size_t inputs_count() const noexcept { return inputs_.size(); }
 	node_input& input_at(std::ptrdiff_t index) { return *inputs_.at(index); }
 	const node_input& input_at(std::ptrdiff_t index) const { return *inputs_.at(index); }
-	std::size_t outputs_count() const noexcept { return outputs().size(); }
-	node_output& output_at(std::ptrdiff_t index) { return *outputs.at(index); }
-	const node_output& output_at(std::ptrdiff_t index) const { return *outputs.at(index); }
+	std::size_t outputs_count() const noexcept { return outputs_.size(); }
+	node_output& output_at(std::ptrdiff_t index) { return *outputs_.at(index); }
+	const node_output& output_at(std::ptrdiff_t index) const { return *outputs_.at(index); }
 
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
