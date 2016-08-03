@@ -27,17 +27,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 	
 
+ring::ring(const frame_format& frm, std::size_t capacity) :
+	base(frm, capacity, adjust_padding_(frm, capacity)) { }
+
+
 ring::ring(const frame_array_properties& prop) :
 	base(prop, adjust_padding_(prop), raw_ring_allocator()) { }
 
 
 
 
-std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
-	std::size_t frame_size = prop.frame_size(); // frame size, in bytes
+std::size_t ring::adjust_padding_(const frame_format& frm, std::size_t capacity) {
+	std::size_t array_length = capacity; // array length, = number of frames
+	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
 	std::size_t page_size = system_page_size(); // system page size, in bytes
 
-	std::size_t a = prop.format().elem_alignment(); // a = alignment of elements
+	std::size_t a = frm.frame_alignment_requirement(); // a = alignment of elements
 
 	// will compute minimal padding frame_padding (bytes to insert between frames)
 	// such that array_length * (frame_size + frame_padding) is a multiple of page_size
@@ -50,14 +55,14 @@ std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
 	// need to make frame_padding also multiple of a
 	// --> count in units a
 	
-	MF_ASSERT_MSG(is_nonzero_multiple_of(frame_size, a), "frame size not multiple of frame alignment");
-	MF_ASSERT_MSG(is_nonzero_multiple_of(page_size, a), "system page size not multiple of frame alignment");
+	Assert(is_nonzero_multiple_of(frame_size, a), "frame size must be multiple of frame alignment");
+	Assert(is_nonzero_multiple_of(page_size, a), "system page size must be multiple of frame alignment");
 	
 	std::size_t frame_size_a = frame_size / a;
 	std::size_t page_size_a = page_size / a;
 	// duration * (frame_size_a + frame_padding_a) must be multiple of page_size_a
 	
-	std::size_t d = page_size_a / gcd(page_size_a, prop.array_length());	
+	std::size_t d = page_size_a / gcd(page_size_a, array_length);	
 	// --> (frame_size_a + frame_padding_a) must be multiple of d
 	// d is a power of 2
 	// d = factors 2 that are missing in array_length for it to be multiple of page_size_a
@@ -67,8 +72,8 @@ std::size_t ring::adjust_padding_(const frame_array_properties& prop) {
 	std::size_t frame_padding = 0;
 	if(r != 0) frame_padding = (d - r) * a;
 	
-	MF_ENSURES(is_nonzero_multiple_of(prop.array_length() * (frame_size + frame_padding), page_size));
-	MF_ENSURES(is_nonzero_multiple_of(frame_size + frame_padding, a));
+	Ensures(is_nonzero_multiple_of(prop.array_length() * (frame_size + frame_padding), page_size));
+	Ensures(is_nonzero_multiple_of(frame_size + frame_padding, a));
 	return frame_padding;
 }
 

@@ -33,20 +33,19 @@ class ndarray_timed_view_generic : public ndarray_timed_view<Dim + 1, byte> {
 	using base = ndarray_timed_view<Dim + 1, byte>;
 
 public:
-	using shape_type = typename base::shape_type;
-	using strides_type = typename base::strides_type;
+	using generic_shape_type = ndsize<Dim>;
+	using generic_strides_type = ndptrdiff<Dim>;
 	
 private:
 	frame_format format_;
-	
+
+	ndarray_timed_view_generic(const frame_format& format, const base& vw) :
+		base(vw), format_(format) { }
+
 public:
 	static ndarray_timed_view_generic null() { return ndarray_timed_view_generic(); }
+	ndarray_timed_view_generic() = default;
 
-	ndarray_timed_view_generic() { }
-	ndarray_timed_view_generic(const base& vw, const frame_format& format) :
-		base(vw), format_(format) { }
-	explicit ndarray_timed_view_generic(time_unit start_time, const frame_format& format) :
-		base(start_time), format_(format) { }
 	ndarray_timed_view_generic(const ndarray_view_generic<Dim>& gen_vw, time_unit start_time) :
 		base(gen_vw, start_time), format_(gen_vw.format()) { }
 
@@ -89,9 +88,14 @@ ndarray_timed_view_generic<Generic_dim> to_generic(const ndarray_timed_view<Conc
 template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Generic_dim>
 ndarray_timed_view<Concrete_dim, Concrete_elem> from_generic(
 	const ndarray_timed_view_generic<Generic_dim>& gen_vw,
-	const ndsize<Concrete_dim - Generic_dim>& frame_shape
+	const ndsize<Concrete_dim - Generic_dim>& frame_shape,
+	std::ptrdiff_t array_index = 0
 ) {
-	auto vw = from_generic<Concrete_dim, Concrete_elem, Generic_dim>(static_cast<ndarray_view_generic<Generic_dim>>(gen_vw), frame_shape);
+	auto vw = from_generic<Concrete_dim, Concrete_elem, Generic_dim>(
+		static_cast<ndarray_view_generic<Generic_dim>>(gen_vw),
+		frame_shape,
+		array_index
+	);
 	return ndarray_timed_view<Concrete_dim, Concrete_elem>(vw, gen_vw.start_time());
 }
 

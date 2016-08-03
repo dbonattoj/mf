@@ -51,47 +51,44 @@ template<std::size_t Dim>
 class ndarray_view_generic : public ndarray_view<Dim + 1, byte> {	
 	using base = ndarray_view<Dim + 1, byte>;
 
-public:
-	using shape_type = typename base::shape_type;
-	using strides_type = typename base::strides_type;
+public:	
+	using generic_shape_type = ndsize<Dim>;
+	using generic_strides_type = ndptrdiff<Dim>;
 	
 private:
 	frame_format format_;
 	
-	ndarray_view_generic(const base& vw, const frame_format& format) :
+	ndarray_view_generic(const frame_format& format, const base& vw) :
 		base(vw), format_(format) { }
 	
 public:
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
-
 	ndarray_view_generic() = default;
 	
-	ndarray_view_generic(byte* start, const frame_format& format, const shape_type& shape, const strides_type& strides) :
-		base(start, shape, strides),
-		format_(format) { }
-	
-	const frame_format& format() const noexcept { return format_; }
-	
-	decltype(auto) slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const
-		{ return ndarray_view_generic<Dim - 1>(base::slice(c, dimension), format_); }
+	ndarray_view_generic(const frame_format&, byte* start, const generic_shape_type&, const generic_strides_type&);
 
-	decltype(auto) operator[](std::ptrdiff_t c) const
-		{ return ndarray_view_generic<Dim - 1>(base::operator[](c), format_); }
-
-	decltype(auto) operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const
-		{ return ndarray_view_generic(base::operator()(start, end, step), format_); }
-		
-	decltype(auto) operator()(std::ptrdiff_t c) const
-		{ return ndarray_view_generic(base::operator()(c), format_); }
-
-	decltype(auto) operator()() const
-		{ return ndarray_view_generic(base::operator()(), format_); }
-	
 	void reset(const ndarray_view_generic& other) noexcept {
 		base::reset(other);
 		format_ = other.format_;
 	}
 	void reset() noexcept { reset(null()); }
+	
+	const frame_format& format() const noexcept { return format_; }
+	
+	decltype(auto) slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const
+		{ return ndarray_view_generic<Dim - 1>(format_, base::slice(c, dimension)); }
+
+	decltype(auto) operator[](std::ptrdiff_t c) const
+		{ return ndarray_view_generic<Dim - 1>(format_, base::operator[](c)); }
+
+	decltype(auto) operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const
+		{ return ndarray_view_generic(format_, base::operator()(start, end, step)); }
+		
+	decltype(auto) operator()(std::ptrdiff_t c) const
+		{ return ndarray_view_generic(format_, base::operator()(c)); }
+
+	decltype(auto) operator()() const
+		{ return ndarray_view_generic(format_, base::operator()()); }
 };
 
 

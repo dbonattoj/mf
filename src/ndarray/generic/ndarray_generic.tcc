@@ -19,21 +19,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 namespace mf {
-
-
-template<typename Allocator>
-ndarray_generic<Allocator>::ndarray_generic(
-	const ndarray_generic_properties& prop,
-	std::size_t padding,
-	const Allocator& allocator
-) :
-base(
-	make_ndsize(prop.array_length(), prop.frame_length()),
-	padding,
-	prop.format().stride(),
-	allocator
-),
-format_(prop.format()) { }
-
+	
+template<std::size_t Dim, typename Allocator>
+ndarray_generic<Dim, Allocator>::ndarray_generic
+(const frame_format& frm, const generic_shape_type& shp, std::size_t padding, const Allocator& allocator) :
+	base(ndcoord_cat(shp, frm.frame_size()), padding, 1, allocator),
+	format_(frm) { }
 
 }

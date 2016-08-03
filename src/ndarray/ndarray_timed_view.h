@@ -47,6 +47,8 @@ public:
 	using typename base::strides_type;
 	using typename base::span_type;
 
+	static ndarray_timed_view null() { return ndarray_timed_view(); }
+
 	/// Create null timed view.
 	ndarray_timed_view() : base(), start_time_(-1) { }
 
@@ -58,8 +60,6 @@ public:
 		Expects(! vw.is_null());	
 	}
 	
-	static ndarray_timed_view null() { return ndarray_timed_view(); }
-
 	time_unit start_time() const { return start_time_; }
 	time_unit end_time() const { return start_time_ + base::shape().front(); }
 	time_unit duration() const { return base::shape().front(); }

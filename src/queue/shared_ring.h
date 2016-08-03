@@ -31,6 +31,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+// TODO remove non-seekable; allow late duration setting
+
 /// Timed ring buffer with changed semantics, for dual-thread use.
 /** Not derived from \ref timed_ring because semantics are changed and functionality is added. Interface and
  ** implementation, and scope of functionality designed to prevent data races and deadlocks. Must be used with two
@@ -113,15 +115,6 @@ public:
 	 ** seek occurs or \a break_event occurs. */
 	bool wait_writable();
 	
-	/// Wait until a frame in any of the given \ref shared_ring buffers becomes writable.
-	/** `Iterator` is an iterator type whose value type is convertible to `shared_ring&`. Returns the iterator pointing
-	 ** to a `shared_ring` that is writable, or returns `end` if `break_event` occured before any `shared_ring`
-	 ** became writable. If any `shared_ring` is already writable, returns it immediatly, before waiting for any
-	 ** other `shared_ring` or for \a break_event.
-	 ** Also waits if write start position is at end time, until seek occurs or \a break_event occurs. */
-	//template<typename Iterator>
-	//wait_result wait_any_writable(Iterator begin, Iterator end, const event_set& break_events);
-
 	/// Begin writing \a write_duration frames at current write start time, if they are available.
 	/** Like begin_write(), but never waits. Instead returns null view when the frames are not available. */
 	section_view_type try_begin_write(time_unit write_duration);
@@ -163,9 +156,6 @@ public:
 	 ** If \a break_event occured, returns false. Otherwise, repeats until at least one frames is readable.
 	 ** Also waits if write start position is at end time, until \a break_event occurs. */
 	bool wait_readable();
-
-	//template<typename Iterator>
-	//static Iterator wait_any_readable(Iterator begin, Iterator end, event& break_event);
 
 	/// Begin reading frames at time span \a span.
 	/** If \a span does not start at `readable_time_span().start_time()`, seeks to `span.start_time()` first.

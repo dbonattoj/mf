@@ -18,9 +18,16 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "../../debug.h"
 
 namespace mf {
+
+
+template<std::size_t Dim>
+ndarray_view_generic<Dim>::ndarray_view_generic
+(const frame_format& frm, byte* start, const generic_shape_type& shape, const generic_strides_type& strides) :
+	base(start, ndcoord_cat(shape, frm.frame_size()), ndcoord_cat(strides, 1)),
+	format_(frm) { }
+
 
 template<std::size_t Generic_dim, std::size_t Concrete_dim, typename Concrete_elem>
 ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw) {

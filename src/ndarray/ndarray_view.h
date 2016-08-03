@@ -111,6 +111,8 @@ protected:
 	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dim) const;
 			
 public:
+	// TODO: with padding != default (rename)
+
 	/// Default strides which correspond to row-major order for specified shape.
 	/** Optionally with `padding` between elements. */
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);

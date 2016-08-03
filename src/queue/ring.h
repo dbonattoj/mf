@@ -27,10 +27,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Ring buffer.
-/** Circular buffer of _frames_. Derived from \ref ndarray_generic, frames are type-erased _n_-dimensional arrays.
+/** Circular buffer of *frames*. Derived from \ref ndarray_generic.
  ** FIFO interface to read/write frames to the ring buffer. */
-class ring : public ndarray_generic<raw_ring_allocator> {
-	using base = ndarray_generic<raw_ring_allocator>;
+class ring : public ndarray_generic<1, raw_ring_allocator> {
+	using base = ndarray_generic<1, raw_ring_allocator>;
 	
 public:
 	using section_view_type = frame_array_view;
@@ -40,16 +40,19 @@ private:
 	time_unit write_position_ = 0;
 	bool full_ = false;
 		
-	static std::size_t adjust_padding_(const frame_array_properties&); 
+	static std::size_t adjust_padding_(const frame_format&, std::size_t capacity); 
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:
-	explicit ring(const frame_array_properties&);
+	ring(const frame_format&, std::size_t capacity);
+	
+	ring(const ring&) = delete;
+	ring& operator=(const ring&) = delete;
 	
 	void initialize();
 	
 	time_unit total_duration() const noexcept { return base::shape().front(); }
-	time_unit frame_length() const noexcept { return base::shape().back(); }
+	time_unit frame_size() const noexcept { return base::shape().back(); }
 	
 	time_unit writable_duration() const;
 	time_unit readable_duration() const;

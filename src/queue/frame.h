@@ -30,7 +30,6 @@ namespace mf {
 using timed_frame_array_view = ndarray_timed_view_generic<1>;
 using frame_array_view = ndarray_view_generic<1>;
 using frame_view = ndarray_view_generic<0>;
-using frame_array_properties = ndarray_generic_properties;
 
 }
 
