@@ -20,9 +20,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <catch.hpp>
 #include <array>
-#include "../src/ndarray/ndarray_view.h"
-#include "../src/ndarray/ndarray_view_cast.h"
-#include "support/ndarray.h"
+#include <mf/ndarray/ndarray_view.h>
+#include <mf/ndarray/ndarray_view_cast.h>
+#include "../support/ndarray.h"
 #include <cstdint>
 
 using namespace mf;

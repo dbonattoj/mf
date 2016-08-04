@@ -21,12 +21,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <catch.hpp>
 #include <vector>
 #include <algorithm>
-#include "../src/ndarray/ndarray_view.h"
-#include "support/ndarray.h"
+#include <mf/ndarray/ndarray_view.h>
+#include "../support/ndarray.h"
 
 using namespace mf;
 using namespace mf::test;
-
 
 
 TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {

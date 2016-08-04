@@ -19,8 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <iostream>
-#include "../src/ndarray/ndcoord.h"
+#include <mf/ndarray/ndcoord.h>
 
 using namespace mf;
 
