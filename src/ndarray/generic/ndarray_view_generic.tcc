@@ -44,11 +44,10 @@ ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Co
 	
 	if(vw.is_null()) return ndarray_view_generic<Generic_dim>::null();
 	
-	Expects(vw.has_default_strides(frame_dim), "must have default strides within frame");
+	Expects(vw.has_default_strides(Concrete_dim - frame_dim), "must have default strides within frame");
 			
-	std::size_t frame_size = tail<frame_dim>(vw.shape()).product() * sizeof(Concrete_elem);
-	auto frm = format(vw);
-		
+	auto frm = tail_format<frame_dim>(vw);
+
 	auto new_start = reinterpret_cast<byte*>(vw.start());
 	auto new_shape = head<Generic_dim>(vw.shape());
 	auto new_strides = head<Generic_dim>(vw.strides());
@@ -69,7 +68,12 @@ ndarray_view<Concrete_dim, Concrete_elem> from_generic(
 	if(gen_vw.is_null()) return ndarray_view<Concrete_dim, Concrete_elem>::null();
 	
 	auto frm = gen_vw.format().array_at(array_index);
+
+	MF_DEBUG_EXPR(frame_shape, frm.elem_stride(), frm.frame_size());
+
+
 	Assert(frm.frame_size() == gen_vw.shape().back());
+	Assert(frame_shape.product() * frm.elem_stride() == frm.frame_size());
 	
 	ndptrdiff<frame_dim> concrete_frame_strides =
 		ndarray_view<frame_dim, Concrete_elem>::default_strides(frame_shape, frm.elem_padding());

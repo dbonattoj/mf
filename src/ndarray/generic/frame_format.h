@@ -134,6 +134,16 @@ frame_array_format format(const ndarray_view<Dim, Elem>& vw) {
 }
 
 
+template<std::size_t Tail_dim, std::size_t Dim, typename Elem>
+frame_array_format tail_format(const ndarray_view<Dim, Elem>& vw) {
+	Expects(vw.has_default_strides(Dim - Tail_dim));
+	std::size_t count = tail<Tail_dim>(vw.shape()).product();
+	std::size_t stride = vw.strides().back();
+	return make_frame_array_format<Elem>(count, stride);
+}
+
+
+
 }
 
 #endif

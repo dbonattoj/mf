@@ -114,15 +114,13 @@ private:
 	using fcall_type = detail::ndarray_view_fcall<ndarray_view<Dim, T>, 1>;
 	
 public:
-	// TODO: with padding != default (rename)
-
 	/// Default strides which correspond to row-major order for specified shape.
 	/** Optionally with `padding` between elements. */
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
 	
 	/// Check if view has default strides.
 	/** If `minimal_dimension` is specified, checks if view has default strides in dimensions from `Dim - 1` down to
-	 ** `minimal_dimension`. Strides from `minimal_dimension + 1` down to `0` may be non-default. */
+	 ** `minimal_dimension`. Strides from `minimal_dimension - 1` down to `0` may be non-default. */
 	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 	
 	/// Returns padding of the view which has default strides.

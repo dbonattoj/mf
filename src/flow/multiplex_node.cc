@@ -25,8 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-multiplex_node::multiplex_node(graph& gr) : node(gr) {
-	add_input_<node_input>();
+multiplex_node::multiplex_node(graph& gr) : base(gr) {
+	add_input_(*this);
 }
 
 
@@ -149,7 +149,7 @@ node_input& multiplex_node::input() {
 
 
 multiplex_node_output& multiplex_node::add_output(std::ptrdiff_t input_channel_index) {
-	return node::add_output_<multiplex_node_output>(input_channel_index);
+	return add_output_(*this, input_channel_index);
 }
 
 

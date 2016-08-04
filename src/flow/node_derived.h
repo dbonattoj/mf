@@ -22,15 +22,31 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_DERIVED_H_
 
 #include "node.h"
+#include <memory>
 #include <utility>
 
 namespace mf { namespace flow {
 
+/// \ref node with derived input and/or output classes, helper base class.
 template<class Derived_input, typename Derived_output>
 class node_derived : public node {
 public:
 	using input_type = Derived_input;
 	using output_type = Derived_output;
+	
+	template<typename... Args>
+	input_type& add_input_(Args&&... args) {
+		input_type* in = new input_type(std::forward<Args>(args)...);
+		node::add_input_ptr_(std::unique_ptr<input_type>(in));
+		return *in;
+	}
+
+	template<typename... Args>
+	output_type& add_output_(Args&&... args) {
+		output_type* out = new output_type(std::forward<Args>(args)...);
+		node::add_output_ptr_(std::unique_ptr<output_type>(out));
+		return *out;
+	}
 	
 public:
 	using node::node;

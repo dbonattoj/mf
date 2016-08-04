@@ -116,7 +116,7 @@ std::size_t processing_node::output_channels_count() const noexcept {
 
 
 processing_node::processing_node(graph& gr, bool with_output) : base(gr) {
-	if(with_output) add_output_( std::make_unique<processing_node_output>(*this) );
+	if(with_output) add_output_(*this);
 }
 
 
@@ -130,9 +130,7 @@ void processing_node::set_handler(processing_node_handler& handler) {
 
 processing_node_input& processing_node::add_input() {
 	std::ptrdiff_t index = inputs_count();
-	processing_node_input* in = new processing_node_input(*this, index);
-	add_input_( std::unique_ptr<processing_node_input>(in) );
-	return *in;
+	return add_input_(*this, index);
 }
 
 

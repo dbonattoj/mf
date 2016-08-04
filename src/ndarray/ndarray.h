@@ -39,7 +39,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Multidimensional array container.
-/** Based on `ndarray_view`, but also owns items. Allocates and deallocates memory. Const-correct interface.
+/** Based on \ref ndarray_view, but also owns items. Allocates and deallocates memory. Const-correct interface.
  ** Uses default strides when created from public constructor. Derived classes (i.e. \ref ring) can create \ref ndarray
  ** with padding between elements (last dimension), and padding between frames (first dimension). */
 template<std::size_t Dim, typename T, typename Allocator = raw_allocator>

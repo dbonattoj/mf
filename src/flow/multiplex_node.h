@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_MULTIPLEX_NODE_H_
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
-#include "node.h"
+#include "node_derived.h"
 #include "node_input.h"
 #include "node_output.h"
 #include <thread>
@@ -50,16 +50,12 @@ public:
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
-
-	/*
-	node::pull_result pull(time_span& span, bool reconnect) override;
-	timed_frame_array_view begin_read(time_unit duration) override;
-	void end_read(time_unit duration) override;
-	*/
 };
 
 
-class multiplex_node final : public node {
+/// Node which lets multiple connected inputs read from the same output.
+class multiplex_node final : public node_derived<node_input, multiplex_node_output> {
+	using base = node_derived<node_input, multiplex_node_output>;
 	friend class multiplex_node_output;
 
 private:

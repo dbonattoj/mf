@@ -68,26 +68,12 @@ protected:
 	
 	void verify_connections_validity_() const;
 
-	void add_input_(std::unique_ptr<node_input>&& in) {
+	void add_input_ptr_(std::unique_ptr<node_input>&& in) {
 		inputs_.push_back(std::move(in));
 	}
 	
-	void add_output_(std::unique_ptr<node_output>&& out) {
+	void add_output_ptr_(std::unique_ptr<node_output>&& out) {
 		outputs_.push_back(std::move(out));
-	}
-
-	template<typename Input, typename... Args>
-	Input& add_input_(Args&&... args) {
-		Input* input = new Input(*this, std::forward<Args>(args)...);
-		inputs_.emplace_back(input);
-		return *input;
-	}
-
-	template<typename Output, typename... Args>
-	Output& add_output_(Args&&... args) {
-		Output* output = new Output(*this, std::forward<Args>(args)...);
-		outputs_.emplace_back(output);
-		return *output;
 	}
 		
 	void set_current_time_(time_unit t) noexcept;
