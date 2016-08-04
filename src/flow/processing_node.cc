@@ -80,7 +80,7 @@ void processing_node::finish_job_(processing_node_job& job) {
 	
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		if(job.has_input_view(i)) {
-			const node_input& in = *inputs().at(i);
+			input_type& in = input_at(i);
 			if(current_time() == in.end_time() - 1) reached_end = true;
 			job.end_input(in);
 		}
@@ -90,13 +90,13 @@ void processing_node::finish_job_(processing_node_job& job) {
 }
 
 
-std::size_t processing_node::output_channels_count_() const noexcept {
+std::size_t processing_node::output_channels_count() const noexcept {
 	return output_channels_.size();
 }
 
 
-processing_node::processing_node(graph& gr, bool with_output) : node(gr) {
-	if(with_output) add_output_<processing_node_output>();
+processing_node::processing_node(graph& gr, bool with_output) : base(gr) {
+	if(with_output) add_output_( std::make_unique<processing_node_output>(*this) );
 }
 
 
@@ -110,7 +110,9 @@ void processing_node::set_handler(processing_node_handler& handler) {
 
 processing_node_input& processing_node::add_input() {
 	std::ptrdiff_t index = inputs_count();
-	return add_input_<processing_node_input>(index);
+	processing_node_input* in = new processing_node_input(*this, index);
+	add_input_( std::unique_ptr<processing_node_input>(in) );
+	return *in;
 }
 
 
@@ -118,17 +120,6 @@ processing_node_output_channel& processing_node::add_output_channel() {
 	std::ptrdiff_t channel_index = output_channels_.size();
 	output_channels_.emplace_back(*this, channel_index);
 	return output_channels_.back();
-}
-
-
-bool processing_node::has_output() const {
-	return (output().size() == 1);
-}
-
-
-std::size_t processing_node::output_channel_count() const noexcept {
-	if(has_output()) return output().channel_count();
-	else return 0;
 }
 
 
@@ -148,7 +139,7 @@ const processing_node_output_channel& processing_node::output_channel_at(std::pt
 
 processing_node_job::processing_node_job(processing_node& nd) :
 	node_(nd),
-	inputs_(nd.inputs().size()) { }
+	input_handles_(nd.inputs_count()) { }
 
 
 processing_node_job::~processing_node_job() {
@@ -161,7 +152,7 @@ bool processing_node_job::begin_input(processing_node_input& in) {
 	std::ptrdiff_t index = in.index();
 	timed_frame_array_view vw = in.begin_read_frame();
 	if(vw.is_null()) return false;
-	inputs_.at(index) = input_view_handle(&in, vw);
+	input_handles_.at(index) = input_view_handle(&in, vw);
 	return true;
 }
 
@@ -169,13 +160,13 @@ bool processing_node_job::begin_input(processing_node_input& in) {
 void processing_node_job::end_input(processing_node_input& in) {
 	std::ptrdiff_t index = in.index();
 	in.end_read_frame();	
-	set_null_(inputs_.at(index));
+	set_null_(input_handles_.at(index));
 }
 
 
 void processing_node_job::cancel_inputs() {
-	for(input_view_handle& in : inputs_) if(! is_null_(in)) {
-		in.cancel_read_frame();	
+	for(input_view_handle& in : input_handles_) if(! is_null_(in)) {
+		in.first->cancel_read_frame();	
 		set_null_(in);
 	}
 }
@@ -192,13 +183,13 @@ void processing_node_job::detach_output_view() {
 
 
 bool processing_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
-	return ! is_null(inputs_.at(index));
+	return ! is_null_(input_handles_.at(index));
 }
 
 
 const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t index) const {
 	Expects(has_input_view(index));
-	return inputs_.at(index).second;
+	return input_handles_.at(index).second;
 }
 
 const frame_view& processing_node_job::output_view() const {

@@ -49,7 +49,7 @@ void sync_node::setup() {
 		
 		buffer_format.place_next_array(channel_array_format);
 	}
-	Assert(buffer_format.arrays_count() == output_channel_count());
+	Assert(buffer_format.arrays_count() == output_channels_count());
 	
 	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
@@ -67,26 +67,32 @@ bool sync_node::process_next_frame_() {
 	set_current_time_(t);
 	processing_node_job job = begin_job_();
 	
-	job.attach_output(out_vw[0]);
+	job.attach_output_view(out_vw[0]);
 	
 	handler_pre_process_(job);
 	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		pull_result res = in->pull();
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+		
+		pull_result res = in.pull();
 		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
-			job.detach_output();
+			job.detach_output_view();
 			return false;
 		}
 	}
 	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		bool cont = job.begin_input(*in);
-		
-	}
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
 	
+		bool cont = job.begin_input(in);
+	}
+
+
 	handler_process_(job);
 	
-	job.detach_output();
+	job.detach_output_view();
 	ring_->end_write(1);
 
 	finish_job_(job);

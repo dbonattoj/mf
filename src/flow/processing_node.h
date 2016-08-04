@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_PROCESSING_NODE_H_
 #define MF_FLOW_PROCESSING_NODE_H_
 
-#include "node.h"
+#include "node_derived.h"
 #include "node_input.h"
 #include "node_output.h"
 #include <memory>
@@ -100,12 +100,11 @@ public:
  ** Creates \ref processing_node_job for each frame to process, with indexed input and output views. 
  ** Derived class implements derived class of \ref processing_node_output_channel, which contains buffer for the output
  ** channel. */
-class processing_node : public node {
+class processing_node : public node_derived<processing_node_input, processing_node_output> {
+	using base = node_derived<processing_node_input, processing_node_output>;
 	friend class processing_node_output;
 
 public:
-	using input_type = processing_node_input;
-	using output_type = processing_node_output;
 	using output_channel_type = processing_node_output_channel;
 
 private:
@@ -132,16 +131,16 @@ public:
 	
 	void set_handler(processing_node_handler&);
 	
-	processing_node_input& add_input();
-	processing_node_output_channel& add_output_channel();
-		
-	bool has_output() const;
-	processing_node_output& output();
-	const processing_node_output& output() const;
+	input_type& add_input();
+	output_channel_type& add_output_channel();
+				
+	bool has_output() const { return (outputs_count() > 0); }
+	output_type& output() { return output_at(0); }
+	const output_type& output() const { return output_at(0); }
 
 	std::size_t output_channels_count() const noexcept;	
-	processing_node_output_channel& output_channel_at(std::ptrdiff_t index);
-	const processing_node_output_channel& output_channel_at(std::ptrdiff_t index) const;
+	output_channel_type& output_channel_at(std::ptrdiff_t index);
+	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
 };
 
 
@@ -162,12 +161,14 @@ private:
 	static bool is_null_(const input_view_handle& in) { return (in.first == nullptr); }
 	static void set_null_(input_view_handle& in) { in = { nullptr, timed_frame_array_view::null() }; }
 
-	processing_node_job(const processing_node_job&) = delete;
-	processing_node_job& operator=(const processing_node_job&) = delete;
-
 public:
 	explicit processing_node_job(processing_node& nd);
+	processing_node_job(const processing_node_job&) = delete;
+	processing_node_job(processing_node_job&&) = default;
 	~processing_node_job();
+
+	processing_node_job& operator=(const processing_node_job&) = delete;
+	processing_node_job& operator=(processing_node_job&&) = default;
 	
 	void attach_output_view(const frame_view&);
 	void detach_output_view();
@@ -189,16 +190,6 @@ public:
 };
 
 
-
-inline processing_node_output& processing_node::output() {
-	Expects(outputs().size() >= 1);
-	return static_cast<processing_node_output&>(*outputs().front());
-}
-
-inline const processing_node_output& processing_node::output() const {
-	Expects(outputs().size() >= 1);
-	return static_cast<const processing_node_output&>(*outputs().front());
-}
 
 inline processing_node& processing_node_output::this_node() {
 	return static_cast<processing_node&>(node_output::this_node());

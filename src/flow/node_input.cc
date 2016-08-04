@@ -7,17 +7,17 @@ node_input::node_input(node& nd) :
 	node_(nd) { }
 
 
-void node_input::connect(node_remote_output& output, std::ptrdiff_t channel_index) {
+void node_input::connect(node_output& output) {
 	Expects(connected_output_ == nullptr, "cannot connect node_input when already connected");
-	Expects(! output.this_output().is_connected(), "cannot connect the input to an output that is already connected");
+	Expects(! output.is_connected(), "cannot connect the input to an output that is already connected");
 	connected_output_ = &output;
-	connected_output_->this_output().input_has_connected(*this);
+	connected_output_->input_has_connected(*this);
 }
 
 
 void node_input::disconnect() {
 	Expects(connected_output_ != nullptr, "cannot disconnect node_input when not connected");
-	connected_output_->this_output().input_has_disconnected();
+	connected_output_->input_has_disconnected();
 	connected_output_ = nullptr;
 }
 
@@ -42,7 +42,7 @@ node::pull_result node_input::pull() {
 }
 
 
-timed_frame_array_view node_input::begin_read_frame(std::ptrdiff_t channel_index) {
+timed_frame_array_view node_input::begin_read_frame() {
 	Expects(pulled_span_.duration() > 0);
 
 	time_unit t = this_node().current_time();
@@ -51,7 +51,7 @@ timed_frame_array_view node_input::begin_read_frame(std::ptrdiff_t channel_index
 	
 	//duration = pulled_span_.duration();
 	
-	timed_frame_array_view view = connected_output_->begin_read(duration, channel_index);
+	timed_frame_array_view view = connected_output_->begin_read(duration);
 	Assert(! view.is_null());
 	
 	if(view.is_null()) return view;
@@ -63,14 +63,14 @@ timed_frame_array_view node_input::begin_read_frame(std::ptrdiff_t channel_index
 }
 
 
-void node_input::end_read_frame(std::ptrdiff_t channel_index) {
+void node_input::end_read_frame() {
 	time_unit duration = (this_node().current_time() < past_window_) ? 0 : 1;
-	connected_output_->end_read(duration, channel_index);
+	connected_output_->end_read(duration);
 }
 
 
-void node_input::cancel_read_frame(std::ptrdiff_t channel_index) {
-	connected_output_->end_read(0, channel_index);
+void node_input::cancel_read_frame() {
+	connected_output_->end_read(0);
 }
 
 

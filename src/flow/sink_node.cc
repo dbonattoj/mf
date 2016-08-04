@@ -56,8 +56,11 @@ void sink_node::pull(time_unit t) {
 
 	// pull & begin reading from activated inputs
 	bool stopped = false;
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		time_unit res = in->pull();
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+
+		time_unit res = in.pull();
 		if(res == pull_result::stopped) {
 			stopped = true;
 			return;
@@ -72,8 +75,11 @@ void sink_node::pull(time_unit t) {
 		return;
 	}
 	
-	for(auto&& in : inputs()) if(in->is_activated()) {		
-		bool cont = job.push_input(*in);
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+
+		bool cont = job.begin_input(in);
 		if(! cont) {
 			job.cancel_inputs();
 			stopped = true;
@@ -86,6 +92,7 @@ void sink_node::pull(time_unit t) {
 	
 	finish_job_(job);
 }
+
 
 // TODO (all nodes): handle cross over end when ended input desactivated
 

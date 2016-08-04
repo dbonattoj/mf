@@ -29,6 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <string>
 #include <memory>
 #include <utility>
+#include <type_traits>
 
 namespace mf { namespace flow {
 
@@ -66,6 +67,14 @@ protected:
 	node& operator=(const node&) = delete;
 	
 	void verify_connections_validity_() const;
+
+	void add_input_(std::unique_ptr<node_input>&& in) {
+		inputs_.push_back(std::move(in));
+	}
+	
+	void add_output_(std::unique_ptr<node_output>&& out) {
+		outputs_.push_back(std::move(out));
+	}
 
 	template<typename Input, typename... Args>
 	Input& add_input_(Args&&... args) {

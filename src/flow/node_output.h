@@ -16,11 +16,11 @@ private:
 	node_input* connected_input_ = nullptr;
 	
 protected:
-	explicit node_output(node& nd);
 	node_output(const node_output&) = delete;
 	node_output& operator=(const node_output&) = delete;
 
 public:	
+	explicit node_output(node& nd);
 	virtual ~node_output() = default;
 
 	node& this_node() const noexcept { return node_; }
