@@ -36,6 +36,7 @@ ndarray_view_generic<Dim> ndarray_view_generic<Dim>::array_at(std::ptrdiff_t arr
 	return ndarray_view_generic<Dim>(array_format, new_start, generic_shape(), generic_strides());
 }
 
+
 template<std::size_t Generic_dim, std::size_t Concrete_dim, typename Concrete_elem>
 ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw) {
 	static_assert(Generic_dim <= Concrete_dim, "generic dimension must be lower or equal to concrete dimension");

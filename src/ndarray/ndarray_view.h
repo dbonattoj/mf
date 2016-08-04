@@ -46,7 +46,7 @@ namespace detail {
 		return array.at({c});
 	}
 	
-	template<std::size_t Dim, typename T, std::ptrdiff_t I>
+	template<typename View, std::ptrdiff_t I>
 	class ndarray_view_fcall;
 }
 
@@ -109,7 +109,10 @@ protected:
 	
 	ndarray_view section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const;
 	std::ptrdiff_t fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dim) const;
-			
+
+private:
+	using fcall_type = detail::ndarray_view_fcall<ndarray_view<Dim, T>, 1>;
+	
 public:
 	// TODO: with padding != default (rename)
 
@@ -190,14 +193,13 @@ public:
 		return detail::get_subscript(*this, c);
 	}
 	
-	using fcall_result = detail::ndarray_view_fcall<Dim, T, 1>;
-	fcall_result operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
+	fcall_type operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
 		return section_(0, start, end, step);
 	}
-	fcall_result operator()(std::ptrdiff_t c) const {
+	fcall_type operator()(std::ptrdiff_t c) const {
 		return section_(0, c, c + 1, 1);
 	}
-	fcall_result operator()() const {
+	fcall_type operator()() const {
 		return *this;
 	}
 	
@@ -220,7 +222,7 @@ public:
 		else return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
 	}
 	
-	std::size_t size() const { return shape().product(); }
+	std::size_t size() const { return shape().product(); } // verify
 	
 	pointer start() const noexcept { return start_; }
 	const shape_type& shape() const noexcept { return shape_; }
@@ -229,8 +231,6 @@ public:
 	
 	span_type full_span() const noexcept { return span_type(0, shape_); }
 	
-	template<std::size_t New_dim>
-	ndarray_view<New_dim, T> reshape(const ndsize<New_dim>&) const;
 	
 	ndarray_view<1 + Dim, T> add_front_axis() const;
 	
@@ -242,6 +242,14 @@ template<typename T>
 ndarray_view<2, T> flip(const ndarray_view<2, T>& vw) {
 	return vw.swapaxis(0, 1);
 }
+
+
+template<std::size_t Dim, typename T, std::size_t New_dim>
+ndarray_view<New_dim, T> reshape(const ndarray_view<Dim, T>&, const ndsize<New_dim>&);
+
+
+template<std::size_t Dim, typename T>
+ndarray_view<1, T> flatten(const ndarray_view<Dim, T>&);
 
 
 }

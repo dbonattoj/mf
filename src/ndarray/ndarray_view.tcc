@@ -27,30 +27,30 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <iostream>
 
 namespace mf {
-
+	
 namespace detail {
-	template<std::size_t Dim, typename T, std::ptrdiff_t Target_dim>
-	class ndarray_view_fcall : public ndarray_view<Dim, T> {
-		static_assert(Target_dim <= Dim, "detail::ndarray_view_fcall target dimension out of bounds");
+	template<typename View, std::ptrdiff_t Target_dim>
+	class ndarray_view_fcall : public View {
+		static_assert(Target_dim <= View::dimension, "detail::ndarray_view_fcall target dimension out of bounds");
+		using base = View;
+	
+	private:
+		using fcall_type = ndarray_view_fcall<View, Target_dim + 1>;
 	
 	public:
-		using base = ndarray_view<Dim, T>;
-
-		ndarray_view_fcall(const base& arr) :
-			base(arr) { }
+		using base::base;
 		
-		ndarray_view_fcall<Dim, T, Target_dim + 1>
-		operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {
-			return this->section_(Target_dim, start, end, step);
+		ndarray_view_fcall(const base& vw) : base(vw) { }
+		
+		fcall_type operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
+			return base::section_(Target_dim, start, end, step);
 		}
-		ndarray_view_fcall<Dim, T, Target_dim + 1>
-		operator()(std::ptrdiff_t c) const {
-			return this->section_(Target_dim, c, c + 1, 1);
+		fcall_type operator()(std::ptrdiff_t c) const {
+			return base::section_(Target_dim, c, c + 1, 1);
 		}
-		ndarray_view_fcall<Dim, T, Target_dim + 1>
-		operator()() const {
+		fcall_type operator()() const {
 			return *this;
-		}
+		}		
 	};
 }
 
@@ -276,14 +276,6 @@ auto ndarray_view<Dim, T>::slice(std::ptrdiff_t c, std::ptrdiff_t dimension) con
 }
 
 
-template<std::size_t Dim, typename T> template<std::size_t New_dim>
-ndarray_view<New_dim, T> ndarray_view<Dim, T>::reshape(const ndsize<New_dim>& new_shape) const {
-	if(strides_ != default_strides(shape_)) throw std::logic_error("can reshape only with default strides");
-	if(new_shape.product() != shape_.product()) throw std::invalid_argument("new shape must have same product");
-	return ndarray_view<New_dim, T>(start_, new_shape);
-}
-
-
 template<std::size_t Dim, typename T>
 ndarray_view<1 + Dim, T> ndarray_view<Dim, T>::add_front_axis() const {
 	auto new_shape = ndcoord_cat(1, shape());
@@ -301,5 +293,19 @@ auto ndarray_view<Dim, T>::swapaxis(std::size_t axis1, std::size_t axis2) const 
 	return ndarray_view(start_, new_shape, new_strides);
 }
 
+
+template<std::size_t Dim, typename T, std::size_t New_dim>
+ndarray_view<New_dim, T> reshape(const ndarray_view<Dim, T>& vw, const ndsize<New_dim>& new_shape) {
+	if(vw.strides() != vw.default_strides(vw.shape())) throw std::logic_error("can reshape only with default strides");
+	if(new_shape.product() != vw.shape().product()) throw std::invalid_argument("new shape must have same product");
+	return ndarray_view<New_dim, T>(vw.start(), new_shape);
+}
+
+
+template<std::size_t Dim, typename T>
+ndarray_view<1, T> flatten(const ndarray_view<Dim, T>& vw) {
+	auto new_shape = make_ndsize(vw.shape().product());
+	return reshape(vw, new_shape);
+}
 
 }

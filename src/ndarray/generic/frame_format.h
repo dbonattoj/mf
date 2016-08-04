@@ -43,7 +43,9 @@ public:
 	const frame_array_format& array_at(std::ptrdiff_t index) const { return arrays_.at(index); }
 };
 
+
 class frame_array_format;
+
 template<typename Elem>
 frame_array_format make_frame_array_format(std::size_t, std::size_t = sizeof(Elem), std::size_t = 0);
 

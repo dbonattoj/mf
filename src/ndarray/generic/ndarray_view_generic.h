@@ -57,13 +57,20 @@ public:
 	
 private:
 	frame_format format_;
-		
+
+protected:
+	ndarray_view_generic section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {
+		Expects(dim < Dim);
+		return ndarray_view_generic(format_, base::section_(dim, start, end, step));
+	}
+
+
 public:
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
 	ndarray_view_generic() = default;
 
-	ndarray_view_generic(const frame_format& format, const base& vw) :
-		base(vw), format_(format) { }
+	ndarray_view_generic(const frame_format& frm, const base& vw) :
+		base(vw), format_(frm) { }
 	
 	ndarray_view_generic(const frame_format&, byte* start, const generic_shape_type&, const generic_strides_type&);
 
