@@ -55,8 +55,9 @@ public:
 	using output_type = filter_output<Output_dim, Output_elem>;
 	using output_frame_shape_type = ndsize<Output_dim>;
 
-	virtual void set_node_output(node_output&) = 0;
+	virtual void set_node_output(node_output&, std::ptrdiff_t channel_index) = 0;
 	virtual const output_frame_shape_type& output_frame_shape() const = 0;
+	virtual std::ptrdiff_t node_output_channel_index() const = 0;
 };
 
 
@@ -87,7 +88,7 @@ private:
 	node_output* node_output_ = nullptr;
 	std::ptrdiff_t node_output_channel_index_ = -1;
 	
-	void is_connected_() const noexcept { return (node_input_ != nullptr) && (node_output_ != nullptr); }
+	bool is_connected_() const noexcept { return (node_input_ != nullptr) && (node_output_ != nullptr); }
 	
 protected:		
 	filter_edge(input_type& in, output_type& out) :
@@ -110,7 +111,7 @@ public:
 	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
 	node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
 	const node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
-	std::ptrdiff_t node_output_channel_index() const
+	std::ptrdiff_t node_output_channel_index() const override
 		{ Expects(node_output_ != nullptr); return node_output_channel_index_; }
 
 	const input_frame_shape_type& input_frame_shape() const override { return output_.frame_shape(); }

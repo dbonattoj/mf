@@ -42,15 +42,6 @@ namespace detail {
 
 	private:
 		frame_shape_type frame_shape_;
-
-	protected:
-		ndarray_generic_properties properties_(std::size_t duration) const noexcept {
-			return ndarray_generic_properties(
-				frame_format::default_format<Elem>(),
-				frame_shape_.product(),
-				duration
-			);
-		}
 	
 	public:
 		explicit ndarray_ring_base(const frame_shape_type& shp) : frame_shape_(shp) { }
@@ -73,7 +64,7 @@ public:
 	
 	ndarray_ring(const frame_shape_type& frame_shape, time_unit dur) :
 		base(frame_shape),
-		ring(base::properties_(dur)) { }
+		ring(make_frame_array_format<Elem>(frame_shape.product()), dur) { }
 	
 	section_view_type begin_write(time_unit duration) {
 		return from_generic<concrete_dim, Elem>(ring::begin_write(duration), base::frame_shape());
@@ -98,7 +89,7 @@ public:
 	
 	ndarray_timed_ring(const frame_shape_type& frame_shape, time_unit dur) :
 		base(frame_shape),
-		timed_ring(base::properties_(dur)) { }
+		timed_ring(make_frame_array_format<Elem>(frame_shape.product()), dur) { }
 	
 	section_view_type begin_write(time_unit duration) {
 		return from_generic<concrete_dim, Elem>(timed_ring::begin_write(duration), base::frame_shape());
@@ -131,7 +122,7 @@ public:
 	
 	ndarray_shared_ring(const frame_shape_type& frame_shape, std::size_t dur, bool seekable, time_unit end_time = -1) :
 		base(frame_shape),
-		shared_ring(base::properties_(dur), seekable, end_time) { }
+		shared_ring(make_frame_array_format<Elem>(frame_shape.product()), dur, seekable, end_time) { }
 	
 	section_view_type begin_write(time_unit write_duration) {
 		return from_generic<concrete_dim, Elem>(shared_ring::begin_write(write_duration), base::frame_shape());

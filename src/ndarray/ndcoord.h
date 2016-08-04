@@ -243,6 +243,20 @@ ndcoord<2, T> flip(const ndcoord<2, T>& coord) {
 }
 
 
+template<std::size_t Section_dim, std::size_t Dim, typename T>
+auto tail(const ndcoord<Dim, T>& coord) noexcept {
+	ndcoord<Section_dim, T> c(coord.begin() + (Dim - Section_dim), coord.end());
+	return c;
+}
+
+template<std::size_t Section_dim, std::size_t Dim, typename T>
+auto head(const ndcoord<Dim, T>& coord) noexcept {
+	ndcoord<Section_dim, T> c(coord.begin(), coord.end() - (Dim - Section_dim));
+	return c;
+}
+
+
+
 }
 
 #endif

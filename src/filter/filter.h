@@ -177,7 +177,7 @@ public:
 private:
 	std::unique_ptr<edge_base_type> edge_;
 	
-	node_input* node_input_ = nullptr;
+	processing_node_input* node_input_ = nullptr;
 	
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
@@ -185,8 +185,8 @@ private:
 public:
 	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
 
-	node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
-	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
+	processing_node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
+	const processing_node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
 	std::ptrdiff_t index() const { return this_node_input().index(); }
 	
 	template<std::size_t Output_dim, typename Output_elem>

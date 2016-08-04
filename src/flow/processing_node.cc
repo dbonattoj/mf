@@ -192,6 +192,12 @@ const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t ind
 	return input_handles_.at(index).second;
 }
 
+
+bool processing_node_job::has_output_view() const noexcept {
+	return ! output_view_.is_null();
+}
+
+
 const frame_view& processing_node_job::output_view() const {
 	Expects(has_output_view());
 	return output_view_;
