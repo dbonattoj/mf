@@ -65,7 +65,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <unistd.h>
 #include <cstdlib>
 #include <limits>
-#include "utility/misc.h"
 
 namespace mf {
 
@@ -87,14 +86,7 @@ void set_random_sleep_enabled(bool);
 
 void initialize_debug();
 
-inline void random_sleep() {
-	if(! detail::random_sleep_enabled_) return;
-	int r = randint<int>(0, std::numeric_limits<int>::max());
-	int r1 = r % 10;	
-	if(r1 < 4) return;
-	else if(r1 < 6) ::usleep(r % 500);
-	else ::usleep(10000 + r%2000);
-}
+void random_sleep();
 
 }
 

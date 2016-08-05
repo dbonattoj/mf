@@ -114,24 +114,8 @@ private:
 	using fcall_type = detail::ndarray_view_fcall<ndarray_view<Dim, T>, 1>;
 	
 public:
-	/// Default strides which correspond to row-major order for specified shape.
-	/** Optionally with `padding` between elements. */
-	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
-	
-	/// Check if view has default strides.
-	/** If `minimal_dimension` is specified, checks if view has default strides in dimensions from `Dim - 1` down to
-	 ** `minimal_dimension`. Strides from `minimal_dimension - 1` down to `0` may be non-default. */
-	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
-	
-	/// Returns padding of the view which has default strides.
-	/** If view does not have default strides, throws exception.
-	 ** \param minimal_dimension Like in has_default_strides(). */
-	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
-	
-	/// Check if view has default strides without padding.
-	/** \param minimal_dimension Like in has_default_strides(). */
-	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
-
+	/// \name Construction
+	///@{
 	/// Create null view.
 	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
 	
@@ -152,36 +136,102 @@ public:
 
 	void reset(const ndarray_view& other) noexcept;
 	void reset() noexcept { reset(ndarray_view()); }
-	void reset(pointer start, const shape_type& shape, const strides_type& strides)
-		{ reset(ndarray_view(start, shape, strides)); }
-	void reset(pointer start, const shape_type& shape)
-		{ reset(ndarray_view(start, shape)); }
 		
+	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
+		if(a.is_null() && b.is_null()) return true;
+		else return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
+	}
+	///@}
+	
+
+
+	/// \name Attributes 
+	///@{
+	std::size_t size() const { return shape().product(); } // verify
+	
+	pointer start() const noexcept { return start_; }
+	const shape_type& shape() const noexcept { return shape_; }
+	const strides_type& strides() const noexcept { return strides_; }
+	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
+	
+	span_type full_span() const noexcept { return span_type(0, shape_); }
+	
+	/// Default strides which correspond to row-major order for specified shape.
+	/** Optionally with \a padding between elements. */
+	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
+	
+	/// Check if view has default strides.
+	/** If \a minimal_dimension is specified, checks if view has default strides in dimensions from `Dim - 1` down to
+	 ** \a minimal_dimension. Strides from `minimal_dimension - 1` down to `0` may be non-default. */
+	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	
+	/// Returns padding of the view which has default strides.
+	/** If view does not have default strides, throws exception.
+	 ** \param minimal_dimension Like in has_default_strides(). */
+	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
+	
+	/// Check if view has default strides without padding.
+	/** \param minimal_dimension Like in has_default_strides(). */
+	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	///@}	
+
+
+
+	/// \name Deep assignment
+	///@{
+	template<typename T2> void assign(const ndarray_view<Dim, T2>&) const;
+	void assign(const ndarray_view<Dim, const T>& other) const;
+
 	template<typename Arg> const ndarray_view& operator=(Arg&& arg) const
 		{ assign(std::forward<Arg>(arg)); return *this; }
 	const ndarray_view& operator=(const ndarray_view& other) const
 		{ assign(other); return *this; }
+	///@}
+
+
+
+	/// \name Deep comparison
+	///@{
+	template<typename T2> bool compare(const ndarray_view<Dim, T2>&) const;
+	bool compare(const ndarray_view<Dim, const T>& other) const { return compare<const T>(other); }
 		
+	template<typename Arg> bool operator==(Arg&& arg) const { return compare(std::forward<Arg>(arg)); }
+	template<typename Arg> bool operator!=(Arg&& arg) const { return ! compare(std::forward<Arg>(arg)); }
+	///@}
+	
+	
+	
+	/// \name Iteration
+	///@{
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
-	pointer coordinates_to_pointer(const coordinates_type&) const;
+	pointer coordinates_to_pointer(const coordinates_type&) const;	
+			
+	iterator begin() const;
+	iterator end() const;
+	///@}
+
+
+
+	/// \name Indexing
+	///@{
+	/// Access element at coordinates \a coord.
+	reference at(const coordinates_type& coord) const;
+
 	
 	/// Cuboid section of view, with interval in each axis.
 	/** Can also specify step for each axis: Stride of the new view are stride of this view multiplied by step.
 	 ** Step `1` does not change stride, step `2` skips every second element on that axis, negative step also reverses
 	 ** direction. It is not necessary that coordinate of last element on an axis coincides with `end - 1`. */
-	ndarray_view section(
-		const coordinates_type& start,
-		const coordinates_type& end,
-		const strides_type& steps = strides_type(1)
-	) const;
+	ndarray_view section
+		(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const;
 	
 	/// Cuboid section of view, defined using `ndspan` object.
 	ndarray_view section(const span_type& span, const strides_type& steps = strides_type(1)) const {
 		return section(span.start_pos(), span.end_pos(), steps);
 	}
 	
-	/// Create `ndarray_view` with one less dimension, by fixing coordinate of axis `dimension` to `c`.
+	/// Create \ref ndarray_view with one less dimension, by fixing coordinate of axis \a dimension to \a c.
 	ndarray_view<Dim - 1, T> slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const;
 	
 	/// Subscript operator, creates slice on first dimension.
@@ -200,36 +250,11 @@ public:
 	fcall_type operator()() const {
 		return *this;
 	}
-	
-	reference at(const coordinates_type&) const;
-			
-	iterator begin() const;
-	iterator end() const;
-	
-	template<typename T2> void assign(const ndarray_view<Dim, T2>&) const;
-	void assign(const ndarray_view<Dim, const T>& other) const;
-	
-	template<typename T2> bool compare(const ndarray_view<Dim, T2>&) const;
-	bool compare(const ndarray_view<Dim, const T>& other) const { return compare<const T>(other); }
+	///@}
 		
-	template<typename Arg> bool operator==(Arg&& arg) const { return compare(std::forward<Arg>(arg)); }
-	template<typename Arg> bool operator!=(Arg&& arg) const { return ! compare(std::forward<Arg>(arg)); }
-		
-	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
-		if(a.is_null() && b.is_null()) return true;
-		else return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
-	}
-	
-	std::size_t size() const { return shape().product(); } // verify
-	
-	pointer start() const noexcept { return start_; }
-	const shape_type& shape() const noexcept { return shape_; }
-	const strides_type& strides() const noexcept { return strides_; }
-	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
-	
-	span_type full_span() const noexcept { return span_type(0, shape_); }
 	
 	
+
 	ndarray_view<1 + Dim, T> add_front_axis() const;
 	
 	ndarray_view swapaxis(std::size_t axis1, std::size_t axis2) const;

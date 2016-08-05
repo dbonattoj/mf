@@ -30,6 +30,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <fstream>
 #include <vector>
 #include <cassert>
+#include "utility/misc.h"
+
 
 #if defined(MF_OS_LINUX) || defined(MF_OS_DARWIN)
 #include <execinfo.h>
@@ -186,6 +188,16 @@ void initialize_debug() {
 	#endif
 }
 
+void random_sleep() {
+	if(! detail::random_sleep_enabled_) return;
+	int r = randint<int>(0, std::numeric_limits<int>::max());
+	int r1 = r % 10;	
+	if(r1 < 4) return;
+	else if(r1 < 6) ::usleep(r % 500);
+	else ::usleep(10000 + r%2000);
+}
+
+
 }
 
 #else
@@ -201,6 +213,7 @@ void set_debug_mode(debug_mode) { }
 void set_no_debug_filter() { }
 void set_debug_filter(const std::set<std::string>&) { }
 void initialize_debug() { }
+void random_sleep() { }
 
 }
 

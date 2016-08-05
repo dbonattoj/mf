@@ -19,8 +19,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <sstream>
-#include <typeinfo>
 #include <algorithm>
+#include "../common.h"
 
 namespace mf {
 
@@ -42,6 +42,7 @@ inline T clamp(T value, T minimum, T maximum) {
 
 template<typename T>
 T gcd(T a, T b) {
+	Expects_crit(a > 0 && b > 0);
 	if(a < b) std::swap(a, b);
 	while(b > 0) {
 		T c = a % b;
@@ -54,7 +55,7 @@ T gcd(T a, T b) {
 template<typename T>
 T lcm(T a, T b) {
 	if(a == 0 || b == 0) return 0;
-	else return std::abs(a * b) / gcd(a, b);
+	else return (a * b) / gcd(a, b);
 }
 
 

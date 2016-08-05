@@ -39,24 +39,31 @@ namespace mf {
  ** Alternately, frames can be *composite*, i.e. contain data from multiple ndarrays of differing dimension and element
  ** types.
  ** 
- ** `ndarray_view_generic<Dim>` derives from `ndarray_view<Dim + 1, byte>`. Lowest dimension has stride 1, and length
- ** equal to frame length in bytes. The stride of the next dimension is set to respect the frame alignment requirement.
- ** For example with `ndarray_view_generic<2> arr`, the expression `arr[1][2][123]` is the 123th byte of frame $(1,2)$.
- ** 
  ** `Dim` is the *generic dimension*, and `Dim + K` the *concrete dimension*. `K` is the *frame dimension*.
  ** Along the generic dimensions, sectionning and slicing operations can be used and return another (lower-dimensional)
  ** `ndarray_view_generic` with the same frame format information. Conversion to and from concrete `ndarray_view` is
  ** done with the functions \ref to_generic() and \ref from_generic(). */
-template<std::size_t Dim>
-class ndarray_view_generic : public ndarray_view<Dim + 1, byte> {	
-	using base = ndarray_view<Dim + 1, byte>;
+template<std::size_t Dim, bool Mutable = true>
+class ndarray_view_generic : private ndarray_view<Dim + 1, std::conditional_t<Mutable, byte, const byte>> {
+	using base = ndarray_view<Dim + 1, std::conditional_t<Mutable, byte, const byte>>;
 
 public:	
-	using generic_shape_type = ndsize<Dim>;
-	using generic_strides_type = ndptrdiff<Dim>;
+	using frame_ptr = std::conditional_t<Mutable, void*, const void*>;
+
+	using value_type = void;
+	using pointer = frame_ptr;
+	using index_type = std::ptrdiff_t;
+	using coordinates_type = ndptrdiff<Dim>;
+	using shape_type = ndsize<Dim>;
+	using strides_type = ndptrdiff<Dim>;
+	using span_type = ndspan<Dim>;
+	
+	constexpr static std::size_t dimension = Dim;
 	
 private:
 	frame_format format_;
+
+	using fcall_type = detail::ndarray_view_fcall<ndarray_view_generic<Dim, Mutable>, 1>;
 
 protected:
 	ndarray_view_generic section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {
@@ -66,16 +73,20 @@ protected:
 
 
 public:
-	static ndarray_view_generic null() { return ndarray_view_generic(); }
+	/// \name Construction
+	///@{
 	ndarray_view_generic() = default;
 
-	ndarray_view_generic(const frame_format& frm, const base& vw) :
-		base(vw), format_(frm) { }
-	
-	ndarray_view_generic(const frame_format&, byte* start, const generic_shape_type&, const generic_strides_type&);
+	ndarray_view_generic(const ndarray_view_generic<Dim, true>& vw) : base(vw), format_(vw.format_) { }
+	// if Mutable == false, then this is not the copy constructor
+	// --> and then additional, implicit copy constructor gets created
 
-	generic_shape_type generic_shape() const { return base::shape().head(); }
-	generic_strides_type generic_strides() const { return base::strides().head(); }
+	ndarray_view_generic(const frame_format& frm, const base& vw) : base(vw), format_(frm) { }
+	ndarray_view_generic(const frame_format&, frame_ptr start, const shape_type&, const strides_type&);
+
+	static ndarray_view_generic null() { return ndarray_view_generic(); }
+	bool is_null() const noexcept { return base:is_null(); }
+	explicit operator bool () const noexcept { return ! is_null(); }
 
 	void reset(const ndarray_view_generic& other) noexcept {
 		base::reset(other);
@@ -83,38 +94,102 @@ public:
 	}
 	void reset() noexcept { reset(null()); }
 	
-	const frame_format& format() const noexcept { return format_; }
+	friend bool same(const ndarray_view_generic& a, const ndarray_view_generic& b) {
+		return (vw.format() == format()) && (base::same(a, b));
+	}
+	///@}
 
-	ndarray_view_generic array_at(std::ptrdiff_t array_index) const;
+
+
+	/// \name Attributes
+	///@{
+	shape_type shape() const { return head<Dim>(base::shape()); }
+	strides_type strides() const { return head<Dim>(base::strides()); }
 	
-	decltype(auto) slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const
-		{ return ndarray_view_generic<Dim - 1>(format_, base::slice(c, dimension)); }
+	const frame_format& format() const noexcept { return format_; }
+	ndarray_view_generic array_at(std::ptrdiff_t array_index) const;
 
-	decltype(auto) operator[](std::ptrdiff_t c) const
-		{ return ndarray_view_generic<Dim - 1>(format_, base::operator[](c)); }
+	static strides_type default_strides(const frame_format& frm, const shape_type& shp) {
+		auto shp = ndcoord_cat(shp, frm.frame_size());
+		auto def_str = base::default_strides(shp);
+		return head<Dim>(def_str);
+	}
+	
+	using base::has_default_strides;
+	///@}
 
-	decltype(auto) operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const
-		{ return ndarray_view_generic(format_, base::operator()(start, end, step)); }
-		
-	decltype(auto) operator()(std::ptrdiff_t c) const
-		{ return ndarray_view_generic(format_, base::operator()(c)); }
+	
+	
+	/// \name Deep assignment
+	///@{
+	ndarray_view_generic& operator=(const ndarray_view_generic& vw) {
+		Expects_crit(vw.format() == format());
+		base::operator=(vw);
+		return *this;
+	}
+	
+	void assign(const ndarray_view_generic& vw) {
+		Expects_crit(vw.format() == format());
+		base::assign(vw);
+	}
+	///@}
+	
+	
+	
+	/// \name Deep comparison
+	///@{
+	bool compare(const ndarray_view_generic& vw) const {
+		if(vw.format() != format()) return false;
+		else return base::compare(vw);
+	}
+	
+	bool operator==(const ndarray_view_generic& vw) const { return compare(vw); }
+	bool operator!=(const ndarray_view_generic& vw) const { return ! compare(vw); }
+	///@}
 
-	decltype(auto) operator()() const
-		{ return ndarray_view_generic(format_, base::operator()()); }
+
+
+	/// \name Indexing
+	///@{
+	ndarray_view_generic section
+	(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const {
+		return ndarray_view_generic(format_, base::section(start, end, steps));
+	}
+	ndarray_view_generic section(const span_type& span, const strides_type& steps = strides_type(1)) const {
+		return ndarray_view_generic(format_, base::section(span, steps));
+	}
+	
+	auto slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const {
+		return ndarray_view_generic<Dim - 1, Mutable>(format_, base::slice(c, dimension));
+	}
+	auto operator[](std::ptrdiff_t c) const {
+		return ndarray_view_generic<Dim - 1, Mutable>(format_, base::operator[](c));
+	}
+
+	fcall_type operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
+		return ndarray_view_generic(format_, base::operator()(start, end, step));
+	}
+	fcall_type operator()(std::ptrdiff_t c) const {
+		return ndarray_view_generic(format_, base::operator()(c));
+	}
+	fcall_type operator()() const {
+		return ndarray_view_generic(format_, base::operator()());
+	}
+	///@}
 };
 
 
 
 /// Cast input `ndarray_view` to generic `ndarray_view_generic` with given dimension.
 template<std::size_t Generic_dim, std::size_t Concrete_dim, typename Concrete_elem>
-ndarray_view_generic<Generic_dim> to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw);
+auto to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw);
 
 
 
 /// Cast input `ndarray_view_generic` to concrete `ndarray_view` with given dimension, frame shape and element type.
-template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Generic_dim>
-ndarray_view<Concrete_dim, Concrete_elem> from_generic(
-	const ndarray_view_generic<Generic_dim>& vw,
+template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Generic_dim, bool Generic_mutable>
+auto from_generic(
+	const ndarray_view_generic<Generic_dim, Generic_mutable>& vw,
 	const ndsize<Concrete_dim - Generic_dim>& frame_shape,
 	std::ptrdiff_t array_index = 0
 );

@@ -52,7 +52,7 @@ public:
 	frame_format& operator=(const frame_format&) = default;
 	frame_format& operator=(frame_format&&) = default;
 
-	bool is_defined() const { return (total_aligmnent_requirement_ != -1); }
+	bool is_defined() const { return (total_size_ != 0); }
 
 	const frame_array_format& place_next_array(const frame_array_format&);
 	
@@ -61,13 +61,21 @@ public:
 	
 	std::size_t arrays_count() const noexcept { return arrays_.size(); }
 	const frame_array_format& array_at(std::ptrdiff_t index) const { return arrays_.at(index); }
+	
+	friend bool operator==(const frame_format& a, const frame_format& b) {
+		return (a.arrays_ == b.arrays_);
+	}
+	
+	friend bool operator!=(const frame_format& a, const frame_format& b) {
+		return (a.arrays_ != b.arrays_);
+	}
 };
 
 
 class frame_array_format;
 
 template<typename Elem>
-frame_array_format make_frame_array_format(std::size_t, std::size_t = sizeof(Elem), std::size_t = 0);
+frame_array_format make_frame_array_format(std::size_t count, std::size_t stride = sizeof(Elem), std::size_t off = 0);
 
 
 
@@ -106,6 +114,10 @@ public:
 
 	std::size_t elem_padding() const noexcept { return elem_stride() - elem_size(); }
 };
+
+
+bool operator==(const frame_array_format&, const frame_array_format&);
+bool operator!=(const frame_array_format&, const frame_array_format&);
 
 
 template<typename Elem>

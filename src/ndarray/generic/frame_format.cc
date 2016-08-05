@@ -74,4 +74,20 @@ const frame_array_format& frame_format::place_next_array(const frame_array_forma
 }
 
 
+bool operator==(const frame_array_format& a, const frame_array_format& b) {
+	return
+		(a.elem_count() == b.elem_count()) &&
+		(a.elem_stride() == b.elem_stride()) &&
+		(a.offset() == b.offset()) &&
+		(a.elem_size() == b.elem_size()) &&
+		(a.elem_alignment() == b.elem_alignment());		
+}
+
+
+bool operator!=(const frame_array_format& a, const frame_array_format& b) {
+	return !(a == b);
+}
+
+
+
 }
