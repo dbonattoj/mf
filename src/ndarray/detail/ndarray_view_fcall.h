@@ -18,52 +18,41 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <sstream>
+#ifndef MF_NDARRAY_VIEW_FCALL_H_
+#define MF_NDARRAY_VIEW_FCALL_H_
+
+#include <stdexcept>
+#include <cstdlib>
 #include <algorithm>
-#include "../common.h"
+#include <cstring>
+#include <type_traits>
 
-namespace mf {
+namespace mf { namespace detail {
 
-template<typename T>
-inline T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept {
-	std::uintptr_t raw_ptr = reinterpret_cast<std::uintptr_t>(ptr);
-	raw_ptr += diff;
-	return reinterpret_cast<T*>(raw_ptr);
-}
+template<typename View, std::ptrdiff_t Target_dim>
+class ndarray_view_fcall : public View {
+	static_assert(Target_dim <= View::dimension, "detail::ndarray_view_fcall target dimension out of bounds");
+	using base = View;
 
+private:
+	using fcall_type = ndarray_view_fcall<View, Target_dim + 1>;
 
-template<typename T>
-bool is_aligned(T* ptr, std::size_t alignment_requirement) {
-	std::uintptr_t raw_ptr = reinterpret_cast<std::uintptr_t>(ptr);
-	return (raw_ptr % alignment_requirement == 0);
-}
-
-
-template<typename T>
-inline T clamp(T value, T minimum, T maximum) {
-	if(value > maximum) value = maximum;
-	else if(value < minimum) value = minimum;
-	return value;
-}
-
-
-template<typename T>
-T gcd(T a, T b) {
-	Expects_crit(a > 0 && b > 0);
-	if(a < b) std::swap(a, b);
-	while(b > 0) {
-		T c = a % b;
-		a = b;
-		b = c;
+public:
+	using base::base;
+	
+	ndarray_view_fcall(const base& vw) : base(vw) { }
+	
+	fcall_type operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
+		return base::section_(Target_dim, start, end, step);
 	}
-	return a;
-}
+	fcall_type operator()(std::ptrdiff_t c) const {
+		return base::section_(Target_dim, c, c + 1, 1);
+	}
+	fcall_type operator()() const {
+		return *this;
+	}		
+};
 
-template<typename T>
-T lcm(T a, T b) {
-	if(a == 0 || b == 0) return 0;
-	else return (a * b) / gcd(a, b);
-}
+}}
 
-
-}
+#endif

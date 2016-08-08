@@ -24,7 +24,7 @@ namespace mf {
 
 template<std::size_t Dim, bool Mutable>
 ndarray_view_generic<Dim, Mutable>::ndarray_view_generic
-(const frame_format& frm, frame_ptr start, const shape_type& shape, const strides_type& strides) :
+(frame_ptr start, const shape_type& shape, const strides_type& strides, const frame_format& frm) :
 	base(start, ndcoord_cat(shape, frm.frame_size()), ndcoord_cat(strides, 1)),
 	format_(frm) { }
 

@@ -30,6 +30,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <type_traits>
 #include <utility>
 #include <memory>
+#include "detail/ndarray_view_fcall.h"
 
 namespace mf {
 
@@ -45,9 +46,6 @@ namespace detail {
 	T& get_subscript(const ndarray_view<1, T>& array, std::ptrdiff_t c) {
 		return array.at({c});
 	}
-	
-	template<typename View, std::ptrdiff_t I>
-	class ndarray_view_fcall;
 }
 
 
@@ -147,7 +145,7 @@ public:
 
 	/// \name Attributes 
 	///@{
-	std::size_t size() const { return shape().product(); } // verify
+	std::size_t size() const { return shape().product(); }
 	
 	pointer start() const noexcept { return start_; }
 	const shape_type& shape() const noexcept { return shape_; }
@@ -155,6 +153,8 @@ public:
 	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
 	
 	span_type full_span() const noexcept { return span_type(0, shape_); }
+	
+	std::size_t start_alignment_requirement() const { return alignof(T); }
 	
 	/// Default strides which correspond to row-major order for specified shape.
 	/** Optionally with \a padding between elements. */

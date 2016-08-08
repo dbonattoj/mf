@@ -18,12 +18,94 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <utility>
+
 namespace mf {
+
+template<std::size_t Dim, typename Allocator>
+ndarray_generic<Dim, Allocator>::ndarray_generic(const Allocator& allocator) :
+	base(allocator) { }
+
+
+template<std::size_t Dim, typename Allocator>
+ndarray_generic<Dim, Allocator>::ndarray_generic
+(const shape_type& shape, const frame_format& frm, std::size_t frame_padding, const Allocator& allocator) :
+base(
+	shape,
+	view_type::default_strides(shape, frame_padding),
+	(frm.frame_size() + frame_padding) * shape().product(),
+	frm.frame_alignment_requirement(),
+	allocator,
+	frm
+) { }
+
 	
 template<std::size_t Dim, typename Allocator>
 ndarray_generic<Dim, Allocator>::ndarray_generic
-(const frame_format& frm, const generic_shape_type& shp, std::size_t padding, const Allocator& allocator) :
-	base(ndcoord_cat(shp, frm.frame_size()), padding, 1, allocator),
-	format_(frm) { }
+(const const_view_type& vw, std::size_t frame_padding, const Allocator& allocator) :
+base(
+	vw.shape(),
+	view_type::default_strides(vw.shape(), frame_padding),
+	(frm.frame_size() + frame_padding) * vw.shape().product(),
+	frm.frame_alignment_requirement(),
+	allocator,
+	frm
+) {
+	base::view().assign(vw);
+}
+
+	
+template<std::size_t Dim, typename Allocator>
+ndarray_generic<Dim, Allocator>::ndarray_generic(const ndarray_generic& arr) :
+base(
+	arr.shape(),
+	arr.strides(),
+	arr.allocated_byte_size(),
+	arr.format().format_alignment_requirement(),
+	arr.get_allocator(),
+	arr.format()
+) {
+	base::view().assign(arr.cview());
+}
+	
+
+template<std::size_t Dim, typename Allocator>
+ndarray_generic<Dim, Allocator>::ndarray_generic(ndarray_generic&& arr) :
+base(std::move(arr)) { }
+	
+
+template<std::size_t Dim, typename Allocator>
+void ndarray_generic<Dim, Allocator>::assign(const const_view_type& vw, std::size_t frame_padding) {
+	base::reset_(
+		vw.shape(),
+		view_type::default_strides(vw.shape(), frame_padding),
+		(frm.frame_size() + frame_padding) * vw.shape().product(),
+		frm.frame_alignment_requirement(),
+		frm
+	);
+	base::view().assign(vw);
+}
+	
+
+template<std::size_t Dim, typename Allocator>
+auto ndarray_generic<Dim, Allocator>::operator=(const ndarray_generic& arr) -> ndarray_generic {
+	if(&arr == this) return *this;
+	base::reset_(
+		arr.shape(),
+		arr.strides(),
+		arr.allocated_size(),
+		arr.format().frame_alignment_requirement()
+	);
+	base::view().assign(vw);
+	return *this;
+}
+
+
+template<std::size_t Dim, typename Allocator>
+auto ndarray_generic<Dim, Allocator>::operator=(ndarray_generic&& arr) -> ndarray_generic {
+	base::operator=(std::move(arr));
+	return *this;
+}
+
 
 }

@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../ndarray_view.h"
 #include "../ndarray_timed_view.h"
 #include "../../common.h"
+#include "../detail/ndarray_view_fcall.h"
 #include <stdexcept>
 
 namespace mf {
@@ -50,7 +51,6 @@ class ndarray_view_generic : private ndarray_view<Dim + 1, std::conditional_t<Mu
 public:	
 	using frame_ptr = std::conditional_t<Mutable, void*, const void*>;
 
-	using value_type = void;
 	using pointer = frame_ptr;
 	using index_type = std::ptrdiff_t;
 	using coordinates_type = ndptrdiff<Dim>;
@@ -81,8 +81,8 @@ public:
 	// if Mutable == false, then this is not the copy constructor
 	// --> and then additional, implicit copy constructor gets created
 
-	ndarray_view_generic(const frame_format& frm, const base& vw) : base(vw), format_(frm) { }
-	ndarray_view_generic(const frame_format&, frame_ptr start, const shape_type&, const strides_type&);
+	ndarray_view_generic(const base& vw, const frame_format& frm) : base(vw), format_(frm) { }
+	ndarray_view_generic(frame_ptr start, const shape_type&, const strides_type&, const frame_format&);
 
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
 	bool is_null() const noexcept { return base:is_null(); }
@@ -103,8 +103,11 @@ public:
 
 	/// \name Attributes
 	///@{
+	pointer start() const { return static_cast<pointer>(base::start()); }
 	shape_type shape() const { return head<Dim>(base::shape()); }
 	strides_type strides() const { return head<Dim>(base::strides()); }
+	
+	std::size_t start_alignment_requirement() const { return format_.frame_alignment_requirement(); }
 	
 	const frame_format& format() const noexcept { return format_; }
 	ndarray_view_generic array_at(std::ptrdiff_t array_index) const;

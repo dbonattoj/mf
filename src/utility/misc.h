@@ -39,6 +39,8 @@ template<typename Numeric> Numeric sq(Numeric n) { return n * n; }
 /** Pointer may be `void*` or any other pointer type. Does not verify alignment. */
 template<typename T> T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept;
 
+template<typename T> bool is_aligned(T* ptr, std::size_t alignment_requirement);
+
 /// Clamp `value` between `minimum` and `maximum` value.
 template<typename T> T clamp(T value, T minimum, T maximum);
 

@@ -1,63 +1,67 @@
-/*
-Author : Tim Lenertz
-Date : May 2016
-
-Copyright (c) 2016, Université libre de Bruxelles
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
-publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 #ifndef MF_NDARRAY_GENERIC_H_
 #define MF_NDARRAY_GENERIC_H_
 
-#include "frame_format.h"
 #include "ndarray_view_generic.h"
-#include "../ndarray.h"
-#include "../../elem.h"
-#include "../../os/memory.h"
+#include "../detail/ndarray_wrapper.h"
+#inculde "../os/memory.h"
 
 namespace mf {
 
-/// Generic \ref ndarray where lower dimension(s) are type-erased.
-/** Analogous to \ref ndarray_view_generic. */
+/// Container for \ref ndarray_view_generic.
 template<std::size_t Dim, typename Allocator = raw_allocator>
-class ndarray_generic : public ndarray<Dim + 1, byte, Allocator> {
-	using base = ndarray<Dim + 1, byte, Allocator>;
-
-public:
-	using view_type = ndarray_view_generic<Dim>;
-
-	using generic_shape_type = typename view_type::generic_shape_type;
-	using generic_strides_type = typename view_type::generic_strides_type;
-
-private:
-	frame_format format_;
-
-public:
-	ndarray_generic
-	(const frame_format&, const generic_shape_type&, std::size_t padding = 0, const Allocator& = Allocator());
+class ndarray_generic : public detail::ndarray_wrapper<ndarray_view_generic<Dim, true>, ndarray_view_generic<Dim, false>, Allocator> {
+	using base = detail::ndarray_wrapper<ndarray_view_generic<Dim, true>, ndarray_view_generic<Dim, false>, Allocator>;
 	
-	ndarray_generic(const ndarray_generic&) = default;
+public:
+	using typename base::view_type;
+	using typename base::const_view_type;
+	using typename base::shape_type;
+	using typename base::strides_type;
+	
+	/// \name Constructor
+	///@{
+	/// Construct null \ref ndarray_generic.
+	explicit ndarray_generic(const Allocator& = Allocator());
+	
+	/// Construct empty \ref ndarray_generic with given shape and framt format.
+	/** Has default strides, optionally with specified frame padding. */
+	ndarray_generic
+	(const shape_type& shape, const frame_format& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
+	
+	/// Construct \ref ndarray_generic with shape and copy of elements from a \ref ndarray_view_generic.
+	/** Has default strides, optionally with specified frame padding. Does not take strides from \a vw. */
+	explicit ndarray_generic(const const_view_type& vw, std::size_t frame_padding = 0, const Allocator& = Allocator());
+	
+	/// Copy-construct from another \ref ndarray_generic of same type.
+	/** Takes strides from \a arr. */
+	ndarray_generic(const ndarray_generic& arr);
+	
+	/// Move-construct from another \ref ndarray_generic of same type.
+	/** Takes strides from \a arr and sets \a arr to null. */
+	ndarray_generic(ndarray_generic&& arr);
+	///@}
+	
 
-	const frame_format& format() const noexcept { return format_; }
+	/// \name Deep assignment
+	///@{
+	/// Assign shape and elements from \ref vw.
+	/** Resets to default strides, optionally with specified frame padding. Reallocates memory if necessary. */
+	void assign(const const_view_type& vw, std::size_t frame_padding = 0);
+	
+	/// Assign shape and elements from \ref vw.
+	/** Equivalent to `assign(vw)`. */
+	ndarray_generic& operator=(const const_view_type& vw)
+		{ assign(vw); return *this; }
 
-	generic_shape_type generic_shape() const { return base::shape().head(); }
-	generic_strides_type generic_strides() const { return base::strides().head(); }
+	/// Copy-assign from another \ref ndarray_generic.
+	/** Takes strides from \a arr */
+	ndarray_generic& operator=(const ndarray_generic& arr);
 
-	view_type view() { return view_type(format_, base::view()); }	
-};
-
+	/// Move-assign from another \ref ndarray_generic.
+	/** Takes strides from \a arr and sets \a arr to null. */
+	ndarray_generic& operator=(ndarray_generic&& arr);
+	///@}
+}
 
 }
 

@@ -66,7 +66,7 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	void* ptr = nullptr;
 	int err = ::posix_memalign(&ptr, actual_align, size);
 	if(err != 0) throw std::bad_alloc();
-	assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
+	Assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
 	return ptr;
 }
 
