@@ -22,19 +22,18 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_NDARRAY_TIMED_VIEW_GENERIC_H_
 
 #include "ndarray_view_generic.h"
-#include "../ndarray_timed_view.h"
+#include "../detail/ndarray_timed_view_derived.h"
 
 namespace mf {
 
 
+/// \ref ndarray_view_generic with absolute time indices associated to first (generic) dimension.
 template<std::size_t Generic_dim>
-class ndarray_timed_view_generic : public ndarray_timed_view_base<ndarray_view_generic<Generic_dim>> {
-	using base = ndarray_timed_view_base<ndarray_view_generic<Generic_dim>>;
+class ndarray_timed_view_generic : public detail::ndarray_timed_view_derived<ndarray_view_generic<Generic_dim>> {
+	using base = detail::ndarray_timed_view_derived<ndarray_view_generic<Generic_dim>>;
 
 public:
 	using base::base;
-	ndarray_timed_view_generic() = default;
-	ndarray_timed_view_generic(const base& vw) : base(vw) { }
 	
 	auto array_at(std::ptrdiff_t array_index) const {
 		return ndarray_timed_view_generic(base::array_at(array_index), base::start_time());

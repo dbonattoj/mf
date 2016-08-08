@@ -27,9 +27,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Iterator over all coordinates in an `ndspan`.
+/// Iterator over all coordinates in an \ref ndspan.
 /** Value type of iterator is `ndcoord<Dim, T>`. Forward iterator only. Iterates over coordinates in same order as
- ** the indices in `ndarray_view`. */
+ ** the indices in \ref ndarray_view. */
 template<std::size_t Dim, typename T>
 class ndspan_iterator :
 public std::iterator<std::forward_iterator_tag, ndcoord<Dim, T>> {

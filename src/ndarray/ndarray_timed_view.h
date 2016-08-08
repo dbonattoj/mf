@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include "../common.h"
 #include "ndarray_view.h"
+#include "detail/ndarray_timed_view_derived.h"
 
 namespace mf {
 

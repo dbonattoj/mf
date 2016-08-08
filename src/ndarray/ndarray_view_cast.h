@@ -189,8 +189,10 @@ namespace detail {
 }
 
 
-/// Cast `ndarray_view` to one with different dimension and/or element type, with same data.
-/** The input and output views may be of type `ndarray_view` or `ndarray_timed_view`.
+/// Cast \ref ndarray_view to one with different dimension and/or element type.
+/** The input and output views may be of type \ref ndarray_view or \ref ndarray_timed_view. No data is copied or
+ ** modified, instead the dimension, start, shape and stride of casted view is adjusted so as to point to a subset
+ ** of the original view's raw data.
  ** - _No-op_: Output and input views have same dimension and element type.
  ** - _Tuple element_: Input element type is an `elem_tuple`. Output element type is the type of one of the elements
  **                    in this tuple. Input and output dimension is same. Returns view of same shape, but with changed
@@ -218,23 +220,6 @@ Output_view ndarray_view_cast(const Input_view& vw) {
 template<typename Output_view, typename Input_view>
 constexpr bool ndarray_view_can_cast =
 	detail::ndarray_view_cast_detector<Output_view, Input_view>::value;
-
-
-template<typename Output_view, typename Input_view>
-Output_view ndarray_view_reinterpret_cast(const Input_view& in_view) {
-	using in_elem_type = typename Input_view::value_type;
-	using out_elem_type = typename Output_view::value_type;
-	static_assert(Output_view::dimension == Input_view::dimension, "output and input view must have same dimension");
-	std::ptrdiff_t in_stride = in_view.strides().back();
-	if(in_stride < sizeof(out_elem_type))
-		throw std::invalid_argument("output ndarray_view elem type is too large");
-	if(in_stride % alignof(out_elem_type) != 0)
-		throw std::invalid_argument("output ndarray_view elem type has incompatible alignment");
-	
-	auto new_start = reinterpret_cast<out_elem_type*>(in_view.start());
-	return Output_view(new_start, in_view.shape(), in_view.strides());
-}
-
 
 
 }

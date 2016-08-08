@@ -153,9 +153,7 @@ public:
 	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
 	
 	span_type full_span() const noexcept { return span_type(0, shape_); }
-	
-	std::size_t start_alignment_requirement() const { return alignof(T); }
-	
+		
 	/// Default strides which correspond to row-major order for specified shape.
 	/** Optionally with \a padding between elements. */
 	static strides_type default_strides(const shape_type&, std::size_t padding = 0);

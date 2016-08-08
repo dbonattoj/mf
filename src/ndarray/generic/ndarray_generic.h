@@ -9,7 +9,8 @@ namespace mf {
 
 /// Container for \ref ndarray_view_generic.
 template<std::size_t Dim, typename Allocator = raw_allocator>
-class ndarray_generic : public detail::ndarray_wrapper<ndarray_view_generic<Dim, true>, ndarray_view_generic<Dim, false>, Allocator> {
+class ndarray_generic :
+public detail::ndarray_wrapper<ndarray_view_generic<Dim, true>, ndarray_view_generic<Dim, false>, Allocator> {
 	using base = detail::ndarray_wrapper<ndarray_view_generic<Dim, true>, ndarray_view_generic<Dim, false>, Allocator>;
 	
 public:
@@ -60,6 +61,14 @@ public:
 	/// Move-assign from another \ref ndarray_generic.
 	/** Takes strides from \a arr and sets \a arr to null. */
 	ndarray_generic& operator=(ndarray_generic&& arr);
+	///@}
+	
+	
+	/// \name Attributes
+	///@{
+	const frame_format& format() const noexcept { return base:view().format(); }
+	view_type array_at(std::ptrdiff_t array_index) { return base::view().array_at(array_index); }
+	const_view_type array_at(std::ptrdiff_t array_index) const { return base::cview().array_at(array_index); }
 	///@}
 }
 

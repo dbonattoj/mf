@@ -32,8 +32,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Vector of n-dimensional coordinates.
-/** Vector of size `Dim` with items of arithmetic type `T`. Used mainly for coordinates of `ndarray_view`.
- ** For real-values vectors expressing positions or directions in space, the `Eigen` vector types are used instead. */
+/** Vector of size `Dim` with items of arithmetic type `T`. Used mainly for coordinates of \ref ndarray_view.
+ ** For real-valued vectors expressing positions or directions in space, the `Eigen` vector types are used instead. */
 template<std::size_t Dim, typename T>
 class ndcoord {
 	static_assert(std::is_arithmetic<T>::value, "ndcoord component type must be arithmetic");
@@ -160,6 +160,9 @@ public:
 };
 
 
+///////////////
+
+
 template<std::size_t Dim, typename T, typename Unary>
 ndcoord<Dim, T> transform(const ndcoord<Dim, T>& a, Unary fct) {
 	ndcoord<Dim, T> o;
@@ -174,6 +177,9 @@ ndcoord<Dim, T> transform(const ndcoord<Dim, T>& a, const ndcoord<Dim, T>& b, Bi
 	for(std::ptrdiff_t i = 0; i < Dim; ++i) o[i] = fct(a[i], b[i]);
 	return o;
 }
+
+
+///////////////
 
 
 template<std::size_t Dim, typename T>
@@ -191,27 +197,7 @@ std::ostream& operator<<(std::ostream& str, const ndcoord<0, T>& coord) {
 }
 
 
-template<std::size_t Dim>
-using ndsize = ndcoord<Dim, std::size_t>;
-
-template<std::size_t Dim>
-using ndptrdiff = ndcoord<Dim, std::ptrdiff_t>;
-
-
-template<typename T, typename... Components>
-auto make_ndcoord(Components... c) {
-	return ndcoord<sizeof...(Components), T>({ static_cast<T>(c)... });
-}
-
-template<typename... Components>
-auto make_ndsize(Components... c) {
-	return make_ndcoord<std::size_t>(c...);
-}
-
-template<typename... Components>
-auto make_ndptrdiff(Components... c) {
-	return make_ndcoord<std::ptrdiff_t>(c...);
-}
+///////////////
 
 
 template<std::size_t Dim1, std::size_t Dim2, typename T>
@@ -238,6 +224,15 @@ ndcoord<1 + Dim2, T> ndcoord_cat(Int c1, const ndcoord<Dim2, T>& coord2) {
 
 
 template<typename T>
+ndcoord<2, T> ndcoord_cat(T c1, T c2) {
+	return make_ndcoord(c1, c2);
+}
+
+
+///////////////
+
+
+template<typename T>
 ndcoord<2, T> flip(const ndcoord<2, T>& coord) {
 	return {coord[1], coord[0]};
 }
@@ -253,6 +248,32 @@ template<std::size_t Section_dim, std::size_t Dim, typename T>
 auto head(const ndcoord<Dim, T>& coord) noexcept {
 	ndcoord<Section_dim, T> c(coord.begin(), coord.end() - (Dim - Section_dim));
 	return c;
+}
+
+
+///////////////
+
+
+template<std::size_t Dim>
+using ndsize = ndcoord<Dim, std::size_t>;
+
+template<std::size_t Dim>
+using ndptrdiff = ndcoord<Dim, std::ptrdiff_t>;
+
+
+template<typename T, typename... Components>
+auto make_ndcoord(Components... c) {
+	return ndcoord<sizeof...(Components), T>({ static_cast<T>(c)... });
+}
+
+template<typename... Components>
+auto make_ndsize(Components... c) {
+	return make_ndcoord<std::size_t>(c...);
+}
+
+template<typename... Components>
+auto make_ndptrdiff(Components... c) {
+	return make_ndcoord<std::ptrdiff_t>(c...);
 }
 
 

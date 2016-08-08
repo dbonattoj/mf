@@ -8,13 +8,18 @@ FLOW
 - shared object (=> also in GPU memory)
 
 - high level graph class with:
-  - implicit convert/multiplex nodes
   - parse graph+node+filter params from file
   - sub-graph (-> composite node)
 
 
-TOOLKIT
-- point_cloud
+
+new (august)
+- multiple output
+- pulled parameter
+- parallel branches
+- real-time stream policy, skipper
+- frozen time windows
+
 
 
 

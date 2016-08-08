@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Random access iterator which traverses an `ndarray_view`.
+/// Random access iterator which traverses an \ref ndarray_view.
 /** Always traverses the elements in order of increasing index, regardless of strides. Random-access iterator operations
  ** (addition, comparation, etc.) act on index values. Index and coordinates of current item can be accessed using
  ** index() and coordinates().
@@ -34,23 +34,25 @@ namespace mf {
  ** entire `ndarray_view`, or just for smaller segments at a time.
  ** If `coordinates()` is called at each iteration, using `ndspan_iterator` may be more efficient because it does not
  ** recompute the coordinates from an index each time. */
-template<typename Array>
+template<std::size_t Dim, typename Elem>
 class ndarray_iterator :
-public std::iterator<std::random_access_iterator_tag, typename Array::value_type> {
-	using base = std::iterator<std::random_access_iterator_tag, typename Array::value_type>;
+public std::iterator<std::random_access_iterator_tag, Elem> {
+	using base = std::iterator<std::random_access_iterator_tag, Elem>;
 
 public:
+	using view_type = ndarray_view<Dim, Elem>;
+
 	using typename base::value_type;
 	using typename base::reference;
 	using typename base::pointer;
 	
-	using index_type = typename Array::index_type;
-	using coordinates_type = typename Array::coordinates_type;
+	using index_type = typename view_type::index_type;
+	using coordinates_type = typename view_type::coordinates_type;
 
-	constexpr static std::size_t dimension = Array::dimension;
+	constexpr static std::size_t dimension = view_type::dimension;
 
 private:
-	const Array array_;
+	const view_type view_;
 	pointer pointer_ = nullptr;
 	index_type index_ = 0;
 	std::ptrdiff_t pointer_step_;
@@ -61,7 +63,7 @@ private:
 
 public:
 	ndarray_iterator() = default;
-	ndarray_iterator(const Array& array, index_type index, pointer ptr);
+	ndarray_iterator(const view_type& vw, index_type index, pointer ptr);
 	ndarray_iterator(const ndarray_iterator&) = default;
 	
 	ndarray_iterator& operator=(const ndarray_iterator&);
@@ -101,12 +103,12 @@ public:
 		{ return a.index() - b.index(); }
 	
 	index_type index() const noexcept { return index_; }
-	coordinates_type coordinates() const noexcept { return array_.index_to_coordinates(index_); }
+	coordinates_type coordinates() const noexcept { return view_.index_to_coordinates(index_); }
 };
 
 
-template<typename Array>
-constexpr std::size_t ndarray_iterator<Array>::dimension;
+template<std::size_t Dim, typename Elem>
+constexpr std::size_t ndarray_iterator<Dim, Elem>::dimension;
 
 
 }

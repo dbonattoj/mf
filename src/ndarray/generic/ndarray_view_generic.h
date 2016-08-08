@@ -106,9 +106,7 @@ public:
 	pointer start() const { return static_cast<pointer>(base::start()); }
 	shape_type shape() const { return head<Dim>(base::shape()); }
 	strides_type strides() const { return head<Dim>(base::strides()); }
-	
-	std::size_t start_alignment_requirement() const { return format_.frame_alignment_requirement(); }
-	
+		
 	const frame_format& format() const noexcept { return format_; }
 	ndarray_view_generic array_at(std::ptrdiff_t array_index) const;
 
