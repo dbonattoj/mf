@@ -3,7 +3,7 @@
 
 #include "ndarray_view_generic.h"
 #include "../detail/ndarray_wrapper.h"
-#inculde "../os/memory.h"
+#include "../../os/memory.h"
 
 namespace mf {
 
@@ -66,11 +66,11 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const frame_format& format() const noexcept { return base:view().format(); }
+	const frame_format& format() const noexcept { return base::view().format(); }
 	view_type array_at(std::ptrdiff_t array_index) { return base::view().array_at(array_index); }
 	const_view_type array_at(std::ptrdiff_t array_index) const { return base::cview().array_at(array_index); }
 	///@}
-}
+};
 
 }
 

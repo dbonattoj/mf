@@ -28,7 +28,7 @@ namespace mf {
 	
 
 ring::ring(const frame_format& frm, std::size_t capacity) :
-	base(frm, capacity, adjust_padding_(frm, capacity)) { }
+	base(make_ndsize(capacity), frm, adjust_padding_(frm, capacity)) { }
 
 
 std::size_t ring::adjust_padding_(const frame_format& frm, std::size_t capacity) {
@@ -82,11 +82,13 @@ void ring::initialize() {
 auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
 	if(duration > total_duration()) throw std::invalid_argument("ring section duration too large");
 	
-	auto new_start = base::start() + (base::strides().front() * start);
+	auto new_start = advance_raw_ptr(base::start(), base::strides().front() * start);
 	auto new_shape = make_ndsize(duration);
-	auto new_strides = base::generic_strides();
+	auto new_strides = base::strides();
 	
-	return section_view_type(base::format(), new_start, new_shape, new_strides);
+	return section_view_type(new_start, new_shape, new_strides, base::format());
+	
+	// TODO implement in base 
 }
 
 

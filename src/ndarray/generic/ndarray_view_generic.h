@@ -85,7 +85,7 @@ public:
 	ndarray_view_generic(frame_ptr start, const shape_type&, const strides_type&, const frame_format&);
 
 	static ndarray_view_generic null() { return ndarray_view_generic(); }
-	bool is_null() const noexcept { return base:is_null(); }
+	bool is_null() const noexcept { return base::is_null(); }
 	explicit operator bool () const noexcept { return ! is_null(); }
 
 	void reset(const ndarray_view_generic& other) noexcept {
@@ -95,7 +95,7 @@ public:
 	void reset() noexcept { reset(null()); }
 	
 	friend bool same(const ndarray_view_generic& a, const ndarray_view_generic& b) {
-		return (vw.format() == format()) && (base::same(a, b));
+		return (a.format() == b.format()) && (base::same(a, b));
 	}
 	///@}
 
@@ -111,9 +111,9 @@ public:
 	ndarray_view_generic array_at(std::ptrdiff_t array_index) const;
 
 	static strides_type default_strides(const frame_format& frm, const shape_type& shp) {
-		auto shp = ndcoord_cat(shp, frm.frame_size());
-		auto def_str = base::default_strides(shp);
-		return head<Dim>(def_str);
+		auto base_shp = ndcoord_cat(shp, frm.frame_size());
+		auto base_def_str = base::default_strides(base_shp);
+		return head<Dim>(base_def_str);
 	}
 	
 	using base::has_default_strides;

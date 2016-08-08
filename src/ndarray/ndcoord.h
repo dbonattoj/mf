@@ -163,6 +163,33 @@ public:
 ///////////////
 
 
+template<std::size_t Dim>
+using ndsize = ndcoord<Dim, std::size_t>;
+
+template<std::size_t Dim>
+using ndptrdiff = ndcoord<Dim, std::ptrdiff_t>;
+
+
+template<typename T, typename... Components>
+auto make_ndcoord(Components... c) {
+	return ndcoord<sizeof...(Components), T>({ static_cast<T>(c)... });
+}
+
+template<typename... Components>
+auto make_ndsize(Components... c) {
+	return make_ndcoord<std::size_t>(c...);
+}
+
+template<typename... Components>
+auto make_ndptrdiff(Components... c) {
+	return make_ndcoord<std::ptrdiff_t>(c...);
+}
+
+
+
+///////////////
+
+
 template<std::size_t Dim, typename T, typename Unary>
 ndcoord<Dim, T> transform(const ndcoord<Dim, T>& a, Unary fct) {
 	ndcoord<Dim, T> o;
@@ -225,7 +252,7 @@ ndcoord<1 + Dim2, T> ndcoord_cat(Int c1, const ndcoord<Dim2, T>& coord2) {
 
 template<typename T>
 ndcoord<2, T> ndcoord_cat(T c1, T c2) {
-	return make_ndcoord(c1, c2);
+	return ndcoord<2, T>(c1, c2);
 }
 
 
@@ -248,32 +275,6 @@ template<std::size_t Section_dim, std::size_t Dim, typename T>
 auto head(const ndcoord<Dim, T>& coord) noexcept {
 	ndcoord<Section_dim, T> c(coord.begin(), coord.end() - (Dim - Section_dim));
 	return c;
-}
-
-
-///////////////
-
-
-template<std::size_t Dim>
-using ndsize = ndcoord<Dim, std::size_t>;
-
-template<std::size_t Dim>
-using ndptrdiff = ndcoord<Dim, std::ptrdiff_t>;
-
-
-template<typename T, typename... Components>
-auto make_ndcoord(Components... c) {
-	return ndcoord<sizeof...(Components), T>({ static_cast<T>(c)... });
-}
-
-template<typename... Components>
-auto make_ndsize(Components... c) {
-	return make_ndcoord<std::size_t>(c...);
-}
-
-template<typename... Components>
-auto make_ndptrdiff(Components... c) {
-	return make_ndcoord<std::ptrdiff_t>(c...);
 }
 
 

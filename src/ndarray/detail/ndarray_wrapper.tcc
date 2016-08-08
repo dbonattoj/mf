@@ -1,4 +1,4 @@
-namespace mf {
+namespace mf { namespace detail {
 
 template<typename View, typename Const_view, typename Allocator>
 void ndarray_wrapper<View, Const_view, Allocator>::allocate_(std::size_t size, std::size_t alignment) {
@@ -39,12 +39,12 @@ ndarray_wrapper<View, Const_view, Allocator>::ndarray_wrapper(
 
 
 template<typename View, typename Const_view, typename Allocator>
-ndarray_wrapper<View, Const_view, Allocator>::ndarray(const Allocator& allocator) :
+ndarray_wrapper<View, Const_view, Allocator>::ndarray_wrapper(const Allocator& allocator) :
 	allocator_(allocator) { }
 	
 
 template<typename View, typename Const_view, typename Allocator>
-ndarray_wrapper<View, Const_view, Allocator>::ndarray(ndarray_wrapper&& arr) :
+ndarray_wrapper<View, Const_view, Allocator>::ndarray_wrapper(ndarray_wrapper&& arr) :
 	allocator_(),
 	allocated_size_(arr.allocated_size_),
 	allocated_buffer_(arr.allocated_buffer_),
@@ -57,13 +57,13 @@ ndarray_wrapper<View, Const_view, Allocator>::ndarray(ndarray_wrapper&& arr) :
 		
 
 template<typename View, typename Const_view, typename Allocator>
-ndarray_wrapper<View, Const_view, Allocator>::~ndarray() {
+ndarray_wrapper<View, Const_view, Allocator>::~ndarray_wrapper() {
 	deallocate_();
 }
 
 
 template<typename View, typename Const_view, typename Allocator>
-auto ndarray_wrapper<View, Const_view, Allocator>::operator=(ndarray&& arr) -> ndarray_wrapper& {
+auto ndarray_wrapper<View, Const_view, Allocator>::operator=(ndarray_wrapper&& arr) -> ndarray_wrapper& {
 	if(&arr == this) return *this;
 	
 	deallocate_();
@@ -88,7 +88,7 @@ void ndarray_wrapper<View, Const_view, Allocator>::reset_(
 	std::size_t allocate_alignment,
 	const Arg&... view_arguments
 ) {	
-	if(allocate_size != allocated_size_() || ! is_aligned(allocated_buffer_, allocate_alignment) {
+	if(allocate_size != allocated_size_() || ! is_aligned(allocated_buffer_, allocate_alignment)) {
 		deallocate_();
 		allocate_(allocate_size, allocate_alignment);
 	}
@@ -103,4 +103,4 @@ void ndarray_wrapper<View, Const_view, Allocator>::reset_(
 
 
 
-}
+}}

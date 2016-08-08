@@ -46,10 +46,10 @@ ndarray_generic<Dim, Allocator>::ndarray_generic
 base(
 	vw.shape(),
 	view_type::default_strides(vw.shape(), frame_padding),
-	(frm.frame_size() + frame_padding) * vw.shape().product(),
-	frm.frame_alignment_requirement(),
+	(vw.format().frame_size() + frame_padding) * vw.shape().product(),
+	vw.format().frame_alignment_requirement(),
 	allocator,
-	frm
+	vw.format()
 ) {
 	base::view().assign(vw);
 }
@@ -79,16 +79,16 @@ void ndarray_generic<Dim, Allocator>::assign(const const_view_type& vw, std::siz
 	base::reset_(
 		vw.shape(),
 		view_type::default_strides(vw.shape(), frame_padding),
-		(frm.frame_size() + frame_padding) * vw.shape().product(),
-		frm.frame_alignment_requirement(),
-		frm
+		(vw.format().frame_size() + frame_padding) * vw.shape().product(),
+		vw.format().frame_alignment_requirement(),
+		vw.format()
 	);
 	base::view().assign(vw);
 }
 	
 
 template<std::size_t Dim, typename Allocator>
-auto ndarray_generic<Dim, Allocator>::operator=(const ndarray_generic& arr) -> ndarray_generic {
+auto ndarray_generic<Dim, Allocator>::operator=(const ndarray_generic& arr) -> ndarray_generic& {
 	if(&arr == this) return *this;
 	base::reset_(
 		arr.shape(),
@@ -96,13 +96,13 @@ auto ndarray_generic<Dim, Allocator>::operator=(const ndarray_generic& arr) -> n
 		arr.allocated_size(),
 		arr.format().frame_alignment_requirement()
 	);
-	base::view().assign(vw);
+	base::view().assign(arr.cview());
 	return *this;
 }
 
 
 template<std::size_t Dim, typename Allocator>
-auto ndarray_generic<Dim, Allocator>::operator=(ndarray_generic&& arr) -> ndarray_generic {
+auto ndarray_generic<Dim, Allocator>::operator=(ndarray_generic&& arr) -> ndarray_generic& {
 	base::operator=(std::move(arr));
 	return *this;
 }

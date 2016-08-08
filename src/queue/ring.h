@@ -53,7 +53,8 @@ public:
 	
 	void initialize();
 	
-	time_unit total_duration() const noexcept { return base::shape().front(); }
+	time_unit capacity() const noexcept { return base::shape().front(); }
+	[[deprecated]] time_unit total_duration() const noexcept { return base::shape().front(); }
 	time_unit frame_size() const noexcept { return base::shape().back(); }
 	
 	time_unit writable_duration() const;

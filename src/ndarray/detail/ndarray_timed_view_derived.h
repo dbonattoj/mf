@@ -22,8 +22,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_NDARRAY_TIMED_VIEW_DERIVED_H_
 
 #include <stdexcept>
-#include "../common.h"
-#include "ndarray_view.h"
+#include "../../common.h"
+#include "../ndarray_view.h"
+#include "ndarray_view_fcall.h"
 
 namespace mf { namespace detail {
 
@@ -35,7 +36,7 @@ class ndarray_timed_view_derived : public Base {
 private:
 	time_unit start_time_;
 
-	using fcall_type = detail::ndarray_view_fcall<ndarray_timed_view_base<Base>, 1>;
+	using fcall_type = detail::ndarray_view_fcall<ndarray_timed_view_derived, 1>;
 	
 public:
 	using typename base::coordinates_type;
@@ -49,12 +50,12 @@ public:
 	ndarray_timed_view_derived(const base& vw, time_unit start_time) :
 		base(vw), start_time_(vw.is_null() ? -1 : start_time) { }
 	
-		void reset(const ndarray_timed_view_base& vw) {
+	void reset(const ndarray_timed_view_derived& vw) {
 		start_time_ = vw.start_time_;
 		base::reset(vw);
 	}
 
-	static ndarray_timed_view_derived null() { return ndarray_timed_view_base(); }
+	static ndarray_timed_view_derived null() { return ndarray_timed_view_derived(); }
 	
 	friend bool same(const ndarray_timed_view_derived& a, const ndarray_timed_view_derived& b) noexcept {
 		return (a.start_time() == b.start_time()) && same(a.non_timed(), b.non_timed());

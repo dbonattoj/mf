@@ -94,7 +94,7 @@ public:
 	using strides_type = ndptrdiff<Dim>;
 	using span_type = ndspan<Dim>;
 	
-	using iterator = ndarray_iterator<ndarray_view>;
+	using iterator = ndarray_iterator<Dim, T>;
 
 	constexpr static std::size_t dimension = Dim;
 
@@ -263,7 +263,7 @@ public:
 template<std::size_t Dim_to, typename Elem_to, std::size_t Dim_from, typename Elem_from>
 constexpr bool ndarray_view_is_assignable = 
 	(Dim_to == Dim_from) &&
-	! std::is_const<Dim_to> &&
+	! std::is_const<Elem_to>::value &&
 	std::is_convertible<Elem_from, Elem_to>::value;
 
 

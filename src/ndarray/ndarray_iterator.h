@@ -25,6 +25,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+template<std::size_t Dim, typename Elem>
+class ndarray_view;
+
 /// Random access iterator which traverses an \ref ndarray_view.
 /** Always traverses the elements in order of increasing index, regardless of strides. Random-access iterator operations
  ** (addition, comparation, etc.) act on index values. Index and coordinates of current item can be accessed using

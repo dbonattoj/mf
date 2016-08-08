@@ -21,9 +21,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_NDARRAY_WRAPPER_H_
 #define MF_NDARRAY_WRAPPER_H_
 
-#include "ndarray_view.h"
-#include "ndcoord.h"
-#include "../os/memory.h"
+#include "../ndarray_view.h"
+#include "../ndcoord.h"
+#include "../../os/memory.h"
 #include <memory>
 #include <utility>
 
@@ -96,7 +96,7 @@ public:
 	///@{
 	~ndarray_wrapper();
 
-	bool is_null() const noexcept { return (start_ == nullptr); }
+	bool is_null() const noexcept { return view_.is_null(); }
 	explicit operator bool () const noexcept { return ! is_null(); }
 	
 	std::size_t allocated_byte_size() const { return allocated_size_; }
@@ -141,12 +141,12 @@ public:
 	
 	/// \name Iteration
 	///@{
-	auto begin() return { view().begin(); }
-	auto begin() const return { cview().cbegin(); }	
-	auto cbegin() const return { cview().cbegin(); }	
-	auto end() return { view().end(); }
-	auto end() const return { cview().cend(); }	
-	auto cend() const return { cview().cend(); }	
+	auto begin() noexcept { return view().begin(); }
+	auto begin() const noexcept { return cview().cbegin(); }	
+	auto cbegin() const noexcept { return cview().cbegin(); }	
+	auto end() noexcept { return view().end(); }
+	auto end() const noexcept { return cview().cend(); }	
+	auto cend() const noexcept { return cview().cend(); }	
 	///@}
 	
 	

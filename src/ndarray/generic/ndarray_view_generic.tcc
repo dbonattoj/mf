@@ -33,7 +33,7 @@ template<std::size_t Dim, bool Mutable>
 auto ndarray_view_generic<Dim, Mutable>::array_at(std::ptrdiff_t array_index) const -> ndarray_view_generic {
 	const frame_array_format& array_format = format().array_at(array_index);
 	auto new_start = base::start() + array_format.offset();
-	return ndarray_view_generic<Dim, Mutable>(array_format, new_start, generic_shape(), generic_strides());
+	return ndarray_view_generic<Dim, Mutable>(array_format, new_start, shape(), strides());
 }
 
 
@@ -77,22 +77,22 @@ auto from_generic(
 	static_assert(Generic_dim <= Concrete_dim, "generic dimension must be lower or equal to concrete dimension");
 	constexpr std::size_t frame_dim = Concrete_dim - Generic_dim;
 
-	if(gen_vw.is_null()) return ndarray_view<Concrete_dim, Concrete_elem>::null();
+	if(vw.is_null()) return ndarray_view<Concrete_dim, Concrete_elem>::null();
 	
-	auto frm = gen_vw.format().array_at(array_index);
+	auto frm = vw.format().array_at(array_index);
 
 	MF_DEBUG_EXPR(frame_shape, frm.elem_stride(), frm.frame_size());
 
 
-	Assert(frm.frame_size() == gen_vw.shape().back());
+	Assert(frm.frame_size() == vw.shape().back());
 	Assert(frame_shape.product() * frm.elem_stride() == frm.frame_size());
 	
 	ndptrdiff<frame_dim> concrete_frame_strides =
 		ndarray_view<frame_dim, Concrete_elem>::default_strides(frame_shape, frm.elem_padding());
 	
-	auto new_start = reinterpret_cast<Concrete_elem*>(gen_vw.start() + frm.offset());
-	auto new_shape = ndcoord_cat(gen_vw.generic_shape(), frame_shape);
-	auto new_strides = ndcoord_cat(gen_vw.generic_strides(), concrete_frame_strides);
+	auto new_start = reinterpret_cast<Concrete_elem*>(vw.start() + frm.offset());
+	auto new_shape = ndcoord_cat(vw.generic_shape(), frame_shape);
+	auto new_strides = ndcoord_cat(vw.generic_strides(), concrete_frame_strides);
 		
 	return ndarray_view<Concrete_dim, Concrete_elem>(new_start, new_shape, new_strides);
 }
