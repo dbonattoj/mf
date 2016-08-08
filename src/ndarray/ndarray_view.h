@@ -73,7 +73,7 @@ namespace detail {
  ** Random-access iterator `ndarray_iterator` always traverses ndarray in index order. As an optimization, iterator
  ** incrementation and decrementation is more efficient when all strides, or tail of strides, is default.
  **
- ** *Important*: Assignment and comparison operators perform deep assignment/comparison in the elements that the view
+ ** **Important**: Assignment and comparison operators perform deep assignment/comparison in the elements that the view
  ** points to, and not of the `ndarray_view` itself. Shallow assignment and comparison is done with `same()` and
  ** `reset()`. This simplifies interface: assigning a single element `arr[0][2] = 3` works the same as assigning an
  ** entire region `arr[0] = make_frame(...)`. (Because `operator[]` returns an `ndarray_view`.)
@@ -259,6 +259,15 @@ public:
 	
 	ndarray_view swapaxis(std::size_t axis1, std::size_t axis2) const;
 };
+
+
+
+template<std::size_t Dim_to, typename Elem_to, std::size_t Dim_from, typename Elem_from>
+constexpr bool ndarray_view_is_assignable = 
+	(Dim_to == Dim_from) &&
+	! std::is_const<Dim_to> &&
+	std::is_convertible<Elem_from, Elem_to>::value;
+
 
 
 template<typename T>

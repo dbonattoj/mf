@@ -62,44 +62,66 @@ public:
 	constexpr static std::size_t dimension = Dim;
 
 protected:
-	Allocator allocator_; ///< Raw allocator used to allocate memory, in bytes.
-	std::size_t stride_; ///< Stride of elements, in bytes.
-	std::size_t padding_; ///< Padding between frames, in bytes.
+	Allocator allocator_; ///< Raw allocator used to allocate memory.
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
-	view_type view_; ///< View used to access items.
+	view_type view_; ///< View to allocated memory.
 
 	void allocate_();
 	void deallocate_();
 	
-	/// Constructor for use by derived classes.
-	/** Size of allocated memory segment is `shape.front() * (padding + shape.tail().product()*stride)`.
-	 ** Caller must ensure this satisfies requirements of allocator.
-	 ** \param shape Shape of entire array. First component is length of array, remaining components is frame shape.
-	 ** \param padding Padding between frames, in bytes.
-	 ** \param stride Stride of elements, in bytes. Must be multiple of alignof(T) and leq to sizeof(T).
-	 ** \param allocator Allocator instance. */
-	ndarray(const shape_type& shape, std::size_t padding, std::size_t stride, const Allocator& allocator);
+	ndarray(const shape_type& shape, const strides_type& strides, std::size_t allocated_size, const Allocator&);
 
 	strides_type strides_with_padding_(const shape_type& shape, std::size_t padding);
 
 public:
-	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator()) :
-		ndarray(shp, 0, sizeof(T), allocator) { }
+	/// \name Construction
+	///@{
+	ndarray();
+	explicit ndarray(const shape_type& shp, const Allocator& allocator = Allocator());
 
-	explicit ndarray(const const_view_type&);
-	ndarray(const ndarray& arr) : ndarray(arr.cview()) { }
-
+	template<
+		typename Other_view,
+		typename = std::enable_if_t<std::is_assignable<view_type, Other_view>::value>
+	> ndarray(const Other_view&);
+	
+	ndarray(const ndarray&);
+	ndarray(ndarray&&);
+		
 	~ndarray();
+
+	static ndarray_view null() { return ndarray_view(); }
+	bool is_null() const noexcept { return (start_ == nullptr); }
+	explicit operator bool () const noexcept { return ! is_null(); }
+	///@}
 	
-	ndarray& operator=(const const_view_type& arr);
-	ndarray& operator=(const ndarray& arr) { return operator=(arr.cview()); }
 	
+	/// \name Deep assignment
+	///@{
+	template<
+		typename Other_view,
+		typename = std::enable_if_t<std::is_assignable<view_type, Other_view>::value>
+	>
+	ndarray& operator=(const Other_view&);
+	ndarray& operator=(ndarray&&);
+
+	template<
+		typename Other_view,
+		typename = std::enable_if_t<std::is_assignable<view_type, Other_view>::value>
+	> void assign(const Other_view&);
+	///@}
+	
+	
+	
+	
+	/// \name View access
+	///@{
 	view_type view() { return view_; }
 	const_view_type view() const { return cview(); }
 	const_view_type cview() const { return const_view_type(view_);  }
 	
 	operator view_type () noexcept { return view(); }
 	operator const_view_type () const noexcept { return cview(); }
+	///@}
 	
 	coordinates_type index_to_coordinates(const index_type& index) const
 		{ return view_.index_to_coordinates(index); }
