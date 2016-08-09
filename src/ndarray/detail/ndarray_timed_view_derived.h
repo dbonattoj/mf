@@ -50,6 +50,9 @@ public:
 	ndarray_timed_view_derived(const base& vw, time_unit start_time) :
 		base(vw), start_time_(vw.is_null() ? -1 : start_time) { }
 	
+	template<typename... Args> void reset(const Args&... args) {
+		reset(ndarray_timed_view_derived(args...));
+	}
 	void reset(const ndarray_timed_view_derived& vw) {
 		start_time_ = vw.start_time_;
 		base::reset(vw);

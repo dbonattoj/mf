@@ -250,12 +250,6 @@ ndcoord<1 + Dim2, T> ndcoord_cat(Int c1, const ndcoord<Dim2, T>& coord2) {
 }
 
 
-template<typename T>
-ndcoord<2, T> ndcoord_cat(T c1, T c2) {
-	return ndcoord<2, T>(c1, c2);
-}
-
-
 ///////////////
 
 

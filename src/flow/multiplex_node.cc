@@ -201,7 +201,7 @@ timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {
 	Assert(! input_view_shared_lock_);
 	input_view_shared_lock_.lock();
 	
-	timed_frame_array_view input_view = this_node().input_view_.array_at(input_channel_index_);
+	timed_frame_array_view input_view = extract_array(this_node().input_view_, input_channel_index_);
 	
 	const time_span& pulled_span = connected_input().pulled_span();
 	Assert(duration == pulled_span.duration());

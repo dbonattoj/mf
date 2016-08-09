@@ -32,8 +32,8 @@ ndarray_generic<Dim, Allocator>::ndarray_generic
 (const shape_type& shape, const frame_format& frm, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	shape,
-	view_type::default_strides(shape, frame_padding),
-	(frm.frame_size() + frame_padding) * shape().product(),
+	view_type::default_strides(frm, shape, frame_padding),
+	(frm.frame_size() + frame_padding) * shape.product(),
 	frm.frame_alignment_requirement(),
 	allocator,
 	frm

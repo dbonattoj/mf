@@ -11,7 +11,7 @@ void ndarray_wrapper<View, Const_view, Allocator>::allocate_(std::size_t size, s
 template<typename View, typename Const_view, typename Allocator>
 void ndarray_wrapper<View, Const_view, Allocator>::deallocate_() {
 	if(allocated_size_ != 0) {
-		allocator_.deallocate(allocated_buffer_, allocated_size_);
+		allocator_.raw_deallocate(allocated_buffer_, allocated_size_);
 		allocated_size_ = 0;
 		allocated_buffer_ = nullptr;
 	}

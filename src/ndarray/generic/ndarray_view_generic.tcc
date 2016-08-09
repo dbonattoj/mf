@@ -25,15 +25,16 @@ namespace mf {
 template<std::size_t Dim, bool Mutable>
 ndarray_view_generic<Dim, Mutable>::ndarray_view_generic
 (frame_ptr start, const shape_type& shape, const strides_type& strides, const frame_format& frm) :
-	base(start, ndcoord_cat(shape, frm.frame_size()), ndcoord_cat(strides, 1)),
+	base(static_cast<base_value_type*>(start), ndcoord_cat(shape, frm.frame_size()), ndcoord_cat(strides, 1)),
 	format_(frm) { }
 
 
 template<std::size_t Dim, bool Mutable>
-auto ndarray_view_generic<Dim, Mutable>::array_at(std::ptrdiff_t array_index) const -> ndarray_view_generic {
-	const frame_array_format& array_format = format().array_at(array_index);
-	auto new_start = base::start() + array_format.offset();
-	return ndarray_view_generic<Dim, Mutable>(array_format, new_start, shape(), strides());
+ndarray_view_generic<Dim, Mutable> extract_array
+(const ndarray_view_generic<Dim, Mutable>& vw, std::ptrdiff_t array_index) {
+	const frame_array_format& array_format = vw.format().array_at(array_index);
+	auto new_start = advance_raw_ptr(vw.start(), array_format.offset());
+	return ndarray_view_generic<Dim, Mutable>(new_start, vw.shape(), vw.strides(), array_format);
 }
 
 
@@ -90,9 +91,9 @@ auto from_generic(
 	ndptrdiff<frame_dim> concrete_frame_strides =
 		ndarray_view<frame_dim, Concrete_elem>::default_strides(frame_shape, frm.elem_padding());
 	
-	auto new_start = reinterpret_cast<Concrete_elem*>(vw.start() + frm.offset());
-	auto new_shape = ndcoord_cat(vw.generic_shape(), frame_shape);
-	auto new_strides = ndcoord_cat(vw.generic_strides(), concrete_frame_strides);
+	auto new_start = reinterpret_cast<Concrete_elem*>(advance_raw_ptr(vw.start(), frm.offset()));
+	auto new_shape = ndcoord_cat(vw.shape(), frame_shape);
+	auto new_strides = ndcoord_cat(vw.strides(), concrete_frame_strides);
 		
 	return ndarray_view<Concrete_dim, Concrete_elem>(new_start, new_shape, new_strides);
 }

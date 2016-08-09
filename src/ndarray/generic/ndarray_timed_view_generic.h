@@ -28,17 +28,18 @@ namespace mf {
 
 
 /// \ref ndarray_view_generic with absolute time indices associated to first (generic) dimension.
-template<std::size_t Generic_dim>
-class ndarray_timed_view_generic : public detail::ndarray_timed_view_derived<ndarray_view_generic<Generic_dim>> {
-	using base = detail::ndarray_timed_view_derived<ndarray_view_generic<Generic_dim>>;
+template<std::size_t Dim, bool Mutable = true>
+using ndarray_timed_view_generic = detail::ndarray_timed_view_derived<ndarray_view_generic<Dim, Mutable>>;
 
-public:
-	using base::base;
-	
-	auto array_at(std::ptrdiff_t array_index) const {
-		return ndarray_timed_view_generic(base::array_at(array_index), base::start_time());
-	}
-};
+
+
+template<std::size_t Dim, bool Mutable>
+ndarray_timed_view_generic<Dim, Mutable> extract_array
+(const ndarray_timed_view_generic<Dim, Mutable>& vw, std::ptrdiff_t array_index) {
+	auto non_timed_vw = extract_array(vw.non_timed(), array_index);
+	return ndarray_timed_view_generic<Dim, Mutable>(non_timed_vw, vw.start_time());
+}
+
 
 
 

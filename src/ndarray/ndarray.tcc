@@ -71,7 +71,7 @@ auto ndarray<Dim, Elem, Allocator>::operator=(const ndarray& arr) -> ndarray& {
 		arr.allocated_size(),
 		alignof(Elem)
 	);
-	base::view().assign(vw);
+	base::view().assign(arr);
 	return *this;
 }
 

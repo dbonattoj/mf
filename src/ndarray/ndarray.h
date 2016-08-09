@@ -61,7 +61,7 @@ public:
 	/** Takes strides from \a arr and sets \a arr to null. */
 	ndarray& operator=(ndarray&& arr);
 	///@}
-}
+};
 
 }
 

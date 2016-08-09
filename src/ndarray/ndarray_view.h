@@ -132,8 +132,10 @@ public:
 	bool is_null() const noexcept { return (start_ == nullptr); }
 	explicit operator bool () const noexcept { return ! is_null(); }
 
+	template<typename... Args> void reset(const Args&... args) {
+		reset(ndarray_view(args...));
+	}
 	void reset(const ndarray_view& other) noexcept;
-	void reset() noexcept { reset(ndarray_view()); }
 		
 	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
 		if(a.is_null() && b.is_null()) return true;
@@ -156,7 +158,7 @@ public:
 		
 	/// Default strides which correspond to row-major order for specified shape.
 	/** Optionally with \a padding between elements. */
-	static strides_type default_strides(const shape_type&, std::size_t padding = 0);
+	static strides_type default_strides(const shape_type&, std::size_t elem_padding = 0);
 	
 	/// Check if view has default strides.
 	/** If \a minimal_dimension is specified, checks if view has default strides in dimensions from `Dim - 1` down to
