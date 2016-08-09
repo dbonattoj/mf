@@ -115,7 +115,7 @@ public:
 	/// \name Construction
 	///@{
 	/// Create null view.
-	ndarray_view() : ndarray_view(nullptr, shape_type()) { }
+	ndarray_view() : ndarray_view(nullptr, shape_type(0)) { }
 	
 	/// Create view with explicitly specified start, shape and strides.
 	ndarray_view(pointer start, const shape_type&, const strides_type&);
@@ -205,7 +205,7 @@ public:
 	///@{
 	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
 
-	coordinates_type index_to_coordinates(const index_type&) const;
+	coordinates_type index_to_coordinates(index_type) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
 	pointer coordinates_to_pointer(const coordinates_type&) const;	
 			

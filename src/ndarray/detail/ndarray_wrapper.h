@@ -29,13 +29,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace detail {
 
-#define WRAP_VIEW_FUNCTION(__func__) \
-	template<typename... Args> decltype(auto) __func__(Args&&... args) { \
-		return view().__func__(std::forward<Args>(args)...); \
+#define WRAP_VIEW_FUNCTION(__function__) \
+	template<typename... Args> decltype(auto) __function__(Args&&... args) { \
+		return view_.__function__(std::forward<Args>(args)...); \
 	} \
-	template<typename... Args> decltype(auto) __func__(Args&&... args) const { \
-		return cview().__func__(std::forward<Args>(args)...); \
+	template<typename... Args> auto __function__(Args&&... args) const { \
+		return cview().__function__(std::forward<Args>(args)...); \
 	}
+// const verion returns copies, from cview() (itself a temporary copy of view_)
+// non-const version may return references (i.e. at() -> ref to elem)
 
 
 /// Container for ndarray type, base class and wrapper around view.
@@ -106,7 +108,7 @@ public:
 	
 	/// \name View access
 	///@{
-	view_type view() { return view_; }
+	const view_type& view() { return view_; }
 	const_view_type view() const { return cview(); }
 	const_view_type cview() const { return const_view_type(view_);  }
 	

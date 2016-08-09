@@ -24,6 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <cstring>
 #include <type_traits>
 
+#include <iostream>
+
 namespace mf {
 
 template<std::size_t Dim, typename T>
@@ -102,7 +104,8 @@ std::ptrdiff_t ndarray_view<Dim, T>::fix_coordinate_(std::ptrdiff_t c, std::ptrd
 
 
 template<std::size_t Dim, typename T>
-auto ndarray_view<Dim, T>::index_to_coordinates(const index_type& index) const -> coordinates_type {	
+auto ndarray_view<Dim, T>::index_to_coordinates(index_type index) const -> coordinates_type {	
+	if(index == 0) return coordinates_type(0);
 	coordinates_type coord;
 	index_type remainder = index;
 	std::size_t factor = shape_.tail().product();
@@ -139,8 +142,9 @@ void ndarray_view<Dim, T>::reset(const ndarray_view& other) noexcept {
 
 
 template<std::size_t Dim, typename T> template<typename T2>
-void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {	
+void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {
 	if(shape() != other.shape()) throw std::invalid_argument("ndarray views must have same shape for assignment");
+	else if(shape().product() == 0) return; // TODO verify iteration when empty
 	std::copy(other.begin(), other.end(), begin());
 }
 

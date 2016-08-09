@@ -93,25 +93,66 @@ TEST_CASE("ndarray_view", "[nd][ndarray_view]") {
 		REQUIRE(same(a1c, a1));
 		REQUIRE(same(a1, a1c));
 		a1c.reset(a1);
-		
-		// null view
-		REQUIRE_FALSE(a1.is_null());
-		a1.reset();
-		REQUIRE(a1.is_null());
-		REQUIRE(! a1);
-		ndarray_view<3, int> null_vw;
-		REQUIRE(null_vw.is_null());
-		REQUIRE(! null_vw);
-		null_vw.reset(a3);
-		REQUIRE_FALSE(null_vw.is_null());
-		REQUIRE(null_vw);
-		null_vw.reset();
-		ndarray_view<3, int> null_vw2;
-		REQUIRE_FALSE(same(a3, null_vw2));
-		REQUIRE(same(null_vw, null_vw2));
-		REQUIRE((ndarray_view<3, int>::null().is_null()));
 	}
+	
+	
+	SECTION("null view; zero length view") {
+		int placeholder[2] = {123, 123};
+		ndarray_view<3, int> null_vw;
+		ndarray_view<3, int> zero_size_vw(&placeholder[0], make_ndsize(0, 0, 0));
 
+		SECTION("null view construction, assignment") {
+			ndsize<3> shp{4, 3, 4};
+			ndarray_view<3, int> a1(raw.data(), shp);
+		
+			ndarray_view<3, int> null_vw;
+			REQUIRE(same(null_vw, ndarray_view<3, int>::null()));
+			REQUIRE(null_vw.is_null());
+			REQUIRE(! null_vw);
+		
+			REQUIRE_FALSE(a1.is_null());
+			REQUIRE(a1);
+			REQUIRE_FALSE(same(a1, null_vw));
+			a1.reset();
+			REQUIRE(a1.is_null());
+			REQUIRE(! a1);
+			REQUIRE(same(a1, null_vw));
+		
+			a1.reset(raw.data(), shp);
+			REQUIRE_FALSE(a1.is_null());
+			a1.reset(null_vw);
+		}
+		
+		SECTION("null view attributes") {
+			REQUIRE(null_vw.is_null());
+			REQUIRE(! null_vw);
+			
+			REQUIRE(null_vw.start() == nullptr);
+			REQUIRE(null_vw.shape() == make_ndsize(0, 0, 0));
+			REQUIRE(null_vw.size() == 0);
+			REQUIRE(null_vw.full_span() == make_ndspan(make_ndptrdiff(0, 0, 0)));
+
+			REQUIRE(null_vw.begin() == null_vw.end());
+			REQUIRE(same(null_vw, null_vw));
+			REQUIRE_FALSE(same(null_vw, zero_size_vw));
+		}
+		
+		SECTION("zero size view attributes") {
+			REQUIRE_FALSE(zero_size_vw.is_null());
+			REQUIRE(zero_size_vw);
+			
+			REQUIRE(zero_size_vw.start() == &placeholder[0]);
+			REQUIRE(zero_size_vw.shape() == make_ndsize(0, 0, 0));
+			REQUIRE(zero_size_vw.size() == 0);
+			REQUIRE(zero_size_vw.full_span() == make_ndspan(make_ndptrdiff(0, 0, 0)));
+
+			REQUIRE(null_vw.begin() == null_vw.end());
+
+			ndarray_view<3, int> zero_size_vw2(&placeholder[1], make_ndsize(0, 0, 0));
+			REQUIRE(same(zero_size_vw, zero_size_vw));
+			REQUIRE_FALSE(same(zero_size_vw, zero_size_vw2));
+		}
+	}
 
 	SECTION("1dim") {
 		ndarray_view<1, int> arr1(raw.data(), ndsize<1>(len));

@@ -31,6 +31,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <limits>
 #include "../common.h"
 
+#include <iostream>
+
 namespace mf {
 
 /// Vector of n-dimensional coordinates.
@@ -57,13 +59,7 @@ public:
 	template<typename It>
 	ndcoord(It begin, It end) {
 		auto out = components_.begin();
-		for(auto in = begin; in != end; ++in, ++out) {
-			const auto& in_c = *in;
-			Assert_crit(in_c >= std::numeric_limits<T>::min());
-			Assert_crit(in_c <= std::numeric_limits<T>::max());
-			*out = static_cast<T>(*in);
-		}
-			
+		for(auto in = begin; in != end; ++in, ++out) *out = static_cast<T>(*in);
 	}
 		
 	ndcoord(std::initializer_list<T> l) noexcept :
