@@ -74,15 +74,15 @@ TEST_CASE("ndarray_view", "[nd][ndarray_view]") {
 		REQUIRE(same(a1, a1));
 		REQUIRE_FALSE(same(a1, a3));
 		REQUIRE_FALSE(same(a3, a1));
+		ndarray_view<3, int> a3_;
+		a3_.reset(raw.data() + 13, shp, str);
+		REQUIRE(same(a3_, a3));
 		a3.reset(a1);
 		REQUIRE(a3.start() == raw.data());
 		REQUIRE(a3.shape() == shp);
 		REQUIRE(a3.strides() == a3.default_strides(shp));
 		REQUIRE(same(a3, a1));
 		REQUIRE(same(a1, a3));
-		ndarray_view<3, int> a3_;
-		a3_.reset(raw.data() + 13, shp, str);
-		REQUIRE(same(a3_, a3));
 		
 		// copy construction
 		ndarray_view<3, int> a1copy = a1;

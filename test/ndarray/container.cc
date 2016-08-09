@@ -57,21 +57,21 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		// construction with shape
 		ndarray<3, int> arr(shape);
 		REQUIRE(arr.shape() == shape);
-		REQUIRE(arr.strides() == ndarray_view<3, int>::default_strides(shp));
+		REQUIRE((arr.strides() == ndarray_view<3, int>::default_strides(shape)));
 		verify_ndarray_memory_(arr);
 		REQUIRE(arr.allocated_byte_size() >= arr_vw.size()*l);
 
 		// construction with shape, padding
 		ndarray<3, int> arr_pad(shape, pad);
 		REQUIRE(arr_pad.shape() == shape);
-		REQUIRE(arr_pad.strides() == ndarray_view<3, int>::default_strides(shp, pad));
+		REQUIRE((arr_pad.strides() == ndarray_view<3, int>::default_strides(shape, pad)));
 		verify_ndarray_memory_(arr_pad);
 
 		// construction from view (ndarray gets default strides)
 		ndarray<3, int> arr2(arr_vw_sec);
 		REQUIRE(arr2.view().compare(arr_vw));
 		REQUIRE(arr2.shape() == arr_vw_sec.shape());
-		REQUIRE(arr2.strides() == ndarray_view<3, int>::default_strides(shp));
+		REQUIRE((arr2.strides() == ndarray_view<3, int>::default_strides(arr_vw_sec.shape())));
 		verify_ndarray_memory_(arr2);
 		arr2[1][1][1] = 456;
 		REQUIRE(arr2[1][1][1] == 456);
@@ -81,7 +81,7 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		ndarray<3, int> arr3(arr_vw_sec, pad);
 		REQUIRE(arr3.view().compare(arr_vw));
 		REQUIRE(arr3.shape() == arr_vw_sec.shape());
-		REQUIRE(arr3.strides() == ndarray_view<3, int>::default_strides(shp, pad));
+		REQUIRE((arr3.strides() == ndarray_view<3, int>::default_strides(arr_vw_sec.shape(), pad)));
 		verify_ndarray_memory_(arr3);
 		arr3[1][1][1] = 456;
 		REQUIRE(arr3[1][1][1] == 456);
@@ -92,10 +92,10 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		ndarray<3, float> arr3_f(arr_vw_sec, pad_f);
 		REQUIRE(arr3_f.view().compare(arr_vw));
 		REQUIRE(arr3_f.shape() == arr_vw_sec.shape());
-		REQUIRE(arr3_f.strides() == ndarray_view<3, float>::default_strides(shp, pad_f));
+		REQUIRE((arr3_f.strides() == ndarray_view<3, float>::default_strides(arr_vw_sec.shape(), pad_f)));
 
 		// construction from null ndarray_view
-		ndarray<3, int> null_arr1 = ndarray_view<3, int>::null();
+		ndarray<3, int> null_arr1(ndarray_view<3, int>::null());
 		REQUIRE(null_arr1.is_null());
 		REQUIRE(null_arr1.allocated_byte_size() == 0);
 
@@ -141,12 +141,12 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		arr_ = arr_vw_sec;
 		REQUIRE(arr_.view().compare(arr_vw_sec));
 		REQUIRE(arr_.shape() == arr_vw_sec.shape());
-		REQUIRE(arr_.strides() == ndarray_view<3, int>::default_strides(shp));
+		REQUIRE((arr_.strides() == ndarray_view<3, int>::default_strides(shp)));
 		arr_[1][1][1] = 123; REQUIRE_FALSE(arr_vw[1][1][1] == 123);
 		arr_2.assign(arr_vw_sec);
 		REQUIRE(arr_2.view().compare(arr_vw_sec));
 		REQUIRE(arr_2.shape() == arr_vw_sec.shape());
-		REQUIRE(arr_2.strides() == ndarray_view<3, int>::default_strides(shp));
+		REQUIRE((arr_2.strides() == ndarray_view<3, int>::default_strides(shp)));
 		arr_2[1][1][1] = 123; REQUIRE_FALSE(arr_vw[1][1][1] == 123);
 				
 		// assignment from view (ndarray gets padded default strides)
@@ -154,7 +154,7 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		arr_3.assign(arr_vw_sec, pad);
 		REQUIRE(arr_3.view().compare(arr_vw_sec));
 		REQUIRE(arr_3.shape() == arr_vw_sec.shape());
-		REQUIRE(arr_3.strides() == ndarray_view<3, int>::default_strides(shp, pad));
+		REQUIRE((arr_3.strides() == ndarray_view<3, int>::default_strides(shp, pad)));
 		arr_3[1][1][1] = 456; REQUIRE_FALSE(arr_vw_sec[1][1][1] == 456);
 
 		// assignment from null ndarray_view
@@ -199,13 +199,13 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		ndarray<3, float> arr_f(arr_vw_sec);
 		ndarray<3, int> arr_9(previous_shape), arr_9_(previous_shape);
 		arr_9 = arr_f.cview();
-		REQUIRE(arr_9.view().compare(arr_f));
+		REQUIRE(arr_9.view().compare(arr_f.cview()));
 		REQUIRE(arr_9.shape() == arr_f.shape());
-		REQUIRE(arr_9.strides() == ndarray_view<3, int>::default_strides(shp));
+		REQUIRE((arr_9.strides() == ndarray_view<3, int>::default_strides(shp)));
 		arr_9_.assign(arr_f.cview(), pad);
-		REQUIRE(arr_9_.view().compare(arr_f));
+		REQUIRE(arr_9_.view().compare(arr_f.cview()));
 		REQUIRE(arr_9_.shape() == arr_f.shape());
-		REQUIRE(arr_9_.strides() == ndarray_view<3, int>::default_strides(shp, pad));
+		REQUIRE((arr_9_.strides() == ndarray_view<3, int>::default_strides(shp, pad)));
 	}
 	
 	
@@ -214,16 +214,16 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		REQUIRE(arr.size() == shape.product());
 		REQUIRE(arr.start());
 		REQUIRE(arr.shape() == shape);
-		REQUIRE(arr.strides() == ndarray_view<3, int>::default_strides(shape));
-		REQUIRE(arr.full_span() == make_ndspan(make_ndsize(0, 0, 0), make_ndsize(3, 4, 4)));
+		REQUIRE((arr.strides() == ndarray_view<3, int>::default_strides(shape)));
+		REQUIRE(arr.full_span() == make_ndspan(make_ndptrdiff(0, 0, 0), make_ndptrdiff(3, 4, 4)));
 		REQUIRE(arr.compare(arr_vw));
 		REQUIRE(arr == arr_vw);
 		REQUIRE_FALSE(arr != arr_vw);
-		REQUIRE(std::equal(arr.begin(), arr.end(), arr_vw.cbegin()));
-		REQUIRE(std::equal(arr.cbegin(), arr.cend(), arr_vw.cbegin()));
+		REQUIRE(std::equal(arr.begin(), arr.end(), arr_vw.begin()));
+		REQUIRE(std::equal(arr.cbegin(), arr.cend(), arr_vw.begin()));
 		REQUIRE(arr(1, 3, -1)(0, 3, -2)(2, 4, -1) == arr_vw(1, 3, -1)(0, 3, -2)(2, 4, -1));
-		REQUIRE(arr.at(make_ndcoord(1, 2, 2)) == arr_vw[1][2][2]);
-		REQUIRE(arr()(0, 3, -2) == arr_vw()(0, 3, -2);
+		REQUIRE(arr.at(make_ndptrdiff(1, 2, 2)) == arr_vw[1][2][2]);
+		REQUIRE(arr()(0, 3, -2) == arr_vw()(0, 3, -2));
 		REQUIRE(arr(1)() == arr_vw(1)()(2, 4, -1));
 		REQUIRE(arr[1][0][1] == arr_vw[1][0][1]);
 		REQUIRE(arr.section(make_ndptrdiff(1, 0, 2), make_ndptrdiff(3, 3, 4), make_ndptrdiff(-1, -2, -1)) ==

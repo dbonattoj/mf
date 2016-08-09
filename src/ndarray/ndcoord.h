@@ -28,6 +28,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <functional>
 #include <ostream>
 #include <type_traits>
+#include <limits>
+#include "../common.h"
 
 namespace mf {
 
@@ -55,8 +57,13 @@ public:
 	template<typename It>
 	ndcoord(It begin, It end) {
 		auto out = components_.begin();
-		for(auto in = begin; in != end; ++in, ++out)
+		for(auto in = begin; in != end; ++in, ++out) {
+			const auto& in_c = *in;
+			Assert_crit(in_c >= std::numeric_limits<T>::min());
+			Assert_crit(in_c <= std::numeric_limits<T>::max());
 			*out = static_cast<T>(*in);
+		}
+			
 	}
 		
 	ndcoord(std::initializer_list<T> l) noexcept :
