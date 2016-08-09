@@ -29,7 +29,7 @@ using namespace mf;
 using namespace mf::test;
 
 
-TEST_CASE("ndarray_view cast", "[ndarray][cast]") {
+TEST_CASE("ndarray_view cast", "[nd][ndarray_view_cast]") {
 	constexpr std::size_t len = 3 * 4 * 4;
 	auto shp = make_ndsize(3, 4, 4);
 

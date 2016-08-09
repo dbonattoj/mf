@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 using namespace mf;
 
 
-TEST_CASE("ndcoord", "[ndcoord]") {
+TEST_CASE("ndcoord", "[nd][ndcoord]") {
 	SECTION("construction") {
 		ndcoord<3, int> zero;
 		REQUIRE(zero[0] == 0);

@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 using namespace mf;
 
-TEST_CASE("ndspan", "[ndspan]") {
+TEST_CASE("ndspan", "[nd][ndspan]") {
 	using span_type = ndspan<3, std::size_t>;
 	
 	span_type span(make_ndsize(1, 2, 3), make_ndsize(7, 6, 5));

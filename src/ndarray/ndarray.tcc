@@ -23,7 +23,7 @@ ndarray<Dim, Elem, Allocator>::ndarray
 (const ndarray_view<Dim, Other_elem>& vw, std::size_t elem_padding, const Allocator& allocator) :
 base(
 	vw.shape(),
-	view_type::default_strides(vw.shape, elem_padding),
+	view_type::default_strides(vw.shape(), elem_padding),
 	(sizeof(Elem) + elem_padding) * vw.shape().product(),
 	alignof(Elem),
 	allocator

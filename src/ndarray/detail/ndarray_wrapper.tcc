@@ -2,9 +2,11 @@ namespace mf { namespace detail {
 
 template<typename View, typename Const_view, typename Allocator>
 void ndarray_wrapper<View, Const_view, Allocator>::allocate_(std::size_t size, std::size_t alignment) {
-	void* buf = allocator_.raw_allocate(size, alignment);
-	allocated_size_ = size;
-	allocated_buffer_ = buf;
+	if(size > 0) {
+		void* buf = allocator_.raw_allocate(size, alignment);
+		allocated_size_ = size;
+		allocated_buffer_ = buf;
+	}
 }
 
 
@@ -88,7 +90,7 @@ void ndarray_wrapper<View, Const_view, Allocator>::reset_(
 	std::size_t allocate_alignment,
 	const Arg&... view_arguments
 ) {	
-	if(allocate_size != allocated_size_() || ! is_aligned(allocated_buffer_, allocate_alignment)) {
+	if(allocate_size != allocated_size() || ! is_aligned(allocated_buffer_, allocate_alignment)) {
 		deallocate_();
 		allocate_(allocate_size, allocate_alignment);
 	}

@@ -63,6 +63,15 @@ public:
 	///@}
 };
 
+
+template<std::size_t Dim, typename Elem>
+auto make_ndarray(const ndarray_view<Dim, Elem>& vw) {
+	using array_elem_type = std::remove_const_t<Elem>;
+	using array_type = ndarray<Dim, array_elem_type>;
+	return array_type(vw);
+}
+
+
 }
 
 #include "ndarray.tcc"

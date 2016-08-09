@@ -59,7 +59,7 @@ auto to_generic(const ndarray_view<Concrete_dim, Concrete_elem>& vw) {
 	auto new_shape = head<Generic_dim>(vw.shape());
 	auto new_strides = head<Generic_dim>(vw.strides());
 	
-	return generic_view_type(frm, new_start, new_shape, new_strides);
+	return generic_view_type(new_start, new_shape, new_strides, frm);
 }
 
 

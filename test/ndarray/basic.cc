@@ -28,31 +28,46 @@ using namespace mf;
 using namespace mf::test;
 
 
-TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {
+TEST_CASE("ndarray_view", "[nd][ndarray_view]") {
 	constexpr std::ptrdiff_t l = sizeof(int);
+	constexpr std::ptrdiff_t pad = l;
 	constexpr std::size_t len = 3 * 4 * 4;
 	std::vector<int> raw(len);
 	for(int i = 0; i < len; ++i) raw[i] = i;
 
 
 	SECTION("basics") {
-		// row major strides
+		// default strides (row major)
 		REQUIRE( (ndarray_view<1, int>::default_strides(make_ndsize(10))) == (ndptrdiff<1>{l}) );
 		REQUIRE( (ndarray_view<2, int>::default_strides(make_ndsize(10, 10))) == (ndptrdiff<2>{10*l, l}) );
 		REQUIRE( (ndarray_view<3, int>::default_strides(make_ndsize(4, 3, 2))) == (ndptrdiff<3>{3*2*l, 2*l, l}) );
+		REQUIRE( (ndarray_view<3, int>::default_strides(make_ndsize(4, 3, 2), pad)) == (ndptrdiff<3>{3*2*(l+pad), 2*(l+pad), l+pad}) );
 				
-		// default strides = row major
+		// default strides view
 		ndsize<3> shp{4, 3, 4};
 		ndarray_view<3, int> a1(raw.data(), shp);
 		REQUIRE(a1.start() == raw.data());
 		REQUIRE(a1.shape() == shp);
-		REQUIRE(a1.strides() == a1.default_strides(shp));
+		REQUIRE(a1.has_default_strides());
+		REQUIRE(a1.default_strides_padding() == 0);
+		REQUIRE(a1.has_default_strides_without_padding());
+
+		// padded default strides view
+		ndarray_view<3, int> a1pad(raw.data(), shp, ndarray_view<3, int>::default_strides(shp, pad));
+		REQUIRE(a1pad.start() == raw.data());
+		REQUIRE(a1pad.shape() == shp);
+		REQUIRE(a1pad.has_default_strides());
+		REQUIRE(a1pad.default_strides_padding() == pad);
+		REQUIRE_FALSE(a1pad.has_default_strides_without_padding());
 		
 		// non-default strides
 		ndptrdiff<3> str{4,2,1};
 		ndarray_view<3, int> a2(raw.data(), shp, str);
 		REQUIRE(a2.strides() == str);
 		REQUIRE(a2.size() == 4*3*4);
+		REQUIRE_FALSE(a2.has_default_strides());
+		REQUIRE_THROWS(a2.default_strides_padding());
+		REQUIRE_FALSE(a2.has_default_strides_without_padding());
 		
 		// comparison and assignment (shallow)
 		ndarray_view<3, int> a3(raw.data() + 13, shp, str);
@@ -65,6 +80,9 @@ TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {
 		REQUIRE(a3.strides() == a3.default_strides(shp));
 		REQUIRE(same(a3, a1));
 		REQUIRE(same(a1, a3));
+		ndarray_view<3, int> a3_;
+		a3_.reset(raw.data() + 13, shp, str);
+		REQUIRE(same(a3_, a3));
 		
 		// copy construction
 		ndarray_view<3, int> a1copy = a1;
@@ -80,14 +98,18 @@ TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {
 		REQUIRE_FALSE(a1.is_null());
 		a1.reset();
 		REQUIRE(a1.is_null());
+		REQUIRE(! a1);
 		ndarray_view<3, int> null_vw;
 		REQUIRE(null_vw.is_null());
+		REQUIRE(! null_vw);
 		null_vw.reset(a3);
 		REQUIRE_FALSE(null_vw.is_null());
+		REQUIRE(null_vw);
 		null_vw.reset();
 		ndarray_view<3, int> null_vw2;
 		REQUIRE_FALSE(same(a3, null_vw2));
 		REQUIRE(same(null_vw, null_vw2));
+		REQUIRE((ndarray_view<3, int>::null().is_null()));
 	}
 
 
@@ -355,6 +377,10 @@ TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {
 			REQUIRE(same(
 				arr3(1, 3, 1)()(),
 				arr3.section(make_ndptrdiff(1, 0, 0), make_ndptrdiff(3, 4, 4), make_ndptrdiff(1, 1, 1))
+			));
+			REQUIRE(same(
+				arr3(1, 3, 1)()(),
+				arr3.section(make_ndspan(make_ndptrdiff(1, 0, 0), make_ndptrdiff(3, 4, 4)), make_ndptrdiff(1, 1, 1))
 			));
 		
 			REQUIRE(arr3()(1, 3, 1)().shape() == make_ndsize(3, 2, 4));
@@ -661,4 +687,39 @@ TEST_CASE("ndarray_view", "[ndarray][ndarray_view]") {
 			REQUIRE(arr3.slice(2, 2)[1][2] == 0x1A);
 		}
 	}
+
+
+	SECTION("conversion") {
+		// Comparison
+		std::vector<float> raw_f(len), raw_f2(len);
+		for(int i = 0; i < len; ++i) raw_f[i] = float(i);
+		for(int i = 0; i < len; ++i) raw_f2[i] = float(i + 1);
+
+		ndarray_view<3, int> arr3(raw.data(), make_ndsize(3, 4, 4));
+		ndarray_view<3, float> arr3_f(raw_f.data(), make_ndsize(3, 4, 4));
+		ndarray_view<3, const float> arr3_fc(raw_f.data(), make_ndsize(3, 4, 4));
+		ndarray_view<3, float> arr3_f2(raw_f2.data(), make_ndsize(3, 4, 4));
+
+		REQUIRE(arr3.compare(arr3_f));
+		REQUIRE(arr3 == arr3_f);
+		REQUIRE(arr3_f == arr3);
+		REQUIRE_FALSE(arr3 != arr3_f);
+		REQUIRE_FALSE(arr3_f != arr3);
+		REQUIRE(arr3_f.compare(arr3));
+		
+		REQUIRE(arr3.compare(arr3_fc));
+		REQUIRE(arr3 == arr3_fc);
+		REQUIRE_FALSE(arr3 != arr3_fc);
+		
+		REQUIRE_FALSE(arr3.compare(arr3_f2));
+		REQUIRE_FALSE(arr3 == arr3_f2);
+		REQUIRE(arr3 != arr3_f2);
+		
+		// Assignment
+		arr3 = arr3_f2;
+		REQUIRE(arr3.compare(arr3_f2));
+		arr3.assign(arr3_fc);
+		REQUIRE_FALSE(arr3.compare(arr3_f2));
+	}
 }
+

@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 using namespace mf;
 
-TEST_CASE("ndarray frame_format", "[ndarray_view][generic][frame_format]") {
+TEST_CASE("ndarray frame_format", "[nd][ndarray_view_generic][frame_format]") {
 	SECTION("default") {
 		frame_format frm;
 		REQUIRE_FALSE(frm.is_defined());
@@ -158,7 +158,7 @@ TEST_CASE("ndarray frame_format", "[ndarray_view][generic][frame_format]") {
 }
 
 
-TEST_CASE("ndarray_view_generic from ndarray_view", "[ndarray_view][generic]") {
+TEST_CASE("ndarray_view <--> ndarray_view_generic", "[nd][ndarray_view_generic][frame_format]") {
 	constexpr std::size_t pad = sizeof(int);
 	constexpr std::size_t len = 3 * 4 * 4;
 	std::vector<int> raw(2 * len);
@@ -294,57 +294,4 @@ TEST_CASE("ndarray_view_generic from ndarray_view", "[ndarray_view][generic]") {
 			REQUIRE(gen1.generic_strides() == make_ndptrdiff(str[1]));
 		}
 	}
-
-
-	SECTION("partial default stride, with padding, timed") {
-		shp[0] = 2;
-		str[0] *= 2;
-		ndarray_view<3, int> arr_(raw.data(), shp, str);
-		ndarray_timed_view<3, int> arr(arr_, 100);
-		std::size_t s = arr.strides().back();
-
-		SECTION("generic dimension 0") {
-			REQUIRE_THROWS(to_generic<0>(arr));
-		}
-
-		SECTION("generic dimension 1") {
-			ndarray_timed_view_generic<1> gen1 = to_generic<1>(arr);
-			REQUIRE(gen1.start() == reinterpret_cast<byte*>(arr.start()));
-			REQUIRE(gen1.generic_shape() == head<1>(shp));
-			REQUIRE(gen1.generic_strides() == head<1>(str));
-
-			ndarray_timed_view<3, int> re = from_generic<3, int>(gen1, make_ndsize(4, 4));
-			REQUIRE(same(re, arr));
-		}
-		
-		SECTION("generic dimension 2") {
-			ndarray_timed_view_generic<2> gen2 = to_generic<2>(arr);
-			REQUIRE(gen2.start() == reinterpret_cast<byte*>(arr.start()));
-			REQUIRE(gen2.generic_shape() == head<2>(shp));
-			REQUIRE(gen2.generic_strides() == head<2>(str));
-
-			ndarray_timed_view<3, int> re = from_generic<3, int>(gen2, make_ndsize(4));
-			REQUIRE(same(re, arr));
-			
-			ndarray_view_generic<1> gen1 = gen2[0];
-			REQUIRE(gen1.generic_shape() == make_ndsize(4));
-			REQUIRE(gen1.generic_strides() == make_ndptrdiff(str[1]));
-		}
-	}
 }
-
-
-TEST_CASE("ndarray_generic", "[ndarray_view][ndarray][generic]") {
-	SECTION("one array format") {
-		std::size_t n = 100;
-		auto gen_shp = make_ndsize(3, 4);
-		frame_format frm = make_frame_array_format<int>(n);
-		
-		ndarray_generic<2> arr(frm, gen_shp);
-		REQUIRE(arr.format() == frm);
-		
-		ndarray_view_generic<1> vw = arr[0];
-		REQUIRE(vw.format() == frm);
-	}
-}
-

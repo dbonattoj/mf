@@ -147,12 +147,12 @@ public:
 
 	/// \name Attributes 
 	///@{
+	/// Number of elements, i.e. product of shape components.
 	std::size_t size() const { return shape().product(); }
 	
 	pointer start() const noexcept { return start_; }
 	const shape_type& shape() const noexcept { return shape_; }
 	const strides_type& strides() const noexcept { return strides_; }
-	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
 	
 	span_type full_span() const noexcept { return span_type(0, shape_); }
 		
@@ -193,7 +193,7 @@ public:
 	/// \name Deep comparison
 	///@{
 	template<typename T2> bool compare(const ndarray_view<Dim, T2>&) const;
-	bool compare(const ndarray_view<Dim, const T>& other) const { return compare<const T>(other); }
+	bool compare(const ndarray_view<Dim, const T>& other) const;
 		
 	template<typename Arg> bool operator==(Arg&& arg) const { return compare(std::forward<Arg>(arg)); }
 	template<typename Arg> bool operator!=(Arg&& arg) const { return ! compare(std::forward<Arg>(arg)); }
@@ -203,6 +203,8 @@ public:
 	
 	/// \name Iteration
 	///@{
+	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
+
 	coordinates_type index_to_coordinates(const index_type&) const;
 	index_type coordinates_to_index(const coordinates_type&) const;
 	pointer coordinates_to_pointer(const coordinates_type&) const;	

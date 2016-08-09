@@ -67,10 +67,21 @@ public:
 	/// \name Attributes
 	///@{
 	const frame_format& format() const noexcept { return base::view().format(); }
-	view_type array_at(std::ptrdiff_t array_index) { return base::view().array_at(array_index); }
-	const_view_type array_at(std::ptrdiff_t array_index) const { return base::cview().array_at(array_index); }
 	///@}
 };
+
+
+template<std::size_t Dim>
+ndarray_view_generic<Dim, true> extract_array(ndarray_generic<Dim>& arr, std::ptrdiff_t array_index) {
+	return extract_array(arr.view(), array_index);
+}
+
+
+template<std::size_t Dim>
+ndarray_view_generic<Dim, false> extract_array(const ndarray_generic<Dim>& arr, std::ptrdiff_t array_index) {
+	return extract_array(arr.cview(), array_index);
+}
+
 
 }
 

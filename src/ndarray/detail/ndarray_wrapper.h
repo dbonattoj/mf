@@ -56,13 +56,12 @@ private:
 	void allocate_(std::size_t allocate_size, std::size_t alignment);
 	void deallocate_();
 
-protected:
 	Allocator allocator_; ///< Raw allocator used to allocate memory.
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	void* allocated_buffer_ = nullptr; ///< Allocated memory.
 	view_type view_; ///< View to allocated memory.
 	
-	
+protected:
 	/// \name Construction, assignment base
 	///@{
 	explicit ndarray_wrapper(const allocator_type& = allocator_type());
@@ -123,7 +122,6 @@ public:
 	WRAP_VIEW_FUNCTION(start);
 	WRAP_VIEW_FUNCTION(shape);
 	WRAP_VIEW_FUNCTION(strides);
-	WRAP_VIEW_FUNCTION(contiguous_length);
 	WRAP_VIEW_FUNCTION(full_span);
 	
 	std::size_t allocated_size() const noexcept { return allocated_size_; }
@@ -133,6 +131,7 @@ public:
 	
 	/// \name Deep comparison
 	///@{	
+	template<typename Other_view> bool compare(const Other_view& vw) const { return cview().compare(vw); }
 	template<typename Other_view> bool operator==(const Other_view& vw) const { return cview().compare(vw); }
 	template<typename Other_view> bool operator!=(const Other_view& vw) const { return ! cview().compare(vw); }
 	///@}
@@ -142,11 +141,11 @@ public:
 	/// \name Iteration
 	///@{
 	auto begin() noexcept { return view().begin(); }
-	auto begin() const noexcept { return cview().cbegin(); }	
-	auto cbegin() const noexcept { return cview().cbegin(); }	
+	auto begin() const noexcept { return cview().begin(); }	
+	auto cbegin() const noexcept { return cview().begin(); }	
 	auto end() noexcept { return view().end(); }
-	auto end() const noexcept { return cview().cend(); }	
-	auto cend() const noexcept { return cview().cend(); }	
+	auto end() const noexcept { return cview().end(); }	
+	auto cend() const noexcept { return cview().end(); }	
 	///@}
 	
 	

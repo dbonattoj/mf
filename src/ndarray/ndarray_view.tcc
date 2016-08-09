@@ -160,6 +160,13 @@ void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const
 template<std::size_t Dim, typename T> template<typename T2>
 bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, T2>& other) const {
 	if(shape() != other.shape()) return false;
+	else return std::equal(other.begin(), other.end(), begin());
+}
+
+
+template<std::size_t Dim, typename T>
+bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, const T>& other) const {
+	if(shape() != other.shape()) return false;
 	else if(same(*this, other)) return true;
 	else return std::equal(other.begin(), other.end(), begin());
 }
