@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <vector>
 #include <algorithm>
 #include <mf/ndarray/ndarray_view.h>
+#include <mf/ndarray/ndarray_format.h>
 #include "../support/ndarray.h"
 
 using namespace mf;
@@ -761,6 +762,90 @@ TEST_CASE("ndarray_view", "[nd][ndarray_view]") {
 		REQUIRE(arr3.compare(arr3_f2));
 		arr3.assign(arr3_fc);
 		REQUIRE_FALSE(arr3.compare(arr3_f2));
+	}
+	
+	
+	SECTION("format") {
+		SECTION("default") {
+			ndarray_format afrm = make_ndarray_format<int>(100);
+			REQUIRE(afrm.is_defined());
+			REQUIRE(afrm.frame_size() == 100 * sizeof(int));
+			REQUIRE(afrm.frame_alignment_requirement() == alignof(int));
+			REQUIRE(afrm.length() == 100);
+			REQUIRE(afrm.stride() == sizeof(int));
+			REQUIRE(afrm.elem_size() == sizeof(int));
+			REQUIRE(afrm.elem_alignment() == alignof(int));
+			REQUIRE(afrm.elem_padding() == 0);
+
+			afrm = make_ndarray_format<int>(100, pad);
+			REQUIRE(afrm.is_defined());
+			REQUIRE(afrm.frame_size() == 100 * (sizeof(int) + pad));
+			REQUIRE(afrm.frame_alignment_requirement() == alignof(int));
+			REQUIRE(afrm.length() == 100);
+			REQUIRE(afrm.stride() == sizeof(int) + pad);
+			REQUIRE(afrm.elem_size() == sizeof(int));
+			REQUIRE(afrm.elem_alignment() == alignof(int));
+			REQUIRE(afrm.elem_padding() == pad);
+
+			REQUIRE_THROWS(make_ndarray_format<int>(100, sizeof(int)/2));
+		}
+		
+		SECTION("from view") {
+			auto shp = make_ndsize(3, 4, 4);
+			auto str = ndarray_view<3, int>::default_strides(shp, pad);
+			ndarray_view<3, int> vw(raw.data(), shp, str);
+			
+			SECTION("full") {
+				ndarray_format afrm = format(vw);
+				REQUIRE(afrm.is_defined());
+				REQUIRE(afrm.frame_size() == (3*4*4) * str.back());
+				REQUIRE(afrm.frame_alignment_requirement() == alignof(int));
+				REQUIRE(afrm.length() == 3*4*4);
+				REQUIRE(afrm.stride() == str.back());
+				REQUIRE(afrm.elem_size() == sizeof(int));
+				REQUIRE(afrm.elem_alignment() == alignof(int));
+				REQUIRE(afrm.elem_padding() == pad);
+			}
+	
+			SECTION("tail 2") {
+				ndarray_format afrm = tail_format<2>(vw);
+				REQUIRE(afrm.is_defined());
+				REQUIRE(afrm.frame_size() == (4*4) * str.back());
+				REQUIRE(afrm.frame_alignment_requirement() == alignof(int));
+				REQUIRE(afrm.length() == 4*4);
+				REQUIRE(afrm.stride() == str.back());
+				REQUIRE(afrm.elem_size() == sizeof(int));
+				REQUIRE(afrm.elem_alignment() == alignof(int));
+				REQUIRE(afrm.elem_padding() == pad);
+			}
+			
+			SECTION("tail 3") {
+				ndarray_format afrm = tail_format<1>(vw);
+				REQUIRE(afrm.is_defined());
+				REQUIRE(afrm.frame_size() == 4 * str.back());
+				REQUIRE(afrm.frame_alignment_requirement() == alignof(int));
+				REQUIRE(afrm.length() == 4);
+				REQUIRE(afrm.stride() == str.back());
+				REQUIRE(afrm.elem_size() == sizeof(int));
+				REQUIRE(afrm.elem_alignment() == alignof(int));
+				REQUIRE(afrm.elem_padding() == pad);
+			}
+		}
+
+		SECTION("undefined") {
+			ndarray_format undef;
+			REQUIRE(! undef.is_defined());
+		}
+		
+		SECTION("assignment, comparison") {
+			ndarray_format afrm = format(vw);
+			ndarray_format afrm2 = afrm;
+			REQUIRE(afrm == afrm2);
+			REQUIRE_FALSE(afrm != afrm2);
+			afrm = tail_format<2>(vw);
+			REQUIRE_FALSE(afrm == afrm2);
+			REQUIRE(afrm != afrm2);
+		}
 	}
 }
 

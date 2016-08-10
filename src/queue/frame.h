@@ -21,15 +21,17 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FRAME_H_
 #define MF_FRAME_H_
 
-#include "../ndarray/generic/ndarray_view_generic.h"
-#include "../ndarray/generic/ndarray_timed_view_generic.h"
-#include "../ndarray/generic/ndarray_generic.h"
+#include "../ndarray/opaque/ndarray_view_opaque.h"
+#include "../ndarray/opaque/ndarray_timed_view_opaque.h"
+#include "../ndarray/opaque/ndarray_opaque.h"
+#include "../ndarray/opaque/ndarray_opaque_frame_format.h"
 
 namespace mf {
 
-using timed_frame_array_view = ndarray_timed_view_generic<1>;
-using frame_array_view = ndarray_view_generic<1>;
-using frame_view = ndarray_view_generic<0>;
+using timed_frame_array_view = ndarray_timed_view_opaque<1>;
+using frame_array_view = ndarray_view_opaque<1>;
+using frame_view = ndarray_view_opaque<0>;
+using frame_format = ndarray_opaque_frame_format;
 
 }
 

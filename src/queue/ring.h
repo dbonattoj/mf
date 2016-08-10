@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_RING_H_
 #define MF_RING_H_
 
-#include "../ndarray/generic/ndarray_generic.h"
+#include "../ndarray/opaque/ndarray_opaque.h"
 #include "frame.h"
 
 namespace mf {
@@ -31,8 +31,8 @@ namespace mf {
 /// Ring buffer.
 /** Circular buffer of *frames*. Derived from \ref ndarray_generic.
  ** FIFO interface to read/write frames to the ring buffer. */
-class ring : public ndarray_generic<1, raw_ring_allocator> {
-	using base = ndarray_generic<1, raw_ring_allocator>;
+class ring : public ndarray_opaque<1, raw_ring_allocator> {
+	using base = ndarray_opaque<1, raw_ring_allocator>;
 	
 public:
 	using section_view_type = frame_array_view;

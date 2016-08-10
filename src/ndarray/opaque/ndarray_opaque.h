@@ -1,3 +1,23 @@
+/*
+Author : Tim Lenertz
+Date : May 2016
+
+Copyright (c) 2016, Université libre de Bruxelles
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
+publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #ifndef MF_NDARRAY_OPAQUE_H_
 #define MF_NDARRAY_OPAQUE_H_
 
@@ -27,7 +47,7 @@ public:
 	/// Construct empty \ref ndarray_opaque with given shape and framt format.
 	/** Has default strides, optionally with specified frame padding. */
 	ndarray_opaque
-	(const shape_type& shape, const frame_format& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
+	(const shape_type& shape, const ndarray_opaque_frame_format& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
 	
 	/// Construct \ref ndarray_opaque with shape and copy of elements from a \ref ndarray_view_opaque.
 	/** Has default strides, optionally with specified frame padding. Does not take strides from \a vw. */
@@ -66,7 +86,7 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const frame_format& format() const noexcept { return base::view().format(); }
+	const ndarray_opaque_frame_format& format() const noexcept { return base::view().format(); }
 	///@}
 };
 

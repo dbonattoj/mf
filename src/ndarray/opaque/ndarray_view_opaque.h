@@ -108,11 +108,9 @@ public:
 	shape_type shape() const { return head<Dim>(base::shape()); }
 	strides_type strides() const { return head<Dim>(base::strides()); }
 		
-	const frame_format& format() const noexcept { return format_; }
-	bool is_composite() const noexcept { return (format_.arrays_count() > 1); }
-	const frame_array_format& array_format() const { Assert(! is_composite()); return format_.array_at(0); }
+	const ndarray_opaque_frame_format& format() const noexcept { return format_; }
 	
-	static strides_type default_strides(const frame_format& frm, const shape_type& shp, std::size_t frame_padding = 0) {
+	static strides_type default_strides(const ndarray_opaque_frame_format& frm, const shape_type& shp, std::size_t frame_padding = 0) {
 		auto base_shp = ndcoord_cat(shp, frm.frame_size() + frame_padding);
 		auto base_def_str = base::default_strides(base_shp);
 		return head<Dim>(base_def_str);

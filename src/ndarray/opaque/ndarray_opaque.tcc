@@ -29,7 +29,7 @@ ndarray_opaque<Dim, Allocator>::ndarray_opaque(const Allocator& allocator) :
 
 template<std::size_t Dim, typename Allocator>
 ndarray_opaque<Dim, Allocator>::ndarray_opaque
-(const shape_type& shape, const frame_format& frm, std::size_t frame_padding, const Allocator& allocator) :
+(const shape_type& shape, const ndarray_opaque_frame_format& frm, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	shape,
 	view_type::default_strides(frm, shape, frame_padding),

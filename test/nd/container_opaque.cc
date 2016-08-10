@@ -19,13 +19,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/ndarray/generic/ndarray_view_generic.h>
-#include <mf/ndarray/generic/ndarray_timed_view_generic.h>
-#include <mf/ndarray/generic/ndarray_generic.h>
+#include <mf/ndarray/opaque/ndarray_view_opaque.h>
+#include <mf/ndarray/opaque/ndarray_timed_view_opaque.h>
+#include <mf/ndarray/opaque/ndarray_opaque.h>
 
 using namespace mf;
 using namespace mf::test;
 
-TEST_CASE("ndarray_generic", "[nd][ndarray_generic][frame_format]") {
+TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 	
 }
