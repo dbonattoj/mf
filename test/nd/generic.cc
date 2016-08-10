@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 using namespace mf;
 
+
 TEST_CASE("ndarray frame_format", "[nd][ndarray_view_generic][frame_format]") {
 	SECTION("default") {
 		frame_format frm;
@@ -71,7 +72,7 @@ TEST_CASE("ndarray frame_format", "[nd][ndarray_view_generic][frame_format]") {
 		REQUIRE_THROWS( make_frame_array_format<int>(100, alignof(int)/2) );
 		REQUIRE_THROWS( make_frame_array_format<int>(100, s, alignof(int)/2) );
 	}
-	
+
 	SECTION("two arrays") {
 		constexpr std::size_t n1 = 33, n2 = 40, s2 = 3*sizeof(double);
 		frame_array_format arr1 = make_frame_array_format<int>(n1);
@@ -169,7 +170,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_generic", "[nd][ndarray_view_generic][
 	SECTION("default stride, with padding") {
 		ndarray_view<3, int> arr(raw.data(), shp, str);
 		std::size_t s = arr.strides().back();
-				
+
 		SECTION("generic dimension 0") {
 			ndarray_view_generic<0> gen0 = to_generic<0>(arr);
 			REQUIRE(gen0.start() == reinterpret_cast<byte*>(arr.start()));
@@ -226,7 +227,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_generic", "[nd][ndarray_view_generic][
 			REQUIRE(gen0.shape() == make_ndsize());
 			REQUIRE(gen0.strides() == make_ndptrdiff());
 		}
-		
+
 		SECTION("generic dimension 2") {
 			ndarray_view_generic<2> gen2 = to_generic<2>(arr);
 			REQUIRE(gen2.start() == reinterpret_cast<byte*>(arr.start()));

@@ -24,25 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/ndarray/generic/ndarray_generic.h>
 
 using namespace mf;
-/*
-TEST_CASE("ndarray_generic", "[nd][ndarray_generic][ndarray_view_generic][frame_format]") {
-	SECTION("null") {
-		ndarray_generic<2> null_arr;
-		REQUIRE(null_arr.is_null());
-		REQUIRE_FALSE(null_arr.format().is_defined());
-	}
-	
-	SECTION("one array format") {
-		std::size_t n = 100;
-		auto gen_shp = make_ndsize(3, 4);
-		frame_format frm = make_frame_array_format<int>(n);
-		
-		ndarray_generic<2> arr(frm, gen_shp);
-		REQUIRE(arr.format() == frm);
-		
-		ndarray_view_generic<1> vw = arr[0];
-		REQUIRE(vw.format() == frm);
-	}
-}
+using namespace mf::test;
 
-*/
+TEST_CASE("ndarray_generic", "[nd][ndarray_generic][frame_format]") {
+	
+}

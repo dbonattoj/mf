@@ -23,12 +23,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 template<std::size_t Dim, typename Allocator>
-ndarray_generic<Dim, Allocator>::ndarray_generic(const Allocator& allocator) :
+ndarray_opaque<Dim, Allocator>::ndarray_opaque(const Allocator& allocator) :
 	base(allocator) { }
 
 
 template<std::size_t Dim, typename Allocator>
-ndarray_generic<Dim, Allocator>::ndarray_generic
+ndarray_opaque<Dim, Allocator>::ndarray_opaque
 (const shape_type& shape, const frame_format& frm, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	shape,
@@ -41,7 +41,7 @@ base(
 
 	
 template<std::size_t Dim, typename Allocator>
-ndarray_generic<Dim, Allocator>::ndarray_generic
+ndarray_opaque<Dim, Allocator>::ndarray_opaque
 (const const_view_type& vw, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	vw.shape(),
@@ -56,7 +56,7 @@ base(
 
 	
 template<std::size_t Dim, typename Allocator>
-ndarray_generic<Dim, Allocator>::ndarray_generic(const ndarray_generic& arr) :
+ndarray_opaque<Dim, Allocator>::ndarray_opaque(const ndarray_opaque& arr) :
 base(
 	arr.shape(),
 	arr.strides(),
@@ -70,12 +70,12 @@ base(
 	
 
 template<std::size_t Dim, typename Allocator>
-ndarray_generic<Dim, Allocator>::ndarray_generic(ndarray_generic&& arr) :
+ndarray_opaque<Dim, Allocator>::ndarray_opaque(ndarray_opaque&& arr) :
 base(std::move(arr)) { }
 	
 
 template<std::size_t Dim, typename Allocator>
-void ndarray_generic<Dim, Allocator>::assign(const const_view_type& vw, std::size_t frame_padding) {
+void ndarray_opaque<Dim, Allocator>::assign(const const_view_type& vw, std::size_t frame_padding) {
 	base::reset_(
 		vw.shape(),
 		view_type::default_strides(vw.shape(), frame_padding),
@@ -88,7 +88,7 @@ void ndarray_generic<Dim, Allocator>::assign(const const_view_type& vw, std::siz
 	
 
 template<std::size_t Dim, typename Allocator>
-auto ndarray_generic<Dim, Allocator>::operator=(const ndarray_generic& arr) -> ndarray_generic& {
+auto ndarray_opaque<Dim, Allocator>::operator=(const ndarray_opaque& arr) -> ndarray_opaque& {
 	if(&arr == this) return *this;
 	base::reset_(
 		arr.shape(),
@@ -102,7 +102,7 @@ auto ndarray_generic<Dim, Allocator>::operator=(const ndarray_generic& arr) -> n
 
 
 template<std::size_t Dim, typename Allocator>
-auto ndarray_generic<Dim, Allocator>::operator=(ndarray_generic&& arr) -> ndarray_generic& {
+auto ndarray_opaque<Dim, Allocator>::operator=(ndarray_opaque&& arr) -> ndarray_opaque& {
 	base::operator=(std::move(arr));
 	return *this;
 }

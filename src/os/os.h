@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_OS_H_
 #define MF_OS_H_
 
-// macros for OS
+// macros for operating system
 #if defined(__APPLE__)
 	#define MF_OS_DARWIN
 #elif defined(_WIN32)
