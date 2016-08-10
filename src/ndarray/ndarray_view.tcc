@@ -34,7 +34,7 @@ constexpr std::size_t ndarray_view<Dim, T>::dimension;
 
 template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t padding) -> strides_type {
-	if(padding % alignof(T) != 0) throw std::invalid_argument("padding does not satisfy alignment requirement");
+	Assert(is_multiple_of(padding, alignof(T)));
 	strides_type strides;
 	strides[Dim - 1] = sizeof(T) + padding;
 	for(std::ptrdiff_t i = Dim - 1; i > 0; --i)
@@ -57,10 +57,8 @@ bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension)
 
 template<std::size_t Dim, typename T>
 bool ndarray_view<Dim, T>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
-	if(has_default_strides(minimal_dimension))
-		return (default_strides_padding(minimal_dimension) == 0);
-	else
-		return false;
+	if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
+	else return false;
 }
 
 
@@ -68,8 +66,8 @@ bool ndarray_view<Dim, T>::has_default_strides_without_padding(std::ptrdiff_t mi
 
 template<std::size_t Dim, typename T>
 std::size_t ndarray_view<Dim, T>::default_strides_padding(std::ptrdiff_t minimal_dimension) const {
-	if(! has_default_strides(minimal_dimension)) throw std::logic_error("not default strides, cannot get padding");
-	else return (strides_.back() - sizeof(T));
+	Assert(has_default_strides(minimal_dimension));
+	return (strides_.back() - sizeof(T));
 }
 
 

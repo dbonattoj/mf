@@ -25,6 +25,98 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 using namespace mf;
 
+TEST_CASE("ndarray_opaque_view", "[nd][ndarray_opaque_frame_format]") {
+	constexpr std::size_t l = sizeof(int);
+
+	SECTION("basics") {
+		// default strides
+		{
+		ndarray_opaque_frame_format frm( make_ndarray_format<int>(100) );
+		ndarray_opaque_frame_format frm_str( make_ndarray_format<int>(100, 2*l) );
+	
+		REQUIRE(( ndarray_view_opaque<2>::default_strides(frm, make_ndsize(3, 2)) ==
+			make_ndptrdiff(2*100*l, 100*l) ));
+		REQUIRE(( ndarray_view_opaque<2>::default_strides(frm, make_ndsize(3, 2), 3*l) ==
+			make_ndptrdiff(2*103*l, 103*l) ));
+		REQUIRE(( ndarray_view_opaque<2>::default_strides(frm_str, make_ndsize(3, 2)) ==
+			make_ndptrdiff(2*100*2*l, 100*2*l) ));
+		REQUIRE(( ndarray_view_opaque<2>::default_strides(frm_str, make_ndsize(3, 2), 3*l) ==
+			make_ndptrdiff( 2*(100*2*l + 3*l ), 100*2*l + 3*l ) ));
+		}
+		
+		// default strides view
+		// frame length=10, stride=2*l, frame_padding=3*l
+		std::unique_ptr<int[]> buffer(new int[3 * 2 * (10*2 + 3)]);
+		ndarray_opaque_frame_format frm(make_ndarray_format<int>(10, 2*l));
+		auto shp = make_ndsize(3, 2);
+		auto str = ndarray_view_opaque<2>::default_strides(frm, 3*l);
+		auto start = static_cast<ndarray_view_opaque<2>::frame_ptr>(buffer.get());
+		ndarray_view_opaque<2> vw(start, shp, str, frm);
+		REQUIRE(vw.start() == start);
+		REQUIRE(vw.shape() == shp);
+		REQUIRE(vw.strides() == str);
+	}
+}
+
+/*
+		// default strides (row major)
+		REQUIRE( (ndarray_view<1, int>::default_strides(make_ndsize(10))) == (ndptrdiff<1>{l}) );
+		REQUIRE( (ndarray_view<2, int>::default_strides(make_ndsize(10, 10))) == (ndptrdiff<2>{10*l, l}) );
+		REQUIRE( (ndarray_view<3, int>::default_strides(make_ndsize(4, 3, 2))) == (ndptrdiff<3>{3*2*l, 2*l, l}) );
+		REQUIRE( (ndarray_view<3, int>::default_strides(make_ndsize(4, 3, 2), pad)) == (ndptrdiff<3>{3*2*(l+pad), 2*(l+pad), l+pad}) );
+				
+		// default strides view
+		ndsize<3> shp{4, 3, 4};
+		ndarray_view<3, int> a1(raw.data(), shp);
+		REQUIRE(a1.start() == raw.data());
+		REQUIRE(a1.shape() == shp);
+		REQUIRE(a1.has_default_strides());
+		REQUIRE(a1.default_strides_padding() == 0);
+		REQUIRE(a1.has_default_strides_without_padding());
+
+		// padded default strides view
+		ndarray_view<3, int> a1pad(raw.data(), shp, ndarray_view<3, int>::default_strides(shp, pad));
+		REQUIRE(a1pad.start() == raw.data());
+		REQUIRE(a1pad.shape() == shp);
+		REQUIRE(a1pad.has_default_strides());
+		REQUIRE(a1pad.default_strides_padding() == pad);
+		REQUIRE_FALSE(a1pad.has_default_strides_without_padding());
+		
+		// non-default strides
+		ndptrdiff<3> str{4,2,1};
+		ndarray_view<3, int> a2(raw.data(), shp, str);
+		REQUIRE(a2.strides() == str);
+		REQUIRE(a2.size() == 4*3*4);
+		REQUIRE_FALSE(a2.has_default_strides());
+		REQUIRE_THROWS(a2.default_strides_padding());
+		REQUIRE_FALSE(a2.has_default_strides_without_padding());
+		
+		// comparison and assignment (shallow)
+		ndarray_view<3, int> a3(raw.data() + 13, shp, str);
+		REQUIRE(same(a1, a1));
+		REQUIRE_FALSE(same(a1, a3));
+		REQUIRE_FALSE(same(a3, a1));
+		ndarray_view<3, int> a3_;
+		a3_.reset(raw.data() + 13, shp, str);
+		REQUIRE(same(a3_, a3));
+		a3.reset(a1);
+		REQUIRE(a3.start() == raw.data());
+		REQUIRE(a3.shape() == shp);
+		REQUIRE(a3.strides() == a3.default_strides(shp));
+		REQUIRE(same(a3, a1));
+		REQUIRE(same(a1, a3));
+		
+		// copy construction
+		ndarray_view<3, int> a1copy = a1;
+		REQUIRE(same(a1copy, a1));
+		
+		// const and non-const
+		ndarray_view<3, const int> a1c = a1;
+		REQUIRE(same(a1c, a1));
+		REQUIRE(same(a1, a1c));
+		a1c.reset(a1);
+
+*/
 
 TEST_CASE("ndarray_opaque_frame_format", "[nd][ndarray_opaque_frame_format]") {
 	SECTION("undefined") {

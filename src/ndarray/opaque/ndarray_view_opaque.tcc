@@ -29,6 +29,48 @@ ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
 	format_(frm) { }
 
 
+
+template<std::size_t Dim, bool Mutable>
+auto ndarray_view_opaque<Dim, Mutable>::default_strides
+(const ndarray_opaque_frame_format& frm, const shape_type& shape, std::size_t frame_padding) -> strides_type {
+	Assert(is_multiple_of(frame_padding, frm.frame_alignment_requirement()));
+	strides_type strides;
+	strides[Dim - 1] = frm.frame_size() + frame_padding;
+	for(std::ptrdiff_t i = Dim - 1; i > 0; --i)
+		strides[i - 1] = strides[i] * shape[i];
+	return strides;
+}
+
+
+template<std::size_t Dim, bool Mutable>
+bool ndarray_view_opaque<Dim, Mutable>::has_default_strides(std::ptrdiff_t minimal_dimension) const noexcept {
+	if(strides().back() < format().frame_size()) return false;
+	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
+		std::ptrdiff_t expected_stride = shape()[i + 1] * strides()[i + 1];
+		if(strides()[i] != expected_stride) return false;
+	}
+	return true;
+}
+
+
+template<std::size_t Dim, bool Mutable>
+std::size_t ndarray_view_opaque<Dim, Mutable>::default_strides_padding(std::ptrdiff_t minimal_dimension) const {
+	if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
+	else return false;
+}
+
+
+
+template<std::size_t Dim, bool Mutable>
+bool ndarray_view_opaque<Dim, Mutable>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
+	Assert(has_default_strides(minimal_dimension));
+	return (strides().back() - format().frame_size());
+}
+
+
+///////////////
+
+
 template<std::size_t Dim, bool Mutable>
 ndarray_view_opaque<Dim, Mutable> extract_part
 (const ndarray_view_opaque<Dim, Mutable>& vw, std::ptrdiff_t part_index) {
@@ -37,9 +79,6 @@ ndarray_view_opaque<Dim, Mutable> extract_part
 	ndarray_opaque_frame_format frm(format_part.format);
 	return ndarray_view_opaque<Dim, Mutable>(new_start, vw.shape(), vw.strides(), frm);
 }
-
-
-//////////
 
 
 template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>

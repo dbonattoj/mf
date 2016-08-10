@@ -110,13 +110,10 @@ public:
 		
 	const ndarray_opaque_frame_format& format() const noexcept { return format_; }
 	
-	static strides_type default_strides(const ndarray_opaque_frame_format& frm, const shape_type& shp, std::size_t frame_padding = 0) {
-		auto base_shp = ndcoord_cat(shp, frm.frame_size() + frame_padding);
-		auto base_def_str = base::default_strides(base_shp);
-		return head<Dim>(base_def_str);
-	}
-	
-	using base::has_default_strides;
+	static strides_type default_strides(const ndarray_opaque_frame_format&, const shape_type&, std::size_t frame_pad = 0);	
+	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
+	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 	///@}
 
 	
