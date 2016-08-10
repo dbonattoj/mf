@@ -63,7 +63,7 @@ void filter_output<Output_dim, Output_elem>::define_frame_shape(const frame_shap
 	frame_shape_ = shp;
 	
 	std::size_t elem_count = frame_shape_.product();
-	frame_array_format array_format = make_frame_array_format<Output_elem>(elem_count);
+	ndarray_format array_format = make_ndarray_format<Output_elem>(elem_count);
 	node_output_channel_->define_format(array_format);
 }
 
@@ -78,7 +78,7 @@ template<std::size_t Output_dim, typename Output_elem>
 auto filter_output<Output_dim, Output_elem>::get_output_view
 (const frame_view& generic_view) -> view_type {
 	std::ptrdiff_t channel_index = index();
-	return from_generic<Output_dim, Output_elem>(generic_view, frame_shape(), channel_index);
+	return from_opaque<Output_dim, Output_elem>(extract_part(generic_view, channel_index), frame_shape());
 }
 
 

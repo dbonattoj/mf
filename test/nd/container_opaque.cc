@@ -24,7 +24,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/ndarray/opaque/ndarray_opaque.h>
 
 using namespace mf;
-using namespace mf::test;
 
 TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 	

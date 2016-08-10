@@ -32,9 +32,10 @@ ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
 template<std::size_t Dim, bool Mutable>
 ndarray_view_opaque<Dim, Mutable> extract_part
 (const ndarray_view_opaque<Dim, Mutable>& vw, std::ptrdiff_t part_index) {
-	const auto& format_part = vw.format().part_index(part_index);
+	const auto& format_part = vw.format().part_at(part_index);
 	auto new_start = advance_raw_ptr(vw.start(), format_part.offset);
-	return ndarray_view_opaque<Dim, Mutable>(new_start, vw.shape(), vw.strides(), format_part.format);
+	ndarray_opaque_frame_format frm(format_part.format);
+	return ndarray_view_opaque<Dim, Mutable>(new_start, vw.shape(), vw.strides(), frm);
 }
 
 

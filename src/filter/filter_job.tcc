@@ -29,7 +29,7 @@ template<typename Input> decltype(auto) filter_job::in_full(Input& pt) {
 		return ndarray_timed_view<dimension + 1, elem_type>();
 			
 	timed_frame_array_view gen_vw = node_job_.input_view(index);
-	return from_generic<dimension + 1, elem_type>(
+	return from_opaque<dimension + 1, elem_type>(
 		gen_vw,
 		pt.frame_shape()
 	);
@@ -48,7 +48,7 @@ template<typename Output> decltype(auto) filter_job::out(Output& pt) {
 	using elem_type = typename Output::elem_type;
 	
 	frame_view gen_vw = node_job_.output_view();
-	return from_generic<dimension, elem_type>(
+	return from_opaque<dimension, elem_type>(
 		gen_vw,
 		pt.frame_shape()
 	);

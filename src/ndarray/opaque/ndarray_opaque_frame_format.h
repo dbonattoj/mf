@@ -32,7 +32,10 @@ public:
 		std::ptrdiff_t offset;
 		ndarray_format format;
 	};
-
+	
+	friend bool operator==(const part& a, const part& b) { return (a.offset == b.offset) && (a.format == b.format); }
+	friend bool operator!=(const part& a, const part& b) { return (a.offset != b.offset) || (a.format != b.format); }
+	
 private:
 	std::vector<part> parts_;
 	std::size_t frame_size_ = 0;

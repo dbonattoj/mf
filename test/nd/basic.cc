@@ -777,7 +777,7 @@ TEST_CASE("ndarray_view", "[nd][ndarray_view]") {
 			REQUIRE(afrm.elem_alignment() == alignof(int));
 			REQUIRE(afrm.elem_padding() == 0);
 
-			afrm = make_ndarray_format<int>(100, pad);
+			afrm = make_ndarray_format<int>(100, sizeof(int)+pad);
 			REQUIRE(afrm.is_defined());
 			REQUIRE(afrm.frame_size() == 100 * (sizeof(int) + pad));
 			REQUIRE(afrm.frame_alignment_requirement() == alignof(int));
@@ -830,21 +830,21 @@ TEST_CASE("ndarray_view", "[nd][ndarray_view]") {
 				REQUIRE(afrm.elem_alignment() == alignof(int));
 				REQUIRE(afrm.elem_padding() == pad);
 			}
+
+			SECTION("assignment, comparison") {
+				ndarray_format afrm = format(vw);
+				ndarray_format afrm2 = afrm;
+				REQUIRE(afrm == afrm2);
+				REQUIRE_FALSE(afrm != afrm2);
+				afrm = tail_format<2>(vw);
+				REQUIRE_FALSE(afrm == afrm2);
+				REQUIRE(afrm != afrm2);
+			}
 		}
 
 		SECTION("undefined") {
 			ndarray_format undef;
 			REQUIRE(! undef.is_defined());
-		}
-		
-		SECTION("assignment, comparison") {
-			ndarray_format afrm = format(vw);
-			ndarray_format afrm2 = afrm;
-			REQUIRE(afrm == afrm2);
-			REQUIRE_FALSE(afrm != afrm2);
-			afrm = tail_format<2>(vw);
-			REQUIRE_FALSE(afrm == afrm2);
-			REQUIRE(afrm != afrm2);
 		}
 	}
 }

@@ -49,7 +49,7 @@ TEST_CASE("ndarray_opaque_frame_format", "[nd][ndarray_opaque_frame_format]") {
 		REQUIRE(frm.array_format() == afrm);
 		
 		ndarray_opaque_frame_format frm2;
-		frm2.add_part();
+		frm2.add_part(afrm);
 		REQUIRE(frm == frm2);
 	}
 
@@ -100,12 +100,12 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 	auto str = ndarray_view<3, int>::default_strides(shp, pad);
 	
 	SECTION("default stride, with padding") {
-		ndarray_view<3, int> arr(raw.data(), shp, str);
-		std::size_t s = arr.strides().back();
+		ndarray_view<3, int> vw(raw.data(), shp, str);
+		std::size_t s = vw.strides().back();
 
 		SECTION("opaque dimension 0") {
-			ndarray_view_opaque<0> op0 = to_opaque<0>(arr);
-			REQUIRE(op0.start() == reinterpret_cast<byte*>(arr.start()));
+			ndarray_view_opaque<0> op0 = to_opaque<0>(vw);
+			REQUIRE(op0.start() == reinterpret_cast<byte*>(vw.start()));
 			REQUIRE(op0.shape() == make_ndsize());
 			REQUIRE(op0.strides() == make_ndptrdiff());
 			
@@ -114,14 +114,14 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op0.format().array_format() == format(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op0, make_ndsize(3, 4, 4));
-			REQUIRE(same(re, arr));
+			REQUIRE(same(re, vw));
 
 			REQUIRE_THROWS(( from_opaque<3, int>(op0, make_ndsize(3, 4, 5)) ));
 		}
 
 		SECTION("opaque dimension 1") {
-			ndarray_view_opaque<1> op1 = to_opaque<1>(arr);
-			REQUIRE(op1.start() == reinterpret_cast<byte*>(arr.start()));
+			ndarray_view_opaque<1> op1 = to_opaque<1>(vw);
+			REQUIRE(op1.start() == reinterpret_cast<byte*>(vw.start()));
 
 			REQUIRE(op1.shape() == make_ndsize(3));
 			REQUIRE(op1.strides() == head<1>(str));
@@ -131,18 +131,18 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op1.format().array_format() == tail_format<2>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op1, make_ndsize(4, 4));
-			REQUIRE(same(re, arr));
+			REQUIRE(same(re, vw));
 			
 			REQUIRE_THROWS(( from_opaque<3, int>(op1, make_ndsize(4, 5)) ));
 
 			ndarray_view_opaque<0> op0 = op1[0];
-			REQUIRE(gen0.shape() == make_ndsize());
-			REQUIRE(gen0.strides() == make_ndptrdiff());
+			REQUIRE(op0.shape() == make_ndsize());
+			REQUIRE(op0.strides() == make_ndptrdiff());
 		}
 
 		SECTION("opaque dimension 2") {
-			ndarray_view_opaque<2> op2 = to_opaque<2>(arr);
-			REQUIRE(op2.start() == reinterpret_cast<byte*>(arr.start()));
+			ndarray_view_opaque<2> op2 = to_opaque<2>(vw);
+			REQUIRE(op2.start() == reinterpret_cast<byte*>(vw.start()));
 			
 			REQUIRE(op2.shape() == head<2>(shp));
 			REQUIRE(op2.strides() == head<2>(str));
@@ -152,7 +152,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op2.format().array_format() == tail_format<1>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op2, make_ndsize(4));
-			REQUIRE(same(re, arr));
+			REQUIRE(same(re, vw));
 
 			REQUIRE_THROWS(( from_opaque<3, int>(op2, make_ndsize(5)) ));
 			
@@ -166,16 +166,16 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 	SECTION("partial default stride, with padding") {
 		shp[0] = 2;
 		str[0] *= 2;
-		ndarray_view<3, int> arr(raw.data(), shp, str);
-		std::size_t s = arr.strides().back();
+		ndarray_view<3, int> vw(raw.data(), shp, str);
+		std::size_t s = vw.strides().back();
 		
 		SECTION("opaque dimension 0") {
-			REQUIRE_THROWS(to_opaque<0>(arr));
+			REQUIRE_THROWS(to_opaque<0>(vw));
 		}
 
 		SECTION("opaque dimension 1") {
-			ndarray_view_opaque<1> op1 = to_opaque<1>(arr);
-			REQUIRE(op1.start() == reinterpret_cast<byte*>(arr.start()));
+			ndarray_view_opaque<1> op1 = to_opaque<1>(vw);
+			REQUIRE(op1.start() == reinterpret_cast<byte*>(vw.start()));
 			REQUIRE(op1.shape() == head<1>(shp));
 			REQUIRE(op1.strides() == head<1>(str));
 
@@ -184,12 +184,12 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op1.format().array_format() == tail_format<2>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op1, make_ndsize(4, 4));
-			REQUIRE(same(re, arr));
+			REQUIRE(same(re, vw));
 		}
 		
 		SECTION("opaque dimension 2") {
-			ndarray_view_opaque<2> op2 = to_opaque<2>(arr);
-			REQUIRE(op2.start() == reinterpret_cast<byte*>(arr.start()));
+			ndarray_view_opaque<2> op2 = to_opaque<2>(vw);
+			REQUIRE(op2.start() == reinterpret_cast<byte*>(vw.start()));
 			REQUIRE(op2.shape() == head<2>(shp));
 			REQUIRE(op2.strides() == head<2>(str));
 
@@ -198,7 +198,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op2.format().array_format() == tail_format<1>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op2, make_ndsize(4));
-			REQUIRE(same(re, arr));
+			REQUIRE(same(re, vw));
 			
 			ndarray_view_opaque<1> op1 = op2[0];
 			REQUIRE(op1.shape() == make_ndsize(4));

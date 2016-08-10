@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_derived.h"
 #include "node_input.h"
 #include "node_output.h"
+#include "../ndarray/ndarray_format.h"
 #include <memory>
 #include <utility>
 
@@ -47,7 +48,7 @@ class processing_node_output_channel final {
 private:
 	processing_node& node_;
 	const std::ptrdiff_t index_;
-	frame_array_format array_format_;
+	ndarray_format array_format_;
 
 public:
 	processing_node_output_channel(processing_node& nd, std::ptrdiff_t index) :
@@ -57,8 +58,8 @@ public:
 	const processing_node& this_node() const { return node_; }
 	std::ptrdiff_t index() const { return index_; }
 	
-	void define_format(const frame_array_format& frm) { array_format_ = frm; }
-	const frame_array_format& format() const noexcept { return array_format_; }
+	void define_format(const ndarray_format& frm) { array_format_ = frm; }
+	const ndarray_format& format() const noexcept { return array_format_; }
 };
 
 

@@ -34,19 +34,20 @@ auto ndarray_opaque_frame_format::add_part(const ndarray_format& new_part_format
 	
 	if(parts_.size() > 0) {
 		const part& previous_part = parts_.back();
-		std::ptrdiff_t min_offset = previous_part.offset;
-		std::size_t alignment_requirement = new_part_format.frame_alignment_requirement();
+		std::ptrdiff_t min_offset = previous_part.offset + previous_part.format.frame_size();
+		std::ptrdiff_t alignment_requirement = new_part_format.frame_alignment_requirement();
 		
 		if(is_multiple_of(min_offset, alignment_requirement)) new_part.offset = min_offset;
 		else new_part.offset = (1 + (min_offset / alignment_requirement)) * alignment_requirement;
 
-		Assert(is_multiple_of(offset, alignment_requirement));
-		Assert(offset >= min_offset);
+		Assert(is_multiple_of(new_part.offset, alignment_requirement));
+		Assert(new_part.offset >= min_offset);
 	}
 	
 	parts_.push_back(new_part);
 	frame_size_ = new_part.offset + new_part.format.frame_size();
 	frame_alignment_requirement_ = lcm(frame_alignment_requirement_, new_part.format.frame_alignment_requirement());
+	return parts_.back();
 }
 	
 
