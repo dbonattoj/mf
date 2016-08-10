@@ -62,7 +62,12 @@ private:
 	std::size_t allocated_size_ = 0; ///< Allocated memory size, in bytes.
 	void* allocated_buffer_ = nullptr; ///< Allocated memory.
 	view_type view_; ///< View to allocated memory.
-	
+
+protected:
+	const view_type& get_view_() const { return view_; }
+	// access view_ from const this
+
+
 protected:
 	/// \name Construction, assignment base
 	///@{

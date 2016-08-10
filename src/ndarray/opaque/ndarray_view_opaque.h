@@ -107,10 +107,11 @@ public:
 	pointer start() const { return static_cast<pointer>(base::start()); }
 	shape_type shape() const { return head<Dim>(base::shape()); }
 	strides_type strides() const { return head<Dim>(base::strides()); }
-		
+	std::size_t size() const { return shape().product(); }
+	
 	const ndarray_opaque_frame_format& format() const noexcept { return format_; }
 	
-	static strides_type default_strides(const ndarray_opaque_frame_format&, const shape_type&, std::size_t frame_pad = 0);	
+	static strides_type default_strides(const shape_type&, const ndarray_opaque_frame_format&, std::size_t frame_pad = 0);	
 	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
 	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
@@ -120,13 +121,13 @@ public:
 	
 	/// \name Deep assignment
 	///@{
-	ndarray_view_opaque& operator=(const ndarray_view_opaque<Dim, false>& vw) {
+	ndarray_view_opaque& operator=(const ndarray_view_opaque<Dim, false>& vw) const {
 		Expects_crit(vw.format() == format());
 		base::operator=(vw.base_view());
 		return *this;
 	}
 	
-	void assign(const ndarray_view_opaque<Dim, false>& vw) {
+	void assign(const ndarray_view_opaque<Dim, false>& vw) const {
 		Expects_crit(vw.format() == format());
 		base::assign(vw.base_view());
 	}

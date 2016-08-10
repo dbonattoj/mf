@@ -32,7 +32,7 @@ ndarray_opaque<Dim, Allocator>::ndarray_opaque
 (const shape_type& shape, const ndarray_opaque_frame_format& frm, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	shape,
-	view_type::default_strides(frm, shape, frame_padding),
+	view_type::default_strides(shape, frm, frame_padding),
 	(frm.frame_size() + frame_padding) * shape.product(),
 	frm.frame_alignment_requirement(),
 	allocator,
@@ -45,7 +45,7 @@ ndarray_opaque<Dim, Allocator>::ndarray_opaque
 (const const_view_type& vw, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	vw.shape(),
-	view_type::default_strides(vw.shape(), frame_padding),
+	view_type::default_strides(vw.shape(), vw.format(), frame_padding),
 	(vw.format().frame_size() + frame_padding) * vw.shape().product(),
 	vw.format().frame_alignment_requirement(),
 	allocator,
@@ -61,7 +61,7 @@ base(
 	arr.shape(),
 	arr.strides(),
 	arr.allocated_byte_size(),
-	arr.format().format_alignment_requirement(),
+	arr.format().frame_alignment_requirement(),
 	arr.get_allocator(),
 	arr.format()
 ) {

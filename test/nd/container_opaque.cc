@@ -26,5 +26,173 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 using namespace mf;
 
 TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
+	ndarray_opaque_frame_format frm;
+	ndarray_format afrm1 = make_ndarray_format<int>(100);
+	ndarray_format afrm2 = make_ndarray_format<double>(50, 2*sizeof(double));
+	frm.add_part(afrm1);
+	frm.add_part(afrm2);
+
+	constexpr std::ptrdiff_t pad = 64;
+	ndsize<2> shape{3, 4};
+	ndarray_opaque<2> og_arr(shape, frm, 0);
+	ndarray_view_opaque<2> arr_vw = og_arr.view();
 	
+	ndarray_view_opaque<2> arr_vw_sec = arr_vw()(0, 2);
+	REQUIRE_FALSE(arr_vw_sec.has_default_strides());
+
+	ndarray_opaque<2> null_arr;
+
+	SECTION("construction") {
+		// null ndarray
+		REQUIRE(null_arr.is_null());
+		REQUIRE(null_arr.allocated_byte_size() == 0);
+	
+		// construction with shape
+		ndarray_opaque<2> arr(shape, frm);
+		REQUIRE(arr.shape() == shape);
+		REQUIRE((arr.strides() == ndarray_view_opaque<2>::default_strides(shape, frm)));
+		REQUIRE(arr.allocated_byte_size() >= arr_vw.size()*frm.frame_size());
+		/*verify_ndarray_memory_(arr);*/
+
+		// construction with shape, padding
+		ndarray_opaque<2> arr_pad(shape, frm, pad);
+		REQUIRE(arr_pad.shape() == shape);
+		REQUIRE((arr_pad.strides() == ndarray_view_opaque<2>::default_strides(shape, frm, pad)));
+		/*verify_ndarray_memory_(arr_pad);*/
+
+		// construction from view (ndarray gets default strides)
+		ndarray_opaque<2> arr2(arr_vw_sec);
+		REQUIRE(arr2.view().compare(arr_vw_sec));
+		REQUIRE(arr2.shape() == arr_vw_sec.shape());
+		REQUIRE((arr2.strides() == ndarray_view_opaque<2>::default_strides(arr_vw_sec.shape(), frm)));
+		/*verify_ndarray_memory_(arr2);
+		arr2[1][1][1] = 456;
+		REQUIRE(arr2[1][1][1] == 456);
+		REQUIRE_FALSE(arr_vw[1][1][1] == 456);*/
+
+		// construction from view (ndarray gets padded default strides)
+		ndarray_opaque<2> arr3(arr_vw_sec, pad);
+		REQUIRE(arr3.view().compare(arr_vw_sec));
+		REQUIRE(arr3.shape() == arr_vw_sec.shape());
+		REQUIRE((arr3.strides() == ndarray_view_opaque<2>::default_strides(arr_vw_sec.shape(), frm, pad)));
+		/*verify_ndarray_memory_(arr3);
+		arr3[1][1][1] = 456;
+		REQUIRE(arr3[1][1][1] == 456);
+		REQUIRE_FALSE(arr_vw[1][1][1] == 456);*/
+	
+		// construction from null ndarray_view
+		ndarray_opaque<2> null_arr1(ndarray_view_opaque<2>::null());
+		REQUIRE(null_arr1.is_null());
+		REQUIRE(null_arr1.allocated_byte_size() == 0);
+
+		// copy-construction from another ndarray (strides get copied)
+		ndarray_opaque<2> arr4 = arr3;
+		REQUIRE(arr4.view().compare(arr3));
+		REQUIRE(arr4.shape() == arr3.shape());
+		REQUIRE(arr4.strides() == arr3.strides());
+		/*REQUIRE(arr4[1][1][1] == 456);
+		verify_ndarray_memory_(arr4);
+		arr4[1][1][1] = 789;
+		REQUIRE(arr4[1][1][1] == 789);
+		REQUIRE_FALSE(arr3[1][1][1] == 789);*/
+		
+		// copy-construction from null ndarray
+		ndarray_opaque<2> null_arr2 = null_arr;
+		REQUIRE(null_arr2.is_null());
+		REQUIRE(null_arr2.allocated_byte_size() == 0);
+
+		// move construction from another ndarray (strides get copied)
+		ndarray_opaque<2> arr5_cmp = arr4;
+		ndarray_opaque<2> arr5 = std::move(arr4);
+		REQUIRE(arr5.view().compare(arr5_cmp));
+		REQUIRE(arr5.shape() == arr5_cmp.shape());
+		REQUIRE(arr5.strides() == arr5_cmp.strides());
+		REQUIRE(arr4.is_null());
+		REQUIRE(arr4.allocated_byte_size() == 0);
+		/*verify_ndarray_memory_(arr5);*/
+
+		// move-construction from null ndarray
+		ndarray_opaque<2> null_arr3 = std::move(null_arr);
+		REQUIRE(null_arr3.is_null());
+		REQUIRE(null_arr3.allocated_byte_size() == 0);
+	}
+
+/*
+	SECTION("assignment") {
+		ndsize<3> previous_shape{5, 1, 1};
+		ndsize<3> shp = arr_vw_sec.shape();
+		
+		// assignment from view (ndarray gets default strides)
+		ndarray<3, int> arr_(previous_shape), arr_2(previous_shape);
+		arr_ = arr_vw_sec;
+		REQUIRE(arr_.view().compare(arr_vw_sec));
+		REQUIRE(arr_.shape() == arr_vw_sec.shape());
+		REQUIRE((arr_.strides() == ndarray_view<3, int>::default_strides(shp)));
+		arr_[1][1][1] = 123; REQUIRE_FALSE(arr_vw[1][1][1] == 123);
+		arr_2.assign(arr_vw_sec);
+		REQUIRE(arr_2.view().compare(arr_vw_sec));
+		REQUIRE(arr_2.shape() == arr_vw_sec.shape());
+		REQUIRE((arr_2.strides() == ndarray_view<3, int>::default_strides(shp)));
+		arr_2[1][1][1] = 123; REQUIRE_FALSE(arr_vw[1][1][1] == 123);
+				
+		// assignment from view (ndarray gets padded default strides)
+		ndarray<3, int> arr_3(previous_shape);
+		arr_3.assign(arr_vw_sec, pad);
+		REQUIRE(arr_3.view().compare(arr_vw_sec));
+		REQUIRE(arr_3.shape() == arr_vw_sec.shape());
+		REQUIRE((arr_3.strides() == ndarray_view<3, int>::default_strides(shp, pad)));
+		arr_3[1][1][1] = 456; REQUIRE_FALSE(arr_vw_sec[1][1][1] == 456);
+
+		// assignment from null ndarray_view
+		ndarray<3, int> arr_4(previous_shape), arr_4_(previous_shape);
+		arr_4 = ndarray_view<3, int>::null();
+		REQUIRE(arr_4.is_null());
+		REQUIRE(arr_4.allocated_byte_size() == 0);
+		arr_4_.assign(ndarray_view<3, int>::null());
+		REQUIRE(arr_4_.is_null());
+		REQUIRE(arr_4_.allocated_byte_size() == 0);
+
+		// copy-assignment from another ndarray (strides get copied)
+		ndarray<3, int> arr_5(previous_shape);
+		arr_5 = arr_3;
+		REQUIRE(arr_5.view().compare(arr_3));
+		REQUIRE(arr_5.shape() == arr_3.shape());
+		REQUIRE(arr_5.strides() == arr_3.strides());
+		arr_5[1][1][1] = 789; REQUIRE_FALSE(arr_3[1][1][1] == 789);
+
+		// copy-assignment from null ndarray
+		ndarray<3, int> arr_6(previous_shape);
+		arr_6 = null_arr;
+		REQUIRE(arr_6.is_null());
+		REQUIRE(arr_6.allocated_byte_size() == 0);
+		
+		// move-assignment from another ndarray (strides get copied)
+		ndarray<3, int> arr_7(previous_shape);
+		ndarray<3, int> arr_3_cmp = arr_3;
+		arr_7 = std::move(arr_3);
+		REQUIRE(arr_7.view().compare(arr_3_cmp));
+		REQUIRE(arr_7.shape() == arr_3_cmp.shape());
+		REQUIRE(arr_7.strides() == arr_3_cmp.strides());
+		REQUIRE(arr_3.is_null());
+		verify_ndarray_memory_(arr_7);
+
+		// move-assignment from null ndarray
+		ndarray<3, int> arr_8(previous_shape);
+		arr_8 = std::move(null_arr);
+		REQUIRE(arr_8.is_null());
+		REQUIRE(arr_8.allocated_byte_size() == 0);
+		
+		// assignment from ndarray_view with different element type
+		ndarray<3, float> arr_f(arr_vw_sec);
+		ndarray<3, int> arr_9(previous_shape), arr_9_(previous_shape);
+		arr_9 = arr_f.cview();
+		REQUIRE(arr_9.view().compare(arr_f.cview()));
+		REQUIRE(arr_9.shape() == arr_f.shape());
+		REQUIRE((arr_9.strides() == ndarray_view<3, int>::default_strides(shp)));
+		arr_9_.assign(arr_f.cview(), pad);
+		REQUIRE(arr_9_.view().compare(arr_f.cview()));
+		REQUIRE(arr_9_.shape() == arr_f.shape());
+		REQUIRE((arr_9_.strides() == ndarray_view<3, int>::default_strides(shp, pad)));
+	}
+*/
 }

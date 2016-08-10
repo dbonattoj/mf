@@ -44,7 +44,7 @@ public:
 	/// Construct null \ref ndarray_opaque.
 	explicit ndarray_opaque(const Allocator& = Allocator());
 	
-	/// Construct empty \ref ndarray_opaque with given shape and framt format.
+	/// Construct empty \ref ndarray_opaque with given shape and frame format.
 	/** Has default strides, optionally with specified frame padding. */
 	ndarray_opaque
 	(const shape_type& shape, const ndarray_opaque_frame_format& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
@@ -86,7 +86,7 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const ndarray_opaque_frame_format& format() const noexcept { return base::view().format(); }
+	const ndarray_opaque_frame_format& format() const noexcept { return base::get_view_().format(); }
 	///@}
 };
 

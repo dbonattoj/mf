@@ -32,7 +32,7 @@ ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
 
 template<std::size_t Dim, bool Mutable>
 auto ndarray_view_opaque<Dim, Mutable>::default_strides
-(const ndarray_opaque_frame_format& frm, const shape_type& shape, std::size_t frame_padding) -> strides_type {
+(const shape_type& shape, const ndarray_opaque_frame_format& frm, std::size_t frame_padding) -> strides_type {
 	Assert(is_multiple_of(frame_padding, frm.frame_alignment_requirement()));
 	strides_type strides;
 	strides[Dim - 1] = frm.frame_size() + frame_padding;
