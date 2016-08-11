@@ -40,7 +40,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) \
 		if(! (__condition__)) { \
 			MF_DEBUG_BACKTRACE("assertion failed at " __FILE__ ":" MF_STRINGIZE(__LINE__) "\n" __msg__); \
-			std::abort(); \
+			throw ::mf::failed_assertion(__msg__ " at " __FILE__ ":" MF_STRINGIZE(__LINE__)); \
 		}
 
 	#define MF_ASSERT_MSG_(__condition__, __msg__) \

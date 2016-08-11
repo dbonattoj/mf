@@ -158,7 +158,7 @@ void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const
 		// optimize when possible
 		const ndarray_format& array_format = format(*this);
 		Assert_crit(array_format == format(other));
-		ndarray_frame_copy(static_cast<void*>(start()), static_cast<const void*>(start()), array_format);
+		ndarray_frame_copy(static_cast<void*>(start()), static_cast<const void*>(other.start()), array_format);
 	} else {
 		std::copy(other.begin(), other.end(), begin());
 	}
