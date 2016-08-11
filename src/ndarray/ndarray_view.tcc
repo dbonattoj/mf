@@ -21,7 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include <cstdlib>
 #include <algorithm>
-#include <cstring>
 #include <type_traits>
 
 #include <iostream>
@@ -141,23 +140,31 @@ void ndarray_view<Dim, T>::reset(const ndarray_view& other) noexcept {
 
 template<std::size_t Dim, typename T> template<typename T2>
 void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {
-	if(shape() != other.shape()) throw std::invalid_argument("ndarray views must have same shape for assignment");
-	else if(shape().product() == 0) return; // TODO verify iteration when empty
+	// converting assignment
+	Assert_crit(shape() == other.shape(), "ndarray_view must have same shape for assignment");
+	if(shape().product() == 0) return;
 	std::copy(other.begin(), other.end(), begin());
 }
 
 
 template<std::size_t Dim, typename T>
 void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const {
-	// optimization: if T is POD type, and both views have default strides without padding,
-	//               then copy using memcpy instead of element-wise loop
-	if(shape() != other.shape()) throw std::invalid_argument("ndarray views must have same shape for assignment");
-	if(std::is_pod<T>::value && has_default_strides_without_padding() && strides() == other.strides())
-		std::memcpy(static_cast<void*>(start()), static_cast<const void*>(other.start()), size() * sizeof(T));
-	else
+	// assignment without conversion
+	
+	Assert_crit(shape() == other.shape(), "ndarray_view must have same shape for assignment");
+	if(shape().product() == 0) return;
+	
+	if(std::is_pod<T>::value && strides() == other.strides() && has_default_strides()) {
+		// optimize when possible
+		const ndarray_format& array_format = format(*this);
+		Assert_crit(array_format == format(other));
+		ndarray_frame_copy(static_cast<void*>(start()), static_cast<const void*>(start()), array_format);
+	} else {
 		std::copy(other.begin(), other.end(), begin());
+	}
 }
 
+// TODO comparison optimization
 
 template<std::size_t Dim, typename T> template<typename T2>
 bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, T2>& other) const {

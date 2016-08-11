@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../detail/ndarray_wrapper.h"
 #include "../../os/memory.h"
 
+
 namespace mf {
 
 /// Container for \ref ndarray_view_opaque.
@@ -86,7 +87,8 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const ndarray_opaque_frame_format& format() const noexcept { return base::get_view_().format(); }
+	const ndarray_opaque_frame_format& frame_format() const noexcept { return base::get_view_().format(); }
+	[[deprecated]] const ndarray_opaque_frame_format& format() const noexcept { return base::get_view_().format(); }
 	///@}
 };
 

@@ -89,7 +89,7 @@ private:
 	time_span writable_time_span_() const;
 	
 public:
-	shared_ring(const frame_format& frm, std::size_t capacity, bool seekable, time_unit end_time = -1);
+	shared_ring(const ring::frame_format_type& frm, std::size_t capacity, bool seekable, time_unit end_time = -1);
 		
 	void initialize();
 	
@@ -98,7 +98,7 @@ public:
 	void break_writer();
 	
 	
-	const frame_format& format() const noexcept { return ring_.format(); }
+	const ring::frame_format_type& format() const noexcept { return ring_.format(); }
 
 	/// Capacity of buffer.
 	/** Maximal readable and writable frames that fit in buffer. */

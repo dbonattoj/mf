@@ -42,7 +42,7 @@ bool compare_sequence_forwards_(const Buffer& buf, const std::vector<int>& seq) 
 	else if( (it == buf.end()) && (vec_it != seq.end()) ) str << "ended early" << std::endl;
 	else if( (it != buf.end()) && (vec_it == seq.end()) ) str << "ended late" << std::endl;
 	
-	std::cout << "sequence mismatch: " << std::endl << str.str() << std::endl;	
+	std::cerr << "sequence mismatch: " << std::endl << str.str() << std::endl;	
 	
 	return false;
 }
@@ -66,7 +66,7 @@ bool compare_sequence_(const Buffer& buf, const std::vector<int>& seq) {
 	else if( (it == buf.begin()) && (vec_it != seq.begin()) ) str << "arrived back early" << std::endl;
 	else if( (it != buf.begin()) && (vec_it == seq.begin()) ) str << "arrived back late" << std::endl;
 	
-	std::cout << "sequence mismatch (backwards): " << std::endl << str.str() << std::endl;	
+	std::cerr << "sequence mismatch (backwards): " << std::endl << str.str() << std::endl;	
 	
 	return false;
 }

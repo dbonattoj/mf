@@ -30,7 +30,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-// TODO iteration over opaque frames?
 
 /// \ref ndarray_view where opaque frames with runtime-determined size take the place of elements.
 /** Frames are opaque segments with runtime-determined size and alignment requirement, and their format is defined with
@@ -61,11 +60,7 @@ private:
 	using fcall_type = detail::ndarray_view_fcall<ndarray_view_opaque<Dim, Mutable>, 1>;
 
 protected:
-	ndarray_view_opaque section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const {
-		Expects(dim < Dim);
-		return ndarray_view_opaque(base::section_(dim, start, end, step), format_);
-	}
-
+	ndarray_view_opaque section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const;
 
 public:
 	/// \name Construction
@@ -107,14 +102,17 @@ public:
 	pointer start() const { return static_cast<pointer>(base::start()); }
 	shape_type shape() const { return head<Dim>(base::shape()); }
 	strides_type strides() const { return head<Dim>(base::strides()); }
+
 	std::size_t size() const { return shape().product(); }
-	
-	const ndarray_opaque_frame_format& format() const noexcept { return format_; }
-	
+	span_type full_span() const noexcept { return span_type(0, shape()); }
+		
 	static strides_type default_strides(const shape_type&, const ndarray_opaque_frame_format&, std::size_t frame_pad = 0);	
 	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
 	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+
+	const ndarray_opaque_frame_format& frame_format() const noexcept { return format_; }
+	[[deprecated]] const ndarray_opaque_frame_format& format() const noexcept { return format_; }
 	///@}
 
 	
@@ -127,20 +125,14 @@ public:
 		return *this;
 	}
 	
-	void assign(const ndarray_view_opaque<Dim, false>& vw) const {
-		Expects_crit(vw.format() == format());
-		base::assign(vw.base_view());
-	}
+	void assign(const ndarray_view_opaque<Dim, false>& vw) const;
 	///@}
 	
 	
 	
 	/// \name Deep comparison
 	///@{
-	bool compare(const ndarray_view_opaque& vw) const {
-		if(vw.format() != format()) return false;
-		else return base::compare(vw);
-	}
+	bool compare(const ndarray_view_opaque& vw) const;
 	
 	bool operator==(const ndarray_view_opaque& vw) const { return compare(vw); }
 	bool operator!=(const ndarray_view_opaque& vw) const { return ! compare(vw); }

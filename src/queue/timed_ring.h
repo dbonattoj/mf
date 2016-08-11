@@ -42,7 +42,7 @@ private:
 public:
 	using section_view_type = timed_frame_array_view;
 
-	timed_ring(const frame_format& frm, std::size_t capacity) :
+	timed_ring(const frame_format_type& frm, std::size_t capacity) :
 		base(frm, capacity) { }
 	
 	void initialize();

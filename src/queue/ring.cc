@@ -25,13 +25,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../os/memory.h"
 
 namespace mf {
-	
+		
 
-ring::ring(const frame_format& frm, std::size_t capacity) :
+ring::ring(const frame_format_type& frm, std::size_t capacity) :
 	base(make_ndsize(capacity), frm, adjust_padding_(frm, capacity)) { }
 
 
-std::size_t ring::adjust_padding_(const frame_format& frm, std::size_t capacity) {
+std::size_t ring::adjust_padding_(const frame_format_type& frm, std::size_t capacity) {
 	std::size_t array_length = capacity; // array length, = number of frames
 	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
 	std::size_t page_size = system_page_size(); // system page size, in bytes

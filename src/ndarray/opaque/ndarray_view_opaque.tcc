@@ -29,6 +29,13 @@ ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
 	format_(frm) { }
 
 
+template<std::size_t Dim, bool Mutable>
+auto ndarray_view_opaque<Dim, Mutable>::section_
+(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const -> ndarray_view_opaque {
+	Expects(dim < Dim);
+	return ndarray_view_opaque(base::section_(dim, start, end, step), format_);
+}
+
 
 template<std::size_t Dim, bool Mutable>
 auto ndarray_view_opaque<Dim, Mutable>::default_strides
@@ -65,6 +72,43 @@ template<std::size_t Dim, bool Mutable>
 bool ndarray_view_opaque<Dim, Mutable>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
 	Assert(has_default_strides(minimal_dimension));
 	return (strides().back() - format().frame_size());
+}
+
+
+template<std::size_t Dim, bool Mutable>
+void ndarray_view_opaque<Dim, Mutable>::assign(const ndarray_view_opaque<Dim, false>& vw) const {
+/*	Assert_crit(vw.frame_format() == frame_format());
+	Assert_crit(vw.shape() == shape());
+	
+	if(format_.is_contiguous() && vw.strides() == strides()) {
+		// directly copy entire memory segment is possible
+		std::memcpy(start(), vw.start(), format_.frame_size() * size());
+	} else {
+		// copy frame-by-frame, optimizing the frame copies when possible
+		
+		
+		for(std::ptrdiff_t part_index = 0; part_index < format_.parts_count(); ++part_index) {
+			const auto& part = format_.part_at(part_index);
+			ndarray_frame_copy();
+			
+			ndarray_frame_copy(static_cast<void*>(start()), static_cast<const void*>(start()), array_format);
+
+		}
+	}
+	
+	base::assign(vw.base_view());
+	*/
+	throw "...";
+}
+
+
+
+template<std::size_t Dim, bool Mutable>
+bool ndarray_view_opaque<Dim, Mutable>::compare(const ndarray_view_opaque& vw) const {
+//	if(vw.format() != format()) return false;
+//	else return base::compare(vw);
+
+	throw "...";
 }
 
 
@@ -142,6 +186,7 @@ auto from_opaque(
 		
 	return ndarray_view<Concrete_dim, Concrete_elem>(new_start, new_shape, new_strides);
 }
+
 
 
 }

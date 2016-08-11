@@ -31,6 +31,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <utility>
 #include <memory>
 #include "detail/ndarray_view_fcall.h"
+#include "ndarray_format.h"
+
 
 namespace mf {
 
@@ -147,13 +149,12 @@ public:
 
 	/// \name Attributes 
 	///@{
-	/// Number of elements, i.e. product of shape components.
-	std::size_t size() const { return shape().product(); }
-	
+	/// Number of elements, i.e. product of shape components.	
 	pointer start() const noexcept { return start_; }
 	const shape_type& shape() const noexcept { return shape_; }
 	const strides_type& strides() const noexcept { return strides_; }
 	
+	std::size_t size() const { return shape().product(); }
 	span_type full_span() const noexcept { return span_type(0, shape_); }
 		
 	/// Default strides which correspond to row-major order for specified shape.
@@ -285,6 +286,22 @@ ndarray_view<New_dim, T> reshape(const ndarray_view<Dim, T>&, const ndsize<New_d
 template<std::size_t Dim, typename T>
 ndarray_view<1, T> flatten(const ndarray_view<Dim, T>&);
 
+
+///////////////
+
+template<std::size_t Tail_dim, std::size_t Dim, typename Elem>
+ndarray_format tail_format(const ndarray_view<Dim, Elem>& vw) {
+	Expects(vw.has_default_strides(Dim - Tail_dim));
+	std::size_t count = tail<Tail_dim>(vw.shape()).product();
+	std::size_t stride = vw.strides().back();
+	return make_ndarray_format<Elem>(count, stride);
+}
+
+
+template<std::size_t Dim, typename Elem>
+ndarray_format format(const ndarray_view<Dim, Elem>& vw) {
+	return tail_format<Dim>(vw);
+}
 
 }
 

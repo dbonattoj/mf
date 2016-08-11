@@ -36,17 +36,18 @@ class ring : public ndarray_opaque<1, raw_ring_allocator> {
 	
 public:
 	using section_view_type = frame_array_view;
+	using frame_format_type = ndarray_opaque_frame_format;
 
 private:
 	time_unit read_position_ = 0;
 	time_unit write_position_ = 0;
 	bool full_ = false;
 		
-	static std::size_t adjust_padding_(const frame_format&, std::size_t capacity); 
+	static std::size_t adjust_padding_(const frame_format_type&, std::size_t capacity); 
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:
-	ring(const frame_format&, std::size_t capacity);
+	ring(const frame_format_type&, std::size_t capacity);
 	
 	ring(const ring&) = delete;
 	ring& operator=(const ring&) = delete;

@@ -31,7 +31,6 @@ namespace mf {
 using timed_frame_array_view = ndarray_timed_view_opaque<1>;
 using frame_array_view = ndarray_view_opaque<1>;
 using frame_view = ndarray_view_opaque<0>;
-using frame_format = ndarray_opaque_frame_format;
 
 }
 

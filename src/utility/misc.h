@@ -57,14 +57,14 @@ bool is_power_of_two(T x) {
 }
 
 /// Check if `x` is a multiple of `base`, including zero.
-template<typename T>
-bool is_multiple_of(T x, T base) {
+template<typename T, typename T2>
+bool is_multiple_of(T x, T2 base) {
 	return (x % base == 0);
 }
 
 /// Check if `x` is a non-zero multiple of `base`.
-template<typename T>
-bool is_nonzero_multiple_of(T x, T base) {
+template<typename T, typename T2>
+bool is_nonzero_multiple_of(T x, T2 base) {
 	return (x != 0) && is_multiple_of(x, base);
 }
 

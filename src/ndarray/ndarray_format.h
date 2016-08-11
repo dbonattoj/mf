@@ -21,7 +21,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_NDARRAY_FRAME_FORMAT_H_
 #define MF_NDARRAY_FRAME_FORMAT_H_
 
-#include "ndarray_view.h"
+#include <cstdlib>
+#include "../utility/misc.h"
 
 namespace mf {
 
@@ -62,7 +63,16 @@ public:
 	std::size_t elem_alignment() const noexcept { return elem_alignment_; }
 
 	std::size_t elem_padding() const noexcept { return stride() - elem_size(); }
+	
+	bool is_contiguous() const noexcept { return (elem_padding() == 0); }
 };
+
+
+/// Compare two data stored in \a a and \a b, both having format \a frame_format.
+bool ndarray_frame_compare(const void* a, const void* b, const ndarray_format& frame_format);
+
+/// Copy data at \a origin having format \a frame_format to \a destination.
+void ndarray_frame_copy(void* destination, const void* origin, const ndarray_format& frame_format);
 
 
 bool operator==(const ndarray_format&, const ndarray_format&);
@@ -72,21 +82,6 @@ bool operator!=(const ndarray_format&, const ndarray_format&);
 template<typename Elem>
 ndarray_format make_ndarray_format(std::size_t length, std::size_t stride = sizeof(Elem)) {
 	return ndarray_format(sizeof(Elem), alignof(Elem), length, stride);
-}
-
-
-template<std::size_t Tail_dim, std::size_t Dim, typename Elem>
-ndarray_format tail_format(const ndarray_view<Dim, Elem>& vw) {
-	Expects(vw.has_default_strides(Dim - Tail_dim));
-	std::size_t count = tail<Tail_dim>(vw.shape()).product();
-	std::size_t stride = vw.strides().back();
-	return make_ndarray_format<Elem>(count, stride);
-}
-
-
-template<std::size_t Dim, typename Elem>
-ndarray_format format(const ndarray_view<Dim, Elem>& vw) {
-	return tail_format<Dim>(vw);
 }
 
 

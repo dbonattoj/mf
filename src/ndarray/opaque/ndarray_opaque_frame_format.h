@@ -40,11 +40,11 @@ private:
 	std::vector<part> parts_;
 	std::size_t frame_size_ = 0;
 	std::size_t frame_alignment_requirement_ = 1;
+	bool contiguous_ = false;
 
 public:
-	ndarray_opaque_frame_format() = default;
-	explicit ndarray_opaque_frame_format(std::size_t frame_size, std::size_t frame_alignment_requirement = 1) :
-		frame_size_(frame_size), frame_alignment_requirement_(frame_alignment_requirement) { }
+	ndarray_opaque_frame_format();
+	explicit ndarray_opaque_frame_format(std::size_t frame_size, std::size_t frame_alignment_requirement = 1);
 	explicit ndarray_opaque_frame_format(const ndarray_format&);
 	
 	ndarray_opaque_frame_format(const ndarray_opaque_frame_format&) = default;
@@ -58,16 +58,26 @@ public:
 	bool is_defined() const noexcept { return (frame_size_ > 0); }
 	bool is_raw() const noexcept { return is_defined() && (parts_.size() == 0); }
 		
-	std::size_t parts_count() const { Assert(is_defined()); return parts_.size(); }
+	std::size_t parts_count() const { Assert_crit(is_defined()); return parts_.size(); }
 	bool is_multi_part() const { return (parts_count() > 1); }
-	const part& part_at(std::ptrdiff_t part_index) const { Assert(is_defined()); return parts_.at(part_index); }
+	const part& part_at(std::ptrdiff_t part_index) const { Assert_crit(is_defined()); return parts_.at(part_index); }
 
 	bool is_single_part() const { return (parts_count() == 1); }
-	const ndarray_format& array_format() const { Assert(is_single_part()); return parts_.front().format; }
+	const ndarray_format& array_format() const { Assert_crit(is_single_part()); return parts_.front().format; }
+	
+	bool is_contiguous() const { Assert_crit(is_defined()); return contiguous_; }
 	
 	friend bool operator==(const ndarray_opaque_frame_format&, const ndarray_opaque_frame_format&);
 	friend bool operator!=(const ndarray_opaque_frame_format&, const ndarray_opaque_frame_format&);
 };
+
+
+/// Compare two data stored in \a a and \a b, both having format \a frame_format.
+bool ndarray_frame_compare(const void* a, const void* b, const ndarray_opaque_frame_format& frame_format);
+
+/// Copy data at \a origin having format \a frame_format to \a destination.
+void ndarray_frame_copy(void* destination, const void* origin, const ndarray_opaque_frame_format& frame_format);
+
 
 }
 
