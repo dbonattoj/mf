@@ -29,8 +29,8 @@ namespace mf {
 // TODO rename total duration -> capacity
 
 /// Ring buffer.
-/** Circular buffer of *frames*. Derived from \ref ndarray_generic.
- ** FIFO interface to read/write frames to the ring buffer. */
+/** Circular buffer of *frames* of \ref ndarray_opaque_frame_format format.
+ ** Derived from 1-dimensional \ref ndarray_opaque. FIFO interface to read/write frames to the ring buffer. */
 class ring : public ndarray_opaque<1, raw_ring_allocator> {
 	using base = ndarray_opaque<1, raw_ring_allocator>;
 	
