@@ -25,8 +25,11 @@ namespace mf {
 template<std::size_t Dim, bool Mutable>
 ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
 (frame_ptr start, const shape_type& shape, const strides_type& strides, const ndarray_opaque_frame_format& frm) :
-	//base(static_cast<base_value_type*>(start), ndcoord_cat(shape, frm.frame_size()), ndcoord_cat(strides, 1)),
-	base(static_cast<base_value_type*>(start), ndcoord_cat(shape, 1), ndcoord_cat(strides, frm.frame_size())),
+	base(
+		static_cast<base_value_type*>(start),
+		ndcoord_cat(shape, 1),
+		ndcoord_cat(strides, frm.frame_size_with_padding())
+	),
 	format_(frm) { }
 
 

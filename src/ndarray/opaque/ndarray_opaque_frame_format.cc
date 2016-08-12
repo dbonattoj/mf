@@ -27,6 +27,7 @@ namespace mf {
 ndarray_opaque_frame_format::ndarray_opaque_frame_format() :
 	frame_size_(0),
 	frame_alignment_requirement_(1),
+	frame_size_with_padding_(0),
 	contiguous_(true) { }
 
 	
@@ -35,13 +36,28 @@ ndarray_opaque_frame_format::ndarray_opaque_frame_format(const ndarray_format& f
 	frame_size_ = format.frame_size();
 	frame_alignment_requirement_ = format.frame_alignment_requirement();
 	contiguous_ = format.is_contiguous();
+	update_frame_size_with_padding_();
 }
 
 
 ndarray_opaque_frame_format::ndarray_opaque_frame_format(std::size_t frame_size, std::size_t frame_alignment_req) :
 	frame_size_(frame_size),
 	frame_alignment_requirement_(frame_alignment_req),
-	contiguous_(true) { }
+	contiguous_(true)
+{
+	update_frame_size_with_padding_();
+}
+
+
+void ndarray_opaque_frame_format::update_frame_size_with_padding_() {
+	if(is_multiple_of(frame_size_, frame_alignment_requirement_)) {
+		frame_size_with_padding_ = frame_size_;
+	} else {
+		std::size_t remainder = frame_size_ % frame_alignment_requirement_;
+		frame_size_with_padding_ = frame_size_ + (frame_alignment_requirement_ - remainder);
+	}
+	Assert(is_multiple_of(frame_size_with_padding_, frame_alignment_requirement_));
+}
 
 
 auto ndarray_opaque_frame_format::add_part(const ndarray_format& new_part_format) -> const part& {
@@ -66,6 +82,7 @@ auto ndarray_opaque_frame_format::add_part(const ndarray_format& new_part_format
 	parts_.push_back(new_part);
 	frame_size_ = new_part.offset + new_part.format.frame_size();
 	frame_alignment_requirement_ = lcm(frame_alignment_requirement_, new_part.format.frame_alignment_requirement());
+	update_frame_size_with_padding_();
 	return parts_.back();
 }
 	

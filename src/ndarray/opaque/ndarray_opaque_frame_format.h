@@ -40,7 +40,11 @@ private:
 	std::vector<part> parts_;
 	std::size_t frame_size_ = 0;
 	std::size_t frame_alignment_requirement_ = 1;
+	
+	std::size_t frame_size_with_padding_ = 0;
 	bool contiguous_ = false;
+	
+	void update_frame_size_with_padding_();
 
 public:
 	ndarray_opaque_frame_format();
@@ -53,6 +57,7 @@ public:
 	const part& add_part(const ndarray_format& format);
 	
 	std::size_t frame_size() const noexcept { return frame_size_; }
+	std::size_t frame_size_with_padding() const noexcept { return frame_size_with_padding_; }
 	std::size_t frame_alignment_requirement() const noexcept { return frame_alignment_requirement_; }
 	
 	bool is_defined() const noexcept { return (frame_size_ > 0); }
