@@ -76,28 +76,36 @@ base(std::move(arr)) { }
 
 template<std::size_t Dim, typename Allocator>
 void ndarray_opaque<Dim, Allocator>::assign(const const_view_type& vw, std::size_t frame_padding) {
-	base::reset_(
-		vw.shape(),
-		view_type::default_strides(vw.shape(), frame_padding),
-		(vw.format().frame_size() + frame_padding) * vw.shape().product(),
-		vw.format().frame_alignment_requirement(),
-		vw.format()
-	);
-	base::view().assign(vw);
+	if(vw.is_null()) {
+		base::reset_();
+	} else {
+		base::reset_(
+			vw.shape(),
+			view_type::default_strides(vw.shape(), vw.format(), frame_padding),
+			(vw.format().frame_size() + frame_padding) * vw.shape().product(),
+			vw.format().frame_alignment_requirement(),
+			vw.format()
+		);
+		base::view().assign(vw);
+	}
 }
 	
 
 template<std::size_t Dim, typename Allocator>
 auto ndarray_opaque<Dim, Allocator>::operator=(const ndarray_opaque& arr) -> ndarray_opaque& {
 	if(&arr == this) return *this;
-	base::reset_(
-		arr.shape(),
-		arr.strides(),
-		arr.allocated_size(),
-		arr.format().frame_alignment_requirement(),
-		arr.format()
-	);
-	base::view().assign(arr.cview());
+	if(arr.is_null()) {
+		base::reset_();
+	} else {
+		base::reset_(
+			arr.shape(),
+			arr.strides(),
+			arr.allocated_size(),
+			arr.format().frame_alignment_requirement(),
+			arr.format()
+		);
+		base::view().assign(arr.cview());
+	}
 	return *this;
 }
 

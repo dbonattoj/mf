@@ -126,5 +126,12 @@ void ndarray_wrapper<View, Const_view, Allocator>::reset_(
 }
 
 
+template<typename View, typename Const_view, typename Allocator>
+void ndarray_wrapper<View, Const_view, Allocator>::reset_() {
+	deallocate_();
+	view_.reset();
+}
+
+
 
 }}

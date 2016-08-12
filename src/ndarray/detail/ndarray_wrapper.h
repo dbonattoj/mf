@@ -95,6 +95,8 @@ protected:
 		std::size_t allocate_alignment,
 		const Arg&... view_arguments
 	);
+	
+	void reset_();
 	///@}
 
 public:
