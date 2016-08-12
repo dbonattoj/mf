@@ -1,6 +1,6 @@
 # toolset
 CXX := ccache clang++-3.8
-CXXFLAGS := -std=c++14 -fcolor-diagnostics -Qunused-arguments
+CXXFLAGS := -std=c++14 -fcolor-diagnostics -Qunused-arguments -Wno-deprecated-declarations
 CXXFLAGS_SHARED := -fPIC
 LDFLAGS := 
 LDFLAGS_SHARED := -shared

@@ -81,6 +81,8 @@ public:
 	
 	reference operator*() const noexcept { return *pointer_; }
 	pointer operator->() const noexcept { return pointer_; }
+	pointer ptr() const noexcept { return pointer_; }
+	
 	reference operator[](std::ptrdiff_t n) const { return *(*this + n); }
 	
 	friend bool operator==(const ndarray_iterator& a, const ndarray_iterator& b) noexcept

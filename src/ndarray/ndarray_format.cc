@@ -26,7 +26,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 namespace {
-	
+
+// TODO benchmark optimization
+
 template<typename Word>
 class strided_memory_optimization_ {
 private:
@@ -94,11 +96,11 @@ bool operator!=(const ndarray_format& a, const ndarray_format& b) {
 }
 
 
-bool ndarray_frame_compare(const void* a_raw, const void* b_raw, const ndarray_format& format) {
+bool ndarray_data_compare(const void* a_raw, const void* b_raw, const ndarray_format& format) {
 	std::size_t frame_len = format.frame_size();
 	std::size_t elem_len = format.elem_size();
 	std::ptrdiff_t stride = format.stride();
-	
+		
 	if(format.is_contiguous()) {
 		return (std::memcmp(a_raw, b_raw, frame_len) == 0);
 	} else if(elem_len == 8 && is_multiple_of(stride, 8)) {
@@ -111,18 +113,21 @@ bool ndarray_frame_compare(const void* a_raw, const void* b_raw, const ndarray_f
 		return strided_memory_optimization_<std::uint8_t>::compare(a_raw, b_raw, stride, frame_len);
 	} else {
 		auto a_raw_end = advance_raw_ptr(a_raw, frame_len);
-		for(; a_raw != a_raw_end; advance_raw_ptr(a_raw, stride), advance_raw_ptr(b_raw, stride))
+		while(a_raw != a_raw_end) {
 			if(std::memcmp(a_raw, b_raw, elem_len) != 0) return false;
+			a_raw = advance_raw_ptr(a_raw, stride);
+			b_raw = advance_raw_ptr(b_raw, stride);
+		}
 		return true;
 	}
 }
 
 
-void ndarray_frame_copy(void* dest_raw, const void* origin_raw, const ndarray_format& format) {
+void ndarray_data_copy(void* dest_raw, const void* origin_raw, const ndarray_format& format) {
 	std::size_t frame_len = format.frame_size();
 	std::size_t elem_len = format.elem_size();
 	std::ptrdiff_t stride = format.stride();
-	
+
 	if(format.is_contiguous()) {
 		std::memcpy(dest_raw, origin_raw, frame_len);
 	} else if(elem_len == 8 && is_multiple_of(stride, 8)) {
@@ -135,8 +140,11 @@ void ndarray_frame_copy(void* dest_raw, const void* origin_raw, const ndarray_fo
 		strided_memory_optimization_<std::uint8_t>::assign(dest_raw, origin_raw, stride, frame_len);
 	} else {
 		auto origin_raw_end = advance_raw_ptr(origin_raw, frame_len);
-		for(; origin_raw != origin_raw_end; advance_raw_ptr(origin_raw, stride), advance_raw_ptr(dest_raw, stride))
+		while(origin_raw != origin_raw_end) {
 			std::memcpy(dest_raw, origin_raw, elem_len);
+			origin_raw = advance_raw_ptr(origin_raw, stride);
+			dest_raw = advance_raw_ptr(dest_raw, stride);
+		}
 	}
 }
 

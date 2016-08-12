@@ -33,6 +33,7 @@ constexpr std::size_t ndarray_view<Dim, T>::dimension;
 
 template<std::size_t Dim, typename T>
 auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t padding) -> strides_type {
+	if(Dim == 0) return ndptrdiff<Dim>();
 	Assert(is_multiple_of(padding, alignof(T)));
 	strides_type strides;
 	strides[Dim - 1] = sizeof(T) + padding;
@@ -45,6 +46,7 @@ auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t 
 
 template<std::size_t Dim, typename T>
 bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension) const noexcept {
+	if(Dim == 0) return true;
 	if(strides_.back() < sizeof(T)) return false;
 	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
 		std::ptrdiff_t expected_stride = shape_[i + 1] * strides_[i + 1];
@@ -56,7 +58,8 @@ bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension)
 
 template<std::size_t Dim, typename T>
 bool ndarray_view<Dim, T>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
-	if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
+	if(Dim == 0) return true;
+	else if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
 	else return false;
 }
 
@@ -65,6 +68,7 @@ bool ndarray_view<Dim, T>::has_default_strides_without_padding(std::ptrdiff_t mi
 
 template<std::size_t Dim, typename T>
 std::size_t ndarray_view<Dim, T>::default_strides_padding(std::ptrdiff_t minimal_dimension) const {
+	if(Dim == 0) return 0;
 	Assert(has_default_strides(minimal_dimension));
 	return (strides_.back() - sizeof(T));
 }
@@ -158,7 +162,7 @@ void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const
 		// optimize when possible
 		const ndarray_format& array_format = format(*this);
 		Assert_crit(array_format == format(other));
-		ndarray_frame_copy(static_cast<void*>(start()), static_cast<const void*>(other.start()), array_format);
+		ndarray_data_copy(static_cast<void*>(start()), static_cast<const void*>(other.start()), array_format);
 	} else {
 		std::copy(other.begin(), other.end(), begin());
 	}

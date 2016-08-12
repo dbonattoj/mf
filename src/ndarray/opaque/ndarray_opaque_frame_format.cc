@@ -86,13 +86,13 @@ bool operator!=(const ndarray_opaque_frame_format& a, const ndarray_opaque_frame
 }
 
 
-bool ndarray_frame_compare(const void* a, const void* b, const ndarray_opaque_frame_format& format) {
+bool ndarray_opaque_frame_compare(const void* a, const void* b, const ndarray_opaque_frame_format& format) {
 	if(format.is_contiguous()) {
 		return (std::memcmp(a, b, format.frame_size()) == 0);
 	} else {
 		for(std::ptrdiff_t part_index = 0; part_index < format.parts_count(); ++part_index) {
 			const auto& part = format.part_at(part_index);
-			bool part_equal = ndarray_frame_compare(
+			bool part_equal = ndarray_data_compare(
 				advance_raw_ptr(a, part.offset),
 				advance_raw_ptr(b, part.offset),
 				part.format
@@ -104,13 +104,13 @@ bool ndarray_frame_compare(const void* a, const void* b, const ndarray_opaque_fr
 }
 
 
-void ndarray_frame_copy(void* destination, const void* origin, const ndarray_opaque_frame_format& format) {
+void ndarray_opaque_frame_copy(void* destination, const void* origin, const ndarray_opaque_frame_format& format) {
 	if(format.is_contiguous()) {
 		std::memcpy(destination, origin, format.frame_size());
 	} else {
 		for(std::ptrdiff_t part_index = 0; part_index < format.parts_count(); ++part_index) {
 			const auto& part = format.part_at(part_index);
-			ndarray_frame_copy(
+			ndarray_data_copy(
 				advance_raw_ptr(destination, part.offset),
 				advance_raw_ptr(origin, part.offset),
 				part.format

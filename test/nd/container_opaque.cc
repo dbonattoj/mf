@@ -22,15 +22,25 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/ndarray/opaque/ndarray_view_opaque.h>
 #include <mf/ndarray/opaque/ndarray_timed_view_opaque.h>
 #include <mf/ndarray/opaque/ndarray_opaque.h>
+#include "../support/ndarray_opaque.h"
 
 using namespace mf;
+using namespace mf::test;
+
+static void verify_ndarray_memory_(ndarray_opaque<2>& arr) {
+	const auto& shp = arr.shape();
+	int i = 0;
+	for(const auto& coord : make_ndspan(shp)) arr.at(coord) = make_opaque_frame(i++);
+	i = 0;
+	for(const auto& coord : make_ndspan(shp)) {
+		INFO(i);
+		REQUIRE(arr.at(coord) == make_opaque_frame(i++));
+	}
+}
+
 
 TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
-	ndarray_opaque_frame_format frm;
-	ndarray_format afrm1 = make_ndarray_format<int>(100);
-	ndarray_format afrm2 = make_ndarray_format<double>(50, 2*sizeof(double));
-	frm.add_part(afrm1);
-	frm.add_part(afrm2);
+	ndarray_opaque_frame_format frm = opaque_frame_format();
 
 	constexpr std::ptrdiff_t pad = 64;
 	ndsize<2> shape{3, 4};
@@ -52,7 +62,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		REQUIRE(arr.shape() == shape);
 		REQUIRE((arr.strides() == ndarray_view_opaque<2>::default_strides(shape, frm)));
 		REQUIRE(arr.allocated_byte_size() >= arr_vw.size()*frm.frame_size());
-		/*verify_ndarray_memory_(arr);*/
+		verify_ndarray_memory_(arr);
 
 		// construction with shape, padding
 		ndarray_opaque<2> arr_pad(shape, frm, pad);
@@ -62,7 +72,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 
 		// construction from view (ndarray gets default strides)
 		ndarray_opaque<2> arr2(arr_vw_sec);
-	//	REQUIRE(arr2.view().compare(arr_vw_sec));
+		REQUIRE(arr2.view().compare(arr_vw_sec));
 		REQUIRE(arr2.shape() == arr_vw_sec.shape());
 		REQUIRE((arr2.strides() == ndarray_view_opaque<2>::default_strides(arr_vw_sec.shape(), frm)));
 		/*verify_ndarray_memory_(arr2);
@@ -72,7 +82,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 
 		// construction from view (ndarray gets padded default strides)
 		ndarray_opaque<2> arr3(arr_vw_sec, pad);
-	//	REQUIRE(arr3.view().compare(arr_vw_sec));
+		REQUIRE(arr3.view().compare(arr_vw_sec));
 		REQUIRE(arr3.shape() == arr_vw_sec.shape());
 		REQUIRE((arr3.strides() == ndarray_view_opaque<2>::default_strides(arr_vw_sec.shape(), frm, pad)));
 		/*verify_ndarray_memory_(arr3);
@@ -87,7 +97,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 
 		// copy-construction from another ndarray (strides get copied)
 		ndarray_opaque<2> arr4 = arr3;
-	//	REQUIRE(arr4.view().compare(arr3));
+		REQUIRE(arr4.view().compare(arr3));
 		REQUIRE(arr4.shape() == arr3.shape());
 		REQUIRE(arr4.strides() == arr3.strides());
 		/*REQUIRE(arr4[1][1][1] == 456);
@@ -104,7 +114,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		// move construction from another ndarray (strides get copied)
 		ndarray_opaque<2> arr5_cmp = arr4;
 		ndarray_opaque<2> arr5 = std::move(arr4);
-	//	REQUIRE(arr5.view().compare(arr5_cmp));
+		REQUIRE(arr5.view().compare(arr5_cmp));
 		REQUIRE(arr5.shape() == arr5_cmp.shape());
 		REQUIRE(arr5.strides() == arr5_cmp.strides());
 		REQUIRE(arr4.is_null());

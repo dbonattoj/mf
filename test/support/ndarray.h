@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_TESTSUPPORT_NDARRAY_H_
 #define MF_TESTSUPPORT_NDARRAY_H_
 
-#include "../../src/ndarray/ndarray.h"
+#include <mf/ndarray/ndarray.h>
 #include <iostream>
 #include <sstream>
 #include <vector>

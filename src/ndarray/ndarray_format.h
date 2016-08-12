@@ -69,10 +69,10 @@ public:
 
 
 /// Compare two data stored in \a a and \a b, both having format \a frame_format.
-bool ndarray_frame_compare(const void* a, const void* b, const ndarray_format& frame_format);
+bool ndarray_data_compare(const void* a, const void* b, const ndarray_format& format);
 
 /// Copy data at \a origin having format \a frame_format to \a destination.
-void ndarray_frame_copy(void* destination, const void* origin, const ndarray_format& frame_format);
+void ndarray_data_copy(void* destination, const void* origin, const ndarray_format& format);
 
 
 bool operator==(const ndarray_format&, const ndarray_format&);

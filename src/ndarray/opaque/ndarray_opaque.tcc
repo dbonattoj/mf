@@ -51,7 +51,7 @@ base(
 	allocator,
 	vw.format()
 ) {
-	base::view().assign(vw);
+	if(! vw.is_null()) base::view().assign(vw);
 }
 
 	
@@ -65,7 +65,7 @@ base(
 	arr.get_allocator(),
 	arr.format()
 ) {
-	base::view().assign(arr.cview());
+	if(! arr.is_null()) base::view().assign(arr.cview());
 }
 	
 
@@ -94,7 +94,8 @@ auto ndarray_opaque<Dim, Allocator>::operator=(const ndarray_opaque& arr) -> nda
 		arr.shape(),
 		arr.strides(),
 		arr.allocated_size(),
-		arr.format().frame_alignment_requirement()
+		arr.format().frame_alignment_requirement(),
+		arr.format()
 	);
 	base::view().assign(arr.cview());
 	return *this;

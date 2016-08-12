@@ -142,6 +142,8 @@ public:
 
 	/// \name Indexing
 	///@{
+	ndarray_view_opaque<0, Mutable> at(const coordinates_type&) const;
+	
 	ndarray_view_opaque section
 	(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const {
 		return ndarray_view_opaque(format_, base::section(start, end, steps));

@@ -22,7 +22,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_NDCOORD_H_
 
 #include <cstddef>
-#include <cassert>
 #include <array>
 #include <initializer_list>
 #include <functional>
@@ -72,11 +71,11 @@ public:
 		ndcoord(coord.begin(), coord.end()) { }
 	
 	T& operator[](std::ptrdiff_t i) noexcept {
-		assert(i >= 0 && i < Dim);
+		Assert(i >= 0 && i < Dim);
 		return components_[i];
 	}
 	const T& operator[](std::ptrdiff_t i) const noexcept {
-		assert(i >= 0 && i < Dim);
+		Assert(i >= 0 && i < Dim);
 		return components_[i];
 	}
 	
