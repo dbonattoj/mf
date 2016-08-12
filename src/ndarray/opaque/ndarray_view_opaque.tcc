@@ -202,7 +202,7 @@ auto from_opaque(
 	Assert(array_format.elem_size() == sizeof(Concrete_elem),
 		"opaque frame format has incorrect element type");
 	Assert(is_multiple_of(array_format.elem_alignment(), alignof(Concrete_elem)),
-		"opaque frame format has incorrect element type");
+		"opaque frame format has incorrect element type");	
 	Assert(frame_shape.product() * array_format.stride() == array_format.frame_size(),
 		"concrete frame shape must match opaque frame size and stride");
 	

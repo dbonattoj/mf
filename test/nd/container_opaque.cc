@@ -31,20 +31,12 @@ static void verify_ndarray_memory_(ndarray_opaque<2>& arr) {
 	const auto& shp = arr.shape();
 	int i = 0;
 	
-	auto fr = make_opaque_frame(123);
-	REQUIRE(opaque_frame_index(fr) == 123);
+	for(const auto& coord : make_ndspan(shp))
+		arr.at(coord) = make_opaque_frame(i++);
 	
-	for(const auto& coord : make_ndspan(shp)) {
-		arr.at(coord) = make_opaque_frame(i);
-		REQUIRE(arr.at(coord) == make_opaque_frame(i));
-		++i;
-	}
 	i = 0;
-	for(const auto& coord : make_ndspan(shp)) {
-		INFO(i);
-		INFO(opaque_frame_index(arr.at(coord)));
+	for(const auto& coord : make_ndspan(shp))
 		REQUIRE(arr.at(coord) == make_opaque_frame(i++));
-	}
 }
 
 
@@ -65,7 +57,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		// null ndarray
 		REQUIRE(null_arr.is_null());
 		REQUIRE(null_arr.allocated_byte_size() == 0);
-	
+
 		// construction with shape
 		ndarray_opaque<2> arr(shape, frm);
 		REQUIRE(arr.shape() == shape);
@@ -77,27 +69,27 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		ndarray_opaque<2> arr_pad(shape, frm, pad);
 		REQUIRE(arr_pad.shape() == shape);
 		REQUIRE((arr_pad.strides() == ndarray_view_opaque<2>::default_strides(shape, frm, pad)));
-		/*verify_ndarray_memory_(arr_pad);*/
+		verify_ndarray_memory_(arr_pad);
 
 		// construction from view (ndarray gets default strides)
 		ndarray_opaque<2> arr2(arr_vw_sec);
 		REQUIRE(arr2.view().compare(arr_vw_sec));
 		REQUIRE(arr2.shape() == arr_vw_sec.shape());
 		REQUIRE((arr2.strides() == ndarray_view_opaque<2>::default_strides(arr_vw_sec.shape(), frm)));
-		/*verify_ndarray_memory_(arr2);
-		arr2[1][1][1] = 456;
-		REQUIRE(arr2[1][1][1] == 456);
-		REQUIRE_FALSE(arr_vw[1][1][1] == 456);*/
+		verify_ndarray_memory_(arr2);
+		arr2[1][1] = make_opaque_frame(456);
+		REQUIRE(arr2[1][1] == make_opaque_frame(456));
+		REQUIRE_FALSE(arr_vw[1][1] == make_opaque_frame(456));
 
 		// construction from view (ndarray gets padded default strides)
 		ndarray_opaque<2> arr3(arr_vw_sec, pad);
 		REQUIRE(arr3.view().compare(arr_vw_sec));
 		REQUIRE(arr3.shape() == arr_vw_sec.shape());
 		REQUIRE((arr3.strides() == ndarray_view_opaque<2>::default_strides(arr_vw_sec.shape(), frm, pad)));
-		/*verify_ndarray_memory_(arr3);
-		arr3[1][1][1] = 456;
-		REQUIRE(arr3[1][1][1] == 456);
-		REQUIRE_FALSE(arr_vw[1][1][1] == 456);*/
+		verify_ndarray_memory_(arr3);
+		arr3[1][1] = make_opaque_frame(456);
+		REQUIRE(arr3[1][1] == make_opaque_frame(456));
+		REQUIRE_FALSE(arr_vw[1][1] == make_opaque_frame(456));
 	
 		// construction from null ndarray_view
 		ndarray_opaque<2> null_arr1(ndarray_view_opaque<2>::null());
@@ -109,11 +101,11 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		REQUIRE(arr4.view().compare(arr3));
 		REQUIRE(arr4.shape() == arr3.shape());
 		REQUIRE(arr4.strides() == arr3.strides());
-		/*REQUIRE(arr4[1][1][1] == 456);
+		REQUIRE(arr4[1][1] == make_opaque_frame(456));
 		verify_ndarray_memory_(arr4);
-		arr4[1][1][1] = 789;
-		REQUIRE(arr4[1][1][1] == 789);
-		REQUIRE_FALSE(arr3[1][1][1] == 789);*/
+		arr4[1][1] = make_opaque_frame(789);
+		REQUIRE(arr4[1][1] == make_opaque_frame(789));
+		REQUIRE_FALSE(arr3[1][1] == make_opaque_frame(789));
 		
 		// copy-construction from null ndarray
 		ndarray_opaque<2> null_arr2 = null_arr;
@@ -128,7 +120,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		REQUIRE(arr5.strides() == arr5_cmp.strides());
 		REQUIRE(arr4.is_null());
 		REQUIRE(arr4.allocated_byte_size() == 0);
-		/*verify_ndarray_memory_(arr5);*/
+		verify_ndarray_memory_(arr5);
 
 		// move-construction from null ndarray
 		ndarray_opaque<2> null_arr3 = std::move(null_arr);
@@ -136,7 +128,7 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		REQUIRE(null_arr3.allocated_byte_size() == 0);
 	}
 
-/*
+
 	SECTION("assignment") {
 		ndsize<3> previous_shape{5, 1, 1};
 		ndsize<3> shp = arr_vw_sec.shape();
@@ -213,5 +205,5 @@ TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
 		REQUIRE(arr_9_.shape() == arr_f.shape());
 		REQUIRE((arr_9_.strides() == ndarray_view<3, int>::default_strides(shp, pad)));
 	}
-*/
+
 }
