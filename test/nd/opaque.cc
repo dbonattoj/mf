@@ -22,17 +22,18 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/ndarray/opaque/ndarray_view_opaque.h>
 #include <mf/ndarray/opaque/ndarray_timed_view_opaque.h>
 #include <mf/ndarray/opaque/ndarray_opaque.h>
+#include "../support/ndarray_opaque.h"
 
 using namespace mf;
+using namespace mf::test;
 
-TEST_CASE("ndarray_opaque_view", "[nd][ndarray_opaque_view]") {
+TEST_CASE("ndarray_view_opaque", "[nd][ndarray_view_opaque]") {
 	constexpr std::size_t l = sizeof(int);
 
-	SECTION("basics") {
-		// default strides
-		{
+	SECTION("default strides") {
 		ndarray_opaque_frame_format frm( make_ndarray_format<int>(100) );
 		ndarray_opaque_frame_format frm_str( make_ndarray_format<int>(100, 2*l) );
+		REQUIRE(frm.frame_size() == 100*sizeof(int));
 	
 		REQUIRE(( ndarray_view_opaque<2>::default_strides(make_ndsize(3, 2), frm) ==
 			make_ndptrdiff(2*100*l, 100*l) ));
@@ -42,21 +43,44 @@ TEST_CASE("ndarray_opaque_view", "[nd][ndarray_opaque_view]") {
 			make_ndptrdiff(2*100*2*l, 100*2*l) ));
 		REQUIRE(( ndarray_view_opaque<2>::default_strides(make_ndsize(3, 2), frm_str, 3*l) ==
 			make_ndptrdiff( 2*(100*2*l + 3*l ), 100*2*l + 3*l ) ));
+	}
+	
+	SECTION("contiguous") {
+		// creating two views to different data
+		auto shp = make_ndsize(2, 3);
+		std::vector<int> raw1(2 * 3 * 10);
+		std::vector<int> raw2 = raw1;
+		for(std::ptrdiff_t i = 0; i != raw1.size(); ++i) {
+			raw1[i] = i;
+			raw2[i] = 2*i + 1;
 		}
+		ndarray_opaque_frame_format frm(make_ndarray_format<int>(10));
+		auto str = ndarray_view_opaque<2>::default_strides(shp, frm);
+		ndarray_view_opaque<2> vw1(static_cast<void*>(&raw1[0]), shp, str, frm);
+		ndarray_view_opaque<2> vw2(static_cast<void*>(&raw2[0]), shp, str, frm);
 		
-		// default strides view
-		// frame length=10, stride=2*l, frame_padding=3*l
-		std::unique_ptr<int[]> buffer(new int[3 * 2 * (10*2 + 3)]);
-		ndarray_opaque_frame_format frm(make_ndarray_format<int>(10, 2*l));
-		auto shp = make_ndsize(3, 2);
-		auto str = ndarray_view_opaque<2>::default_strides(3*l, frm);
-		auto start = static_cast<ndarray_view_opaque<2>::frame_ptr>(buffer.get());
-		ndarray_view_opaque<2> vw(start, shp, str, frm);
-		REQUIRE(vw.start() == start);
-		REQUIRE(vw.shape() == shp);
-		REQUIRE(vw.strides() == str);
+		// assign and compare 0-d section
+		REQUIRE(vw1 == vw1);
+		REQUIRE(vw1 != vw2);
+
+		vw1[1][1] = vw2[1][1];
+		REQUIRE(vw1[1][0] != vw2[1][0]);
+		REQUIRE(vw1[1][1] == vw2[1][1]);
+		REQUIRE(vw1[1][2] != vw2[1][2]);
 		
-		// TODO reset, same, null, etc basics
+		REQUIRE_FALSE(raw1[(1*3 + 1)*10 - 1] == raw2[(1*3 + 1)*10 - 1]);
+		for(std::ptrdiff_t i = 0; i < 10; ++i)
+			REQUIRE(raw1[(1*3 + 1)*10 + i] == raw2[(1*3 + 1)*10 + i]);
+		REQUIRE_FALSE(raw1[(1*3 + 1)*10 + 10] == raw2[(1*3 + 1)*10 + 10]);
+		
+		// assign and compare 1-d section
+		vw1[0] = vw2[0];
+		REQUIRE(vw1[0] == vw2[0]);
+		REQUIRE(vw1[1] != vw2[1]);
+		
+		// assign and compare full
+		vw1 = vw2;
+		REQUIRE(vw1 == vw2);
 	}
 }
 

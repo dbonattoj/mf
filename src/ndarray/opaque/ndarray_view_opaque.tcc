@@ -28,7 +28,7 @@ ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
 	base(
 		static_cast<base_value_type*>(start),
 		ndcoord_cat(shape, 1),
-		ndcoord_cat(strides, frm.frame_size_with_padding())
+		ndcoord_cat(strides, frm.frame_size())
 	),
 	format_(frm) { }
 
@@ -67,8 +67,8 @@ bool ndarray_view_opaque<Dim, Mutable>::has_default_strides(std::ptrdiff_t minim
 
 
 template<std::size_t Dim, bool Mutable>
-std::size_t ndarray_view_opaque<Dim, Mutable>::default_strides_padding(std::ptrdiff_t minimal_dimension) const {
-	if(Dim == 0) return 0;
+bool ndarray_view_opaque<Dim, Mutable>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
+	if(Dim == 0) return true;
 	else if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
 	else return false;
 }
@@ -76,8 +76,8 @@ std::size_t ndarray_view_opaque<Dim, Mutable>::default_strides_padding(std::ptrd
 
 
 template<std::size_t Dim, bool Mutable>
-bool ndarray_view_opaque<Dim, Mutable>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
-	if(Dim == 0) return true;
+std::size_t ndarray_view_opaque<Dim, Mutable>::default_strides_padding(std::ptrdiff_t minimal_dimension) const {
+	if(Dim == 0) return 0;
 	Assert(has_default_strides(minimal_dimension));
 	return (strides().back() - format().frame_size());
 }
@@ -101,6 +101,7 @@ void ndarray_view_opaque<Dim, Mutable>::assign(const ndarray_view_opaque<Dim, fa
 		// directly copy entire memory segment
 		std::memcpy(start(), vw.start(), format_.frame_size() * size());
 	} else {
+		// copy frame-by-frame, optimizing the frame copies when possible
 		// copy frame-by-frame, optimizing the frame copies when possible
 		auto it = base_view().begin();
 		auto it_end = base_view().end();

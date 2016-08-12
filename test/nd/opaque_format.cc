@@ -114,9 +114,8 @@ TEST_CASE("ndarray_opaque_frame_format", "[nd][ndarray_opaque_frame_format]") {
 		REQUIRE(frm.part_at(1).offset == 49*4 + 4);
 		REQUIRE(frm.part_at(2).format == afrm3);
 		REQUIRE(frm.part_at(2).offset == (49*4 + 4) + 20*2*8);
-		REQUIRE(frm.frame_size() == (49*4 + 4) + (20*2*8) + (3*1));
-		REQUIRE(frm.frame_size_with_padding() == (49*4 + 4) + (20*2*8) + 8);
-		REQUIRE(is_multiple_of(frm.frame_size_with_padding(), frm.frame_alignment_requirement()));
+		REQUIRE(frm.frame_size() == (49*4 + 4) + (20*2*8) + 8);
+		REQUIRE(is_multiple_of(frm.frame_size(), frm.frame_alignment_requirement()));
 		REQUIRE(frm.frame_alignment_requirement() == 8);
 
 		struct padded_int64_t {

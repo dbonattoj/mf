@@ -30,10 +30,19 @@ using namespace mf::test;
 static void verify_ndarray_memory_(ndarray_opaque<2>& arr) {
 	const auto& shp = arr.shape();
 	int i = 0;
-	for(const auto& coord : make_ndspan(shp)) arr.at(coord) = make_opaque_frame(i++);
+	
+	auto fr = make_opaque_frame(123);
+	REQUIRE(opaque_frame_index(fr) == 123);
+	
+	for(const auto& coord : make_ndspan(shp)) {
+		arr.at(coord) = make_opaque_frame(i);
+		REQUIRE(arr.at(coord) == make_opaque_frame(i));
+		++i;
+	}
 	i = 0;
 	for(const auto& coord : make_ndspan(shp)) {
 		INFO(i);
+		INFO(opaque_frame_index(arr.at(coord)));
 		REQUIRE(arr.at(coord) == make_opaque_frame(i++));
 	}
 }

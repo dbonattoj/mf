@@ -119,11 +119,7 @@ public:
 	
 	/// \name Deep assignment
 	///@{
-	ndarray_view_opaque& operator=(const ndarray_view_opaque<Dim, false>& vw) const {
-		Expects_crit(vw.format() == format());
-		base::operator=(vw.base_view());
-		return *this;
-	}
+	const ndarray_view_opaque& operator=(const ndarray_view_opaque& vw) const { assign(vw); return *this; }
 	
 	void assign(const ndarray_view_opaque<Dim, false>& vw) const;
 	///@}
