@@ -102,7 +102,6 @@ void ndarray_view_opaque<Dim, Mutable>::assign(const ndarray_view_opaque<Dim, fa
 		std::memcpy(start(), vw.start(), format_.frame_size() * size());
 	} else {
 		// copy frame-by-frame, optimizing the frame copies when possible
-		// copy frame-by-frame, optimizing the frame copies when possible
 		auto it = base_view().begin();
 		auto it_end = base_view().end();
 		auto other_it = vw.base_view().begin();

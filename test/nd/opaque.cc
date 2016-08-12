@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/ndarray/opaque/ndarray_view_opaque.h>
 #include <mf/ndarray/opaque/ndarray_timed_view_opaque.h>
 #include <mf/ndarray/opaque/ndarray_opaque.h>
+#include <mf/os/memory.h>
 #include "../support/ndarray_opaque.h"
 
 using namespace mf;
@@ -81,6 +82,73 @@ TEST_CASE("ndarray_view_opaque", "[nd][ndarray_view_opaque]") {
 		// assign and compare full
 		vw1 = vw2;
 		REQUIRE(vw1 == vw2);
+	}
+	
+	
+	SECTION("non-contiguous") {
+		// 4 kinds of padding:
+		// (1) between array elements in frame part
+		// (2) between frame parts (to satisfy alignment of frame part array elements)
+		// (3) at the end of frame (to satisfy alignment of frame)
+		// (4) additional stride between frames
+		
+		// creating two views to different data
+		auto shp = make_ndsize(2, 3);
+		auto frm = opaque_frame_format();
+		raw_allocator alloc;
+		std::size_t f = frm.frame_size(); // frame size
+		std::size_t p = 32; // additional stride padding between frames (4)
+		std::size_t fp = frm.frame_size() + p; // frame size with stride padding
+		std::size_t n = 2 * 3 * fp; // full length of array memory
+		void* raw1_v = alloc.raw_allocate(n, frm.frame_alignment_requirement());
+		void* raw2_v = alloc.raw_allocate(n, frm.frame_alignment_requirement());
+		
+		byte* raw1 = static_cast<byte*>(raw1_v);
+		byte* raw2 = static_cast<byte*>(raw2_v);
+		for(std::ptrdiff_t i = 0; i < n; ++i) {
+			raw1[i] = (i % 100);
+			raw2[i] = 100 + ((2*i + 1) % 100);
+		}
+		auto str = make_ndptrdiff(3*fp ,fp);
+		
+		ndarray_view_opaque<2> vw1(raw1_v, shp, str, frm);
+		ndarray_view_opaque<2> vw2(raw2_v, shp, str, frm);
+		
+		// assign and compare 0-d section
+		REQUIRE(vw1 == vw1);
+		REQUIRE(vw1 != vw2);
+
+		vw1[1][1] = vw2[1][1];
+		REQUIRE(vw1[1][0] != vw2[1][0]);
+		REQUIRE(vw1[1][1] == vw2[1][1]);
+		REQUIRE(vw1[1][2] != vw2[1][2]);
+		
+		// assign and compare 1-d section
+		vw1[0] = vw2[0];
+		REQUIRE(vw1[0] == vw2[0]);
+		REQUIRE(vw1[1] != vw2[1]);
+		
+		// assign and compare full
+		vw1 = vw2;
+		REQUIRE(vw1 == vw2);
+		
+		// write in padding
+		REQUIRE(frm.part_at(1).format.elem_padding() > 1);
+		raw1[frm.part_at(1).offset + frm.part_at(1).format.elem_size()] = 244; // (1)
+		raw1[frm.part_at(1).offset - 1] = 244; // (2)
+		raw1[frm.part_at(2).offset + frm.part_at(2).format.frame_size()] = 244; // (3)
+		raw1[frm.frame_size() + 1] = 244; // (4);
+		REQUIRE(vw1 == vw2); // must still be equal (compare does not look in padidng area)
+		vw1 = vw2;
+		// must not have overwritte padding areas:
+		REQUIRE(244 == raw1[frm.part_at(1).offset + frm.part_at(1).format.elem_size()]);
+		REQUIRE(244 == raw1[frm.part_at(1).offset - 1]);
+		REQUIRE(244 == raw1[frm.part_at(2).offset + frm.part_at(2).format.frame_size()]);
+		REQUIRE(244 == raw1[frm.frame_size() + 1]);
+		
+		// deallocate
+		alloc.raw_deallocate(raw1_v, n);
+		alloc.raw_deallocate(raw2_v, n);
 	}
 }
 

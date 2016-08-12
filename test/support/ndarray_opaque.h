@@ -32,10 +32,6 @@ ndarray_opaque_frame_format opaque_frame_format();
 ndarray_opaque<0> make_opaque_frame(int i);
 int opaque_frame_index(const ndarray_view_opaque<0>&, bool verify = false);
 
-ndarray_opaque_frame_format opaque_contiguous_frame_format();
-ndarray_opaque<0> make_contiguous_opaque_frame(int i);
-int opaque_contiguous_frame_index(const ndarray_view_opaque<0>&, bool verify = false);
-
 }}
 
 #endif
