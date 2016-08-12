@@ -36,5 +36,15 @@ int opaque_frame_index(const ndarray_view_opaque<0>& vw, bool verify) {
 }
 
 
+bool compare_opaque_frames(const ndarray_view_opaque<1>& frames, const std::vector<int>& is) {
+	if(frames.shape().front() != is.size()) return false;
+	for(std::ptrdiff_t i = 0; i < is.size(); ++i) {
+		auto expected = make_opaque_frame(is[i]);
+		if(frames[i] != expected) return false;
+	}
+	return true;
+}
+
+
 
 }}

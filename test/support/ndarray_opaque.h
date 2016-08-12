@@ -31,6 +31,8 @@ namespace mf { namespace test {
 ndarray_opaque_frame_format opaque_frame_format();
 ndarray_opaque<0> make_opaque_frame(int i);
 int opaque_frame_index(const ndarray_view_opaque<0>&, bool verify = false);
+bool compare_opaque_frames(const ndarray_view_opaque<1>& frames, const std::vector<int>& is);
+
 
 }}
 
