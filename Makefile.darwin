@@ -1,19 +1,21 @@
 # toolset
-CXX := clang++
-CXXFLAGS := -std=c++14
-CXXFLAGS_SHARED := -fPIC -shared
-LDFLAGS := 
+CXX := ccache /usr/local/opt/llvm/bin/clang++
+CXXFLAGS := -I/usr/local/opt/llvm/include -std=c++14 -fcolor-diagnostics -Qunused-arguments -Wno-deprecated-declarations
+CXXFLAGS_SHARED := -fPIC
+LDFLAGS := -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib
+LDFLAGS_SHARED := -dynamiclib
 LDLIBS := -lpthread -lm
 
 # debug/deploy build settings
 ifeq ($(DEBUG), 1)
-	CXXFLAGS += -g -Wl,-export-dynamic -pedantic
+	CXXFLAGS += -g -pedantic
+	LDFLAGS += -Wl
 else
-	CXXFLAGS += -O3 -DNDEBUG
+	CXXFLAGS += -O3 -DNDEBUG 
 endif
 
 # included external dependencies
-CXXFLAGS += -std=c++14 -fPIC -I./external/include -I./dist/include
+CXXFLAGS += -I./external/include -I./dist/include
 
 # external dependencies on system
 PACKAGES := opencv eigen3
@@ -24,10 +26,15 @@ LDLIBS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs-only-l --
 
 
 # === shared library mf ======
-LIB := $(DIST_DIR)/libmf.dylib
+ifeq ($(DEBUG), 1)
+	LIB := $(DIST_DIR)/libmf_debug.so
+else
+	LIB := $(DIST_DIR)/libmf.so
+endif
 LIB_SRC := $(shell find src -name '*.cc')
 LIB_OBJ := $(patsubst src/%.cc,$(BUILD_DIR)/src/%.o,$(LIB_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(LIB_SRC))
+
 
 # === tests ======
 TEST := $(DIST_DIR)/mf_test
@@ -38,22 +45,18 @@ TEST_SUPPORT_SRC := $(shell find test/support/. -name '*.cc')
 TEST_SUPPORT_OBJ := $(patsubst test/support/%.cc,$(BUILD_DIR)/test/support/%.o,$(TEST_SUPPORT_SRC))
 DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
 
+
 # === programs ======
-# one executable per .cc in prog/*.cc
+# one executable per directory in prog/*.
+PROG_DIR := $(shell find prog -mindepth 1 -maxdepth 1 -type d ! -name "support")
+PROG := $(patsubst prog/%,$(DIST_DIR)/prog/%,$(PROG_DIR))
 PROG_SRC := $(shell find prog -maxdepth 1 -name '*.cc')
-PROG := $(patsubst prog/%.cc,$(DIST_DIR)/prog/%,$(PROG_SRC))
-# programs support
-PROG_SUPPORT_SRC := $(shell find prog/support -name '*.cc')
-PROG_SUPPORT_OBJ := $(patsubst prog/support/%.cc,$(BUILD_DIR)/prog/support/%.o,$(PROG_SUPPORT_SRC))
-# programs filters: one shared library per .cc in prog/filter/*.cc
-PROG_FILTER_SRC := $(shell find prog/filter -name '*.cc')
-PROG_FILTER_OBJ := $(patsubst prog/filter/%.cc,$(BUILD_DIR)/prog/filter/%.o,$(PROG_FILTER_SRC))
-PROG_FILTER := $(patsubst prog/filter/%.cc,$(DIST_DIR)/prog/filter/%.dylib,$(PROG_FILTER_SRC))
-DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC) $(PROG_FILTER_SRC)) 
+PROG_SUPPORT_OBJ := $(patsubst prog/%.cc,$(BUILD_DIR)/prog/%.o,$(PROG_SUPPORT_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
 
 
 # === default targets ======
-all : library prog
+all : library
 	
 
 library : $(LIB)
@@ -65,7 +68,7 @@ build_test : $(TEST)
 test : build_test
 	$(TEST)
 
-prog : $(PROG) $(PROG_FILTER)
+prog : $(PROG)
 	
 
 clean :
@@ -75,55 +78,56 @@ clean :
 
 # === internal targets ======
 
+# = library ===
+
 # shared library mf: build objects for src/../*.cc, and then link into shared library target
 # also create symlink dist/include/mf --> src/ , so that test+prog can #include <mf/...>
 # TODO improve
 $(LIB) : $(LIB_OBJ)
+	@echo linking $@ && \
 	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) -o $@ $(LIB_OBJ) $(LDLIBS) && \
+	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_SHARED) -o $@ $(LIB_OBJ) $(LDLIBS) && \
 	mkdir -p dist/include && ln -fs ../../src dist/include/mf
 	
 
 # .cc compilation in src/: compile for shared library
 $(BUILD_DIR)/src/%.o : src/%.cc
+	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXX_FLAGS_SHARED) -c -o $@ $< -MMD
+	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $< -MMD
 
 
 
-
+# = test ===
 
 # test executable:  build mf, obj for test/../*.cc, test/support/*.cc, and link into test executable 
 $(TEST) : $(LIB) $(TEST_OBJ) $(TEST_SUPPORT_OBJ)
+	@echo linking $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
 
 # .cc compilation in test/: compile for test executable
 $(BUILD_DIR)/test/%.o : test/%.cc
+	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
+	
 
+# = programs ===
 
-
-# program executable: build mf, program filter shared libs, obj for program executable and program support, and link
-$(DIST_DIR)/prog/% :  $(BUILD_DIR)/prog/%.o $(PROG_SUPPORT_OBJ) $(LIB) $(PROG_FILTER)
+# program executable: 
+$(DIST_DIR)/prog/% : prog/%/*.cc $(PROG_SUPPORT_OBJ) $(LIB)
+	@echo building program $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-# program filter shared lib: build mf, program filter obj, program support, and link into shared lib
-$(DIST_DIR)/prog/filter/%.dylib : $(BUILD_DIR)/prog/filter/%.o $(LIB) $(PROG_SUPPORT_OBJ)
-	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # .cc compilation in prog/: compile for program executable
 $(BUILD_DIR)/prog/%.o : prog/%.cc
+	@echo compiling $@ && \
 	mkdir -p $(dir $@) && \
 	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
 
-# .cc compilation in prog/filter/: compile for filter shared library
-$(BUILD_DIR)/prog/filter/%.o : prog/filter/%.cc
-	mkdir -p $(dir $@) && \
-	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $< -MMD
 
 
 .PHONY: clean library build_test test prog
