@@ -31,7 +31,7 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 	auto frm = opaque_frame_format();
 	std::size_t capacity = 10;
 	REQUIRE_FALSE(is_multiple_of(capacity * frm.frame_size(), system_page_size()));
-	timed_ring rng(frm, capacity);
+	timed_ring rng(frm, capacity, timed_ring::undefined_time);
 	
 	REQUIRE(rng.current_time() == -1);
 	REQUIRE(rng.read_start_time() == 0);

@@ -61,6 +61,7 @@ private:
 
 protected:
 	ndarray_view_opaque section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const;
+	using base::fix_coordinate_;
 
 public:
 	/// \name Construction

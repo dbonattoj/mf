@@ -192,6 +192,8 @@ public:
 	 ** buffer, the writer can only mark end after writing at least one frame, and hence cannot retroactively mark
 	 ** current read start position as being the end. */
 	bool reader_reached_end() const;
+	
+	time_unit current_time() const { return ring_.current_time(); }
 };
 
 
