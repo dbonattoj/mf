@@ -41,7 +41,7 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 	
 	SECTION("single read/write") {
 		// write frames [0,3[
-		auto w_section(rng.begin_write_span(time_span(0, 3)));
+		auto w_section(rng.begin_write(3));
 		REQUIRE(w_section.shape().front() == 3);
 		REQUIRE(rng.current_time() == -1);
 		REQUIRE(rng.read_start_time() == 0);
@@ -83,7 +83,7 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 		
 	SECTION("multiple read/write") {	
 		// write frames [0,5[
-		auto w_section(rng.begin_write_span(time_span(0, 5)));
+		auto w_section(rng.begin_write(5));
 		w_section[0] = make_opaque_frame(0);
 		w_section[1] = make_opaque_frame(1);
 		w_section[2] = make_opaque_frame(2);		
@@ -101,22 +101,9 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 		REQUIRE(rng.current_time() == 4);
 		REQUIRE(rng.read_start_time() == 4);
 		REQUIRE(rng.write_start_time() == 5);
-
-		
-		// try to write [10,11[ (after current time)
-		REQUIRE_THROWS_AS(rng.begin_write_span(time_span(10,11)), sequencing_error);
-		REQUIRE(rng.current_time() == 4);
-		REQUIRE(rng.read_start_time() == 4);
-		REQUIRE(rng.write_start_time() == 5);
-		
-		// try to write [3,10[ (before current time)
-		REQUIRE_THROWS_AS(rng.begin_write_span(time_span(3,10)), sequencing_error);
-		REQUIRE(rng.current_time() == 4);
-		REQUIRE(rng.read_start_time() == 4);
-		REQUIRE(rng.write_start_time() == 5);
 		
 		// write [5,7[
-		w_section.reset(rng.begin_write_span(time_span(5, 7)));
+		w_section.reset(rng.begin_write(2));
 		w_section[0] = make_opaque_frame(5);
 		w_section[1] = make_opaque_frame(6);
 		rng.end_write(2);
@@ -124,35 +111,34 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 		REQUIRE(rng.read_start_time() == 4);
 		REQUIRE(rng.write_start_time() == 7);
 		
-		// try to read/skip [5,8[ (more than readable)
+		// try to read [5,8[ (more than readable)
 		REQUIRE_THROWS_AS(rng.begin_read_span(time_span(5, 8)), sequencing_error);
-		REQUIRE_THROWS_AS(rng.skip_span(time_span(5, 8)), sequencing_error);
 		REQUIRE(rng.current_time() == 6);
 		REQUIRE(rng.read_start_time() == 4);
 		REQUIRE(rng.write_start_time() == 7);
 		
 		// try to read [5,16[ (more than capacity)
-		REQUIRE_THROWS_AS(rng.begin_read_span(time_span(5, 16)), std::invalid_argument);
+		REQUIRE_THROWS(rng.begin_read_span(time_span(5, 16)));
 		REQUIRE(rng.current_time() == 6);
 		REQUIRE(rng.read_start_time() == 4);
 		REQUIRE(rng.write_start_time() == 7);
 		
 		// read [5,7[
-		r_section.reset(rng.begin_read_span(time_span(5, 7)));
+		r_section.reset(rng.begin_read(2));
 		compare_opaque_frames(r_section, {5, 6});
 		rng.end_read(2);
 		REQUIRE(rng.current_time() == 6);
-		REQUIRE(rng.read_start_time() == 7);
+		REQUIRE(rng.read_start_time() == 6);
 		REQUIRE(rng.write_start_time() == 7);
 	
 		// try to write [7,18[ (more than capacity)
-		REQUIRE_THROWS_AS(rng.begin_write_span(time_span(7, 18)), std::invalid_argument);
+		REQUIRE_THROWS(rng.begin_write(11));
 		REQUIRE(rng.current_time() == 6);
-		REQUIRE(rng.read_start_time() == 7);
+		REQUIRE(rng.read_start_time() == 6);
 		REQUIRE(rng.write_start_time() == 7);
 		
 		// write [7,12[ (out of [7,15[)
-		w_section.reset(rng.begin_write_span(time_span(7, 15)));
+		w_section.reset(rng.begin_write(8));
 		w_section[0] = make_opaque_frame(7);
 		w_section[1] = make_opaque_frame(8);
 		w_section[2] = make_opaque_frame(9);
@@ -160,34 +146,14 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 		w_section[4] = make_opaque_frame(11);
 		rng.end_write(5);
 		REQUIRE(rng.current_time() == 11);
-		REQUIRE(rng.read_start_time() == 7);
+		REQUIRE(rng.read_start_time() == 6);
 		REQUIRE(rng.write_start_time() == 12);
 		
 		// try to write [12,18[ (more than writable)
-		REQUIRE_THROWS_AS(rng.begin_write_span(time_span(12, 18)), sequencing_error);
+		REQUIRE_THROWS_AS(rng.begin_write(6), sequencing_error);
 		REQUIRE(rng.current_time() == 11);
-		REQUIRE(rng.readable_time_span() == time_span(7,12));
-		REQUIRE(rng.read_start_time() == 7);
-		REQUIRE(rng.write_start_time() == 12);
-		
-		// skip [5,7[ (already passed)
-		rng.skip_span(time_span(5, 7));
-		REQUIRE(rng.current_time() == 11);
-		REQUIRE(rng.readable_time_span() == time_span(7,12));
-		REQUIRE(rng.read_start_time() == 7);
-		REQUIRE(rng.write_start_time() == 12);
-		
-		// skip [5,8[ (partially passed)
-		rng.skip_span(time_span(5, 8));
-		REQUIRE(rng.current_time() == 11);
-		REQUIRE(rng.readable_time_span() == time_span(8,12));
-		REQUIRE(rng.read_start_time() == 8);
-		REQUIRE(rng.write_start_time() == 12);
-		
-		// skip [8,11[ (all of buffer)
-		rng.skip_span(time_span(8, 12));
-		REQUIRE(rng.current_time() == 11);	
-		REQUIRE(rng.read_start_time() == 12);
+		REQUIRE(rng.readable_time_span() == time_span(6,12));
+		REQUIRE(rng.read_start_time() == 6);
 		REQUIRE(rng.write_start_time() == 12);
 	}
 	

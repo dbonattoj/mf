@@ -72,13 +72,6 @@ std::size_t ring::adjust_padding_(const frame_format_type& frm, std::size_t capa
 }
 
 
-void ring::initialize() {
-	read_position_ = 0;
-	write_position_ = 0;
-	full_ = false;
-}
-
-
 auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
 	if(duration > total_duration()) throw std::invalid_argument("ring section duration too large");
 	

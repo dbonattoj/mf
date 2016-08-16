@@ -31,7 +31,7 @@ namespace mf {
 /// Ring buffer.
 /** Circular buffer of *frames* of \ref ndarray_opaque_frame_format format.
  ** Derived from 1-dimensional \ref ndarray_opaque. FIFO interface to read/write frames to the ring buffer. */
-class ring : public ndarray_opaque<1, raw_ring_allocator> {
+class ring : private ndarray_opaque<1, raw_ring_allocator> {
 	using base = ndarray_opaque<1, raw_ring_allocator>;
 	
 public:
@@ -51,12 +51,11 @@ public:
 	
 	ring(const ring&) = delete;
 	ring& operator=(const ring&) = delete;
-	
-	void initialize();
+		
+	const frame_format_type& frame_format() const noexcept { return base::format(); }
 	
 	time_unit capacity() const noexcept { return base::shape().front(); }
 	[[deprecated]] time_unit total_duration() const noexcept { return base::shape().front(); }
-	time_unit frame_size() const noexcept { return base::shape().back(); }
 	
 	time_unit writable_duration() const;
 	time_unit readable_duration() const;

@@ -21,8 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_TIMED_RING_H_
 #define MF_TIMED_RING_H_
 
-#include <atomic>
-#include <ostream>
 #include <stdexcept>
 #include "ring.h"
 #include "frame.h"
@@ -30,47 +28,44 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Ring buffer which adds absolute time index to frames.
-class timed_ring : public ring {
-	using base = ring;
-
-private:
-	/// Time of last written frame.
-	/** Defined _current time_ of timed ring buffer. Next write starts at `last_write_time_ + 1`. */
-	std::atomic<time_unit> last_write_time_{-1};
-	// TODO remove atomic?
-
+class timed_ring : private ring {
 public:
 	using section_view_type = timed_frame_array_view;
+	using ring::frame_format_type;
 
-	timed_ring(const frame_format_type& frm, std::size_t capacity) :
-		base(frm, capacity) { }
+	static constexpr time_unit undefined_time = -1;
+
+private:
+	time_unit last_write_time_ = -1;
+	time_unit end_time_ = undefined_time;
+
+public:
+	timed_ring(const frame_format_type&, std::size_t capacity, time_unit end_time = undefined_time);
 	
-	void initialize();
+	const ring::frame_format_type& frame_format() const noexcept { return ring::frame_format(); }	
+	time_unit end_time() const { return end_time_; }
 	
-	time_unit current_time() const noexcept { return last_write_time_; }
-	time_unit read_start_time() const noexcept;
-	time_unit write_start_time() const noexcept;
+	time_unit current_time() const;
+	time_unit read_start_time() const;
+	time_unit write_start_time() const;
+
+	time_unit capacity() const noexcept { return ring::capacity(); }
+	time_unit readable_duration() const;
+	time_unit writable_duration() const;
 	
 	time_span readable_time_span() const;
 	time_span writable_time_span() const;
-
-	time_unit readable_duration() const { return readable_time_span().duration(); }
-	time_unit writable_duration() const { return writable_time_span().duration(); } 
-	
-	bool can_write_span(time_span) const;
-	bool can_read_span(time_span) const;
-	bool can_skip_span(time_span) const;
 	
 	section_view_type begin_write(time_unit);
-	section_view_type begin_write_span(time_span);
 	void end_write(time_unit written_duration);
+	bool writer_reached_end() const;
 	
 	section_view_type begin_read(time_unit);
 	section_view_type begin_read_span(time_span);
-	
-	void skip_span(time_span);
-	
+	void end_read(time_unit read_duration);
+	void skip(time_unit duration);
 	void seek(time_unit);
+	bool reader_reached_end() const;
 };
 
 

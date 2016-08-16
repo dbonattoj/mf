@@ -21,116 +21,123 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "timed_ring.h"
 
 namespace mf {
+	
 
-void timed_ring::initialize() {
-	last_write_time_ = -1;
-	base::initialize();
-}
-
-
-void timed_ring::end_write(time_unit written_duration) {
-	base::end_write(written_duration);
-	last_write_time_ += written_duration;
-}
+timed_ring::timed_ring(const frame_format_type& frm, std::size_t capacity, time_unit end_time) :
+	ring(frm, capacity),
+	last_write_time_(-1),
+	end_time_(end_time) { }
 
 
 time_span timed_ring::readable_time_span() const {
-	return time_span(
-		last_write_time_ + 1 - base::readable_duration(),
-		last_write_time_ + 1
-	);
+	time_unit start = last_write_time_ + 1 - ring::readable_duration();
+	time_unit end = last_write_time_ + 1;
+	Assert_crit(start <= end);
+	Assert_crit(end_time_ == undefined_time || end <= end_time_);
+	return time_span(start, end);
 }
 
 
 time_span timed_ring::writable_time_span() const {
-	return time_span(
-		last_write_time_ + 1,
-		last_write_time_ + 1 + base::writable_duration()
-	);
+	time_unit start = last_write_time_ + 1;
+	time_unit end = last_write_time_ + 1 + ring::writable_duration();
+	if(end_time_ != undefined_time) end = std::min(end, end_time_);
+	Assert_crit(start <= end);
+	Assert_crit(end_time_ == undefined_time || end <= end_time_);
+	return time_span(start, end);
 }
 
 
-time_unit timed_ring::read_start_time() const noexcept {
-	return last_write_time_ + 1 - base::readable_duration();
+time_unit timed_ring::readable_duration() const {
+	return ring::readable_duration();
 }
 
 
-time_unit timed_ring::write_start_time() const noexcept {
+time_unit timed_ring::writable_duration() const {
+	return writable_time_span().duration();
+}
+
+
+time_unit timed_ring::current_time() const {
+	return last_write_time_;
+}
+
+
+time_unit timed_ring::read_start_time() const {
+	return last_write_time_ + 1 - ring::readable_duration();
+}
+
+
+time_unit timed_ring::write_start_time() const {
 	return last_write_time_ + 1;
 }
 
 
-bool timed_ring::can_write_span(time_span span) const {
-	if(span.start_time() != last_write_time_ + 1) return false; // must start immediately after the last written frame 
-	else if(span.duration() > base::writable_duration()) return false;
-	else return true;
-}
-
-
-bool timed_ring::can_read_span(time_span span) const {
-	time_unit skip_and_read_duration = span.start_time() - read_start_time() + span.duration();
-	if(span.start_time() < read_start_time()) return false; // time span to read already passed
-	else if(skip_and_read_duration > base::readable_duration()) return false;
-	else return true;
-}
-
-
-bool timed_ring::can_skip_span(time_span span) const {
-	time_unit skip_duration = span.start_time() - read_start_time() + span.duration();
-	if(skip_duration > base::readable_duration()) return false;
-	else return true;
-}
-
-
 auto timed_ring::begin_write(time_unit duration) -> section_view_type {
-	auto sec = base::begin_write(duration);
+	if(duration > writable_duration()) throw sequencing_error("write duration is greater than writable duration");
+	auto sec = ring::begin_write(duration);
 	return section_view_type(sec, write_start_time());
 }
 
 
-auto timed_ring::begin_write_span(time_span span) -> section_view_type {
-	if(span.start_time() != write_start_time()) throw sequencing_error("write span must start at write start time");
-	return begin_write(span.duration());
+void timed_ring::end_write(time_unit written_duration) {
+	Assert_crit(written_duration <= writable_duration());
+	ring::end_write(written_duration);
+	last_write_time_ += written_duration;
+}
+
+
+bool timed_ring::writer_reached_end() const {
+	return (end_time_ != undefined_time) && (write_start_time() == end_time_);
 }
 
 
 auto timed_ring::begin_read(time_unit duration) -> section_view_type {
-	auto sec = base::begin_read(duration);
+	if(duration > readable_duration()) throw sequencing_error("read duration is greater than readable duration");
+	auto sec = ring::begin_read(duration);
 	return section_view_type(sec, read_start_time());
 }
 
 
 auto timed_ring::begin_read_span(time_span span) -> section_view_type {
-	if(span.duration() > base::total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
-	if(! can_read_span(span)) throw sequencing_error("cannot read span");
+	if(! readable_time_span().includes(span)) throw sequencing_error("read span is not readable");
+
 	time_unit read_start = read_start_time();
 	if(span.start_time() > read_start)
-		base::skip(span.start_time() - read_start);	
+		ring::skip(span.start_time() - read_start);	
 
-	assert(readable_time_span().start_time() == span.start_time());
+	Assert_crit(readable_time_span().start_time() == span.start_time());
 	
-	auto sec = base::begin_read(span.duration());
+	auto sec = ring::begin_read(span.duration());
 	return section_view_type(sec, read_start_time());
 }
 
 
-void timed_ring::skip_span(time_span span) {
-	if(span.duration() > base::total_duration()) throw std::invalid_argument("skip duration larger than ring capacity");
-	if(! can_skip_span(span)) throw sequencing_error("cannot skip span");
-	
-	time_unit skip_duration = span.start_time() - read_start_time() + span.duration();
-	if(skip_duration > 0) base::skip(skip_duration);
+void timed_ring::end_read(time_unit read_duration) {
+	ring::end_read(read_duration);
+}
+
+
+void timed_ring::skip(time_unit skip_duration) {
+	if(skip_duration > readable_duration()) throw sequencing_error("skip duration is greater than readable duration");
+	ring::skip(skip_duration);
 }
 
 
 void timed_ring::seek(time_unit t) {
+	Assert_crit(t >= 0);
+	Assert_crit(end_time_ == undefined_time || t < end_time_);
 	time_span readable = readable_time_span();
 	if(t > 0 && readable.includes(t)) {
-		base::skip(t - readable.start_time());
+		ring::skip(t - readable.start_time());
 	} else {
-		base::skip(readable.duration());
+		ring::skip(readable.duration());
 		last_write_time_ = t - 1;
 	}
+}
+
+bool timed_ring::reader_reached_end() const {
+	return (end_time_ != undefined_time) && (read_start_time() == end_time_);
 }
 
 
