@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <catch.hpp>
 #include <cstdint>
 #include <array>
-#include <mf/ndarray/opaque/ndarray_opaque_frame_format.h>
+#include <mf/nd/opaque/ndarray_opaque_frame_format.h>
 
 using namespace mf;
 

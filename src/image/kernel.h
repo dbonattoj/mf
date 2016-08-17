@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_IMAGE_KERNEL_H_
 
 #include "../common.h"
-#include "../ndarray/ndarray.h"
+#include "../nd/ndarray.h"
 
 namespace mf {
 

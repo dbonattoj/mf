@@ -21,8 +21,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <catch.hpp>
 #include <vector>
 #include <algorithm>
-#include <mf/ndarray/ndarray_view.h>
-#include <mf/ndarray/ndarray_format.h>
+#include <mf/nd/ndarray_view.h>
+#include <mf/nd/ndarray_format.h>
 #include "../support/ndarray.h"
 
 using namespace mf;

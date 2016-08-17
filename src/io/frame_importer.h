@@ -22,8 +22,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FRAME_IMPORTER_H_
 
 #include "../common.h"
-#include "../ndarray/ndcoord.h"
-#include "../ndarray/ndarray_view.h"
+#include "../nd/ndcoord.h"
+#include "../nd/ndarray_view.h"
 
 namespace mf {
 

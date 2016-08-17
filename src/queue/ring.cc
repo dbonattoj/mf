@@ -73,32 +73,30 @@ std::size_t ring::adjust_padding_(const frame_format_type& frm, std::size_t capa
 
 
 auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
-	if(duration > total_duration()) throw std::invalid_argument("ring section duration too large");
-	
+	Assert(duration <= capacity());
+		
 	auto new_start = advance_raw_ptr(base::start(), base::strides().front() * start);
 	auto new_shape = make_ndsize(duration);
 	auto new_strides = base::strides();
 	
 	return section_view_type(new_start, new_shape, new_strides, base::format());
-	
-	// TODO implement in base 
 }
 
 
 time_unit ring::readable_duration() const {
-	if(full_) return total_duration();
+	if(full_) return capacity();
 	else if(read_position_ <= write_position_) return write_position_ - read_position_;
-	else return total_duration() - read_position_ + write_position_;
+	else return capacity() - read_position_ + write_position_;
 }
 
 
 time_unit ring::writable_duration() const {
-	return total_duration() - readable_duration();
+	return capacity() - readable_duration();
 }
 
 
 auto ring::begin_write(time_unit duration) -> section_view_type {
-	if(duration > total_duration()) throw std::invalid_argument("write duration larger than ring capacity");
+	if(duration > capacity()) throw std::invalid_argument("write duration larger than ring capacity");
 	else if(duration > writable_duration()) throw sequencing_error("write duration larger than writable frames");
 	else return section_(write_position_, duration);
 }
@@ -107,13 +105,13 @@ auto ring::begin_write(time_unit duration) -> section_view_type {
 void ring::end_write(time_unit written_duration) {
 	if(written_duration == 0) return;
 	if(written_duration > writable_duration()) throw std::invalid_argument("reported written duration too large");
-	write_position_ = (write_position_ + written_duration) % total_duration();
+	write_position_ = (write_position_ + written_duration) % capacity();
 	if(write_position_ == read_position_) full_ = true;
 }
 	
 
 auto ring::begin_read(time_unit duration) -> section_view_type {
-	if(duration > total_duration()) throw std::invalid_argument("read duration larger than ring capacity");
+	if(duration > capacity()) throw std::invalid_argument("read duration larger than ring capacity");
 	else if(duration > readable_duration()) throw sequencing_error("read duration larger than readable frames");
 	else return section_(read_position_, duration);
 }
@@ -122,7 +120,7 @@ auto ring::begin_read(time_unit duration) -> section_view_type {
 void ring::end_read(time_unit read_duration) {
 	if(read_duration == 0) return;
 	if(read_duration > readable_duration()) throw std::invalid_argument("reported read duration too large");
-	read_position_ = (read_position_ + read_duration) % total_duration();
+	read_position_ = (read_position_ + read_duration) % capacity();
 	full_ = false;
 }
 
@@ -131,7 +129,7 @@ void ring::skip(time_unit duration) {
 	// no check whether duration > total_duration: unlike begin_read/write, the data to skip will not be accessed
 	if(duration == 0) return;
 	if(duration > readable_duration()) throw std::invalid_argument("skip duration larger than readable frames");
-	read_position_ = (read_position_ + duration) % total_duration();
+	read_position_ = (read_position_ + duration) % capacity();
 	full_ = false;
 }
 

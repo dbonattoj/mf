@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "depth_camera.h"
 #include "../geometry/projection_view_frustum.h"
-#include "../ndarray/ndcoord.h"
+#include "../nd/ndcoord.h"
 #include <utility>
 
 namespace mf {

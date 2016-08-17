@@ -21,8 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_TESTSUPPORT_NDARRAY_OPAQUE_H_
 #define MF_TESTSUPPORT_NDARRAY_OPAQUE_H_
 
-#include <mf/ndarray/opaque/ndarray_opaque.h>
-#include <iostream>
+#include <mf/nd/opaque/ndarray_opaque.h>
 #include <sstream>
 #include <vector>
 

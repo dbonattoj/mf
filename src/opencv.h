@@ -26,8 +26,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "masked_elem.h"
 
 #include "color.h"
-#include "ndarray/ndcoord.h"
-#include "ndarray/ndarray.h"
+#include "nd/ndcoord.h"
+#include "nd/ndarray.h"
 
 namespace cv { // in OpenCV namespace
 	template<>

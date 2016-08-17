@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../utility/misc.h"
 #include "../flow/processing_node.h"
 #include "../flow/sync_node.h"
-#include "../ndarray/ndarray_timed_view.h"
+#include "../nd/ndarray_timed_view.h"
 #include <type_traits>
 #include <utility>
 

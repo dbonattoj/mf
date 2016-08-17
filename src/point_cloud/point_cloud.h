@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_POINT_CLOUD_H_
 #define MF_POINT_CLOUD_H_
 
-#include "../ndarray/ndarray_view.h"
+#include "../nd/ndarray_view.h"
 
 namespace mf {
 

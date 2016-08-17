@@ -20,7 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <catch.hpp>
 #include <algorithm>
-#include <mf/ndarray/ndarray.h>
+#include <mf/nd/ndarray.h>
 #include "../support/ndarray.h"
 
 using namespace mf;

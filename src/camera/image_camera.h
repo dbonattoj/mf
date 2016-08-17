@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <array>
 #include "camera.h"
 #include "../common.h"
-#include "../ndarray/ndspan.h"
+#include "../nd/ndspan.h"
 
 namespace mf {
 

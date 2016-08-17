@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <string>
 #include "../point_cloud/point.h"
 #include "../utility/io.h"
-#include "../ndarray/ndarray_view.h"
+#include "../nd/ndarray_view.h"
 
 namespace mf {
 

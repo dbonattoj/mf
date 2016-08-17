@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <memory>
 #include "../color.h"
 #include "../io/seekable_frame_importer.h"
-#include "../ndarray/ndarray_view.h"
+#include "../nd/ndarray_view.h"
 
 namespace mf {
 

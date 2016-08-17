@@ -43,6 +43,7 @@ TEST_CASE("shared_ring", "[queue][shared_ring]") {
 	REQUIRE(rng.end_time() == 200);	
 	REQUIRE(rng.capacity() == 5);
 	
+	
 	SECTION("break reader") {
 		SECTION("reject write") {
 			std::atomic<bool> done(false);

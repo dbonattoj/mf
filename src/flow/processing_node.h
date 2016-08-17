@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_derived.h"
 #include "node_input.h"
 #include "node_output.h"
-#include "../ndarray/ndarray_format.h"
+#include "../nd/ndarray_format.h"
 #include <memory>
 #include <utility>
 

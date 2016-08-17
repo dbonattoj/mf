@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "projection_camera.h"
 #include "depth_image_camera.h"
-#include "../ndarray/ndcoord.h"
+#include "../nd/ndcoord.h"
 
 namespace mf {
 

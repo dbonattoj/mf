@@ -1,7 +1,7 @@
 #include <catch.hpp>
 #include <array>
-#include <mf/ndarray/ndarray_view.h>
-#include <mf/ndarray/ndarray_format.h>
+#include <mf/nd/ndarray_view.h>
+#include <mf/nd/ndarray_format.h>
 #include "../support/ndarray.h"
 
 using namespace mf;

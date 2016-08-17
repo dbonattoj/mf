@@ -20,7 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <fstream>
 #include <type_traits>
-#include "../ndarray/ndarray_view_cast.h"
+#include "../nd/ndarray_view_cast.h"
 
 #include <iostream>
 

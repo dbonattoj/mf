@@ -20,8 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <catch.hpp>
 #include <type_traits>
-#include "../src/elem_tuple.h"
-#include "../src/utility/misc.h"
+#include <mf/elem_tuple.h>
+#include <mf/utility/misc.h>
 
 using namespace mf;
 

@@ -21,10 +21,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FRAME_H_
 #define MF_FRAME_H_
 
-#include "../ndarray/opaque/ndarray_view_opaque.h"
-#include "../ndarray/opaque/ndarray_timed_view_opaque.h"
-#include "../ndarray/opaque/ndarray_opaque.h"
-#include "../ndarray/opaque/ndarray_opaque_frame_format.h"
+#include "../nd/opaque/ndarray_view_opaque.h"
+#include "../nd/opaque/ndarray_timed_view_opaque.h"
+#include "../nd/opaque/ndarray_opaque.h"
+#include "../nd/opaque/ndarray_opaque_frame_format.h"
 
 namespace mf {
 

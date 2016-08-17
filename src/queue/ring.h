@@ -21,12 +21,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_RING_H_
 #define MF_RING_H_
 
-#include "../ndarray/opaque/ndarray_opaque.h"
+#include "../nd/opaque/ndarray_opaque.h"
 #include "frame.h"
 
 namespace mf {
-
-// TODO rename total duration -> capacity
 
 /// Ring buffer.
 /** Circular buffer of *frames* of \ref ndarray_opaque_frame_format format.
@@ -55,7 +53,6 @@ public:
 	const frame_format_type& frame_format() const noexcept { return base::format(); }
 	
 	time_unit capacity() const noexcept { return base::shape().front(); }
-	[[deprecated]] time_unit total_duration() const noexcept { return base::shape().front(); }
 	
 	time_unit writable_duration() const;
 	time_unit readable_duration() const;
