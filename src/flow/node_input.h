@@ -57,12 +57,12 @@ public:
 	void disconnect();
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
 	node_output& connected_output() const
-		{ Expects(is_connected()); return *connected_output_; }
+		{ Assert(is_connected()); return *connected_output_; }
 	node& connected_node() const
-		{ Expects(is_connected()); return connected_output().this_node(); }
+		{ Assert(is_connected()); return connected_output().this_node(); }
 
 	std::size_t channels_count() const
-		{ Expects(is_connected()); return connected_output().channels_count(); }
+		{ Assert(is_connected()); return connected_output().channels_count(); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);

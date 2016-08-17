@@ -41,22 +41,11 @@ time_unit sync_node::maximal_offset_to(const node& target_node) const {
 void sync_node::setup() {
 	handler_setup_();
 		
-	// TODO move to processing_node
-	
-	ndarray_opaque_frame_format buffer_format;
-	for(std::ptrdiff_t i = 0; i < output_channels_count(); ++i) {
-		const processing_node_output_channel& chan = output_channel_at(i);
-		const ndarray_format& channel_array_format = chan.format();
-		Assert(channel_array_format.is_defined());
-		
-		buffer_format.add_part(channel_array_format);
-	}
-	Assert(buffer_format.parts_count() == output_channels_count());
-	
 	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 	
-	ring_.reset(new timed_ring(buffer_format, required_capacity));
+	auto buffer_frame_format = output_frame_format_();
+	ring_.reset(new timed_ring(buffer_frame_format, required_capacity));
 }
 
 

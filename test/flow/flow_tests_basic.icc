@@ -391,7 +391,7 @@ SECTION("basic") {
 		}
 	}
 
-
+/*
 	SECTION("multiplex") {
 		flow::filter_graph gr;
 		auto shp = make_ndsize(10, 10);
@@ -491,6 +491,7 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
+*/
 }
 #endif
 

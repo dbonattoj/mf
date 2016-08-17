@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../flow/node.h"
 #include "../flow/processing_node.h"
+#include "../flow/processing_node_job.h"
 #include "../queue/frame.h"
 #include "filter_edge.h"
 #include "filter_parameter.h"
@@ -115,6 +116,7 @@ public:
 	virtual std::size_t edges_count() const = 0;
 	virtual void install(processing_node&) = 0;
 	virtual void install(processing_node&, multiplex_node&) = 0;
+	virtual bool frame_shape_is_defined() const = 0;
 };
 
 
@@ -125,6 +127,8 @@ public:
 };
 
 
+/// Output port of filter.
+/** Has statically defined output frame dimension and element type. */
 template<std::size_t Output_dim, typename Output_elem>
 class filter_output : public filter_output_base {
 public:
@@ -159,11 +163,14 @@ public:
 
 	void define_frame_shape(const frame_shape_type& shp);
 	const frame_shape_type& frame_shape() const;
+	bool frame_shape_is_defined() const override;
 	
 	view_type get_output_view(const frame_view& generic_view);
 };
 
 
+/// Input port of filter.
+/** Has statically defined input frame dimension and element type. */
 template<std::size_t Input_dim, typename Input_elem>
 class filter_input : public filter_input_base {
 public:

@@ -28,11 +28,21 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 using namespace mf;
 using namespace mf::test;
 
-constexpr bool async1 = false;
-constexpr bool async2 = false;
-constexpr bool seekable = true;
+TEST_CASE("flow graph test: seekable, mixed", "[flow][sync+async][seekable]") {
+	constexpr bool seekable = true;
+	constexpr bool async1 = false;
+	constexpr bool async2 = true;
 
-TEST_CASE("flow graph test: seekable, sync", "[flow_graph]" "[sync][seekable]") {
+	#include "flow_tests_basic.icc"
+	#include "flow_tests_activation.icc"
+	#include "flow_tests_seek.icc"
+}
+
+TEST_CASE("flow graph test: seekable, mixed alt.", "[flow][sync+async][seekable]") {
+	constexpr bool seekable = true;
+	constexpr bool async1 = true;
+	constexpr bool async2 = false;
+
 	#include "flow_tests_basic.icc"
 	#include "flow_tests_activation.icc"
 	#include "flow_tests_seek.icc"

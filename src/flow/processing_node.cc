@@ -19,6 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "processing_node.h"
+#include "processing_node_job.h"
 #include "multiplex_node.h"
 
 namespace mf { namespace flow {
@@ -68,9 +69,10 @@ void processing_node::verify_connections_validity_() const {
 void processing_node::handler_setup_() {
 	Expects(handler_ != nullptr);
 	handler_->handler_setup(*this);
-	
+		
 	for(const output_channel_type& chan : output_channels_)
-		if(! chan.format().is_defined()) throw invalid_node_graph("processing_node did not set output channel format");
+		if(! chan.frame_format().is_defined())
+			throw invalid_node_graph("processing_node did not define all output channel formats");
 }
 
 
@@ -151,74 +153,15 @@ const processing_node_output_channel& processing_node::output_channel_at(std::pt
 }
 
 
-
-///////////////
-
-
-processing_node_job::processing_node_job(processing_node& nd) :
-	node_(nd),
-	input_handles_(nd.inputs_count()) { }
-
-
-processing_node_job::~processing_node_job() {
-	Expects(output_view_.is_null(), "processing_node_job must be detached prior to destruction");
-	cancel_inputs();
-}
-
-
-bool processing_node_job::begin_input(processing_node_input& in) {
-	std::ptrdiff_t index = in.index();
-	timed_frame_array_view vw = in.begin_read_frame();
-	if(vw.is_null()) return false;
-	input_handles_.at(index) = input_view_handle(&in, vw);
-	return true;
-}
-
-
-void processing_node_job::end_input(processing_node_input& in) {
-	std::ptrdiff_t index = in.index();
-	in.end_read_frame();	
-	set_null_(input_handles_.at(index));
-}
-
-
-void processing_node_job::cancel_inputs() {
-	for(input_view_handle& in : input_handles_) if(! is_null_(in)) {
-		in.first->cancel_read_frame();	
-		set_null_(in);
+ndarray_opaque_frame_format processing_node::output_frame_format_() const {
+	ndarray_opaque_frame_format frm;
+	for(const processing_node_output_channel& chan : output_channels_) {
+		const ndarray_format& channel_frame_format = chan.frame_format();
+		Assert(channel_frame_format.is_defined());
+		frm.add_part(channel_frame_format);
 	}
+	return frm;
 }
 
-
-void processing_node_job::attach_output_view(const frame_view& out_vw) {
-	output_view_.reset(out_vw);
-}
-
-
-void processing_node_job::detach_output_view() {
-	output_view_.reset();
-}
-
-
-bool processing_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
-	return ! is_null_(input_handles_.at(index));
-}
-
-
-const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t index) const {
-	Expects(has_input_view(index));
-	return input_handles_.at(index).second;
-}
-
-
-bool processing_node_job::has_output_view() const noexcept {
-	return ! output_view_.is_null();
-}
-
-
-const frame_view& processing_node_job::output_view() const {
-	Expects(has_output_view());
-	return output_view_;
-}
 
 }}

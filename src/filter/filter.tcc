@@ -60,17 +60,26 @@ void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multip
 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::define_frame_shape(const frame_shape_type& shp) {
+	Assert(node_output_channel_ != nullptr);
 	frame_shape_ = shp;
 	
 	std::size_t elem_count = frame_shape_.product();
-	ndarray_format array_format = make_ndarray_format<Output_elem>(elem_count);
-	node_output_channel_->define_format(array_format);
+	ndarray_format frame_format = make_ndarray_format<Output_elem>(elem_count);
+	node_output_channel_->define_frame_format(frame_format);
 }
 
 
 template<std::size_t Output_dim, typename Output_elem>
 auto filter_output<Output_dim, Output_elem>::frame_shape() const -> const frame_shape_type& {
+	Assert(node_output_channel_ != nullptr);
 	return frame_shape_;
+}
+
+
+template<std::size_t Output_dim, typename Output_elem>
+bool filter_output<Output_dim, Output_elem>::frame_shape_is_defined() const {
+	Assert(node_output_channel_ != nullptr);
+	return node_output_channel_->frame_format().is_defined();
 }
 
 

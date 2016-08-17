@@ -62,7 +62,7 @@ public:
 
 
 /// Edge in filter graph.
-/** Connects output or origin node to input of destination node. */
+/** Connects output of *origin filter* to input of *destination filter*. */
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem>
 class filter_edge :
 	public filter_edge_input_base<Dim, Input_elem>,

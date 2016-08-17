@@ -29,39 +29,41 @@ namespace mf { namespace flow {
 
 
 void filter::handler_setup(processing_node& nd) {
-	Expects(&nd == node_);
+	Assert(&nd == node_);
 	this->setup();
+	for(filter_output_base* out : outputs_)
+		Assert(out->frame_shape_is_defined());
 }
 
 
 void filter::handler_pre_process(processing_node& nd, processing_node_job& job) {
-	Expects(&nd == node_);
+	Assert(&nd == node_);
 	filter_job fjob(job);
 	this->pre_process(fjob);
 }
 
 
 void filter::handler_process(processing_node& nd, processing_node_job& job) {
-	Expects(&nd == node_);
+	Assert(&nd == node_);
 	filter_job fjob(job);
 	this->process(fjob);
 }
 
 
 void filter::register_input(filter_input_base& in) {
-	Expects(! was_installed());
+	Assert(! was_installed());
 	inputs_.push_back(&in);
 }
 
 
 void filter::register_output(filter_output_base& out) {
-	Expects(! was_installed());
+	Assert(! was_installed());
 	outputs_.push_back(&out);
 }
 
 
 void filter::set_asynchonous(bool async) {
-	Expects(! was_installed());
+	Assert(! was_installed());
 	asynchronous_ = async;
 }
 
@@ -72,7 +74,7 @@ bool filter::is_asynchonous() const {
 
 
 void filter::set_prefetch_duration(time_unit dur) {
-	Expects(! was_installed());
+	Assert(! was_installed());
 	prefetch_duration_ = dur;
 }
 
@@ -82,14 +84,23 @@ time_unit filter::prefetch_duration() const {
 }
 
 bool filter::need_multiplex_node_() const {
-	if(outputs_.size() > 1) return true;
-	else return std::any_of(outputs_.cbegin(), outputs_.cend(), [](filter_output_base* out) {
-		return (out->edges_count() > 1);
-	});
+	std::size_t connected_outputs_count = std::count_if(
+		outputs_.cbegin(), outputs_.cend(),
+		[](filter_output_base* out) { return (out->edges_count() > 0); }
+	);
+	if(connected_outputs_count > 1) return true;
+	
+	bool has_output_with_multiple_edges = std::any_of(
+		outputs_.cbegin(), outputs_.cend(),
+		[](filter_output_base* out) { return (out->edges_count() > 1); }
+	);
+	if(has_output_with_multiple_edges) return true;
+	
+	return false;
 }
 
 void filter::install(graph& gr) {
-	Expects(! was_installed());
+	Assert(! was_installed());
 	/*if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
@@ -110,22 +121,22 @@ void filter::install(graph& gr) {
 		for(filter_output_base* out : outputs_) out->install(*node_);
 	}
 
-	Ensures(was_installed());
+	Assert(was_installed());
 }
 
 
 void sink_filter::install(graph& gr) {
-	Expects(! was_installed());
-	Expects(outputs_.size() == 0, "sink filter must have no outputs");
-	Expects(! is_asynchonous(), "sink filter cannot be asynchonous");
-	Expects(prefetch_duration() == 0, "sink filter cannot have prefetch");
+	Assert(! was_installed());
+	Assert(outputs_.size() == 0, "sink filter must have no outputs");
+	Assert(! is_asynchonous(), "sink filter cannot be asynchonous");
+	Assert(prefetch_duration() == 0, "sink filter cannot have prefetch");
 	
 	sink_node& nd = gr.add_sink<sink_node>();
 	node_ = &nd;
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
-	Ensures(was_installed());
+	Assert(was_installed());
 }
 
 
@@ -146,9 +157,9 @@ const node_stream_properties& source_filter::stream_properties() const noexcept 
 
 
 void source_filter::install(graph& gr) {
-	Expects(! was_installed());
-	Expects(inputs_.size() == 0, "source filter must have no inputs");
-	Expects(outputs_.size() == 1, "non-sink filter must have exactly one output");
+	Assert(! was_installed());
+	Assert(inputs_.size() == 0, "source filter must have no inputs");
+	Assert(outputs_.size() == 1, "non-sink filter must have exactly one output");
 	/*if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
@@ -160,18 +171,18 @@ void source_filter::install(graph& gr) {
 	node_->set_handler(*this);
 	node_->define_source_stream_properties(node_stream_properties_);
 	outputs_.front()->install(*node_);
-	Ensures(was_installed());
+	Assert(was_installed());
 }
 
 
 time_unit filter::current_time() const {
-	Expects(was_installed());
+	Assert(was_installed());
 	return node_->current_time();
 }
 
 
 bool filter::reached_end() const {
-	Expects(was_installed());
+	Assert(was_installed());
 	return node_->reached_end();
 }
 

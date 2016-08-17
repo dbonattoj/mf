@@ -45,7 +45,8 @@ ndarray_timed_view_opaque<Dim, Mutable> extract_part
 template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>
 auto to_opaque(const ndarray_timed_view<Concrete_dim, Concrete_elem>& concrete_view) {
 	auto non_timed_opaque = to_opaque(concrete_view.non_timed());
-	return ndarray_timed_view<Concrete_dim, Concrete_elem>(non_timed_opaque, concrete_view.start_time());
+	constexpr bool opaque_mutable = ! std::is_const<Concrete_elem>::value;
+	return ndarray_timed_view_opaque<Opaque_dim, opaque_mutable>(non_timed_opaque, concrete_view.start_time());
 }
 
 
@@ -55,8 +56,8 @@ auto from_opaque(
 	const ndarray_timed_view_opaque<Opaque_dim, Opaque_mutable>& opaque_view,
 	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
 ) {
-	auto non_timed_concrete = from_opaque<Concrete_dim, Concrete_elem>(opaque_view.non_timed());
-	return ndarray_timed_view_opaque<Opaque_dim, Opaque_mutable>(non_timed_concrete, opaque_view.start_time());
+	auto non_timed_concrete = from_opaque<Concrete_dim, Concrete_elem>(opaque_view.non_timed(), frame_shape);
+	return ndarray_timed_view<Concrete_dim, Concrete_elem>(non_timed_concrete, opaque_view.start_time());
 }
 
 

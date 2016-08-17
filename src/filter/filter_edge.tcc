@@ -102,9 +102,9 @@ void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_f
 	node_output& convert_node_output = convert_node_->output();
 		
 	std::size_t elem_count = base::output_frame_shape().product();
-	ndarray_format array_format = make_ndarray_format<Input_elem>(elem_count);
+	ndarray_format frame_format = make_ndarray_format<Input_elem>(elem_count);
 	
-	convert_node_output_channel_->define_format(array_format);
+	convert_node_output_channel_->define_frame_format(frame_format);
 }
 
 

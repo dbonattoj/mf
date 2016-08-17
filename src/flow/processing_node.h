@@ -44,11 +44,14 @@ public:
 };
 
 
+/// Channel of the \ref processing_node_output of a \ref processing_node.
+/** Defines \ref ndarray_format for the frames on that channel.
+ ** Has index value for use with \ref processing_node_job. */
 class processing_node_output_channel final {
 private:
 	processing_node& node_;
 	const std::ptrdiff_t index_;
-	ndarray_format array_format_;
+	ndarray_format frame_format_;
 
 public:
 	processing_node_output_channel(processing_node& nd, std::ptrdiff_t index) :
@@ -58,8 +61,8 @@ public:
 	const processing_node& this_node() const { return node_; }
 	std::ptrdiff_t index() const { return index_; }
 	
-	void define_format(const ndarray_format& frm) { array_format_ = frm; }
-	const ndarray_format& format() const noexcept { return array_format_; }
+	void define_frame_format(const ndarray_format& frm) { frame_format_ = frm; }
+	const ndarray_format& frame_format() const noexcept { return frame_format_; }
 };
 
 
@@ -81,7 +84,7 @@ public:
 
 
 /// Input of \ref processing_node.
-/** Adds index value (like \ref processing_node_output_channel) for use with \ref processing_node_job. */
+/** Has index value for use with \ref processing_node_job. */
 class processing_node_input final : public node_input {
 private:
 	const std::ptrdiff_t index_;
@@ -96,11 +99,9 @@ public:
 
 
 /// Node which processes frames one-by-one, base class.
-/** Frame processing is delegated to external \ref processing_node_handler, for example \ref filter
- ** Has none or one output, which have multiple channels. Can have any number of inputs.
- ** Creates \ref processing_node_job for each frame to process, with indexed input and output views. 
- ** Derived class implements derived class of \ref processing_node_output_channel, which contains buffer for the output
- ** channel. */
+/** Frame processing is delegated to external \ref processing_node_handler, for example \ref filter.
+ ** Has no or one output, which can have multiple channels. Can have any number of inputs.
+ ** Creates \ref processing_node_job for each frame to process, with indexed input and output views. */
 class processing_node : public node_derived<processing_node_input, processing_node_output> {
 	using base = node_derived<processing_node_input, processing_node_output>;
 	friend class processing_node_output;
@@ -126,6 +127,8 @@ protected:
 	virtual timed_frame_array_view output_begin_read_(time_unit duration) = 0;
 	virtual void output_end_read_(time_unit duration) = 0;
 
+	ndarray_opaque_frame_format output_frame_format_() const;
+
 public:
 	processing_node(graph&, bool with_output);
 	~processing_node() override;
@@ -142,52 +145,6 @@ public:
 	std::size_t output_channels_count() const noexcept;	
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
-};
-
-
-/// Job of \ref processing_node.
-/** Exists during processing of one frame, and is created by the \ref processing_node. Contains readable view
- ** with frames from each activated input, and writable multi-channel view for output frame.
- ** Passed to the \ref processing_node_handler. */
-class processing_node_job {
-private:
-	using input_view_handle = std::pair<node_input*, timed_frame_array_view>;
-
-	processing_node& node_;
-	std::vector<input_view_handle> input_handles_;
-	frame_view output_view_;
-
-	bool end_marked_ = false;
-	
-	static bool is_null_(const input_view_handle& in) { return (in.first == nullptr); }
-	static void set_null_(input_view_handle& in) { in = { nullptr, timed_frame_array_view::null() }; }
-
-public:
-	explicit processing_node_job(processing_node& nd);
-	processing_node_job(const processing_node_job&) = delete;
-	processing_node_job(processing_node_job&&) = default;
-	~processing_node_job();
-
-	processing_node_job& operator=(const processing_node_job&) = delete;
-	processing_node_job& operator=(processing_node_job&&) = default;
-	
-	void attach_output_view(const frame_view&);
-	void detach_output_view();
-
-	bool begin_input(processing_node_input&);
-	void end_input(processing_node_input&);
-	void cancel_inputs();
-	
-	bool end_was_marked() const noexcept { return end_marked_; }
-		
-	time_unit time() const noexcept { return node_.current_time(); }
-	void mark_end() noexcept { end_marked_ = true; }
-	
-	bool has_input_view(std::ptrdiff_t index) const noexcept;
-	const timed_frame_array_view& input_view(std::ptrdiff_t index) const;
-	
-	bool has_output_view() const noexcept;
-	const frame_view& output_view() const;
 };
 
 
