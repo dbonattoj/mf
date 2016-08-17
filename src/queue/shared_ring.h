@@ -28,10 +28,16 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <atomic>
 #include <ostream>
 #include <tuple>
+#include <utility>
 
 namespace mf {
 
 /// Timed ring buffer with changed semantics, for dual-thread use.
+/** Meant to be accessed from two threads, one reader and one writer.
+ ** Changed semantics:
+ ** - When trying to read/write more than readable/writable duration, will block until the frames become available
+ **   from the other thread. Deadlocks are prevented.
+ ** - If span to read, write, skip crosses end time, it gets truncated. */
 class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
@@ -40,9 +46,6 @@ public:
 	static constexpr time_unit undefined_time = timed_ring::undefined_time;
 
 private:
-	bool reader_is_waiting_() const { return (reader_state_ > 0); }
-	bool writer_is_waiting_() const { return (writer_state_ > 0); }
-
 	/// Indicates current state of reader and writer.
 	/** May be `idle` or `accessing`, or a positive integer if thread is waiting for that number of frames. */
 	using thread_state = time_unit;
@@ -50,23 +53,26 @@ private:
 
 	timed_ring ring_;
 
-	mutable std::mutex mutex_; ///< Protects read/write positions from concurrent access.
-	
-	std::atomic<bool> reader_break_ {false};
-	std::atomic<bool> writer_break_ {false};
-		
+	mutable std::mutex mutex_; ///< Protects timed_ring from concurrent access, and 
 	std::condition_variable readable_cv_;
 	std::condition_variable writable_cv_;
+	
+	std::atomic_flag reader_keep_waiting_ = ATOMIC_FLAG_INIT;
+	std::atomic_flag writer_keep_waiting_ = ATOMIC_FLAG_INIT;
 
 	std::atomic<thread_state> reader_state_{idle}; ///< Current state of reader thread. Used to prevent deadlocks.
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
 		
-	time_span writable_time_span_() const;
-	
+	bool reader_is_waiting_() const { return (reader_state_ > 0); }
+	bool writer_is_waiting_() const { return (writer_state_ > 0); }
+	time_unit frames_reader_waits_for_() const { return std::max<time_unit>(reader_state_.load(), 0); }
+	time_unit frames_writer_waits_for_() const { return std::max<time_unit>(writer_state_.load(), 0); }
+
+
 public:
-	shared_ring(const ring::frame_format_type& frm, std::size_t capacity, time_unit end_time = -1);
+	shared_ring(const ring::frame_format_type& frm, std::size_t capacity, time_unit end_time = undefined_time);
 			
 	void break_reader();
 	void break_writer();

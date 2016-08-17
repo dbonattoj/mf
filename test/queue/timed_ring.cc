@@ -31,8 +31,9 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 	auto frm = opaque_frame_format();
 	std::size_t capacity = 10;
 	REQUIRE_FALSE(is_multiple_of(capacity * frm.frame_size(), system_page_size()));
-	timed_ring rng(frm, capacity, timed_ring::undefined_time);
+	timed_ring rng(frm, capacity, 50);
 	
+	REQUIRE(rng.end_time() == 50);
 	REQUIRE(rng.current_time() == -1);
 	REQUIRE(rng.read_start_time() == 0);
 	REQUIRE(rng.write_start_time() == 0);
@@ -261,7 +262,6 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 		REQUIRE(rng.writable_time_span() == time_span(3, 10));
 		REQUIRE(rng.writable_duration() == 7);
 
-
 		// write none, out of [3, 5[
 		w_section.reset(rng.begin_write(2));
 		rng.end_write(0);
@@ -283,5 +283,37 @@ TEST_CASE("timed_ring", "[queue][timed_ring]") {
 		REQUIRE(rng.readable_duration() == 2);
 		REQUIRE(rng.writable_time_span() == time_span(3, 11));
 		REQUIRE(rng.writable_duration() == 8);
+	}
+	
+	SECTION("end time") {
+		// seek to 45
+		rng.seek(45);
+		REQUIRE(rng.write_start_time() == 45); 
+		REQUIRE(rng.read_start_time() == 45); 
+		REQUIRE(rng.writable_time_span() == time_span(45, 50));
+		REQUIRE(rng.readable_time_span() == time_span(45, 45));
+		REQUIRE_FALSE(rng.writer_reached_end());
+		REQUIRE_FALSE(rng.reader_reached_end());
+		
+		// write [45, 50[
+		auto w_section = rng.begin_write(5);
+		w_section[0] = make_opaque_frame(0);
+		w_section[1] = make_opaque_frame(1);
+		w_section[2] = make_opaque_frame(2);		
+		w_section[3] = make_opaque_frame(3);		
+		w_section[4] = make_opaque_frame(4);		
+		rng.end_write(5);
+		REQUIRE(rng.writable_time_span() == time_span(50, 50));
+		REQUIRE(rng.readable_time_span() == time_span(45, 50));
+		REQUIRE(rng.writer_reached_end());
+		REQUIRE_FALSE(rng.reader_reached_end());
+	
+		// read [45, 50[
+		rng.begin_read(5);
+		rng.end_read(5);
+		REQUIRE(rng.writable_time_span() == time_span(50, 50));
+		REQUIRE(rng.readable_time_span() == time_span(50, 50));
+		REQUIRE(rng.writer_reached_end());
+		REQUIRE(rng.reader_reached_end());
 	}
 }

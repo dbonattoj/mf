@@ -42,6 +42,98 @@ TEST_CASE("shared_ring", "[queue][shared_ring]") {
 	
 	REQUIRE(rng.end_time() == 200);	
 	REQUIRE(rng.capacity() == 5);
+	
+	SECTION("break reader") {
+		SECTION("reject write") {
+			std::atomic<bool> done(false);
+			MF_TEST_THREAD() {
+				while(! done) {
+					// don't write 1 frame
+					auto w_section = rng.begin_write(1);
+					rng.end_write(0);
+				
+					// break reader
+					rng.break_reader();
+				}
+			};
+			
+			// read 3 frames, wait for them to become available...
+			auto r_section = rng.begin_read(3);
+			REQUIRE(r_section.is_null());
+			
+			done = true;
+		}
+		
+		SECTION("not reading") {
+			std::atomic<bool> broke(false), cont(false);
+			MF_TEST_THREAD() {
+				rng.break_reader();
+				broke = true;
+				
+				while(! cont);
+				
+				auto w_section = rng.begin_write(3);
+				rng.end_write(3);
+			};
+			
+			while(! broke);
+			cont = true;
+			
+			auto r_section = rng.begin_read(3);
+			REQUIRE(r_section.duration() == 3);
+			rng.end_read(3);
+		}
+	}
+	
+
+	
+	SECTION("break writer") {
+		// fill buffer
+		rng.begin_write(duration);
+		rng.end_write(duration);
+
+		SECTION("reject read") {
+			std::atomic<bool> done(false);
+			MF_TEST_THREAD() {
+				while(! done) {
+					// don't read 1 frame
+					auto r_section = rng.begin_read(1);
+					rng.end_read(0);
+				
+					// break writer
+					rng.break_writer();
+				}
+			};
+			
+			// write 3 frames, wait for them to become available...
+			auto w_section = rng.begin_write(3);
+			REQUIRE(w_section.is_null());
+			
+			done = true;
+		}
+		
+		SECTION("not writing") {
+			std::atomic<bool> broke(false), cont(false);
+			MF_TEST_THREAD() {
+				rng.break_writer();
+				broke = true;
+				
+				while(! cont);
+				
+				auto w_section = rng.begin_read(3);
+				rng.end_read(3);
+			};
+			
+			while(! broke);
+			cont = true;
+			
+			auto w_section = rng.begin_write(3);
+			REQUIRE(w_section.duration() == 3);
+			rng.end_write(3);
+		}
+	}
+
+
 
 	SECTION("background writer") {
 		// secondary thread: keeps writing frames into buffer

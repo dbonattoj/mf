@@ -25,13 +25,17 @@ namespace mf {
 
 shared_ring::shared_ring
 (const ring::frame_format_type& frm, std::size_t capacity, time_unit end_time) :
-	ring_(frm, capacity, end_time) { }
+	ring_(frm, capacity, end_time)
+{ 
+	reader_keep_waiting_.test_and_set();
+	writer_keep_waiting_.test_and_set();
+}
 
 
 void shared_ring::break_reader() {
 	std::lock_guard<std::mutex> lock(mutex_);
-	if(reader_state_ > 0) {
-		reader_break_.store(true);
+	if(reader_is_waiting_()) {
+		reader_keep_waiting_.clear();
 		readable_cv_.notify_one();
 	}
 }
@@ -39,8 +43,8 @@ void shared_ring::break_reader() {
 
 void shared_ring::break_writer() {
 	std::lock_guard<std::mutex> lock(mutex_);
-	if(writer_state_ > 0) {
-		writer_break_.store(true);
+	if(writer_is_waiting_()) {
+		writer_keep_waiting_.clear();
 		writable_cv_.notify_one();
 	}
 }
@@ -69,7 +73,7 @@ locked:
 	// prevent deadlock
 	// c.f. begin_read_span
 	time_unit readable = ring_.readable_duration();
-	if(ring_.writable_duration() < duration && readable < reader_state_)
+	if(ring_.writable_duration() < duration && readable < frames_reader_waits_for_())
 		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
 
 	while(ring_.writable_duration() < duration) {
@@ -84,7 +88,7 @@ locked:
 		// - spurious wakeup
 		
 		// test if writer break event occured
-		if(writer_break_.exchange(false)) {
+		if(! reader_keep_waiting_.test_and_set()) {
 			writer_state_ = idle;
 			return section_view_type::null();
 		}
@@ -133,14 +137,14 @@ bool shared_ring::wait_writable() {
 
 	std::unique_lock<std::mutex> lock(mutex_);
 	
-	if(ring_.writable_duration() == 0 && ring_.readable_duration() < reader_state_)
+	if(ring_.writable_duration() == 0 && ring_.readable_duration() < frames_reader_waits_for_())
 		throw sequencing_error("deadlock detected: ring buffer reader was already waiting");
 
-	while(writable_time_span_().duration() == 0) {
+	while(ring_.writable_time_span().duration() == 0) {
 		writer_state_ = 1;
 		writable_cv_.wait(lock);
 		
-		if(writer_break_.exchange(false)) {
+		if(! writer_keep_waiting_.test_and_set()) {
 			writer_state_ = idle;
 			return false;		
 		}
@@ -201,7 +205,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 	// prevent deadlock
 	// it is not sufficient to have a single writer_state_ == waiting state:
 	// need to store for how many frames the writer is waiting, and verify here if the wait is still necessary.
-	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() < duration)
+	if(ring_.writable_duration() < frames_writer_waits_for_() && ring_.readable_duration() < duration)
 		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
 
 	// wait until duration becomes readable
@@ -211,7 +215,7 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 		
 		readable_cv_.wait(lock);
 		
-		if(reader_break_.exchange(false)) {
+		if(! reader_keep_waiting_.test_and_set()) {
 			reader_state_ = idle;
 			return section_view_type::null();
 		}
@@ -249,14 +253,14 @@ bool shared_ring::wait_readable() {
 	
 	std::unique_lock<std::mutex> lock(mutex_);
 	
-	if(ring_.writable_duration() < writer_state_ && ring_.readable_duration() == 0)
+	if(ring_.writable_duration() < frames_writer_waits_for_() && ring_.readable_duration() == 0)
 		throw sequencing_error("deadlock detected: ring buffer writer was already waiting");
 
 	while(ring_.readable_duration() == 0) {
 		reader_state_ = 1;
 		
 		readable_cv_.wait(lock);
-		if(reader_break_.exchange(false)) break;
+		if(! reader_keep_waiting_.test_and_set()) break;
 	}
 	
 	reader_state_ = idle;
@@ -362,14 +366,9 @@ time_unit shared_ring::read_start_time() const {
 }
 
 
-time_span shared_ring::writable_time_span_() const {
-	return ring_.writable_time_span();
-}
-
-
 time_span shared_ring::writable_time_span() const {
 	std::lock_guard<std::mutex> lock(mutex_);
-	return writable_time_span_();
+	return ring_.writable_time_span();
 }
 
 

@@ -28,6 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Ring buffer which adds absolute time index to frames.
+/** Not thread-safe, member functions should not be called from multiple threads concurrently. */
 class timed_ring : private ring {
 public:
 	using section_view_type = timed_frame_array_view;
