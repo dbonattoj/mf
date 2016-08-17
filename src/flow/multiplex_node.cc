@@ -54,7 +54,10 @@ void multiplex_node::load_input_view_(time_unit t) {
 
 	set_current_time_(t);
 	
-	input().end_read_frame();
+	if(! input_view_.is_null()) {
+		input().end_read_frame();
+		input_view_.reset();
+	}
 		
 	pull_result result = input().pull();
 	if(result == pull_result::success) {

@@ -84,11 +84,15 @@ time_unit filter::prefetch_duration() const {
 }
 
 bool filter::need_multiplex_node_() const {
+	/*
 	std::size_t connected_outputs_count = std::count_if(
 		outputs_.cbegin(), outputs_.cend(),
 		[](filter_output_base* out) { return (out->edges_count() > 0); }
 	);
 	if(connected_outputs_count > 1) return true;
+	*/
+	
+	if(outputs_.size() > 1) return true;
 	
 	bool has_output_with_multiple_edges = std::any_of(
 		outputs_.cbegin(), outputs_.cend(),
@@ -98,6 +102,7 @@ bool filter::need_multiplex_node_() const {
 	
 	return false;
 }
+
 
 void filter::install(graph& gr) {
 	Assert(! was_installed());
@@ -159,7 +164,7 @@ const node_stream_properties& source_filter::stream_properties() const noexcept 
 void source_filter::install(graph& gr) {
 	Assert(! was_installed());
 	Assert(inputs_.size() == 0, "source filter must have no inputs");
-	Assert(outputs_.size() == 1, "non-sink filter must have exactly one output");
+
 	/*if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
@@ -170,7 +175,15 @@ void source_filter::install(graph& gr) {
 	//}
 	node_->set_handler(*this);
 	node_->define_source_stream_properties(node_stream_properties_);
-	outputs_.front()->install(*node_);
+
+	if(need_multiplex_node_()) {
+		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
+		multiplex_node_->input().connect(node_->output());
+		for(filter_output_base* out : outputs_) out->install(*node_, *multiplex_node_);
+	} else {
+		for(filter_output_base* out : outputs_) out->install(*node_);
+	}
+
 	Assert(was_installed());
 }
 

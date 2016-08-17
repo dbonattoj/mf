@@ -119,7 +119,8 @@ auto ring::begin_read(time_unit duration) -> section_view_type {
 
 void ring::end_read(time_unit read_duration) {
 	if(read_duration == 0) return;
-	if(read_duration > readable_duration()) throw std::invalid_argument("reported read duration too large");
+	Assert_crit(read_duration <= readable_duration());
+	if(read_duration > readable_duration()) throw sequencing_error("reported read duration too large");
 	read_position_ = (read_position_ + read_duration) % capacity();
 	full_ = false;
 }
