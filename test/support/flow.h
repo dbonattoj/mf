@@ -73,7 +73,7 @@ public:
 		
 		previous_frame_ = t;
 		
-		std::cout << "       >> " << t << '\n';
+		//std::cout << "       >> " << t << '\n';
 	}
 	
 	bool has_produced_frame(int i) const {
