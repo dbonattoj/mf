@@ -1,0 +1,66 @@
+#ifndef MF_IMAGE_VIEW_H_
+#define MF_IMAGE_VIEW_H_
+
+#include "../nd/ndarray_view.h"
+#include "../opencv.h"
+
+namespace mf {
+
+template<typename Pixel>
+class image_view {
+public:
+	using shape_type = ndsize<2>;
+	using pixel_type = Pixel;
+	
+	using view_type = ndarray_view<2, pixel_type>;
+	using const_view_type = ndarray_view<2, const pixel_type>;
+	using cv_mat_type = cv::Mat_<pixel_type>;
+
+private:
+	cv_mat_type mat_;
+
+public:
+	image_view();
+	explicit image_view(const view_type&);
+	explicit image_view(const cv_mat_type&);
+	
+	shape_type shape() const;
+	
+	view_type view() const;
+	const cv_mat_type& cv_mat() const { return mat_; }
+};
+
+
+
+template<typename Pixel, typename Mask = byte>
+class masked_image_view : public image_view<Pixel> {
+	using base = image_view<Pixel>;
+
+public:
+	using typename base::shape_type;
+	using typename base::pixel_type;
+	using typename base::view_type;
+	using typename base::const_view_type;
+	using typename base::cv_mat_type;
+	
+	using mask_type = Mask;
+	using mask_view_type = ndarray_view<2, mask_type>;
+	using const_mask_view_type = ndarray_view<2, const mask_type>;
+	using cv_mask_mat_type = cv::Mat_<mask_type>;
+	
+private:
+	cv_mask_mat_type mask_mat_;
+
+public:
+	masked_image_view();
+	masked_image_view(const view_type&, const mask_view_type&);
+	masked_image_view(const cv_mat_type&, const cv_mask_mat_type&);
+	
+	const cv_mask_mat_type& cv_mask_mat() const { return mask_mat_; }
+};
+
+}
+
+#include "image_view.tcc"
+
+#endif

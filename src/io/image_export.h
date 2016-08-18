@@ -23,38 +23,38 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <string>
 #include <type_traits>
-#include "../image/image.h"
+#include "../image/image_view.h"
 #include "../color.h"
 
 namespace mf {
 
-void image_export(const image<rgb_color>&, const std::string& filename);
-void image_export(const masked_image<rgb_color>&, const std::string& filename);
-void image_export(const masked_image<rgb_color>&, const std::string& filename, const rgb_color& background);
+void image_export(const image_view<rgb_color>&, const std::string& filename);
+void image_export(const masked_image_view<rgb_color>&, const std::string& filename);
+void image_export(const masked_image_view<rgb_color>&, const std::string& filename, const rgb_color& background);
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>&, const std::string& filename, T min_value, T max_value, const rgb_color& background);
+	(const masked_image_view<T>&, const std::string& filename, T min_value, T max_value, const rgb_color& background);
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>&, const std::string& filename, const rgb_color& background);
+	(const masked_image_view<T>&, const std::string& filename, const rgb_color& background);
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>&, const std::string& filename, T min_value, T max_value);
+	(const masked_image_view<T>&, const std::string& filename, T min_value, T max_value);
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>&, const std::string& filename);
+	(const masked_image_view<T>&, const std::string& filename);
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image<T>&, const std::string& filename, T min_value, T max_value);
+	(const image_view<T>&, const std::string& filename, T min_value, T max_value);
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image<T>&, const std::string& filename);
+	(const image_view<T>&, const std::string& filename);
 
 }
 

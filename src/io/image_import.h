@@ -22,12 +22,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_IMAGE_IMPORT_H_
 
 #include <string>
-#include "../image/image.h"
+#include "../image/image_view.h"
 #include "../color.h"
 
 namespace mf {
 
-image<rgb_color> image_import(const std::string& filename);
+image_view<rgb_color> image_import(const std::string& filename);
 
 }
 

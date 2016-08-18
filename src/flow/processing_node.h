@@ -62,10 +62,7 @@ public:
 	const processing_node& this_node() const { return node_; }
 	std::ptrdiff_t index() const { return index_; }
 	
-	void define_frame_format(const ndarray_format& frm) {
-		std::cout << "def! " << this << std::endl;
-		frame_format_ = frm;
-	}
+	void define_frame_format(const ndarray_format& frm) { frame_format_ = frm; }
 	const ndarray_format& frame_format() const noexcept { return frame_format_; }
 };
 

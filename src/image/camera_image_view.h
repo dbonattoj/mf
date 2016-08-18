@@ -18,25 +18,24 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_CAMERA_IMAGE_H_
-#define MF_CAMERA_IMAGE_H_
+#ifndef MF_CAMERA_IMAGE_VIEW_H_
+#define MF_CAMERA_IMAGE_VIEW_H_
 
-#include "image.h"
+#include "image_view.h"
 #include "../camera/projection_image_camera.h"
 #include <utility>
 
 namespace mf {
 
 template<typename Pixel>
-class camera_image : public masked_image<Pixel> {
-	using base = masked_image<Pixel>;
+class camera_image_view : public masked_image_view<Pixel> {
+	using base = masked_image_view<Pixel>;
 
 private:
 	projection_image_camera camera_;
 
 public:
-	camera_image(const base&, const projection_camera&);
-	camera_image(base&&, const projection_camera&);
+	camera_image_view(const base&, const projection_camera&);
 	
 	const projection_image_camera& this_camera() const { return camera_; }
 	projection_image_camera& this_camera() { return camera_; }
@@ -44,6 +43,6 @@ public:
 
 }
 
-#include "camera_image.tcc"
+#include "camera_image_view.tcc"
 
 #endif

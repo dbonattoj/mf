@@ -23,14 +23,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-void image_export(const image<rgb_color>& img, const std::string& filename) {
+void image_export(const image_view<rgb_color>& img, const std::string& filename) {
 	cv::Mat output_img;
 	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGR);
 	cv::imwrite(filename, output_img);
 }
 
 
-void image_export(const masked_image<rgb_color>& img, const std::string& filename) {
+void image_export(const masked_image_view<rgb_color>& img, const std::string& filename) {
 	cv::Mat output_img, holes;
 	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGRA);
 	cv::bitwise_not(img.cv_mask_mat(), holes);
@@ -39,7 +39,7 @@ void image_export(const masked_image<rgb_color>& img, const std::string& filenam
 }
 
 
-void image_export(const masked_image<rgb_color>& img, const std::string& filename, const rgb_color& background) {
+void image_export(const masked_image_view<rgb_color>& img, const std::string& filename, const rgb_color& background) {
 	cv::Scalar cv_background(background.b, background.g, background.r);
 	cv::Mat output_img, holes;
 	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGR);

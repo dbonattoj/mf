@@ -24,7 +24,7 @@ namespace mf {
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>& img, const std::string& filename, T min_value, T max_value, const rgb_color& background)
+	(const masked_image_view<T>& img, const std::string& filename, T min_value, T max_value, const rgb_color& background)
 {
 	cv::Mat output_img;
 	double alpha = 255.0 / (max_value - min_value);
@@ -43,7 +43,7 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>& img, const std::string& filename, const rgb_color& background)
+	(const masked_image_view<T>& img, const std::string& filename, const rgb_color& background)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos, img.cv_mask_mat());
@@ -53,7 +53,7 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>& img, const std::string& filename, T min_value, T max_value)
+	(const masked_image_view<T>& img, const std::string& filename, T min_value, T max_value)
 {
 	cv::Mat output_img;
 	double alpha = 255.0 / (max_value - min_value);
@@ -70,7 +70,7 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image<T>& img, const std::string& filename)
+	(const masked_image_view<T>& img, const std::string& filename)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos, img.cv_mask_mat());
@@ -80,7 +80,7 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image<T>& img, const std::string& filename, T min_value, T max_value)
+	(const image_view<T>& img, const std::string& filename, T min_value, T max_value)
 {
 	cv::Mat output_img;
 	double alpha = 255.0 / (max_value - min_value);
@@ -92,7 +92,7 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 
 template<typename T>
 std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image<T>& img, const std::string& filename)
+	(const image_view<T>& img, const std::string& filename)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos);
