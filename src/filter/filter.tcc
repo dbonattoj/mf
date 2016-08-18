@@ -48,6 +48,7 @@ void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multiplex_node& mpx_nd) {
 	node_output_channel_ = &nd.add_output_channel();
+	std::cout << "output chan of node with multiplexer: " << node_output_channel_ << std::endl;
 	
 	for(edge_base_type* edge : edges_) {
 		std::ptrdiff_t channel_index = node_output_channel_->index();
@@ -62,6 +63,8 @@ template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::define_frame_shape(const frame_shape_type& shp) {
 	Assert(node_output_channel_ != nullptr);
 	frame_shape_ = shp;
+	
+	std::cout << "chan! " <<  node_output_channel_ << std::endl;
 	
 	std::size_t elem_count = frame_shape_.product();
 	ndarray_format frame_format = make_ndarray_format<Output_elem>(elem_count);

@@ -35,9 +35,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace test {
 
-
 constexpr int noframe = -2;
 constexpr int missingframe = -3;
+
 
 class sequence_frame_source : public flow::source_filter {
 private:
@@ -56,6 +56,8 @@ public:
 		output(*this) { }
 	
 	void setup() override {
+		std::cout << "source setup" << std::endl;
+
 		output.define_frame_shape(frame_shape_);
 	}
 	
@@ -71,15 +73,20 @@ public:
 		
 		previous_frame_ = t;
 		
-		std::cout << "       >> " << t << std::endl;
+		std::cout << "       >> " << t << '\n';
 	}
 	
 	bool has_produced_frame(int i) const {
 		return (produced_frames_.find(i) != produced_frames_.end());
 	}
 	
-	bool seeked_back() const { return seeked_back_; }
+	bool seeked_back() const {
+		return seeked_back_;
+	}
 };
+
+
+///////////////
 
 
 class passthrough_filter : public flow::filter {
@@ -127,6 +134,40 @@ public:
 };
 
 
+///////////////
+
+
+class multiple_output_filter : public flow::filter {
+private:
+	void setup() override {
+		std::cout << "multiout setup" << std::endl;
+
+		output1.define_frame_shape(input.frame_shape());	
+		output2.define_frame_shape(input.frame_shape());	
+	}
+	
+	void process(flow::filter_job& job) override {				
+		auto in = job.in(input);
+		auto out1 = job.out(output1);
+		auto out2 = job.out(output2);
+		
+		out1 = in;
+		out2 = in;
+	}
+
+public:
+	input_type<2, int> input;
+	output_type<2, int> output1;
+	output_type<2, int> output2;
+	
+	multiple_output_filter() :
+		input(*this), output1(*this), output2(*this) { }
+};
+
+
+///////////////
+
+
 class simple_sink : public flow::sink_filter {
 public:
 	input_type<2, int> input;
@@ -136,6 +177,9 @@ public:
 	
 	void process(flow::filter_job& job) override { }
 };
+
+
+///////////////
 
 
 
@@ -188,6 +232,8 @@ public:
 };
 
 
+///////////////
+
 
 class input_synchronize_test_filter : public flow::filter {
 public:
@@ -203,6 +249,7 @@ public:
 
 
 	void setup() override {
+		std::cout << "merge setup" << std::endl;
 		output.define_frame_shape(input1.frame_shape());
 	}
 	

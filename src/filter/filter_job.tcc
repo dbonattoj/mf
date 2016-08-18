@@ -47,7 +47,9 @@ template<typename Output> decltype(auto) filter_job::out(Output& pt) {
 	constexpr std::size_t dimension = Output::dimension;
 	using elem_type = typename Output::elem_type;
 	
-	frame_view gen_vw = node_job_.output_view();
+	std::ptrdiff_t index = pt.index();
+	
+	frame_view gen_vw = extract_part(node_job_.output_view(), index);
 	return from_opaque<dimension, elem_type>(
 		gen_vw,
 		pt.frame_shape()

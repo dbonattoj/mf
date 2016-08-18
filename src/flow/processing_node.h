@@ -27,6 +27,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../nd/ndarray_format.h"
 #include <memory>
 #include <utility>
+#include <iostream>
 
 namespace mf { namespace flow {
 
@@ -61,7 +62,10 @@ public:
 	const processing_node& this_node() const { return node_; }
 	std::ptrdiff_t index() const { return index_; }
 	
-	void define_frame_format(const ndarray_format& frm) { frame_format_ = frm; }
+	void define_frame_format(const ndarray_format& frm) {
+		std::cout << "def! " << this << std::endl;
+		frame_format_ = frm;
+	}
 	const ndarray_format& frame_format() const noexcept { return frame_format_; }
 };
 
@@ -111,7 +115,7 @@ public:
 
 private:
 	processing_node_handler* handler_ = nullptr;
-	std::vector<processing_node_output_channel> output_channels_;
+	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
 
 protected:
 	void verify_connections_validity_() const;

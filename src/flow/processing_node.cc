@@ -70,8 +70,8 @@ void processing_node::handler_setup_() {
 	Expects(handler_ != nullptr);
 	handler_->handler_setup(*this);
 		
-	for(const output_channel_type& chan : output_channels_)
-		if(! chan.frame_format().is_defined())
+	for(auto&& chan : output_channels_)
+		if(! chan->frame_format().is_defined())
 			throw invalid_node_graph("processing_node did not define all output channel formats");
 }
 
@@ -138,25 +138,25 @@ processing_node_input& processing_node::add_input() {
 
 processing_node_output_channel& processing_node::add_output_channel() {
 	std::ptrdiff_t channel_index = output_channels_.size();
-	output_channels_.emplace_back(*this, channel_index);
-	return output_channels_.back();
+	output_channels_.emplace_back(new processing_node_output_channel(*this, channel_index));
+	return *output_channels_.back();
 }
 
 
 processing_node_output_channel& processing_node::output_channel_at(std::ptrdiff_t index) {
-	return output_channels_.at(index);
+	return *output_channels_.at(index);
 }
 
 
 const processing_node_output_channel& processing_node::output_channel_at(std::ptrdiff_t index) const {
-	return output_channels_.at(index);
+	return *output_channels_.at(index);
 }
 
 
 ndarray_opaque_frame_format processing_node::output_frame_format_() const {
 	ndarray_opaque_frame_format frm;
-	for(const processing_node_output_channel& chan : output_channels_) {
-		const ndarray_format& channel_frame_format = chan.frame_format();
+	for(auto&& chan : output_channels_) {
+		const ndarray_format& channel_frame_format = chan->frame_format();
 		Assert(channel_frame_format.is_defined());
 		frm.add_part(channel_frame_format);
 	}
