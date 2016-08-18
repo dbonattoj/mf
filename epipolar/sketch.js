@@ -1,9 +1,12 @@
 // config:
-var dir = "ulb";
+var dir = "poznan_blocks";
 var left = "L";
 var right = "R";
-
+var ext = ".jpg";
 /////
+
+if(location.search) dir = location.search.substring(1);
+
 
 var param;
 var left_im, right_im;
@@ -12,9 +15,10 @@ var l_K, l_Rt, r_K, r_Rt, w, h, sc, left_im_og, right_im_og;
 var l_K_inv, l_Rt_inv, r_K_inv, r_Rt_inv;
 var z_far, z_near;
 
-var pt_col = [255, 255, 0];
-var pt_rad = 2;
-var ln_col = [255, 255, 0];
+var pt_col = [255, 0, 0];
+var pt_rad = 5;
+var ln_col = [255, 0, 0];
+var ln_w = 3;
 
 var l_pt = [10.0, 10.0];
 var r_pt = [10.0, 10.0];
@@ -95,8 +99,8 @@ function calculateCorrespondingPoint() {
 
 function preload() {
   loadJSON("datasets/" + dir + "/param.json", function(par) { param = par; });
-  left_im = loadImage("datasets/" + dir + "/" + left + ".jpg");
-  right_im = loadImage("datasets/" + dir + "/" + right + ".jpg");
+  left_im = loadImage("datasets/" + dir + "/" + left + ext);
+  right_im = loadImage("datasets/" + dir + "/" + right + ext);
 }
 
 function convertRt(Rt_) {
@@ -178,11 +182,13 @@ function draw() {
   // epipolar line
   noFill();
   stroke(ln_col);
+  strokeWeight(ln_w);
   line(r_ln[0], r_ln[1], r_ln[2], r_ln[3]);
 
   // rect
   noFill();
   stroke(0);
+  strokeWeight(1);
   rect(left_im_og[0], left_im_og[1], w*sc, h*sc);
   rect(right_im_og[0], right_im_og[1], w*sc, h*sc);
   
