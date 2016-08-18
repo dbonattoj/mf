@@ -14,6 +14,7 @@ var left_im, right_im;
 var l_K, l_Rt, r_K, r_Rt, w, h, sc, left_im_og, right_im_og;
 var l_K_inv, l_Rt_inv, r_K_inv, r_Rt_inv;
 var z_far, z_near;
+var inv_z;
 
 var pt_col = [255, 0, 0];
 var pt_rad = 5;
@@ -24,6 +25,7 @@ var l_pt = [10.0, 10.0];
 var r_pt = [10.0, 10.0];
 var r_ln = [0.0, 0.0, 0.0, 0.0];
 var z = 0.0;
+var projected_depth = 0.0;
 
 var zslider;
 var zslider_max = 1000;
@@ -71,11 +73,12 @@ function calculateEpipolarLine() {
 
 function projMat(K) {
   var z_diff = z_far - z_near;
+  var sign = (inv_z ? -1.0 : 1.0);
   return [
     [K[0][0], 0.0, K[0][2], 0.0],
     [0.0, K[1][1], K[1][2], 0.0],
-    [0.0, 0.0, -z_near/z_diff, (z_far * z_near)/z_diff],
-    [0.0, 0.0, 1.0, 0.0]
+    [0.0, 0.0, sign * z_far/z_diff, -(z_far * z_near)/z_diff],
+    [0.0, 0.0, sign, 0.0]
   ];
 }
 
@@ -95,6 +98,9 @@ function calculateCorrespondingPoint() {
   x_R_h[0] /= x_R_h[3];
   x_R_h[1] /= x_R_h[3];
   r_pt = [x_R_h[0], x_R_h[1]];
+
+  var Wp = numeric.dot(l_proj_inv, x_L_h);
+  projected_depth = Wp[2] / Wp[3];
 }
 
 function preload() {
@@ -127,8 +133,10 @@ function setup() {
   sc = param["scale"];
   left_im_og = [10, 10];
   right_im_og = [w*sc + 20, 10];
+  inv_z = param["inv_z"];
   z_near = param["z_near"];
   z_far = param["z_far"];
+
   
   if(param["mpeg_intrinsic"]) {
     l_Rt = convertRt(l_Rt);
@@ -143,7 +151,7 @@ function setup() {
   createCanvas(max(left_im_og[0], right_im_og[0]) + w*sc + 10, max(left_im_og[1], right_im_og[1]) + h*sc + 10 + 40);
 
   zslider = createSlider(0, 1000, 0);
-  zslider.position(30, h*sc + 20);
+  zslider.position(30, h*sc + 40);
   zslider.input(updateFromSlider);
 
   background(255);
@@ -195,7 +203,8 @@ function draw() {
   // slider text
   fill(0);
   noStroke();
-  text("d =", 10, h*sc + 35);
+  text("d =" , 10, h*sc + 55);
+  text(floor(projected_depth * 100.0)/100.0, 220, h*sc + 55);
 }
 
 function updateFromMouse() {

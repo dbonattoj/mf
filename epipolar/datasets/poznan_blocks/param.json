@@ -6,7 +6,8 @@
 	"mpeg_intrinsic" : true,
 
 	"z_near" : 15.0,
-	"z_far" : 100.0,
+	"z_far" : 35.0,
+	"inv_z" : false,
 
 
 	"L_K" : [
