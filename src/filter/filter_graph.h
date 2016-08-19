@@ -30,7 +30,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 class filter_graph {
-private:
+public:
 	std::vector<std::unique_ptr<filter>> filters_;
 	std::unique_ptr<graph> node_graph_;
 	

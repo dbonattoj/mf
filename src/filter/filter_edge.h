@@ -30,9 +30,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+class filter;
+
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
-
 
 template<std::size_t Input_dim, typename Input_elem>
 class filter_edge_input_base {
@@ -41,6 +42,7 @@ public:
 	using input_frame_shape_type = ndsize<Input_dim>;
 	using input_full_view_type = ndarray_timed_view<Input_dim + 1, Input_elem>;
 
+	virtual const filter& origin_filter() const = 0;
 	virtual void set_node_input(node_input&) = 0;
 	virtual const input_frame_shape_type& input_frame_shape() const = 0;
 		
@@ -55,8 +57,8 @@ public:
 	using output_type = filter_output<Output_dim, Output_elem>;
 	using output_frame_shape_type = ndsize<Output_dim>;
 
+	virtual const filter& destination_filter() const = 0;
 	virtual void set_node_output(node_output&, std::ptrdiff_t channel_index) = 0;
-	virtual const output_frame_shape_type& output_frame_shape() const = 0;
 	virtual std::ptrdiff_t node_output_channel_index() const = 0;
 };
 
@@ -106,16 +108,19 @@ public:
 	void set_node_input(node_input& in) override;
 	void set_node_output(node_output& out, std::ptrdiff_t channel_index) override;
 	
+	const filter& origin_filter() const override { return output_.this_filter(); }
+	const filter& destination_filter() const override { return input_.this_filter(); }
+	
 	graph& this_graph();
-	node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
-	const node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
-	node_output& this_node_output() { Expects(node_output_ != nullptr); return *node_output_; }
-	const node_output& this_node_output() const { Expects(node_output_ != nullptr); return *node_output_; }
+	node_input& this_node_input() { Assert(node_input_ != nullptr); return *node_input_; }
+	const node_input& this_node_input() const { Assert(node_input_ != nullptr); return *node_input_; }
+	node_output& this_node_output() { Assert(node_output_ != nullptr); return *node_output_; }
+	const node_output& this_node_output() const { Assert(node_output_ != nullptr); return *node_output_; }
 	std::ptrdiff_t node_output_channel_index() const override
-		{ Expects(node_output_ != nullptr); return node_output_channel_index_; }
+		{ Assert(node_output_ != nullptr); return node_output_channel_index_; }
 
 	const input_frame_shape_type& input_frame_shape() const override { return output_.frame_shape(); }
-	const output_frame_shape_type& output_frame_shape() const override { return output_.frame_shape(); }
+	const output_frame_shape_type& output_frame_shape() const { return output_.frame_shape(); }
 };
 
 
@@ -154,6 +159,7 @@ public:
 };
 
 
+// TODO allow one filter edge for multiple node edges
 
 /// Edge in filter graph with conversion.
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>

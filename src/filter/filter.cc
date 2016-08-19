@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/sink_node.h"
 #include "../flow/sync_node.h"
 #include "../flow/async_node.h"
+#include <set>
 
 namespace mf { namespace flow {
 
@@ -84,22 +85,14 @@ time_unit filter::prefetch_duration() const {
 }
 
 bool filter::need_multiplex_node_() const {
-	/*
-	std::size_t connected_outputs_count = std::count_if(
-		outputs_.cbegin(), outputs_.cend(),
-		[](filter_output_base* out) { return (out->edges_count() > 0); }
-	);
-	if(connected_outputs_count > 1) return true;
-	*/
-	
-	if(outputs_.size() > 1) return true;
-	
-	bool has_output_with_multiple_edges = std::any_of(
-		outputs_.cbegin(), outputs_.cend(),
-		[](filter_output_base* out) { return (out->edges_count() > 1); }
-	);
-	if(has_output_with_multiple_edges) return true;
-	
+	// multiplex node is needed if there are multiple output edges
+	bool one_output_edge = false;
+	for(auto&& out : outputs_) {
+		std::size_t edges_count = out->edges_count();
+		if(one_output_edge && edges_count >= 1) return true;
+		else if(!one_output_edge && edges_count == 1) one_output_edge = true;
+		else if(edges_count > 1) return true;
+	}
 	return false;
 }
 
@@ -114,6 +107,7 @@ void filter::install(graph& gr) {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
 	//}
+	node_->set_name(name_.empty() ? "filter" : name_);
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
@@ -138,6 +132,7 @@ void sink_filter::install(graph& gr) {
 	
 	sink_node& nd = gr.add_sink<sink_node>();
 	node_ = &nd;
+	node_->set_name(name_.empty() ? "sink" : name_);
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
@@ -173,6 +168,7 @@ void source_filter::install(graph& gr) {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
 	//}
+	node_->set_name(name_.empty() ? "source" : name_);
 	node_->set_handler(*this);
 	node_->define_source_stream_properties(node_stream_properties_);
 

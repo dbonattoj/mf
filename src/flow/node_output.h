@@ -32,7 +32,8 @@ namespace mf { namespace flow {
 class node_output {
 private:
 	node& node_;
-	
+	std::string name_ = "out";
+
 	node_input* connected_input_ = nullptr;
 	
 protected:
@@ -44,6 +45,9 @@ public:
 	virtual ~node_output() = default;
 
 	node& this_node() const noexcept { return node_; }
+
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
 
 	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
 	node_input& connected_input() const noexcept { Assert(is_connected()); return *connected_input_; }

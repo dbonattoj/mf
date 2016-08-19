@@ -94,6 +94,7 @@ public:
 	void setup() override;
 	
 	node_input& input();
+	const node_input& input() const;
 	multiplex_node_output& add_output(std::ptrdiff_t input_channel_index);
 };
 

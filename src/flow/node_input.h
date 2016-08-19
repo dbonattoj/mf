@@ -33,6 +33,7 @@ private:
 
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
+	std::string name_ = "in";
 	
 	node_output* connected_output_ = nullptr;
 	
@@ -52,6 +53,9 @@ public:
 
 	time_unit past_window_duration() const noexcept { return past_window_; }
 	time_unit future_window_duration() const noexcept { return future_window_; }
+
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
 	
 	void connect(node_output& out);
 	void disconnect();

@@ -40,6 +40,7 @@ SECTION("basic") {
 		gr.run();
 		
 		REQUIRE(sink.check());
+
 	}
 
 	SECTION("source --> passthrough --> sink") {
@@ -311,6 +312,7 @@ SECTION("basic") {
 	}
 
 
+
 	SECTION("multiple inputs") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
@@ -393,7 +395,8 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
-
+	
+	
 
 	SECTION("multiple outputs") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
@@ -419,7 +422,6 @@ SECTION("basic") {
 			
 			gr.setup();
 			gr.run();
-			
 			REQUIRE(sink.check());
 		}
 		
@@ -448,16 +450,13 @@ SECTION("basic") {
 			
 			gr.setup();
 			gr.run();
-			
 			REQUIRE(sink.check());
 		}
 	}
-
-
-	SECTION("one-to-many") {
-		flow::filter_graph gr;
-		auto shp = make_ndsize(10, 10);
 	
+	
+	
+	SECTION("one-to-many") {	
 		std::size_t count = 50;
 		std::size_t last = count - 1;
 		std::vector<int> seq(count);
@@ -483,6 +482,32 @@ SECTION("basic") {
 			gr.setup();
 			gr.run();
 			
+			REQUIRE(sink.check());
+		}
+
+		SECTION("different connected filters") {
+			INFO(R"(
+			source ----> passthrough' --> merge --> sink
+			        +------------------ > /
+			)");
+			
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& passthrough = gr.add_filter<passthrough_filter>(0, 0);
+			auto& merge = gr.add_filter<input_synchronize_test_filter>();
+			auto& sink = gr.add_filter<expected_frames_sink>(seq);
+			
+			source.set_asynchonous(async1);
+			merge.set_asynchonous(async1);
+			passthrough.set_asynchonous(async2);
+			
+			passthrough.input.connect(source.output);
+			merge.input1.connect(passthrough.output);
+			merge.input2.connect(source.output);
+			sink.input.connect(merge.output);
+	
+			gr.setup();
+			gr.run();
+
 			REQUIRE(sink.check());
 		}
 
@@ -515,8 +540,9 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
+
 	
-	
+
 	SECTION("complex") {
 		flow::filter_graph gr;
 		auto shp = make_ndsize(10, 10);
@@ -572,8 +598,8 @@ SECTION("basic") {
 			          |                                                    /--> /          /--> /
 			          +---------------------------------------> merge3' --/               /
 			                                              | --> /                        /
-			                                              |                             /
-			source2  --> [-1, +2]passthrough3' --> multiout --> [-1, +1]passthrough4 --/
+			source2  --> [-1, +2]passthrough3' --> multiout                             /
+			                                              | --> [-1, +1]passthrough4 --/
 			)");
 			
 			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
@@ -613,12 +639,11 @@ SECTION("basic") {
 			sink.input.connect(merge2.output);
 	
 			gr.setup();
+			export_graph_visualization(*gr.node_graph_, "graph.gv");
 			gr.run();
 			
 			REQUIRE(sink.check());
 		}
-
 	}
 }
 #endif
-

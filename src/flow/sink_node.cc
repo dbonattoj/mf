@@ -23,6 +23,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 	
+sink_node::sink_node(graph& gr) : processing_node(gr, false) {
+	set_name("sink");
+}
+
+
 void sink_node::setup_graph() {
 	setup_sink();
 }

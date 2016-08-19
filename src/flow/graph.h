@@ -33,19 +33,20 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 class node;
-class sync_node;
 
 /// Graph containing interconnected nodes through which media frames flow.
 /** Low-level graph composed of \ref node objects. High-level graph of \ref filter obbjects is \ref filter_graph. */
 class graph {
 public:
 	using frame_callback_function_type = void(time_unit t);
+	using thread_uid = int;
 	
 private:
 	std::vector<std::unique_ptr<node>> nodes_;
 	sink_node* sink_ = nullptr;
 	bool was_setup_ = false;
 	bool launched_ = false;
+	thread_uid last_thread_uid_ = 0;
 	
 	std::atomic<bool> was_stopped_ {false};
 
@@ -74,7 +75,15 @@ public:
 		sink_ = &sink;
 		return sink;
 	}
-
+	
+	thread_uid new_thread_uid();
+	
+	std::size_t nodes_count() const { return nodes_.size(); }
+	const node& node_at(std::ptrdiff_t i) const { return *nodes_.at(i); }
+	node& node_at(std::ptrdiff_t i) { return *nodes_.at(i); }
+	sink_node& sink() { return *sink_; }
+	const sink_node& sink() const { return *sink_; }
+	
 	bool was_setup() const { return was_setup_; }
 	bool is_launched() const { return launched_; }
 	

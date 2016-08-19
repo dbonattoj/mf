@@ -45,6 +45,11 @@ void graph::setup() {
 }
 
 
+auto graph::new_thread_uid() -> thread_uid {
+	return last_thread_uid_++;
+}
+
+
 void graph::launch() {
 	if(launched_) return;
 		

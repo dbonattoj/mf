@@ -30,6 +30,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "filter_job.h"
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace mf { namespace flow {
 
@@ -50,6 +51,8 @@ public:
 	using job_type = filter_job;
 
 protected:
+	std::string name_;
+
 	std::vector<filter_input_base*> inputs_;
 	std::vector<filter_output_base*> outputs_;
 
@@ -66,6 +69,9 @@ public:
 	filter(const filter&) = delete;
 	filter& operator=(const filter&) = delete;
 	virtual ~filter() = default;
+
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
 	
 	void register_input(filter_input_base&);
 	void register_output(filter_output_base&);
@@ -114,6 +120,7 @@ public:
 class filter_output_base {
 public:
 	virtual std::size_t edges_count() const = 0;
+	virtual const filter& connected_filter_at_edge(std::ptrdiff_t index) const = 0;
 	virtual void install(processing_node&) = 0;
 	virtual void install(processing_node&, multiplex_node&) = 0;
 	virtual bool frame_shape_is_defined() const = 0;
@@ -124,6 +131,7 @@ public:
 class filter_input_base {
 public:
 	virtual void install(processing_node&) = 0;
+	virtual const filter& connected_filter() const = 0;
 };
 
 
@@ -140,6 +148,7 @@ public:
 	using view_type = ndarray_view<Output_dim, Output_elem>;
 
 private:
+	filter& filter_;
 	std::vector<edge_base_type*> edges_;
 	processing_node_output_channel* node_output_channel_ = nullptr;
 	
@@ -147,7 +156,10 @@ private:
 
 public:
 	explicit filter_output(filter&);
-
+	
+	filter& this_filter() { return filter_; }
+	const filter& this_filter() const { return filter_; }
+		
 	processing_node_output_channel& this_node_output_channel()
 		{ Expects(node_output_channel_ != nullptr); return *node_output_channel_; }
 	const processing_node_output_channel& this_node_output_channel() const
@@ -155,6 +167,8 @@ public:
 	std::ptrdiff_t index() const { return this_node_output_channel().index(); }
 	
 	std::size_t edges_count() const override { return edges_.size(); }
+	const filter& connected_filter_at_edge(std::ptrdiff_t index) const override
+		{ return edges_.at(index)->destination_filter(); }
 	void edge_has_connected(edge_base_type&);
 		
 	bool was_installed() const { return (node_output_channel_ != nullptr); }
@@ -182,6 +196,7 @@ public:
 	using full_view_type = ndarray_timed_view<Input_dim + 1, Input_elem>;
 
 private:
+	filter& filter_;
 	std::unique_ptr<edge_base_type> edge_;
 	
 	processing_node_input* node_input_ = nullptr;
@@ -191,6 +206,11 @@ private:
 
 public:
 	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
+
+	const filter& connected_filter() const override { return edge_->origin_filter(); }
+
+	filter& this_filter() { return filter_; }
+	const filter& this_filter() const { return filter_; }
 
 	processing_node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
 	const processing_node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }

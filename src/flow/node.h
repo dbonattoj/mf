@@ -57,6 +57,8 @@ private:
 	std::atomic<time_unit> current_time_ {-1};
 	std::atomic<bool> reached_end_ {false};
 	
+	std::string name_ = "node";
+	
 	void propagate_pre_setup_();
 	void propagate_setup_();
 	void deduce_stream_properties_();
@@ -106,6 +108,9 @@ public:
 	
 	void define_source_stream_properties(const node_stream_properties&);
 	const node_stream_properties& stream_properties() const noexcept { return stream_properties_; }
+	
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
 	
 	void setup_sink();
 

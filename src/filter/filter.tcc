@@ -26,8 +26,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 template<std::size_t Output_dim, typename Output_elem>
-filter_output<Output_dim, Output_elem>::filter_output(filter& filt) {
-	filt.register_output(*this);
+filter_output<Output_dim, Output_elem>::filter_output(filter& filt) :
+	filter_(filt)
+{
+	filter_.register_output(*this);
 }
 
 
@@ -39,33 +41,34 @@ void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& 
 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
-	Assert(edges_.size() == 1, "installing filter output with multiple edges requires multiplex node");
+	Assert(edges_count() == 1, "multiplex node is required because filter output has multiple edges");
+		
 	node_output_channel_ = &nd.add_output_channel();
-	edges_.front()->set_node_output(nd.output(), node_output_channel_->index());
+	std::ptrdiff_t channel_index = node_output_channel_->index();
+
+	for(edge_base_type* edge : edges_) {
+		edge->set_node_output(nd.output(), channel_index);
+	}
 }
 
 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multiplex_node& mpx_nd) {
 	node_output_channel_ = &nd.add_output_channel();
-	std::cout << "output chan of node with multiplexer: " << node_output_channel_ << std::endl;
+	std::ptrdiff_t channel_index = node_output_channel_->index();
 	
 	for(edge_base_type* edge : edges_) {
-		std::ptrdiff_t channel_index = node_output_channel_->index();
 		multiplex_node_output& mpx_out = mpx_nd.add_output(channel_index);
 		edge->set_node_output(mpx_out, 0);
 	}
 }
 
 
-
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::define_frame_shape(const frame_shape_type& shp) {
 	Assert(node_output_channel_ != nullptr);
 	frame_shape_ = shp;
-	
-	std::cout << "chan! " <<  node_output_channel_ << std::endl;
-	
+		
 	std::size_t elem_count = frame_shape_.product();
 	ndarray_format frame_format = make_ndarray_format<Output_elem>(elem_count);
 	node_output_channel_->define_frame_format(frame_format);
@@ -99,10 +102,11 @@ auto filter_output<Output_dim, Output_elem>::get_output_view
 
 template<std::size_t Input_dim, typename Input_elem>
 filter_input<Input_dim, Input_elem>::filter_input(filter& filt, time_unit past_window, time_unit future_window) :
+	filter_(filt),
 	past_window_(past_window),
 	future_window_(future_window)
 {
-	filt.register_input(*this);
+	filter_.register_input(*this);
 }
 
 
@@ -132,7 +136,6 @@ template<std::size_t Input_dim, typename Input_elem>
 bool filter_input<Input_dim, Input_elem>::is_activated() {
 	return node_input_->is_activated();
 }
-
 
 
 template<std::size_t Input_dim, typename Input_elem>

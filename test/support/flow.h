@@ -53,7 +53,7 @@ public:
 	
 	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
 		flow::source_filter(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
-		output(*this) { }
+		output(*this) { set_name("source"); }
 	
 	void setup() override {
 		std::cout << "source setup" << std::endl;
@@ -130,7 +130,7 @@ public:
 
 	passthrough_filter(time_unit past_window, time_unit future_window) :
 		input(*this, past_window, future_window),
-		output(*this) { }
+		output(*this) { set_name("passthrough"); }
 };
 
 
@@ -161,7 +161,7 @@ public:
 	output_type<2, int> output2;
 	
 	multiple_output_filter() :
-		input(*this), output1(*this), output2(*this) { }
+		input(*this), output1(*this), output2(*this) { set_name("multiout"); }
 };
 
 
@@ -175,7 +175,7 @@ public:
 	simple_sink() :
 		input(*this) { }
 	
-	void process(flow::filter_job& job) override { }
+	void process(flow::filter_job& job) override { set_name("sink"); }
 };
 
 
@@ -196,7 +196,7 @@ public:
 	explicit expected_frames_sink(const std::vector<int>& seq) :
 		expected_frames_(seq),
 		got_frames_(seq.size(), missingframe),
-		input(*this) { }
+		input(*this) { set_name("sink"); }
 	
 	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
@@ -245,7 +245,7 @@ public:
 	std::vector<bool> activation2;
 	
 	input_synchronize_test_filter(time_unit prefetch = 0) :
-		input1(*this), input2(*this), output(*this) { }
+		input1(*this), input2(*this), output(*this) { set_name("merge"); }
 
 
 	void setup() override {

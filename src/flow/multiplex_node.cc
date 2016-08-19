@@ -27,6 +27,7 @@ namespace mf { namespace flow {
 
 multiplex_node::multiplex_node(graph& gr) : base(gr) {
 	add_input_(*this);
+	set_name("multiplex");
 }
 
 
@@ -151,6 +152,12 @@ node_input& multiplex_node::input() {
 }
 
 
+const node_input& multiplex_node::input() const {
+	Assert(inputs().size() == 1);
+	return *inputs().front();
+}
+
+
 multiplex_node_output& multiplex_node::add_output(std::ptrdiff_t input_channel_index) {
 	return add_output_(*this, input_channel_index);
 }
@@ -168,7 +175,7 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 	
 	time_span expected_input_span = this_node().expected_input_span_();
 	if(! expected_input_span.includes(span)) {
-		MF_DEBUG_T("multiplex", "tfail1");
+	//	MF_DEBUG_T("multiplex", "tfail1");
 		return node::pull_result::transitory_failure;
 	}
 	
@@ -184,10 +191,10 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 	time_span input_span = this_node().current_input_span_();
 	
 	if(input_span.includes(span)) {
-		MF_DEBUG_T("multiplex", "success");
+	//	MF_DEBUG_T("multiplex", "success");
 		return node::pull_result::success;
 	} else {
-		MF_DEBUG_T("multiplex", "tfail2");
+	//	MF_DEBUG_T("multiplex", "tfail2");
 		return node::pull_result::transitory_failure;
 	}
 }
