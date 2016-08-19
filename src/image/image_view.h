@@ -3,6 +3,8 @@
 
 #include "../nd/ndarray_view.h"
 #include "../opencv.h"
+#include "../masked_elem.h"
+#include "../nd/ndarray_view_cast.h"
 
 namespace mf {
 
@@ -42,7 +44,7 @@ public:
 	using typename base::view_type;
 	using typename base::const_view_type;
 	using typename base::cv_mat_type;
-	
+		
 	using mask_type = Mask;
 	using mask_view_type = ndarray_view<2, mask_type>;
 	using const_mask_view_type = ndarray_view<2, const mask_type>;
@@ -58,6 +60,16 @@ public:
 	
 	const cv_mask_mat_type& cv_mask_mat() const { return mask_mat_; }
 };
+
+
+template<typename Pixel>
+auto to_masked_image_view(const ndarray_view<2, masked_elem<Pixel>>& masked_vw) {
+	using image_type = masked_image_view<Pixel, byte>;
+	auto vw = ndarray_view_cast<typename image_type::view_type>(masked_vw);
+	auto mask_vw = ndarray_view_cast<typename image_type::mask_view_type>(masked_vw);
+	return image_type(vw, mask_vw);
+}
+
 
 }
 

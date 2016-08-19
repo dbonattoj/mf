@@ -86,6 +86,7 @@ void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(graph&) {
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::install_(graph& gr) {	
 	convert_node_ = &gr.add_node<sync_node>();
+	convert_node_->set_name("convert");
 	convert_node_->set_handler(*this);
 	auto& convert_node_input = convert_node_->add_input();
 	auto& convert_node_output = convert_node_->output();
@@ -97,7 +98,8 @@ void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_f
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
-void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::handler_setup() {
+void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
+handler_setup(processing_node& nd) {
 	node_input& convert_node_input = *convert_node_->inputs().front();
 	node_output& convert_node_output = convert_node_->output();
 		
@@ -110,12 +112,12 @@ void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_f
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
-handler_pre_process(processing_node_job& job) { }
+handler_pre_process(processing_node& nd, processing_node_job& job) { }
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
-handler_process(processing_node_job& job) {
+handler_process(processing_node& nd, processing_node_job& job) {
 	auto in = job.input_view(0)[0];
 	const auto& out = job.output_view();
 	
@@ -131,7 +133,7 @@ handler_process(processing_node_job& job) {
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 auto filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
 cast_connected_node_output_view(const timed_frame_array_view& generic_converted_view) const -> input_full_view_type {
-	// `generic_output_view` is reading from `convert_node_`.
+	// `generic_output_view` is read from `convert_node_`.
 	// its format is already <Dim, Input_elem>
 	return from_opaque<Dim + 1, Input_elem>(generic_converted_view, base::input_frame_shape());
 }

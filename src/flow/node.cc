@@ -48,7 +48,9 @@ bool node::precedes_strict(const node& nd) const {
 
 
 const node& node::first_successor() const {
-	Expects(outputs_.size() > 0);
+	// TODO bug??
+	
+	Assert(outputs_.size() > 0);
 	
 	if(outputs_.size() == 1) return outputs_.front()->connected_node();
 	
@@ -69,7 +71,7 @@ const node& node::first_successor() const {
 	collect_all_successors(outputs_.front()->connected_node(), common_successors);
 	
 	// for the other outputs...
-	for(auto it = outputs_.cbegin() + 1; it != outputs_.cend(); ++it) {
+	for(auto it = outputs_.cbegin() + 1; it < outputs_.cend(); ++it) {
 		// out_successors := successors of node connected to output `it`
 		const node& connected_node = (*it)->connected_node();
 		nodes_vector_type out_successors;
@@ -78,15 +80,18 @@ const node& node::first_successor() const {
 		// common_successors := intersection(common_successors, out_successors)
 		nodes_vector_type old_common_successors = common_successors;
 		common_successors.clear();
+		std::sort(old_common_successors.begin(), old_common_successors.end());
+		std::sort(out_successors.begin(), out_successors.end());
 		std::set_intersection(
 			old_common_successors.cbegin(), old_common_successors.cend(),
 			out_successors.cbegin(), out_successors.cend(),
 			std::back_inserter(common_successors)
 		);
 	}
+	Assert(common_successors.size() > 0);
 	// common_successors = nodes that are successors of every output
 	
-	// find node in `common_successors` that is not preceded by any another
+	// find node in `common_successors` that is not preceded by any other
 	// (precedes_strict forms a partial order)
 	auto it = std::find_if(
 		common_successors.cbegin(), common_successors.cend(),

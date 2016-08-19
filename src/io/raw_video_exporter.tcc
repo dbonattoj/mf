@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <iostream>
 
 namespace mf {
-
+/*
 template<typename Elem>
 auto raw_video_exporter<Elem>::scaled_component_frame_
 (std::ptrdiff_t component, const frame_view_type& vw) const -> image<component_type> {
@@ -50,7 +50,7 @@ auto raw_video_exporter<Elem>::scaled_component_frame_
 	);
 	return scaled_image;
 }
-
+*/
 
 template<typename Elem> template<typename T>
 void raw_video_exporter<Elem>::write_raw_(const ndarray_view<2, T>& vw) {
@@ -69,8 +69,9 @@ template<typename Elem>
 void raw_video_exporter<Elem>::write_frame_planar_(const frame_view_type& vw) {
 	for(std::ptrdiff_t component = 0; component < format_.num_components; ++component) {
 		if(format_.component_scale_x[component] != 1 || format_.component_scale_y[component] != 1) {
-			auto img = scaled_component_frame_(component, vw);
-			write_raw_(img.view());
+			throw 0;
+			//auto img = scaled_component_frame_(component, vw);
+			//write_raw_(img.view());
 		} else {
 			using componentwise_view_type = ndarray_view<3, const component_type>;
 			auto component_view = ndarray_view_cast<componentwise_view_type>(vw).slice(component, 2);

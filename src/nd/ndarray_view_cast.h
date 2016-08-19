@@ -132,7 +132,7 @@ namespace detail {
 		ndarray_view<Dim, masked_elem<Elem>> // in
 	>{
 		using input_view_type = ndarray_view<Dim, masked_elem<Elem>>;
-		using output_view_type = ndarray_view<Dim, bool>;
+		using output_view_type = ndarray_view<Dim, mask_type>;
 
 		output_view_type operator()(const input_view_type& arr) const {
 			std::ptrdiff_t offset = offsetof(masked_elem<Elem>, mask);

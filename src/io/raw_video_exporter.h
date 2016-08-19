@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "frame_exporter.h"
 #include "raw_video_frame_format.h"
 #include "../elem.h"
-#include "../image/image.h"
+#include "../image/image_view.h"
 #include <string>
 #include <iosfwd>
 
@@ -46,7 +46,7 @@ private:
 	
 	template<typename T> void write_raw_(const ndarray_view<2, T>&);
 	
-	image<component_type> scaled_component_frame_(std::ptrdiff_t component, const frame_view_type&) const;
+	//image<component_type> scaled_component_frame_(std::ptrdiff_t component, const frame_view_type&) const;
 
 	void write_frame_planar_(const frame_view_type&);
 	void write_frame_interleaved_(const frame_view_type&);

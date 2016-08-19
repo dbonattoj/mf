@@ -149,6 +149,7 @@ public:
 
 private:
 	filter& filter_;
+	std::string name_;
 	std::vector<edge_base_type*> edges_;
 	processing_node_output_channel* node_output_channel_ = nullptr;
 	
@@ -159,6 +160,9 @@ public:
 	
 	filter& this_filter() { return filter_; }
 	const filter& this_filter() const { return filter_; }
+
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
 		
 	processing_node_output_channel& this_node_output_channel()
 		{ Expects(node_output_channel_ != nullptr); return *node_output_channel_; }
@@ -197,6 +201,7 @@ public:
 
 private:
 	filter& filter_;
+	std::string name_;
 	std::unique_ptr<edge_base_type> edge_;
 	
 	processing_node_input* node_input_ = nullptr;
@@ -211,6 +216,9 @@ public:
 
 	filter& this_filter() { return filter_; }
 	const filter& this_filter() const { return filter_; }
+
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
 
 	processing_node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
 	const processing_node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }

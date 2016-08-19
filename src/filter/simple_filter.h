@@ -34,7 +34,7 @@ public:
 	input_type<Dim, Input_elem> input;
 	output_type<Dim, Output_elem> output;
 
-	using input_view_type = ndarray_view<Dim, const Input_elem>;
+	using input_view_type = ndarray_view<Dim, Input_elem>;
 	using output_view_type = ndarray_view<Dim, Output_elem>;
 
 protected:

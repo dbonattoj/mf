@@ -540,6 +540,31 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
+	
+	
+	SECTION("implicit conversion") {
+		SECTION("conversion") {
+			INFO(R"(
+			source --> tofloat --[]--> sink
+			)");
+			
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& tofloat = gr.add_filter<to_float_filter>();
+			auto& sink = gr.add_filter<expected_frames_sink>(seq);
+			
+			tofloat.input.connect(source.output);
+			sink.input.connect(tofloat.output, to_int);
+			
+			source.set_asynchonous(async1);
+			tofloat.set_asynchonous(async1);
+			sink.set_asynchonous(async1);
+			
+			gr.setup();
+			gr.run();
+			
+			REQUIRE(sink.check());
+		}
+	}
 
 	
 
@@ -639,7 +664,6 @@ SECTION("basic") {
 			sink.input.connect(merge2.output);
 	
 			gr.setup();
-			export_graph_visualization(*gr.node_graph_, "graph.gv");
 			gr.run();
 			
 			REQUIRE(sink.check());

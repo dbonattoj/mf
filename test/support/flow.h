@@ -137,6 +137,35 @@ public:
 ///////////////
 
 
+class to_float_filter : public flow::filter {
+private:
+	void setup() override {
+		output.define_frame_shape(input.frame_shape());	
+	}
+		
+	void process(flow::filter_job& job) override {				
+		auto in = job.in(input);
+		auto out = job.out(output);
+		out = in;
+	}
+	
+public:
+	input_type<2, int> input;
+	output_type<2, float> output;
+	
+	to_float_filter() :
+		input(*this, 0, 0),
+		output(*this) { set_name("to float"); }
+};
+
+
+int to_int(float f) {
+	return static_cast<int>(f);
+}
+
+///////////////
+
+
 class multiple_output_filter : public flow::filter {
 private:
 	void setup() override {

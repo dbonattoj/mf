@@ -64,7 +64,7 @@ public:
 
 
 /// Edge in filter graph.
-/** Connects output of *origin filter* to input of *destination filter*. */
+/** Connects output of *origin filter* (type Output_elem) to input of *destination filter* (type Input_elem). */
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem>
 class filter_edge :
 	public filter_edge_input_base<Dim, Input_elem>,
@@ -127,9 +127,9 @@ public:
 /// Edge in filter graph without conversion.
 template<std::size_t Dim, typename Output_elem, typename Input_elem>
 class filter_direct_edge final :
-	public filter_edge<Dim, Input_elem, Input_elem, Output_elem>
+	public filter_edge<Dim, Output_elem, Input_elem, Input_elem>
 {
-	using base = filter_edge<Dim, Input_elem, Input_elem, Output_elem>;
+	using base = filter_edge<Dim, Output_elem, Input_elem, Input_elem>;
 
 	/*
 	origin node
@@ -164,10 +164,10 @@ public:
 /// Edge in filter graph with conversion.
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 class filter_converting_edge final :
-	public filter_edge<Dim, Input_elem, Casted_elem, Output_elem>,
+	public filter_edge<Dim, Output_elem, Casted_elem, Input_elem>,
 	public processing_node_handler
 {
-	using base = filter_edge<Dim, Input_elem, Casted_elem, Output_elem>;
+	using base = filter_edge<Dim, Output_elem, Casted_elem, Input_elem>;
 
 	/*
 	origin node
@@ -204,9 +204,9 @@ public:
 	filter_converting_edge(input_type& in, output_type& out, Convert_function&& func) :
 		base(in, out), convert_function_(std::forward<Convert_function>(func)) { }
 
-	void handler_setup() final override;
-	void handler_pre_process(processing_node_job&) final override;
-	void handler_process(processing_node_job&) final override;
+	void handler_setup(processing_node&) final override;
+	void handler_pre_process(processing_node&, processing_node_job&) final override;
+	void handler_process(processing_node&, processing_node_job&) final override;
 
 	input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const override;
 };
