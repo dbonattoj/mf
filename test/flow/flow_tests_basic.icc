@@ -557,7 +557,6 @@ SECTION("basic") {
 			
 			source.set_asynchonous(async1);
 			tofloat.set_asynchonous(async1);
-			sink.set_asynchonous(async1);
 			
 			gr.setup();
 			gr.run();

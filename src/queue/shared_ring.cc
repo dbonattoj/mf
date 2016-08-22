@@ -112,7 +112,7 @@ locked:
 
 
 auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_type {
-	Assert(original_duration > capacity());
+	Assert(original_duration <= capacity());
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);

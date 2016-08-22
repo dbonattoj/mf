@@ -103,21 +103,21 @@ bool filter::need_multiplex_node_() const {
 
 void filter::install(graph& gr) {
 	Assert(! was_installed());
-	/*if(asynchronous_) {
+	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
 		node_ = &nd;
-	} else {*/
+	} else {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
-	//}
+	}
 	node_->set_name(name_.empty() ? default_filter_name : name_);
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
 
 	if(need_multiplex_node_()) {
-		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
+		multiplex_node_ = &gr.add_node<multiplex_node>();
 		multiplex_node_->input().connect(node_->output());
 		for(filter_output_base* out : outputs_) out->install(*node_, *multiplex_node_);
 	} else {
@@ -164,20 +164,20 @@ void source_filter::install(graph& gr) {
 	Assert(! was_installed());
 	Assert(inputs_.size() == 0, "source filter must have no inputs");
 
-	/*if(asynchronous_) {
+	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
 		node_ = &nd;
-	} else {*/
+	} else {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
-	//}
+	}
 	node_->set_name(name_.empty() ? "source" : name_);
 	node_->set_handler(*this);
 	node_->define_source_stream_properties(node_stream_properties_);
 
 	if(need_multiplex_node_()) {
-		multiplex_node_ = &nd.this_graph().add_node<multiplex_node>();
+		multiplex_node_ = &gr.add_node<multiplex_node>();
 		multiplex_node_->input().connect(node_->output());
 		for(filter_output_base* out : outputs_) out->install(*node_, *multiplex_node_);
 	} else {
