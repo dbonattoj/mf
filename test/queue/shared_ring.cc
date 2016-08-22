@@ -43,7 +43,7 @@ TEST_CASE("shared_ring", "[queue][shared_ring]") {
 	REQUIRE(rng.end_time() == 200);	
 	REQUIRE(rng.capacity() == 5);
 	
-	
+
 	SECTION("break reader") {
 		SECTION("reject write") {
 			std::atomic<bool> done(false);
@@ -85,9 +85,8 @@ TEST_CASE("shared_ring", "[queue][shared_ring]") {
 			rng.end_read(3);
 		}
 	}
-	
 
-	
+		
 	SECTION("break writer") {
 		// fill buffer
 		rng.begin_write(duration);
@@ -112,7 +111,7 @@ TEST_CASE("shared_ring", "[queue][shared_ring]") {
 			
 			done = true;
 		}
-		
+
 		SECTION("not writing") {
 			std::atomic<bool> broke(false), cont(false);
 			MF_TEST_THREAD() {

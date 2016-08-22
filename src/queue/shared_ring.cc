@@ -88,7 +88,7 @@ locked:
 		// - spurious wakeup
 		
 		// test if writer break event occured
-		if(! reader_keep_waiting_.test_and_set()) {
+		if(! writer_keep_waiting_.test_and_set()) {
 			writer_state_ = idle;
 			return section_view_type::null();
 		}
