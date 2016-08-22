@@ -18,32 +18,13 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/*
-Author : Tim Lenertz
-Date : May 2016
-
-Copyright (c) 2016, Université libre de Bruxelles
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
-publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-/*
 #include "async_node.h"
 #include "graph.h"
 
 namespace mf { namespace flow {
 	
-async_node::async_node(graph& gr) : processing_node(gr) { }
+async_node::async_node(graph& gr) :
+	processing_node(gr, true) { }
 
 async_node::~async_node() {
 	Assert(! running_);
@@ -52,12 +33,13 @@ async_node::~async_node() {
 
 void async_node::setup() {
 	handler_setup_();
-	
-	const node& connected_node = output().connected_node();
+		
+	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
-
-	ndarray_generic_properties prop(output().format(), output().frame_length(), required_capacity);
-	ring_.reset(new shared_ring(prop, stream_properties().is_seekable(), stream_properties().duration()));
+	
+	auto buffer_frame_format = output_frame_format_();
+	Assert(stream_properties().is_seekable());
+	ring_.reset(new shared_ring(buffer_frame_format, required_capacity, stream_properties().duration()));
 }
 
 void async_node::launch() {
@@ -179,7 +161,7 @@ async_node::process_result async_node::process_frame_() {
 	set_current_time_(t);
 	processing_node_job job = begin_job_();
 
-	job.attach_output(out_vw[0]);
+	job.attach_output_view(out_vw[0]);
 	MF_RAND_SLEEP;
 	
 	MF_RAND_SLEEP;
@@ -190,20 +172,26 @@ async_node::process_result async_node::process_frame_() {
 	
 	handler_pre_process_(job);
 			
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		time_unit res = in->pull();
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+		
+		pull_result res = in.pull();
 		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
-			job.detach_output();
+			job.detach_output_view();
 			ring_->end_write(0);
 			MF_DEBUG("process frame... t=", request_time, " in fail --> failure");
 			return process_result::failure;
 		}
 	}
 	
-	for(auto&& in : inputs()) if(in->is_activated()) {
-		bool cont = job.push_input(*in);
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+
+		bool cont = job.begin_input(in);
 		if(! cont) {
-			job.detach_output();
+			job.detach_output_view();
 			ring_->end_write(0);
 			MF_DEBUG("process frame... t=", request_time, " in broke --> failure");
 			return process_result::failure;
@@ -215,11 +203,10 @@ async_node::process_result async_node::process_frame_() {
 
 	finish_job_(job);
 	
-	job.detach_output();
+	job.detach_output_view();
 	
 	if(reached_end()) {
-		bool mark_last_frame = !ring_->is_seekable();
-		ring_->end_write(1, mark_last_frame);
+		ring_->end_write(1);
 		MF_DEBUG("process frame... t=", request_time, " --> should_pause");	
 		return process_result::should_pause;
 	} else {
@@ -295,4 +282,3 @@ void async_node::output_end_read_(time_unit duration) {
 
 
 }}
-*/

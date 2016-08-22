@@ -38,9 +38,8 @@ private:
 	bool process_next_frame_();
 
 public:
-	explicit sync_node(graph& gr) :
-		processing_node(gr, true) { }
-	
+	explicit sync_node(graph&);
+		
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;
 	

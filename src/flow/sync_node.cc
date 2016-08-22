@@ -24,6 +24,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+sync_node::sync_node(graph& gr) :
+	processing_node(gr, true) { }
+
 time_unit sync_node::minimal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
 	const node_input& in = output().connected_input();

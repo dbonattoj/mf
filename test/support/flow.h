@@ -159,7 +159,7 @@ public:
 };
 
 
-int to_int(float f) {
+inline int to_int(float f) {
 	return static_cast<int>(f);
 }
 
