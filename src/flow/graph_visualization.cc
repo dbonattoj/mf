@@ -96,9 +96,10 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 		html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
 		html << R"(<TR CELLPADDING="1">)";
 		for(std::ptrdiff_t i = 0; i < nd.output_channels_count(); ++i) {
+			const std::string& chan_name = nd.output_channel_at(i).name();
 			if(i > 0) html << R"(<TD WIDTH="5"></TD>)";
 			html << R"(<TD BORDER="1" CELLPADDING="1">)";
-			html << R"(<FONT POINT-SIZE="10">)" << "chan" << R"(</FONT>)";
+			html << R"(<FONT POINT-SIZE="10">)" << chan_name << R"(</FONT>)";
 			html << R"(</TD>)";
 		}
 		html << R"(</TR>)";

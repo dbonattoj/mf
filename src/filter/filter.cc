@@ -27,6 +27,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <set>
 
 namespace mf { namespace flow {
+	
+const std::string filter::default_filter_name = "filter";
+const std::string filter::default_filter_input_name = "in";
+const std::string filter::default_filter_output_name = "out";
 
 
 void filter::handler_setup(processing_node& nd) {
@@ -107,7 +111,7 @@ void filter::install(graph& gr) {
 		sync_node& nd = gr.add_node<sync_node>();
 		node_ = &nd;
 	//}
-	node_->set_name(name_.empty() ? "filter" : name_);
+	node_->set_name(name_.empty() ? default_filter_name : name_);
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);

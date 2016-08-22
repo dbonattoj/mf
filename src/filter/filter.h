@@ -49,7 +49,11 @@ public:
 	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = filter_job;
-
+	
+	static const std::string default_filter_name;
+	static const std::string default_filter_input_name;
+	static const std::string default_filter_output_name;
+	
 protected:
 	std::string name_;
 

@@ -44,6 +44,7 @@ void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
 	Assert(edges_count() == 1, "multiplex node is required because filter output has multiple edges");
 		
 	node_output_channel_ = &nd.add_output_channel();
+	node_output_channel_->set_name(name_.empty() ? filter::default_filter_output_name : name_);
 	std::ptrdiff_t channel_index = node_output_channel_->index();
 
 	for(edge_base_type* edge : edges_) {
@@ -55,6 +56,7 @@ void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multiplex_node& mpx_nd) {
 	node_output_channel_ = &nd.add_output_channel();
+	node_output_channel_->set_name(name_.empty() ? filter::default_filter_output_name : name_);
 	std::ptrdiff_t channel_index = node_output_channel_->index();
 	
 	for(edge_base_type* edge : edges_) {
@@ -113,7 +115,7 @@ filter_input<Input_dim, Input_elem>::filter_input(filter& filt, time_unit past_w
 template<std::size_t Input_dim, typename Input_elem>
 void filter_input<Input_dim, Input_elem>::install(processing_node& nd) {
 	node_input_ = &nd.add_input();
-	node_input_->set_name(name_.empty() ? "in" : name_);
+	node_input_->set_name(name_.empty() ? filter::default_filter_input_name : name_);
 	node_input_->set_past_window(past_window_);
 	node_input_->set_future_window(future_window_);
 	

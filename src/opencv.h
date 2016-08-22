@@ -118,13 +118,19 @@ void copy_masked_to_opencv
 
 
 /// Create `cv::Mat` header pointing at the same data as \a vw.
-/** \a vw must have default strides without padding, and `Elem` cannot be a `masked_elem` type. */
+/** If `Elem` is a const type, a `const_cast` is done and the returned type is
+ ** `const cv::Mat_<std::remove_const_t<Elem>>`. The called must ensure that the returned `cv::Mat_` does not get
+ ** written into.
+ ** \a vw must have default strides without padding, and `Elem` cannot be a `masked_elem` type. */
 template<std::size_t Dim, typename Elem>
-cv::Mat_<Elem> to_opencv(const ndarray_view<Dim, Elem>& vw) {	
+auto to_opencv(const ndarray_view<Dim, Elem>& vw) {	
 	if(vw.default_strides_padding() != 0)
 		throw std::invalid_argument("ndarray_view must have default strides without padding to be converted into Mat");
 	
-	using opencv_type = cv::DataType<Elem>;
+	using elem_type = std::remove_const_t<Elem>;
+	using opencv_type = cv::DataType<elem_type>;
+	using mat_type = cv::Mat_<elem_type>;
+	using qualified_mat_type = std::conditional_t<std::is_const<Elem>::value, const mat_type, mat_type>;
 	using channel_type = typename opencv_type::channel_type;
 
 	int sizes[Dim];
@@ -134,22 +140,35 @@ cv::Mat_<Elem> to_opencv(const ndarray_view<Dim, Elem>& vw) {
 		Dim,
 		sizes,
 		opencv_type::type,
-		reinterpret_cast<void*>(vw.start())
+		reinterpret_cast<void*>(const_cast<elem_type*>(vw.start()))
 	);
+	cv::Mat_<elem_type> mat_(mat);
 
-	return cv::Mat_<Elem>(mat);
+	return mat_;
 }
 
 
-/// Create `ndarray_view` pointing at same data as OpenCV matrix \a mat.
+/// Create \ref ndarray_view pointing at same data as OpenCV matrix \a mat.
 /** Dimension must be specified if different from 2, because the OpenCV \a mat knows its dimension only runtime. */
 template<std::size_t Dim = 2, typename Elem>
-ndarray_view<Dim, Elem> to_ndarray_view(const cv::Mat_<Elem>& mat) {
+ndarray_view<Dim, Elem> to_ndarray_view(cv::Mat_<Elem>& mat) {
 	if(mat.dims != Dim) throw std::invalid_argument("OpenCV matrix in to_ndarray_view has incorrect dimension");
 	Elem* start = reinterpret_cast<Elem*>(mat.data);
 	ndcoord<Dim, int> shape(mat.size.p, mat.size.p + Dim);
 	ndcoord<Dim, std::size_t> strides(mat.step.p, mat.step.p + Dim);
 	return ndarray_view<Dim, Elem>(start, shape, strides);
+}
+
+
+/// Create \ref ndarray_view pointing at same data as OpenCV matrix \a mat.
+/** Dimension must be specified if different from 2, because the OpenCV \a mat knows its dimension only runtime. */
+template<std::size_t Dim = 2, typename Elem>
+ndarray_view<Dim, const Elem> to_ndarray_view(const cv::Mat_<Elem>& mat) {
+	if(mat.dims != Dim) throw std::invalid_argument("OpenCV matrix in to_ndarray_view has incorrect dimension");
+	const Elem* start = reinterpret_cast<const Elem*>(mat.data);
+	ndcoord<Dim, int> shape(mat.size.p, mat.size.p + Dim);
+	ndcoord<Dim, std::size_t> strides(mat.step.p, mat.step.p + Dim);
+	return ndarray_view<Dim, const Elem>(start, shape, strides);
 }
 
 

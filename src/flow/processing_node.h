@@ -51,6 +51,7 @@ public:
 class processing_node_output_channel final {
 private:
 	processing_node& node_;
+	std::string name_;
 	const std::ptrdiff_t index_;
 	ndarray_format frame_format_;
 
@@ -58,6 +59,9 @@ public:
 	processing_node_output_channel(processing_node& nd, std::ptrdiff_t index) :
 		node_(nd), index_(index) { }
 	
+	const std::string& name() const { return name_; }
+	void set_name(const std::string& nm) { name_ = nm; }
+
 	processing_node& this_node() { return node_; }
 	const processing_node& this_node() const { return node_; }
 	std::ptrdiff_t index() const { return index_; }
