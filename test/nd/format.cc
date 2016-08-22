@@ -94,7 +94,7 @@ void test_non_contiguous_() {
 }
 
 TEST_CASE("ndarray_format", "[nd][ndarray_format]") {	
-	SECTION("data assignment") {
+	SECTION("data assignment and comparison") {
 		SECTION("contiguous") {
 			std::vector<int> raw1(len), raw2(len);
 			for(int i = 0; i < len; ++i) {

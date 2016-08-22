@@ -168,7 +168,6 @@ void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const
 	}
 }
 
-// TODO comparison optimization
 
 template<std::size_t Dim, typename T> template<typename T2>
 bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, T2>& other) const {
@@ -179,6 +178,19 @@ bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, T2>& other) const {
 
 template<std::size_t Dim, typename T>
 bool ndarray_view<Dim, T>::compare(const ndarray_view<Dim, const T>& other) const {
+	if(shape() != other.shape()) return false;
+	else if(same(*this, other)) return true;
+
+	if(std::is_pod<T>::value && strides() == other.strides() && has_default_strides()) {
+		const ndarray_format& array_format = format(*this);
+		Assert_crit(array_format == format(other));
+		return ndarray_data_compare
+			(static_cast<const void*>(start()), static_cast<const void*>(other.start()), array_format);
+	} else {
+		return std::equal(other.begin(), other.end(), begin());
+	}
+	
+	
 	if(shape() != other.shape()) return false;
 	else if(same(*this, other)) return true;
 	else return std::equal(other.begin(), other.end(), begin());
