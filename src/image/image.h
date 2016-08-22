@@ -28,9 +28,9 @@ public:
 	explicit image(const const_ndarray_view_type&);
 
 	image(const const_view_type&);
+	image(const image&);
 	image(image&&);
 	
-	image& operator=(const const_ndarray_view_type&);
 	image& operator=(const const_view_type&);
 	image& operator=(const image&);
 	image& operator=(image&&);
@@ -39,7 +39,7 @@ public:
 	
 	view_type view();
 	const_view_type view() const { return cview(); }
-	const_view_type cview() { return const_view_type(mat_); }
+	const_view_type cview() const { return const_view_type(mat_); }
 	
 	operator view_type () { return view();  }
 	operator const_view_type () const { return cview(); }

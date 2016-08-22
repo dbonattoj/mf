@@ -18,6 +18,7 @@ TEST_CASE("image (container)", "[image]") {
 	}
 	
 	SECTION("from shape") {
+		// image(shape)
 		image<rgb_color> im(shp);
 		REQUIRE(im.shape() == shp);
 		REQUIRE_FALSE(im.view().is_null());
@@ -25,22 +26,17 @@ TEST_CASE("image (container)", "[image]") {
 		REQUIRE_FALSE(im.array_view().is_null());
 		REQUIRE(im.array_view().shape() == shp);
 	}
-	
 
 	SECTION("from ndarray_view") {
+		// image(ndarray_view)
 		image<rgb_color> im(arr.view());
 		REQUIRE_FALSE(same(im.array_view(), arr.view()));
 		REQUIRE(im.array_view() == arr.view());
 		REQUIRE(im.shape() == arr.shape());
-		
-		image<rgb_color> im2(shp);
-		im2 = arr.view();
-		REQUIRE_FALSE(same(im.array_view(), arr.view()));
-		REQUIRE(im.array_view() == arr.view());
-		REQUIRE(im2.shape() == arr.shape());
 	}
 	
 	SECTION("from image_view") {
+		// image(image_view)
 		image_view<rgb_color> imvw(arr.view());
 		image_view<rgb_color> imvw2(arr2.view());
 		image<rgb_color> im(imvw);
@@ -48,6 +44,7 @@ TEST_CASE("image (container)", "[image]") {
 		REQUIRE(im.array_view() == arr.view());
 		REQUIRE(im.shape() == arr.shape());
 		
+		// image = image_view
 		image<rgb_color> im2(shp);
 		im2 = imvw2;
 		REQUIRE_FALSE(same(im.array_view(), arr.view()));
@@ -56,21 +53,50 @@ TEST_CASE("image (container)", "[image]") {
 	}
 	
 	SECTION("from const image_view") {
+		// image(const image_view)
 		image_view<const rgb_color> imvw(arr.view());
 		image_view<const rgb_color> imvw2(arr2.view());
 		image<rgb_color> im(imvw);
 		REQUIRE(im.array_view() == arr.view());
 		
+		// image = const image_view
 		image<rgb_color> im2(shp);
 		im2 = imvw2;
 		REQUIRE(im.array_view() == arr.view());
 	}
 
 	SECTION("from opencv mat") {
+		// image(opencv_mat)
 		image_view<rgb_color> imvw(arr.view());
 		auto cvmat = imvw.cv_mat();
 		
 		image<rgb_color> im(cvmat);
 		REQUIRE(im.array_view() == imvw.array_view());
+	}
+	
+	SECTION("copy construct/assign") {
+		// image(image)
+		image<rgb_color> im(arr.view());
+		image<rgb_color> im2(im);
+		REQUIRE_FALSE(same(im.array_view(), im2.array_view()));
+		REQUIRE(im.array_view() == im2.array_view());
+		
+		// image = image
+		image<rgb_color> im3(arr.view());
+		im3 = im2;
+		REQUIRE_FALSE(same(im3.array_view(), im2.array_view()));
+		REQUIRE(im3.array_view() == im2.array_view());
+	}
+	
+	SECTION("move construct/assign") {
+		// image(image&&)
+		image<rgb_color> im(arr.view());
+		image<rgb_color> im2(std::move(im));
+		REQUIRE(same(im.array_view(), im2.array_view()));
+		
+		// image = image&&
+		image<rgb_color> im3(arr.view());
+		im3 = std::move(im2);
+		REQUIRE(same(im3.array_view(), im2.array_view()));
 	}
 }

@@ -17,14 +17,8 @@ image_view<Pixel>::image_view(cv_mat_qualified_type& mat) :
 
 
 template<typename Pixel>
-image_view<Pixel>::image_view(const image_view<std::remove_const_t<pixel_type>>& im) :
+image_view<Pixel>::image_view(const image_view& im) :
 	mat_(im.cv_mat()) { }
-	
-
-template<typename Pixel>
-image_view<Pixel>::image_view(image_view&& im) :
-	mat_(std::move(im.mat_)) { }
-
 
 template<typename Pixel>
 auto image_view<Pixel>::shape() const -> shape_type {
@@ -43,21 +37,6 @@ template<typename Pixel>
 void image_view<Pixel>::reset(const image_view& im) {
 	mat_ = im.mat_;
 }
-	
-
-template<typename Pixel>
-auto image_view<Pixel>::operator=(const image_view& im) -> image_view& {
-	im.mat_.copyTo(mat_);
-	return *this;
-}
-
-
-template<typename Pixel>
-auto image_view<Pixel>::operator=(image_view&& im) -> image_view& {
-	 mat_ = im.mat_;
-	 return *this;
-}
-
 
 
 ///////////////
@@ -83,22 +62,6 @@ template<typename Pixel, typename Mask>
 void masked_image_view<Pixel, Mask>::reset(const masked_image_view& im) {
 	base::reset(im);
 	mask_mat_ = im.mask_mat_;
-}
-	
-
-template<typename Pixel, typename Mask>
-auto masked_image_view<Pixel, Mask>::operator=(const masked_image_view& im) -> masked_image_view& {
-	base::operator=(im);
-	im.mask_mat_.copyTo(mask_mat_);
-	return *this;
-}
-
-
-template<typename Pixel, typename Mask>
-auto masked_image_view<Pixel, Mask>::operator=(masked_image_view&& im) -> masked_image_view& {
-	base::operator=(std::move(im));
-	mask_mat_ = im.mask_mat_;
-	return *this;
 }
 
 

@@ -32,13 +32,11 @@ image<Pixel>::image(const const_view_type& vw) :
 template<typename Pixel>
 image<Pixel>::image(image&& im) :
 	mat_(im.mat_) { }
-
+	
 
 template<typename Pixel>
-auto image<Pixel>::operator=(const const_ndarray_view_type& ndvw) -> image& {
-	copy_to_opencv(ndvw, mat_);
-	return *this;
-}
+image<Pixel>::image(const image& im) :
+	image(im.cview()) { }
 
 
 template<typename Pixel>

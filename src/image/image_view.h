@@ -22,26 +22,25 @@ public:
 		std::is_const<pixel_type>::value, const cv_mat_type, cv_mat_type
 	>;
 
-private:
+protected:
+	using const_view = image_view<std::add_const_t<pixel_type>>;
 	mutable cv_mat_type mat_;
 
 public:
 	image_view();
 	explicit image_view(const ndarray_view_type&);
 	explicit image_view(cv_mat_qualified_type&);
+	image_view(const image_view&);
 	virtual ~image_view() = default;
-
-	image_view(const image_view<std::remove_const_t<pixel_type>>&);
-	image_view(image_view&&);	
 	
+	image_view& operator=(const image_view&) = delete;
+
+	void reset(const image_view&);
+	operator const_view () const { return const_view(mat_); }
+
 	bool is_null() const { return mat_.empty(); }
 	explicit operator bool () const { return ! is_null(); }
-	
-	void reset(const image_view&);
-	
-	image_view& operator=(const image_view&);
-	image_view& operator=(image_view&&);
-	
+			
 	shape_type shape() const;
 	
 	ndarray_view_type array_view() const;
@@ -70,20 +69,23 @@ public:
 	>;
 
 private:
+	using typename base::const_view;
+	using const_masked_view = masked_image_view<std::add_const_t<pixel_type>, std::add_const_t<mask_type>>;
+
 	mutable cv_mask_mat_type mask_mat_;
 
 public:
 	masked_image_view();
+	masked_image_view(const masked_image_view&);
+	masked_image_view(masked_image_view&&);
 	masked_image_view(const ndarray_view_type&, const mask_ndarray_view_type&);
 	masked_image_view(cv_mat_qualified_type&, cv_mask_mat_qualified_type&);
 
-	masked_image_view(const masked_image_view& im) = default;
-	masked_image_view(masked_image_view&& im) = default;
+	masked_image_view& operator=(const masked_image_view&) = delete;
 
 	void reset(const masked_image_view&);
-	
-	masked_image_view& operator=(const masked_image_view&);
-	masked_image_view& operator=(masked_image_view&&);
+	operator const_masked_view () const { return const_masked_view(base::mat_, mask_mat_); }
+	operator const_view () const { return const_view(base::mat_); }
 
 	mask_ndarray_view_type mask_array_view() const;
 	cv_mask_mat_qualified_type& cv_mask_mat() const { return mask_mat_; }

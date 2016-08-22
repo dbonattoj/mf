@@ -26,26 +26,31 @@ TEST_CASE("image_view", "[image][image_view]") {
 		REQUIRE(im.array_view().is_null());
 	}
 	
-	SECTION("copy construct") {
+	SECTION("copy/move construct") {
+		// construct image_view(image_view)
 		image_view<rgb_color> im(arr.view());
 		image_view<rgb_color> im2(im);
-
 		REQUIRE(same(im2.array_view(), im.array_view()));
 		
+		// construct const image_view(image_view)
 		image_view<const rgb_color> im3(im);
 		REQUIRE(same(im3.array_view(), im.array_view()));
 		
+		// construct const image_view(const image_view)
+		image_view<const rgb_color> im4(im3);
+		
+		// move-construct image_view(image_view)
 		image_view<rgb_color> im5(std::move(im));
 		REQUIRE(same(im5.array_view(), im.array_view()));
 	}
 
 	SECTION("from ndarray_view") {
+		// construct image_view(ndarray_view)
 		ndarray_view<2, rgb_color> ndvw = arr.view();
 		image_view<rgb_color> im(ndvw);
 		REQUIRE_FALSE(im.is_null());
 		REQUIRE(same(im.array_view(), ndvw));
 		REQUIRE(im.shape() == ndvw.shape());
-		
 		// ndvw and im must reference same memory
 		REQUIRE(im.cv_mat()(3, 4) == ndvw[3][4]);
 		ndvw[3][4] = c1;
@@ -53,6 +58,7 @@ TEST_CASE("image_view", "[image][image_view]") {
 		im.cv_mat()(5, 8) = c2;
 		REQUIRE(ndvw[5][8] == c2);
 
+		// reset(ndarray_view)
 		ndarray_view<2, rgb_color> ndvw2 = arr2.view();	
 		image_view<rgb_color> im2(ndvw2);
 		im.reset(im2);
@@ -65,17 +71,20 @@ TEST_CASE("image_view", "[image][image_view]") {
 		REQUIRE(ndvw2[5][8] == c4);
 		REQUIRE_FALSE(ndvw[5][8] == c4);
 		
+		// construct ndarray_view(invalid ndarray_view)
 		ndarray_view<2, rgb_color> ndvw3 = ndvw.section(ndvw.full_span(), make_ndptrdiff(2, 2));
 		REQUIRE_FALSE(ndvw3.has_default_strides_without_padding());
 		REQUIRE_THROWS(new image_view<rgb_color>(ndvw3));
 	}
 	
 	SECTION("from const ndarray_view") {
+		// construct image_view(const ndarray_view)
 		ndarray_view<2, const rgb_color> ndvw = arr.view();
 		image_view<const rgb_color> im(ndvw);
 		REQUIRE_FALSE(im.is_null());
 		REQUIRE(im.cv_mat()(3, 4) == ndvw[3][4]);
 		
+		// reset(const ndarray_view)
 		ndarray_view<2, const rgb_color> ndvw2 = arr2.view();	
 		image_view<const rgb_color> im2(ndvw2);
 		im.reset(im2);
@@ -85,7 +94,8 @@ TEST_CASE("image_view", "[image][image_view]") {
 	SECTION("from opencv mat") {
 		image_view<rgb_color> im(arr.view());
 		auto cvmat = im.cv_mat();
-		
+
+		// construct image_view(cv_mat)
 		image_view<rgb_color> im2(cvmat);
 		// cvmat and im must reference same memory
 		REQUIRE(im.cv_mat()(3, 4) == cvmat(3, 4));
@@ -93,16 +103,8 @@ TEST_CASE("image_view", "[image][image_view]") {
 		REQUIRE(im.cv_mat()(3, 4) == c1);
 		im.cv_mat()(5, 8) = c2;
 		REQUIRE(cvmat(5, 8) == c2);
-	}
-	
-	SECTION("assign") {
-		image_view<rgb_color> im(arr.view());
-		image_view<rgb_color> im2(arr2.view());
 		
-		// should change the data in im, but not rereference the view 
-		im = im2;
-		REQUIRE(arr.view() == arr2.view());
-		im.cv_mat()(5, 8) = c1;
-		REQUIRE_FALSE(im2.cv_mat()(5, 8) == c1);
+		// construct const image_view(cv_mat)
+		image_view<const rgb_color> im3(cvmat);
 	}
 }
