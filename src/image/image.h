@@ -32,11 +32,12 @@ public:
 	
 	image& operator=(const const_ndarray_view_type&);
 	image& operator=(const const_view_type&);
+	image& operator=(const image&);
 	image& operator=(image&&);
 	
 	shape_type shape() const;
 	
-	view_type view() { return view_type(mat_); }
+	view_type view();
 	const_view_type view() const { return cview(); }
 	const_view_type cview() { return const_view_type(mat_); }
 	

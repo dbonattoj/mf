@@ -124,9 +124,8 @@ void copy_masked_to_opencv
  ** \a vw must have default strides without padding, and `Elem` cannot be a `masked_elem` type. */
 template<std::size_t Dim, typename Elem>
 auto to_opencv(const ndarray_view<Dim, Elem>& vw) {	
-	if(vw.default_strides_padding() != 0)
-		throw std::invalid_argument("ndarray_view must have default strides without padding to be converted into Mat");
-	
+	Assert(vw.has_default_strides_without_padding());
+
 	using elem_type = std::remove_const_t<Elem>;
 	using opencv_type = cv::DataType<elem_type>;
 	using mat_type = cv::Mat_<elem_type>;

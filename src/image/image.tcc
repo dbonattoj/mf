@@ -56,8 +56,22 @@ auto image<Pixel>::operator=(image&& im) -> image& {
 
 
 template<typename Pixel>
+auto image<Pixel>::operator=(const image& im) -> image& {
+	im.mat_.copyTo(mat_);
+	return *this;
+}
+
+
+template<typename Pixel>
 auto image<Pixel>::shape() const -> shape_type {
-	return shape_type(mat_.size[0], mat_.size[1]);
+	return make_ndsize(mat_.size[0], mat_.size[1]);
+}
+
+
+template<typename Pixel>
+auto image<Pixel>::view() -> view_type {
+	view_type vw(mat_);
+	return vw;
 }
 
 

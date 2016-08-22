@@ -17,6 +17,16 @@ image_view<Pixel>::image_view(cv_mat_qualified_type& mat) :
 
 
 template<typename Pixel>
+image_view<Pixel>::image_view(const image_view<std::remove_const_t<pixel_type>>& im) :
+	mat_(im.cv_mat()) { }
+	
+
+template<typename Pixel>
+image_view<Pixel>::image_view(image_view&& im) :
+	mat_(std::move(im.mat_)) { }
+
+
+template<typename Pixel>
 auto image_view<Pixel>::shape() const -> shape_type {
 	return make_ndsize(mat_.size[0], mat_.size[1]);
 }
@@ -24,7 +34,8 @@ auto image_view<Pixel>::shape() const -> shape_type {
 
 template<typename Pixel>
 auto image_view<Pixel>::array_view() const -> ndarray_view_type {
-	return to_ndarray_view(mat_);
+	if(is_null()) return ndarray_view_type::null();
+	else return to_ndarray_view(mat_);
 }
 
 
@@ -93,7 +104,8 @@ auto masked_image_view<Pixel, Mask>::operator=(masked_image_view&& im) -> masked
 
 template<typename Pixel, typename Mask>
 auto masked_image_view<Pixel, Mask>::mask_array_view() const -> mask_ndarray_view_type {
-	return to_ndarray_view(mask_mat_);
+	if(base::is_null()) return mask_ndarray_view_type::null();
+	else return to_ndarray_view(mask_mat_);
 }
 
 

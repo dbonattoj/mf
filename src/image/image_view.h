@@ -29,6 +29,10 @@ public:
 	image_view();
 	explicit image_view(const ndarray_view_type&);
 	explicit image_view(cv_mat_qualified_type&);
+	virtual ~image_view() = default;
+
+	image_view(const image_view<std::remove_const_t<pixel_type>>&);
+	image_view(image_view&&);	
 	
 	bool is_null() const { return mat_.empty(); }
 	explicit operator bool () const { return ! is_null(); }
@@ -72,6 +76,9 @@ public:
 	masked_image_view();
 	masked_image_view(const ndarray_view_type&, const mask_ndarray_view_type&);
 	masked_image_view(cv_mat_qualified_type&, cv_mask_mat_qualified_type&);
+
+	masked_image_view(const masked_image_view& im) = default;
+	masked_image_view(masked_image_view&& im) = default;
 
 	void reset(const masked_image_view&);
 	
