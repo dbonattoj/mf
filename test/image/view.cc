@@ -29,6 +29,7 @@ TEST_CASE("image_view", "[image][image_view]") {
 	SECTION("copy/move construct") {
 		// construct image_view(image_view)
 		image_view<rgb_color> im(arr.view());
+		image_view<rgb_color> im_(arr2.view());
 		image_view<rgb_color> im2(im);
 		REQUIRE(same(im2.array_view(), im.array_view()));
 		
@@ -42,6 +43,18 @@ TEST_CASE("image_view", "[image][image_view]") {
 		// move-construct image_view(image_view)
 		image_view<rgb_color> im5(std::move(im));
 		REQUIRE(same(im5.array_view(), im.array_view()));
+		
+		// image_view.reset(image_view)
+		im5.reset(im2);
+		REQUIRE(same(im5.array_view(), im2.array_view()));
+
+		// const image_view.reset(image_view)
+		im3.reset(im_);
+		REQUIRE(same(im3.array_view(), im_.array_view()));
+
+		// const image_view.reset(const image_view)
+		im3.reset(im4);
+		REQUIRE(same(im3.array_view(), im4.array_view()));
 	}
 
 	SECTION("from ndarray_view") {
@@ -58,37 +71,22 @@ TEST_CASE("image_view", "[image][image_view]") {
 		im.cv_mat()(5, 8) = c2;
 		REQUIRE(ndvw[5][8] == c2);
 
-		// reset(ndarray_view)
-		ndarray_view<2, rgb_color> ndvw2 = arr2.view();	
-		image_view<rgb_color> im2(ndvw2);
-		im.reset(im2);
-		// npw ndvw2 and im must reference same memory
-		REQUIRE(same(im.array_view(), ndvw2));
-		REQUIRE(im.cv_mat()(3, 4) == ndvw2[3][4]);
-		ndvw2[3][4] = c3;
-		REQUIRE(im.cv_mat()(3, 4) == c3);
-		im.cv_mat()(5, 8) = c4;
-		REQUIRE(ndvw2[5][8] == c4);
-		REQUIRE_FALSE(ndvw[5][8] == c4);
-		
-		// construct ndarray_view(invalid ndarray_view)
+		// construct image_view(invalid ndarray_view)
 		ndarray_view<2, rgb_color> ndvw3 = ndvw.section(ndvw.full_span(), make_ndptrdiff(2, 2));
 		REQUIRE_FALSE(ndvw3.has_default_strides_without_padding());
 		REQUIRE_THROWS(new image_view<rgb_color>(ndvw3));
 	}
 	
 	SECTION("from const ndarray_view") {
-		// construct image_view(const ndarray_view)
+		// construct const image_view(const ndarray_view)
 		ndarray_view<2, const rgb_color> ndvw = arr.view();
 		image_view<const rgb_color> im(ndvw);
-		REQUIRE_FALSE(im.is_null());
-		REQUIRE(im.cv_mat()(3, 4) == ndvw[3][4]);
+		REQUIRE(same(im.array_view(), ndvw));
 		
-		// reset(const ndarray_view)
-		ndarray_view<2, const rgb_color> ndvw2 = arr2.view();	
+		// construct const image_view(ndarray_view)
+		ndarray_view<2, rgb_color> ndvw2 = arr.view();
 		image_view<const rgb_color> im2(ndvw2);
-		im.reset(im2);
-		REQUIRE(im.cv_mat()(3, 4) == ndvw2[3][4]);
+		REQUIRE(same(im2.array_view(), ndvw2));
 	}
 	
 	SECTION("from opencv mat") {

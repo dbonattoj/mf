@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <string>
 #include <type_traits>
 #include "../image/image_view.h"
+#include "../image/masked_image_view.h"
 #include "../color.h"
 
 namespace mf {
