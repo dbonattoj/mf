@@ -229,9 +229,23 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 
 		std::string in_col = thread_index_color_(in.reader_thread_index());
 		
+		std::string label;
+		time_unit p = in.past_window_duration();
+		time_unit f = in.future_window_duration();
+		if(p > 0 && f > 0) label = "[-"s + std::to_string(p) + ", +" + std::to_string(f) + "]";
+		else if(p > 0) label = "[-"s + std::to_string(p) + "]";
+		else if(f > 0) label = "[+" + std::to_string(f) + "]";
+		
 		output_
 			<< '\t' << uid_(out.this_node(), "node") << ':' << uid_(out, "out")
-			<< " -> " << uid_(nd, "node") << ':' << uid_(in, "in") << " [color=" << in_col << "];\n";
+			<< " -> " << uid_(nd, "node") << ':' << uid_(in, "in") << " ["
+			<< "color=" << in_col << ", "
+			<< "headlabel=\"" << label << "\", "
+			<< "fontsize=10, "
+			<< "labelangle=45, "
+			<< "labeldistance=2.0, "
+			<< "labelfontcolor=" << in_col << ", "
+			<< "];\n";
 	}
 }
 
