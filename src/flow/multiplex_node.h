@@ -53,9 +53,17 @@ public:
 };
 
 
+class multiplex_node_input final : public node_input {
+public:
+	using node_input::node_input;
+
+	thread_index reader_thread_index() const final override;
+};
+
+
 /// Node which lets multiple connected inputs read from the same output.
-class multiplex_node final : public node_derived<node_input, multiplex_node_output> {
-	using base = node_derived<node_input, multiplex_node_output>;
+class multiplex_node final : public node_derived<multiplex_node_input, multiplex_node_output> {
+	using base = node_derived<multiplex_node_input, multiplex_node_output>;
 	friend class multiplex_node_output;
 
 private:
@@ -96,8 +104,8 @@ public:
 	void pre_setup() override;
 	void setup() override;
 	
-	node_input& input();
-	const node_input& input() const;
+	multiplex_node_input& input() { return input_at(0); }
+	const multiplex_node_input& input() const { return input_at(0); }
 	multiplex_node_output& add_output(std::ptrdiff_t input_channel_index);
 };
 
@@ -108,6 +116,10 @@ inline multiplex_node& multiplex_node_output::this_node() noexcept {
 
 inline const multiplex_node& multiplex_node_output::this_node() const noexcept {
 	return static_cast<const multiplex_node&>(node_output::this_node());
+}
+
+inline thread_index multiplex_node_input::reader_thread_index() const {
+	return static_cast<const multiplex_node&>(this_node()).loading_thread_index();
 }
 
 

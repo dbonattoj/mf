@@ -49,8 +49,7 @@ public:
 
 	node& this_node() const noexcept { return node_; }
 
-	void set_reader_thread_index(thread_index tid) { reader_thread_index_ = tid; }
-	thread_index reader_thread_index() const { return reader_thread_index_; }
+	virtual thread_index reader_thread_index() const = 0;
 	
 	void set_past_window(time_unit dur) { past_window_ = dur; }
 	void set_future_window(time_unit dur) { future_window_ = dur; }

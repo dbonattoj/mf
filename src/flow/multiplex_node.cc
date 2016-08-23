@@ -25,10 +25,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+
 multiplex_node::multiplex_node(graph& gr) : base(gr) {
 	thread_index_ = this_graph().new_thread_index();
 	add_input_(*this);
-	input().set_reader_thread_index(thread_index_);
 	set_name("multiplex");
 }
 
@@ -150,18 +150,6 @@ void multiplex_node::pre_setup() {
 
 void multiplex_node::setup() {
 	Assert(stream_properties().is_seekable());
-}
-
-	
-node_input& multiplex_node::input() {
-	Assert(inputs().size() == 1);
-	return *inputs().front();
-}
-
-
-const node_input& multiplex_node::input() const {
-	Assert(inputs().size() == 1);
-	return *inputs().front();
 }
 
 

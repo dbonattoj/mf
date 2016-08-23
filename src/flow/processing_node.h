@@ -91,13 +91,15 @@ public:
 /// Input of \ref processing_node.
 /** Has index value for use with \ref processing_node_job. */
 class processing_node_input final : public node_input {
-private:
+private:	
 	const std::ptrdiff_t index_;
 
 public:
 	using node_input::node_input;
 
 	processing_node_input(processing_node&, std::ptrdiff_t index);
+	
+	thread_index reader_thread_index() const final override;
 	
 	std::ptrdiff_t index() const { return index_; }
 };
@@ -152,8 +154,6 @@ public:
 	std::size_t output_channels_count() const noexcept;	
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
-	
-	void pre_setup() final override;
 };
 
 
@@ -165,6 +165,11 @@ inline processing_node& processing_node_output::this_node() {
 inline const processing_node& processing_node_output::this_node() const {
 	return static_cast<const processing_node&>(node_output::this_node());
 }
+
+inline thread_index processing_node_input::reader_thread_index() const {
+	return static_cast<const processing_node&>(this_node()).processing_thread_index();
+}
+
 
 
 }}

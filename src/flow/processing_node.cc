@@ -166,13 +166,4 @@ ndarray_opaque_frame_format processing_node::output_frame_format_() const {
 }
 
 
-void processing_node::pre_setup() {
-	thread_index tid = this->processing_thread_index();
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		in.set_reader_thread_index(tid);
-	}
-}
-
-
 }}
