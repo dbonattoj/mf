@@ -37,6 +37,9 @@ class graph;
 class node_output;
 class node_input;
 
+using thread_index = int;
+static constexpr thread_index undefined_thread_index = -1;
+
 /// Node in flow graph, base class.
 class node {
 public:
@@ -84,6 +87,7 @@ protected:
 public:
 	virtual ~node();
 
+	const graph& this_graph() const noexcept { return graph_; }
 	graph& this_graph() noexcept { return graph_; }
 
 	const auto& inputs() const noexcept { return inputs_; }

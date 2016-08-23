@@ -45,8 +45,13 @@ void graph::setup() {
 }
 
 
-auto graph::new_thread_uid() -> thread_uid {
-	return last_thread_uid_++;
+thread_index graph::new_thread_index() {
+	return last_thread_index_++;
+}
+
+
+thread_index graph::root_thread_index() const {
+	return 0;
 }
 
 

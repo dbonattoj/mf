@@ -39,6 +39,8 @@ private:
 
 public:
 	explicit sync_node(graph&);
+	
+	thread_index processing_thread_index() const override;
 		
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;

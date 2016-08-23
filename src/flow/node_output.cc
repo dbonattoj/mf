@@ -26,6 +26,13 @@ namespace mf { namespace flow {
 node_output::node_output(node& nd) :
 	node_(nd) { }
 
+
+thread_index node_output::reader_thread_index() const {
+	Assert(is_connected(), "output reader thread index known only when connected to an input");
+	return connected_input().reader_thread_index();
+}
+
+
 void node_output::input_has_connected(node_input& input) {
 	connected_input_ = &input;
 }

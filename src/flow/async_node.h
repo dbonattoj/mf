@@ -41,6 +41,7 @@ private:
 	
 	time_unit prefetch_duration_ = default_prefetch;
 	
+	thread_index thread_index_ = undefined_thread_index;
 	std::thread thread_;
 	std::atomic<bool> running_ {false};
 
@@ -65,6 +66,8 @@ private:
 public:
 	async_node(graph&);
 	~async_node() override;
+	
+	thread_index processing_thread_index() const override;
 	
 	time_unit prefetch_duration() const { return prefetch_duration_; }
 	void set_prefetch_duration(time_unit dur) { prefetch_duration_ = dur; }

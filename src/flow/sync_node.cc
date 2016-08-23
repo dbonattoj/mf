@@ -27,6 +27,7 @@ namespace mf { namespace flow {
 sync_node::sync_node(graph& gr) :
 	processing_node(gr, true) { }
 
+
 time_unit sync_node::minimal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
 	const node_input& in = output().connected_input();
@@ -38,6 +39,11 @@ time_unit sync_node::maximal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
 	const node_input& in = output().connected_input();
 	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration();
+}
+
+
+thread_index sync_node::processing_thread_index() const {
+	return output().reader_thread_index();
 }
 
 

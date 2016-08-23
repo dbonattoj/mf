@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <iosfwd>
 #include <string>
+#include "node.h"
 
 namespace mf { namespace flow {
 
@@ -38,6 +39,7 @@ private:
 	std::ostream& output_;
 	const graph& graph_;
 	std::string graph_id_ = "G";
+	bool thread_index_colors_ = true;
 	
 	void generate_node_dispatch_(const node&);
 	void generate_processing_node_(const processing_node&, bool async, bool sink);
@@ -45,13 +47,17 @@ private:
 	void generate_node_input_connections_(const node&);
 	void generate_ranks_();
 
+	std::string thread_index_color_(thread_index) const;
+
 public:
 	graph_visualization(const graph&, std::ostream&);
 	
 	void generate();
 };
 
+
 void export_graph_visualization(const graph&, const std::string& filename);
+
 
 }}
 

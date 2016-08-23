@@ -117,7 +117,9 @@ std::size_t processing_node::output_channels_count() const noexcept {
 }
 
 
-processing_node::processing_node(graph& gr, bool with_output) : base(gr) {
+processing_node::processing_node(graph& gr, bool with_output) :
+	base(gr)
+{
 	if(with_output) add_output_(*this);
 }
 
@@ -161,6 +163,15 @@ ndarray_opaque_frame_format processing_node::output_frame_format_() const {
 		frm.add_part(channel_frame_format);
 	}
 	return frm;
+}
+
+
+void processing_node::pre_setup() {
+	thread_index tid = this->processing_thread_index();
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		in.set_reader_thread_index(tid);
+	}
 }
 
 

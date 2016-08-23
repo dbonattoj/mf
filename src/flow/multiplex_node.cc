@@ -26,7 +26,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 multiplex_node::multiplex_node(graph& gr) : base(gr) {
+	thread_index_ = this_graph().new_thread_index();
 	add_input_(*this);
+	input().set_reader_thread_index(thread_index_);
 	set_name("multiplex");
 }
 
@@ -96,6 +98,11 @@ time_unit multiplex_node::minimal_offset_to(const node& target_node) const {
 
 time_unit multiplex_node::maximal_offset_to(const node& target_node) const {
 	return 0; // TODO
+}
+
+
+thread_index multiplex_node::loading_thread_index() const {
+	return thread_index_;
 }
 
 	

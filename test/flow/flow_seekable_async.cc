@@ -25,6 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../support/ndarray.h"
 #include "../support/flow.h"
 
+#include <mf/flow/graph_visualization.h>
+
 using namespace mf;
 using namespace mf::test;
 

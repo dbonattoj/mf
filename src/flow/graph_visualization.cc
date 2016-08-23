@@ -51,6 +51,21 @@ namespace {
 			return it.first->second;
 		}*/
 	}
+	
+	std::vector<std::string> html_colors_ {
+		"blue",
+		"red",
+		"forestgreen",
+		"orange",
+		"fuchsia",
+		"turquoise",
+		"salmon",
+		"cadetblue",
+		"cornflowerblue",
+		"yellowgreen",
+		"slategray",
+		"indigo"
+	};
 }
 
 
@@ -59,11 +74,18 @@ graph_visualization::graph_visualization(const graph& gr, std::ostream& output) 
 	graph_(gr) { }
 
 
+std::string graph_visualization::thread_index_color_(thread_index tid) const {
+	if(! thread_index_colors_) return "black";
+	else if(tid == graph_.root_thread_index()) return "black";
+	else if(tid == undefined_thread_index) return "lightgray";
+	else return html_colors_.at(tid % html_colors_.size());
+}
+
 void graph_visualization::generate_node_dispatch_(const node& nd) {	
 	if(typeid(nd) == typeid(sync_node))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, false);
-/*	else if(typeid(nd) == typeid(async_node))
-		generate_processing_node_(static_cast<const processing_node&>(nd), true, false);*/
+	else if(typeid(nd) == typeid(async_node))
+		generate_processing_node_(static_cast<const processing_node&>(nd), true, false);
 	else if(typeid(nd) == typeid(sink_node))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, true);
 	else if(typeid(nd) == typeid(multiplex_node))
@@ -76,6 +98,8 @@ void graph_visualization::generate_node_dispatch_(const node& nd) {
 void graph_visualization::generate_processing_node_(const processing_node& nd, bool async, bool sink) {
 	std::string node_id = uid_(nd, "node");
 	
+	std::string col = thread_index_color_(nd.processing_thread_index());
+	
 	std::ostringstream html;
 	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
 	
@@ -84,9 +108,10 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 		html << R"(<TD WIDTH="20"></TD>)";
 		for(std::ptrdiff_t i = 0; i < nd.inputs_count(); ++i) {
 			const node_input& in = nd.input_at(i);
+			std::string in_col = thread_index_color_(in.reader_thread_index());
 			std::string input_name = "in";
 			std::string input_id = uid_(in, "in");
-			html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(">)";
+			html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(" COLOR=")" << in_col << R"(">)";
 			html << R"(<FONT POINT-SIZE="10">)" << nd.input_at(i).name() << R"(</FONT>)";
 			html << R"(</TD>)";
 			html << R"(<TD WIDTH="20"></TD>)";
@@ -96,9 +121,9 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 	
 	std::size_t colspan = 2*nd.inputs_count() + 1;
 	html << R"(<TR>)";
-	html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="1" STYLE="ROUNDED" CELLPADDING="4">)";
+	html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR=")" << col << R"(">)";
 	html << nd.name();
-	html << R"(<BR/><FONT POINT-SIZE="10">)";
+	html << R"(<BR/><FONT POINT-SIZE="10" COLOR=")" << col << R"(">)";
 	if(sink) html << "sink node";
 	else if(async) html << "async node";
 	else html << "sync node";
@@ -107,9 +132,10 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 	html << R"(</TR>)";
 	
 	if(! sink) {
+		std::string output_col = thread_index_color_(nd.output().reader_thread_index());
 		html << R"(<TR>)";
 		html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="0">)";
-		html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
+		html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0" COLOR=")" << output_col << R"(">)";
 		html << R"(<TR>)";
 		html << R"(<TD WIDTH="20"></TD>)";
 		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << uid_(nd.output(), "out") << R"(">)";
@@ -146,16 +172,18 @@ void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
 	
 	std::string input_id = uid_(nd.input(), "in");
+	std::string in_col = thread_index_color_(nd.input().reader_thread_index());
 	html << R"(<TR>)";
 	html << R"(<TD WIDTH="20"></TD>)";
-	html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(">)";
+	html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(" COLOR=")" << in_col << R"(">)";
 	html << R"(<FONT POINT-SIZE="10">)" << nd.input().name() << R"(</FONT>)";
 	html << R"(</TD>)";
 	html << R"(<TD WIDTH="20"></TD>)";
 	html << R"(</TR>)";
 	
+	std::string col = thread_index_color_(nd.loading_thread_index());
 	html << R"(<TR>)";
-	html << R"(<TD COLSPAN="3" BORDER="1" STYLE="ROUNDED" CELLPADDING="4">)";
+	html << R"(<TD COLSPAN="3" BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR=")" << col << R"(">)";
 	html << nd.name();
 	html << R"(</TD>)";
 	html << R"(</TR>)";
@@ -168,7 +196,8 @@ void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 	
 	for(std::ptrdiff_t i = 0; i < nd.outputs_count(); ++i) {
 		std::string output_id = uid_(nd.output_at(i), "out");
-		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << output_id << R"(">)";
+		std::string output_col = thread_index_color_(nd.output_at(i).reader_thread_index());
+		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << output_id << R"(" COLOR=")" << output_col << R"(">)";
 		html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
 		html << R"(<TR CELLPADDING="1">)";
 		html << R"(<TD BORDER="1" CELLPADDING="1">)";
@@ -197,10 +226,12 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 		const node_input& in = nd.input_at(i);
 		if(! in.is_connected()) continue;
 		const node_output& out = in.connected_output();
+
+		std::string in_col = thread_index_color_(in.reader_thread_index());
 		
 		output_
 			<< '\t' << uid_(out.this_node(), "node") << ':' << uid_(out, "out")
-			<< " -> " << uid_(nd, "node") << ':' << uid_(in, "in") << ";\n";
+			<< " -> " << uid_(nd, "node") << ':' << uid_(in, "in") << " [color=" << in_col << "];\n";
 	}
 }
 

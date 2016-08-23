@@ -64,6 +64,7 @@ private:
 	time_unit input_future_window_ = -1;
 
 	std::thread thread_;
+	thread_index thread_index_ = undefined_thread_index;
 
 	bool stopped_ = false;
 	time_unit successor_time_of_input_view_ = -1;
@@ -87,6 +88,8 @@ public:
 
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;
+	
+	thread_index loading_thread_index() const;
 	
 	void launch() override;
 	void stop() override;

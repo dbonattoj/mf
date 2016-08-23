@@ -139,6 +139,8 @@ public:
 	~processing_node() override;
 	
 	void set_handler(processing_node_handler&);
+
+	virtual thread_index processing_thread_index() const = 0;
 	
 	input_type& add_input();
 	output_channel_type& add_output_channel();
@@ -150,6 +152,8 @@ public:
 	std::size_t output_channels_count() const noexcept;	
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
+	
+	void pre_setup() final override;
 };
 
 

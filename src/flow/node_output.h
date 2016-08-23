@@ -46,6 +46,8 @@ public:
 
 	node& this_node() const noexcept { return node_; }
 
+	thread_index reader_thread_index() const;
+
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
 

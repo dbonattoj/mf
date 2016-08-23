@@ -24,12 +24,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 	
 async_node::async_node(graph& gr) :
-	processing_node(gr, true) { }
+	processing_node(gr, true)
+{
+	thread_index_ = this_graph().new_thread_index();
+}
+	
 
 async_node::~async_node() {
 	Assert(! running_);
 	Assert(! thread_.joinable());
 }
+
+
+thread_index async_node::processing_thread_index() const {
+	return thread_index_;
+}
+
 
 void async_node::setup() {
 	handler_setup_();

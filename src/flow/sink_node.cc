@@ -19,12 +19,18 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "sink_node.h"
+#include "graph.h"
 #include <unistd.h>
 
 namespace mf { namespace flow {
 	
 sink_node::sink_node(graph& gr) : processing_node(gr, false) {
 	set_name("sink");
+}
+
+
+thread_index sink_node::processing_thread_index() const {
+	return this_graph().root_thread_index();
 }
 
 

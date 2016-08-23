@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_GRAPH_H_
 
 #include "../common.h"
+#include "node.h"
 #include "sink_node.h"
 #include <utility>
 #include <vector>
@@ -39,14 +40,13 @@ class node;
 class graph {
 public:
 	using frame_callback_function_type = void(time_unit t);
-	using thread_uid = int;
 	
 private:
 	std::vector<std::unique_ptr<node>> nodes_;
 	sink_node* sink_ = nullptr;
 	bool was_setup_ = false;
 	bool launched_ = false;
-	thread_uid last_thread_uid_ = 0;
+	thread_index last_thread_index_ = 0;
 	
 	std::atomic<bool> was_stopped_ {false};
 
@@ -76,7 +76,8 @@ public:
 		return sink;
 	}
 	
-	thread_uid new_thread_uid();
+	thread_index new_thread_index();
+	thread_index root_thread_index() const;
 	
 	std::size_t nodes_count() const { return nodes_.size(); }
 	const node& node_at(std::ptrdiff_t i) const { return *nodes_.at(i); }

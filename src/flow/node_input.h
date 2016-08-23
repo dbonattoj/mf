@@ -34,6 +34,7 @@ private:
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
 	std::string name_ = "in";
+	thread_index reader_thread_index_ = undefined_thread_index;
 	
 	node_output* connected_output_ = nullptr;
 	
@@ -48,6 +49,9 @@ public:
 
 	node& this_node() const noexcept { return node_; }
 
+	void set_reader_thread_index(thread_index tid) { reader_thread_index_ = tid; }
+	thread_index reader_thread_index() const { return reader_thread_index_; }
+	
 	void set_past_window(time_unit dur) { past_window_ = dur; }
 	void set_future_window(time_unit dur) { future_window_ = dur; }
 
