@@ -29,9 +29,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Heterogeneous tuple of items.
-/** Similar to `std::tuple`, but is also POD type (implies standard layout), and guarantees memory layout. Items
- ** must be `elem` types, but not other `elem_tuple`s.  */
+/// Heterogeneous tuple of elem, with standard layout.
+/** Similar to `std::tuple`, but is also a standard layout type, and guarantees memory layout. Items must be `elem`
+ ** types, but not other `elem_tuple`s.
+ ** \ref ndarray_view of \ref elem_tuple objects can be casted to \ref ndarray_view of a single tuple element, via
+ ** \ref ndarray_view_cast. */
 template<typename First_elem, typename... Other_elems>
 class elem_tuple {
 	static_assert(! elem_traits<First_elem>::is_tuple, "elem_tuple element must not be another tuple");

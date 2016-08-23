@@ -24,9 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray_view.h"
 #include "ndarray_timed_view.h"
 #include "../common.h"
-#include "../elem.h"
-#include "../elem_tuple.h"
-#include "../masked_elem.h"
+#include "../elem/elem.h"
+#include "../elem/elem_tuple.h"
 #include "../utility/misc.h"
 #include <cstddef>
 #include <type_traits>
@@ -108,40 +107,6 @@ namespace detail {
 			);
 		}
 	};
-	
-	// masked to elem cast
-	template<std::size_t Dim, typename Elem>
-	struct ndarray_view_caster<
-		ndarray_view<Dim, Elem>, // out
-		ndarray_view<Dim, masked_elem<Elem>> // in
-	>{
-		using input_view_type = ndarray_view<Dim, masked_elem<Elem>>;
-		using output_view_type = ndarray_view<Dim, Elem>;
-
-		output_view_type operator()(const input_view_type& arr) const {
-			auto* start = reinterpret_cast<Elem*>(arr.start());
-			return output_view_type(start, arr.shape(), arr.strides());
-		}
-	};
-	
-	
-	// masked to mask cast
-	template<std::size_t Dim, typename Elem>
-	struct ndarray_view_caster<
-		ndarray_view<Dim, mask_type>, // out
-		ndarray_view<Dim, masked_elem<Elem>> // in
-	>{
-		using input_view_type = ndarray_view<Dim, masked_elem<Elem>>;
-		using output_view_type = ndarray_view<Dim, mask_type>;
-
-		output_view_type operator()(const input_view_type& arr) const {
-			std::ptrdiff_t offset = offsetof(masked_elem<Elem>, mask);
-			auto* start = reinterpret_cast<mask_type*>(
-				advance_raw_ptr(arr.start(), offset)
-			);
-			return output_view_type(start, arr.shape(), arr.strides());
-		}
-	};
 
 
 	// no-op cast
@@ -201,14 +166,7 @@ namespace detail {
  ** - _Scalars from vector_: Input element type is vector type, such as `rgb_color`. Output element type is the scalar
  **                          type of this vector. Output dimension is one more than input dimension. Returns view where
  **                          added, last dimension is index of scalar element from the original vector elements.
- **                          Example: `ndarray_view<2, rgb_color>` --> `ndarray_view<3, byte>`.
- ** - _Masked to unmasked_: Input element type is `masked_elem<Elem>`. Output element type is `Elem`. Dimensions are
- **                         the same. Returns view to the elements without `masked_elem` wrapper. Value of the items
- **                         that were null/masked is undefined.
- **                         Example: `ndarray_view<2, masked_elem<rgb_color>>` --> `ndarray_view<2, rgb_color>`.
- ** - _Masked to mask_type:_ Input element type is `masked_elem<Elem>`. Output element type is `mask_type`.
- **                          Dimensions are equal. Returns view where element is `masked_elem::mask` of the element. 
- **                          Example: `ndarray_view<2, masked_elem<rgb_color>>` --> `ndarray_view<2, mask_type>`.*/
+ **                          Example: `ndarray_view<2, rgb_color>` --> `ndarray_view<3, byte>`. */
 template<typename Output_view, typename Input_view>
 Output_view ndarray_view_cast(const Input_view& vw) {
 	detail::ndarray_view_caster<Output_view, Input_view> caster;
@@ -222,7 +180,11 @@ constexpr bool ndarray_view_can_cast =
 	detail::ndarray_view_cast_detector<Output_view, Input_view>::value;
 
 
-
+/// Cast \ref ndarray_view to one with different, unrelated element type.
+/** Size and alignment requirement of `Output_view::value_type` must be $leq$ to that of `Input_view::value_type`.
+ ** No data is copied or modified, the returned \ref ndarray_view points to the same data.
+ ** Modifying the element `out_vw.at(coord)` only affects `in_vw.at(coord)`, the value at the same coordinates of the
+ ** input view. */
 template<typename Output_view, typename Input_view>
 Output_view ndarray_view_reinterpret_cast(const Input_view& in_view) {
 	using in_elem_type = typename Input_view::value_type;

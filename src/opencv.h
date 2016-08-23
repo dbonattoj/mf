@@ -23,7 +23,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <opencv2/opencv.hpp>
 #include <algorithm>
-#include "masked_elem.h"
 
 #include "color.h"
 #include "nd/ndcoord.h"
@@ -86,35 +85,6 @@ void copy_to_opencv(const ndarray_view<Dim, const Elem>& vw, cv::Mat_<Elem>& mat
 	);
 }
 
-
-/// Copy the data in the masked view \a vw into the OpenCV Mat \a mat, and the mask into \a mask_mat.
-/** Like with \ref copy_to_opencv, \a mat is created and allocated as needed. \a vw is an \ref ndarray_view of
- ** \ref masked_elem elements.
- ** Non-null elements from `vw` are copied into \a mat, and \a mask_set gets written into \a mask_mat.
- ** Null elements from `vw` are not copied into \a mat, and 0 gets written into \a mask_mat. */
-template<std::size_t Dim, typename Elem>
-void copy_masked_to_opencv
-(const ndarray_view<Dim, const masked_elem<Elem>>& vw, cv::Mat_<Elem>& mat, cv::Mat_<uchar>& mask_mat, uchar mask_set = 255) {
-	int sizes[Dim];
-	for(std::ptrdiff_t i = 0; i < Dim; ++i) sizes[i] = vw.shape()[i];
-
-	mat.create(Dim, sizes);
-	mask_mat.create(Dim, sizes);
-
-	auto vw_it = vw.begin();
-	auto mat_it = mat.begin();
-	auto mask_mat_it = mask_mat.begin();
-	
-	for(; vw_it != vw.end(); ++vw_it, ++mat_it, ++mask_mat_it) {
-		const masked_elem<Elem>& elem = *vw_it;
-		if(is_null(elem)) {
-			*mask_mat_it = 0;
-		} else {
-			*mask_mat_it = mask_set;
-			*mat_it = elem;
-		}
-	}
-}
 
 
 /// Create `cv::Mat` header pointing at the same data as \a vw.
@@ -180,29 +150,6 @@ void copy_to_ndarray_view(const cv::Mat_<Elem>& mat, const ndarray_view<Dim, Ele
 	ndarray_view<Dim, Elem> tmp_vw = to_ndarray_view<Dim>(mat);
 	if(tmp_vw.shape() != vw.shape()) throw std::invalid_argument("vw in copy_to_ndarray_view has incorrect shape");
 	vw.assign(tmp_vw);
-}
-
-
-/// Copy OpenCV Mat \a mat with mask \a mask_mat into the memory pointed to by \a vw.
-template<std::size_t Dim, typename Elem>
-void copy_masked_to_ndarray_view
-(const cv::Mat_<Elem>& mat, const cv::Mat_<uchar>& mask_mat, const ndarray_view<Dim, masked_elem<Elem>>& vw) {
-	ndarray_view<Dim, Elem> tmp_vw = to_ndarray_view<Dim>(mat);
-	ndarray_view<Dim, uchar> tmp_mask_vw = to_ndarray_view<Dim>(mask_mat);
-	
-	if(tmp_vw.shape() != vw.shape())
-		throw std::invalid_argument("vw in copy_masked_to_ndarray_view has incorrect shape");
-	if(tmp_vw.shape() != tmp_mask_vw.shape())
-		throw std::invalid_argument("tmp_mask_vw in copy_masked_to_ndarray_view has incorrect shape");
-	
-	auto tmp_vw_it = tmp_vw.begin();
-	auto tmp_mask_vw_it = tmp_mask_vw.begin();
-	auto vw_it = vw.begin();
-	for(; vw_it != vw.end(); ++tmp_vw_it, ++tmp_mask_vw_it, ++vw_it) {
-		mask_type mask = *tmp_mask_vw_it;
-		vw_it->mask = mask;
-		if(mask) vw_it->elem = *tmp_vw_it;
-	}
 }
 
 

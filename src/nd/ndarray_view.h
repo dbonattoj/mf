@@ -26,7 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray_iterator.h"
 #include "ndspan.h"
 #include "../utility/misc.h"
-#include "../elem.h"
+#include "../elem/elem.h"
 #include <type_traits>
 #include <utility>
 #include <memory>

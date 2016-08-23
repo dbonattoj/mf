@@ -25,28 +25,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <array>
 #include <complex>
 #include <type_traits>
-#include "common.h"
+#include "../common.h"
 
 namespace mf {
-
-/// Type for null element.
-class nullelem_t {
-public:
-	constexpr explicit nullelem_t(int) { }
-};
-
-/// Null element constant.
-/** Can be assigned to, or used to construction nullable element types. */
-constexpr nullelem_t nullelem { 0 };
-
-
-template<typename Elem> bool operator==(const Elem& elem, nullelem_t) noexcept { return is_null(elem); }
-template<typename Elem> bool operator==(nullelem_t, const Elem& elem) noexcept { return is_null(elem); }
-template<typename Elem> bool operator==(nullelem_t, nullelem_t) noexcept { return true; }
-template<typename Elem> bool operator!=(const Elem& elem, nullelem_t) noexcept { return not is_null(elem); }
-template<typename Elem> bool operator!=(nullelem_t, const Elem& elem) noexcept { return not is_null(elem); }
-template<typename Elem> bool operator!=(nullelem_t, nullelem_t) noexcept { return false; }
-
 
 /// Elem traits base class with the required members.
 template<typename Elem, typename Scalar = Elem, std::size_t Components = 1, bool Nullable = false>
@@ -75,18 +56,44 @@ template<typename T, std::size_t N>
 struct elem_traits<std::array<T, N>> :
 	elem_traits_base<std::array<T, N>, T, N> { };
 
+
 /// Elem traits specialization for `std::complex<T>`.
 template<typename T>
 struct elem_traits<std::complex<T>> :
 	elem_traits_base<std::complex<T>, T, 2> { };
 
 
+///////////////
+
+
+/// Type for null element.
+class nullelem_t {
+public:
+	constexpr explicit nullelem_t(int) { }
+};
+
+
+/// Null element constant.
+/** Can be assigned to, or used to construct nullable element types. */
+constexpr nullelem_t nullelem { 0 };
+
+
+template<typename Elem> inline bool operator==(const Elem& elem, nullelem_t) noexcept { return is_null(elem); }
+template<typename Elem> inline bool operator==(nullelem_t, const Elem& elem) noexcept { return is_null(elem); }
+template<typename Elem> inline bool operator==(nullelem_t, nullelem_t) noexcept { return true; }
+template<typename Elem> inline bool operator!=(const Elem& elem, nullelem_t) noexcept { return not is_null(elem); }
+template<typename Elem> inline bool operator!=(nullelem_t, const Elem& elem) noexcept { return not is_null(elem); }
+template<typename Elem> inline bool operator!=(nullelem_t, nullelem_t) noexcept { return false; }
+
+
+/// Test if elem is null.
 template<typename Elem>
 std::enable_if_t<elem_traits<Elem>::is_nullable, bool> is_null(const Elem& elem) {
 	return elem.is_null();
 }
 
 
+/// Test if elem is null.
 template<typename Elem>
 std::enable_if_t<! elem_traits<Elem>::is_nullable, bool> is_null(const Elem& elem) {
 	return false;

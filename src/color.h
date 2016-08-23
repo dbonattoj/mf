@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_COLOR_H_
 
 #include <cstdint>
-#include "elem.h"
+#include "elem/elem.h"
 
 namespace mf {
 

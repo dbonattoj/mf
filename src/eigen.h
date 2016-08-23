@@ -31,7 +31,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #pragma GCC diagnostic pop
 
 #include "common.h"
-#include "elem.h"
+#include "elem/elem.h"
 
 namespace mf {
 
@@ -69,7 +69,7 @@ using Eigen_quaternion = Eigen::Quaternion<Eigen_scalar>;
 
 
 /// Elem traits specialization for Eigen matrix type.
-/** 2 dimensional matrix becomes 1 dimensional vector elem. */
+/** 2 dimensional matrix becomes 1 dimensional vector elem. (No support for multiple dimensions here) */
 template<typename Scalar, std::size_t Rows, std::size_t Columns>
 struct elem_traits<Eigen::Matrix<Scalar, Rows, Columns>> :
 	elem_traits_base<

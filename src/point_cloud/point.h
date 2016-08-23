@@ -23,8 +23,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../color.h"
 #include "../eigen.h"
-#include "../elem.h"
-#include "../elem_tuple.h"
+#include "../elem/elem.h"
+#include "../elem/elem_tuple.h"
 
 namespace mf {
 

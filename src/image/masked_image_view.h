@@ -71,16 +71,6 @@ public:
 	cv_mask_mat_qualified_type& cv_mask_mat() const { return mask_mat_; }
 };
 
-
-template<typename Pixel>
-auto to_masked_image_view(const ndarray_view<2, masked_elem<Pixel>>& masked_vw) {
-	using image_type = masked_image_view<Pixel, byte>;
-	auto vw = ndarray_view_cast<typename image_type::view_type>(masked_vw);
-	auto mask_vw = ndarray_view_cast<typename image_type::mask_view_type>(masked_vw);
-	return image_type(vw, mask_vw);
-}
-
-
 }
 
 #include "masked_image_view.tcc"
