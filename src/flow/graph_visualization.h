@@ -23,6 +23,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <iosfwd>
 #include <string>
+#include <map>
+#include <cstdint>
 #include "node.h"
 
 namespace mf { namespace flow {
@@ -40,6 +42,9 @@ private:
 	const graph& graph_;
 	std::string graph_id_ = "G";
 	bool thread_index_colors_ = true;
+	std::map<std::uintptr_t, std::string> uids_;
+	
+	template<typename T> std::string uid_(const T& object, const std::string& prefix);
 	
 	void generate_node_dispatch_(const node&);
 	void generate_processing_node_(const processing_node&, bool async, bool sink);
@@ -58,6 +63,20 @@ public:
 
 void export_graph_visualization(const graph&, const std::string& filename);
 
+
+template<typename T>
+std::string graph_visualization::uid_(const T& object, const std::string& prefix) {
+	std::uintptr_t address = reinterpret_cast<std::uintptr_t>(&object);
+	auto it = uids_.find(address);
+	if(it != uids_.end()) {
+		return it->second;
+	} else {
+		std::size_t index = uids_.size();
+		std::string uid = prefix + std::to_string(index);
+		uids_.emplace(address, uid);
+		return uid;
+	}
+}
 
 }}
 

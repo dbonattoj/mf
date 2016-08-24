@@ -99,7 +99,7 @@ public:
 	std::size_t outputs_count() const noexcept { return outputs_.size(); }
 	node_output& output_at(std::ptrdiff_t index) { return *outputs_.at(index); }
 	const node_output& output_at(std::ptrdiff_t index) const { return *outputs_.at(index); }
-
+	
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 

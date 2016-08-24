@@ -35,23 +35,7 @@ namespace mf { namespace flow {
 
 using namespace std::literals;
 
-namespace {
-	template<typename T>
-	std::string uid_(const T& object, const std::string& prefix) {
-		return prefix + std::to_string(reinterpret_cast<std::uintptr_t>(&object));
-		/*
-		static std::map<const T*, std::string> ids = std::map<const T*, std::string>();
-		auto it = ids.find(&object);
-		if(it != ids.end()) {
-			return it->second;
-		} else {
-			std::size_t index = ids.size();
-			std::string id = prefix + std::to_string(index);
-			auto it = ids.emplace(&object, id);
-			return it.first->second;
-		}*/
-	}
-	
+namespace {	
 	std::vector<std::string> html_colors_ {
 		"blue",
 		"red",
@@ -97,9 +81,7 @@ void graph_visualization::generate_node_dispatch_(const node& nd) {
 
 void graph_visualization::generate_processing_node_(const processing_node& nd, bool async, bool sink) {
 	std::string node_id = uid_(nd, "node");
-	
-	std::string col = thread_index_color_(nd.processing_thread_index());
-	
+		
 	std::ostringstream html;
 	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
 	
@@ -119,6 +101,7 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 		html << R"(</TR>)";
 	}
 	
+	std::string col = thread_index_color_(nd.processing_thread_index());
 	std::size_t colspan = 2*nd.inputs_count() + 1;
 	html << R"(<TR>)";
 	html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR=")" << col << R"(">)";
@@ -135,10 +118,11 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 		std::string output_col = thread_index_color_(nd.output().reader_thread_index());
 		html << R"(<TR>)";
 		html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="0">)";
-		html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0" COLOR=")" << output_col << R"(">)";
+		html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
+		if(async) html << R"(<TR><TD></TD><TD BORDER="1" HEIGHT="3" COLOR=")" << col << R"("></TD><TD></TD></TR>)";
 		html << R"(<TR>)";
 		html << R"(<TD WIDTH="20"></TD>)";
-		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << uid_(nd.output(), "out") << R"(">)";
+		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << uid_(nd.output(), "out") << R"(" COLOR=")" << output_col << R"(">)";
 		html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
 		html << R"(<TR CELLPADDING="1">)";
 		for(std::ptrdiff_t i = 0; i < nd.output_channels_count(); ++i) {
@@ -181,16 +165,26 @@ void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 	html << R"(<TD WIDTH="20"></TD>)";
 	html << R"(</TR>)";
 	
-	std::string col = thread_index_color_(nd.loading_thread_index());
+	std::string col = thread_index_color_(nd.loader_thread_index());
 	html << R"(<TR>)";
 	html << R"(<TD COLSPAN="3" BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR=")" << col << R"(">)";
 	html << nd.name();
+	html << R"(<BR/><FONT POINT-SIZE="10" COLOR=")" << col << R"(">)";
+	if(nd.is_async()) html << "async loader";
+	else html << "sync loader";
+	html << R"(</FONT>)";
 	html << R"(</TD>)";
 	html << R"(</TR>)";
 	
 	html << R"(<TR>)";
 	html << R"(<TD COLSPAN="3" BORDER="0">)";
 	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
+
+	if(nd.is_async()) {
+		std::size_t colspan = 2*nd.outputs_count() - 1;
+		html << R"(<TR><TD></TD><TD BORDER="1" HEIGHT="3" COLSPAN=")" << colspan << R"(" COLOR=")" << col << R"("></TD><TD></TD></TR>)";
+	}
+
 	html << R"(<TR>)";
 	html << R"(<TD WIDTH="20"></TD>)";
 	
@@ -232,9 +226,9 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 		std::string label;
 		time_unit p = in.past_window_duration();
 		time_unit f = in.future_window_duration();
-		if(p > 0 && f > 0) label = "[-"s + std::to_string(p) + ", +" + std::to_string(f) + "]";
-		else if(p > 0) label = "[-"s + std::to_string(p) + "]";
-		else if(f > 0) label = "[+" + std::to_string(f) + "]";
+		if(p > 0 && f > 0) label = "[-"s + std::to_string(p) + ", +" + std::to_string(f) + "]     ";
+		else if(p > 0) label = "[-"s + std::to_string(p) + "]  ";
+		else if(f > 0) label = "[+" + std::to_string(f) + "]  ";
 		
 		output_
 			<< '\t' << uid_(out.this_node(), "node") << ':' << uid_(out, "out")
@@ -266,11 +260,9 @@ void graph_visualization::generate_ranks_() {
 void graph_visualization::generate() {
 	output_ << "digraph " << graph_id_ << "{\n";
 	output_ << "\trankdir=TB\n";
-	for(std::ptrdiff_t i = 0; i < graph_.nodes_count(); ++i)
-		generate_node_dispatch_(graph_.node_at(i));
-	for(std::ptrdiff_t i = 0; i < graph_.nodes_count(); ++i)
-		generate_node_input_connections_(graph_.node_at(i));
-		
+
+	for(std::ptrdiff_t i = 0; i < graph_.nodes_count(); ++i) generate_node_dispatch_(graph_.node_at(i));
+	for(std::ptrdiff_t i = 0; i < graph_.nodes_count(); ++i) generate_node_input_connections_(graph_.node_at(i));
 	generate_ranks_();	
 			
 	output_ << '}' << std::flush;

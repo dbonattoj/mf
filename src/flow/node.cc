@@ -45,10 +45,7 @@ bool node::precedes_strict(const node& nd) const {
 }
 
 
-
-const node& node::first_successor() const {
-	// TODO bug??
-	
+const node& node::first_successor() const {	
 	Assert(outputs_.size() > 0);
 	
 	if(outputs_.size() == 1) return outputs_.front()->connected_node();

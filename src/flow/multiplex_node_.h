@@ -24,6 +24,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_derived.h"
 #include "node_input.h"
 #include "node_output.h"
+#include <thread>
+#include <condition_variable>
+#include <mutex>
+#include <shared_mutex>
 
 namespace mf { namespace flow {
 
@@ -33,6 +37,8 @@ class multiplex_node;
 class multiplex_node_output final : public node_output {
 private:
 	const std::ptrdiff_t input_channel_index_;
+
+	std::shared_lock<std::shared_timed_mutex> input_view_shared_lock_;
 	
 	multiplex_node& this_node() noexcept;
 	const multiplex_node& this_node() const noexcept;
@@ -65,21 +71,28 @@ private:
 	class sync_loader;
 	class async_loader;
 
-	const node* common_successor_node_ = nullptr;
+	const node* successor_node_ = nullptr;
 	time_unit input_past_window_ = -1;
 	time_unit input_future_window_ = -1;
-	
-	std::unique_ptr<loader> loader_;
-	timed_frame_array_view loaded_input_view_;
 
+	std::thread thread_;
+	thread_index thread_index_ = undefined_thread_index;
+
+	bool stopped_ = false;
+	time_unit successor_time_of_input_view_ = -1;
+	
+	timed_frame_array_view input_view_;
+		
+	std::mutex successor_time_mutex_;
+	std::condition_variable successor_time_changed_cv_;
+
+	std::shared_timed_mutex input_view_mutex_;
+	std::condition_variable_any input_view_updated_cv_;
+	
 	time_span expected_input_span_() const;
-
+	time_span current_input_span_() const;
 	void load_input_view_(time_unit t);
-	void unload_input_view_();
-	
-	time_unit input_view_time_() const;
-	const timed_frame_array_view& input_view_() const { return loaded_input_view_; }
-	timed_frame_array_view& input_view_() { return loaded_input_view_; }
+	void thread_main_();
 	
 public:
 	explicit multiplex_node(graph&);
@@ -88,10 +101,8 @@ public:
 	time_unit minimal_offset_to(const node&) const override;
 	time_unit maximal_offset_to(const node&) const override;
 	
-	bool is_async() const;
-	thread_index loader_thread_index() const;
-	
-	const node& common_successor_node() const { return *common_successor_node_; }
+	bool is_multi_threaded() const { return multi_threaded_; }
+	thread_index loading_thread_index() const;
 	
 	void launch() override;
 	void stop() override;
@@ -113,7 +124,7 @@ inline const multiplex_node& multiplex_node_output::this_node() const noexcept {
 }
 
 inline thread_index multiplex_node_input::reader_thread_index() const {
-	return static_cast<const multiplex_node&>(this_node()).loader_thread_index();
+	return static_cast<const multiplex_node&>(this_node()).loading_thread_index();
 }
 
 
