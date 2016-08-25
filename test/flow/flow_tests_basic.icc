@@ -565,7 +565,7 @@ SECTION("basic") {
 	}
 	*/
 	
-
+	
 	SECTION("complex") {
 		flow::filter_graph gr;
 		auto shp = make_ndsize(10, 10);
@@ -574,7 +574,7 @@ SECTION("basic") {
 		std::size_t last = count - 1;
 		std::vector<int> seq(count);
 		for(int i = 0; i < seq.size(); ++i) seq[i] = i;
-
+		/*
 		SECTION("graph 1") {
 			INFO(R"(
 			source1' -+--> [-3, +1]passthrough1 --> [-1, +0]passthrough2' --> merge1 --> merge2' --> sink 
@@ -614,16 +614,16 @@ SECTION("basic") {
 			
 			REQUIRE(sink.check());
 		}
-		
+		*/	
 		SECTION("graph 2") {
 			INFO(R"(
-			source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2' -----------> merge1 -------------> merge2' --> sink 
-			          |                                             /--> /               / -->
-			          +--------------------------------> merge3' --/                    /
-			          `                            | --> /                             /
-			source2  --> [-1, +2]pass3' --> multiout                                  /
-			          ,                            | --> [-1, +1]pass4 --> merge4' --/
-			          +-------------------------------------------------->                            
+			source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2 ------------> merge1' -------------> merge2' --> sink 
+			          |                                             /--> /                / -->
+			          +--------------------------------> merge3' --/                     /
+			          `                            | --> /                              /
+			source2  --> [-1, +2]pass3' --> multiout                                   /
+			          ,                            | --> [-1, +1]pass4' --> merge4' --/
+			          +--------------------------------------------------->                            
 			)");
 
 			
@@ -643,11 +643,11 @@ SECTION("basic") {
 			source1.set_asynchonous(async2);
 			source2.set_asynchonous(async1);
 			passthrough1.set_asynchonous(async1);
-			passthrough2.set_asynchonous(async2);
+			passthrough2.set_asynchonous(async1);
 			passthrough3.set_asynchonous(async2);
-			passthrough4.set_asynchonous(async1);
-			merge1.set_asynchonous(async1);
-			merge2.set_asynchonous(async2);
+			passthrough4.set_asynchonous(async2);
+			merge1.set_asynchonous(async2);
+			merge2.set_asynchonous(async1);
 			merge3.set_asynchonous(async2);
 			merge4.set_asynchonous(async2);
 			multiout.set_asynchonous(async1);
@@ -675,5 +675,6 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
+	
 }
 #endif
