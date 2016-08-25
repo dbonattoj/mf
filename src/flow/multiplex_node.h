@@ -71,15 +71,23 @@ private:
 	
 	std::unique_ptr<loader> loader_;
 	timed_frame_array_view loaded_input_view_;
+	
+	bool outputs_on_different_threads_() const;
 
-	time_span expected_input_span_() const;
+	/// \name Loader interface
+	/// Called by loader, possibly from different threads.
+	///@{
+	time_unit capture_successor_time_() const;
 
-	void load_input_view_(time_unit t);
+	time_span expected_input_span_(time_unit successor_time) const;
+
+	void load_input_view_(time_unit successor_time);
 	void unload_input_view_();
 	
-	time_unit input_view_time_() const;
+	time_unit successor_time_of_input_view_() const;
 	const timed_frame_array_view& input_view_() const { return loaded_input_view_; }
 	timed_frame_array_view& input_view_() { return loaded_input_view_; }
+	///@}
 	
 public:
 	explicit multiplex_node(graph&);

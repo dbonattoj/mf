@@ -39,7 +39,7 @@ TEST_CASE("flow graph test: seekable, mixed", "[flow][sync+async][seekable]") {
 	#include "flow_tests_activation.icc"
 	#include "flow_tests_seek.icc"
 }
-/*
+
 TEST_CASE("flow graph test: seekable, mixed alt.", "[flow][sync+async][seekable]") {
 	constexpr bool seekable = true;
 	constexpr bool async1 = true;
@@ -49,4 +49,4 @@ TEST_CASE("flow graph test: seekable, mixed alt.", "[flow][sync+async][seekable]
 	#include "flow_tests_activation.icc"
 	#include "flow_tests_seek.icc"
 }
-*/
+

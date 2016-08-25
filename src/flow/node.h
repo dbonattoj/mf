@@ -62,8 +62,17 @@ private:
 	
 	std::string name_ = "node";
 	
+	/// Recursively pre-setup nodes in sink-to-source order.
+	/** Must be called on sink node. Calls pre_setup() once on each node in graph, in an order such that when one node
+	 ** is pre-setup, its successors have already been pre-setup. */
 	void propagate_pre_setup_();
+	
+	/// Recursively setup nodes in source-to-sink order.
+	/** Must be called on sink node. Calls setup() once on each node in graph, in an order such that when one node
+	 ** is setup, its predecessors have already been setup */
 	void propagate_setup_();
+	
+	
 	void deduce_stream_properties_();
 
 protected:

@@ -32,13 +32,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <cassert>
 #include "utility/misc.h"
 
-
-#if defined(MF_OS_LINUX) || defined(MF_OS_DARWIN)
-#include <execinfo.h>
-#include <unistd.h>
-#include <signal.h>
-#endif
-
 namespace mf {
 
 namespace {
@@ -51,21 +44,6 @@ namespace {
 	std::set<std::string> tags_;
 	
 	std::string filename_ = "debug.txt";
-	
-	#ifdef MF_OS_LINUX
-	[[noreturn]] void signal_handler_(int sig) {
-		MF_DEBUG_BACKTRACE("signal, aborting");
-		std::fflush(nullptr);
-		std::abort();
-	}
-	
-	[[noreturn]] void terminate_handler_() {
-		MF_DEBUG_BACKTRACE();
-		std::fprintf(stderr, "terminated");
-		std::fflush(nullptr);
-		std::abort();
-	}
-	#endif
 }
 
 
@@ -128,15 +106,8 @@ namespace detail {
 		if(tags_.empty()) return true;
 		else return (tags_.find(tag) != tags_.end());
 	}
-	
-	#if defined(MF_OS_LINUX) || defined(MF_OS_DARWIN)
-	debug_backtrace debug_get_backtrace() {
-		debug_backtrace bt;
-		bt.size = ::backtrace(bt.trace, debug_backtrace::max_size);
-		return bt;
-	}
-	
-	void debug_print_backtrace(const debug_header& header, const debug_backtrace& bt) {
+		
+	void debug_print_backtrace(const debug_header& header, const std::string& bt) {
 		std::FILE* output = debug_stream();
 		if(! output) return;
 		
@@ -145,16 +116,8 @@ namespace detail {
 
 		std::lock_guard<std::mutex> lock(debug_mutex());	
 			
-		std::fprintf(output, "%s", head.c_str());
-		::backtrace_symbols_fd(bt.trace, bt.size, fileno(output));
-		std::fprintf(output, "%s", tail.c_str());
+		std::fprintf(output, "%sCall Stack Backtrace:\n%s%s", head.c_str(), bt.c_str(), tail.c_str());
 	}
-	#else
-	debug_backtrace debug_get_backtrace() { return debug_backtrace(); }
-	void debug_print_backtrace(const debug_header& header, const debug_backtrace&) {
-		debug_print("", header, "no support for debug backtrace print");
-	}
-	#endif
 }
 
 namespace detail {
@@ -180,13 +143,7 @@ void set_debug_filter(const std::set<std::string>& tags) {
 }
 
 
-void initialize_debug() {
-	#ifdef MF_OS_LINUX
-	//std::set_terminate(&terminate_handler_);
-	::signal(SIGSEGV, &signal_handler_);
-	::signal(SIGILL, &signal_handler_);
-	#endif
-}
+void initialize_debug() { }
 
 void random_sleep() {
 	if(! detail::random_sleep_enabled_) return;

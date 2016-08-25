@@ -20,7 +20,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #if 1
 SECTION("basic") {	
-	/*
 	flow::filter_graph gr;
 	auto shp = make_ndsize(10, 10);
 
@@ -29,7 +28,7 @@ SECTION("basic") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
-
+/*
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -397,7 +396,6 @@ SECTION("basic") {
 		}
 	}
 	
-	
 
 	SECTION("multiple outputs") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
@@ -541,8 +539,8 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
-	
-	
+
+
 	SECTION("implicit conversion") {
 		SECTION("conversion") {
 			INFO(R"(
@@ -565,11 +563,10 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
-
+	*/
 	
-*/
+
 	SECTION("complex") {
-		
 		flow::filter_graph gr;
 		auto shp = make_ndsize(10, 10);
 	
@@ -577,7 +574,7 @@ SECTION("basic") {
 		std::size_t last = count - 1;
 		std::vector<int> seq(count);
 		for(int i = 0; i < seq.size(); ++i) seq[i] = i;
-/*
+
 		SECTION("graph 1") {
 			INFO(R"(
 			source1' -+--> [-3, +1]passthrough1 --> [-1, +0]passthrough2' --> merge1 --> merge2' --> sink 
@@ -617,16 +614,18 @@ SECTION("basic") {
 			
 			REQUIRE(sink.check());
 		}
-		*/
+		
 		SECTION("graph 2") {
 			INFO(R"(
-			source1' -+--> [-3, +1]passthrough1 --> [-1, +0]passthrough2' ----> merge1 -------> merge2' --> sink 
-			          |                                                    /--> /          /--> /
-			          +---------------------------------------> merge3' --/               /
-			                                              | --> /                        /
-			source2  --> [-1, +2]passthrough3' --> multiout                             /
-			                                              | --> [-1, +1]passthrough4 --/
+			source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2' -----------> merge1 -------------> merge2' --> sink 
+			          |                                             /--> /               / -->
+			          +--------------------------------> merge3' --/                    /
+			          `                            | --> /                             /
+			source2  --> [-1, +2]pass3' --> multiout                                  /
+			          ,                            | --> [-1, +1]pass4 --> merge4' --/
+			          +-------------------------------------------------->                            
 			)");
+
 			
 			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
@@ -637,6 +636,7 @@ SECTION("basic") {
 			auto& merge1 = gr.add_filter<input_synchronize_test_filter>();
 			auto& merge2 = gr.add_filter<input_synchronize_test_filter>();
 			auto& merge3 = gr.add_filter<input_synchronize_test_filter>();
+			auto& merge4 = gr.add_filter<input_synchronize_test_filter>();
 			auto& multiout = gr.add_filter<multiple_output_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
 			
@@ -649,6 +649,7 @@ SECTION("basic") {
 			merge1.set_asynchonous(async1);
 			merge2.set_asynchonous(async2);
 			merge3.set_asynchonous(async2);
+			merge4.set_asynchonous(async2);
 			multiout.set_asynchonous(async1);
 			
 			passthrough1.input.connect(source1.output);
@@ -661,15 +662,17 @@ SECTION("basic") {
 			passthrough3.input.connect(source2.output);
 			multiout.input.connect(passthrough3.output);
 			passthrough4.input.connect(multiout.output2);
-			merge2.input2.connect(passthrough4.output);
+			merge4.input2.connect(passthrough4.output);	
+			merge4.input1.connect(source1.output);	
+			merge2.input2.connect(merge4.output);
 			sink.input.connect(merge2.output);
 	
 			gr.setup();
-		//	gr.run();
+			gr.run();
 			
 			export_graph_visualization(*gr.node_graph_, "gr.gv");
 			
-		//	REQUIRE(sink.check());
+			REQUIRE(sink.check());
 		}
 	}
 }

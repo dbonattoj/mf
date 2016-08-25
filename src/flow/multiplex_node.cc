@@ -36,14 +36,21 @@ multiplex_node::multiplex_node(graph& gr) : base(gr) {
 multiplex_node::~multiplex_node() { }
 
 
-time_unit multiplex_node::input_view_time_() const {
-	if(! loaded_input_view_.is_null()) return current_time();
-	else return -1;
+time_unit multiplex_node::capture_successor_time_() const {
+	return common_successor_node().current_time();
 }
 
 
-void multiplex_node::load_input_view_(time_unit t) {
-	set_current_time_(t);
+time_span multiplex_node::expected_input_span_(time_unit successor_time) const {
+	return time_span(
+		std::max(successor_time - input_past_window_, time_unit(0)),
+		std::min(successor_time + input_future_window_ + 1, stream_properties().duration())
+	);
+}
+
+
+void multiplex_node::load_input_view_(time_unit successor_time) {
+	set_current_time_(successor_time);
 	
 	unload_input_view_();
 	
@@ -62,14 +69,10 @@ void multiplex_node::unload_input_view_() {
 	}
 }
 
-
-
-time_span multiplex_node::expected_input_span_() const {
-	time_unit successor_time = common_successor_node_->current_time();
-	return time_span(
-		std::max(successor_time - input_past_window_, time_unit(0)),
-		std::min(successor_time + input_future_window_ + 1, stream_properties().duration())
-	);	
+	
+time_unit multiplex_node::successor_time_of_input_view_() const {
+	if(! loaded_input_view_.is_null()) return current_time();
+	else return -1;
 }
 
 
@@ -107,8 +110,12 @@ void multiplex_node::stop() {
 
 
 void multiplex_node::pre_setup() {
+	// successors have already been pre-setup
+	
+	// find common successor node
 	common_successor_node_ = &first_successor();
 
+	// calculate input time window
 	input_past_window_ = input_future_window_ = 0;
 	for(auto&& out : outputs()) {
 		const node_input& in = out->connected_input();
@@ -121,12 +128,23 @@ void multiplex_node::pre_setup() {
 	}
 	input().set_past_window(input_past_window_);
 	input().set_future_window(input_future_window_);
+
+	// set up loader
+	// needs to know thread index of outputs (determined by successor nodes)
+	if(outputs_on_different_threads_()) loader_.reset(new async_loader(*this));
+	else loader_.reset(new sync_loader(*this));
 }
 
 
-void multiplex_node::setup() {
-	loader_.reset(new async_loader(*this));
+bool multiplex_node::outputs_on_different_threads_() const {
+	thread_index first_output_reader_index = output_at(0).reader_thread_index();
+	for(std::ptrdiff_t i = 1; i < outputs_count(); ++i)
+		if(output_at(i).reader_thread_index() != first_output_reader_index) return true;
+	return false;
 }
+
+
+void multiplex_node::setup() { }
 
 
 multiplex_node_output& multiplex_node::add_output(std::ptrdiff_t input_channel_index) {
@@ -148,6 +166,10 @@ std::size_t multiplex_node_output::channels_count() const noexcept {
 
 node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 	Assert(this_node().loader_);
+
+	time_unit end_time = this_node().end_time();
+	span = time_span(span.start_time(), std::min(span.end_time(), end_time));
+
 	return this_node().loader_->pull(span);
 }
 

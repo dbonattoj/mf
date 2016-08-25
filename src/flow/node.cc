@@ -127,32 +127,42 @@ void node::deduce_stream_properties_() {
 
 
 void node::propagate_pre_setup_() {
+	// do nothing if this node was already pre_setup
 	if(stage_ == was_pre_setup) return;
-		
-	for(auto&& in : inputs()) {
-		node& connected_node = in->connected_node();
-		connected_node.propagate_pre_setup_();
+	
+	// do nothing if any of its direct successors are not yet pre_setup	
+	for(auto&& out : outputs()) {
+		const node& direct_successor = out->connected_node();
+		if(direct_successor.stage_ != was_pre_setup) return;
 	}
-	
+
+	// pre_setup this node
+	Assert(stage_ == construction);
 	this->pre_setup();
-	
 	stage_ = was_pre_setup;
+	
+	// recursively attempt to pre_setup direct predecessors
+	for(auto&& in : inputs()) {
+		node& direct_predecessor = in->connected_node();
+		direct_predecessor.propagate_pre_setup_();
+	}
 }
 
 
-
-void node::propagate_setup_() {		
+void node::propagate_setup_() {	
+	// do nothing if this node was already setup
 	if(stage_ == was_setup) return;
 	
+	// recursively attempt to setup its direct predecessors
 	for(auto&& in : inputs()) {
-		node& connected_node = in->connected_node();
-		connected_node.propagate_setup_();
+		node& direct_predecessor = in->connected_node();
+		direct_predecessor.propagate_setup_();
 	}
-	
-	if(! is_source()) deduce_stream_properties_();
 
-	this->setup();
-	
+	// setup this node
+	Assert(stage_ == was_pre_setup);
+	if(! is_source()) deduce_stream_properties_();
+	this->pre_setup();
 	stage_ = was_setup;
 }
 

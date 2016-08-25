@@ -21,6 +21,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_DEBUG_H_
 #define MF_DEBUG_H_
 
+#include "os/backtrace.h"
+
 #ifndef NDEBUG
 
 	#define MF_DEBUG_HEADER(caption, separator) \
@@ -43,8 +45,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 	#define MF_DEBUG_BACKTRACE(caption) \
 		::mf::detail::debug_print_backtrace( \
-			MF_DEBUG_HEADER(caption "\nbacktrace:", ""), \
-			::mf::detail::debug_get_backtrace())
+			MF_DEBUG_HEADER(caption, ""), \
+			stack_backtrace_string() \
+		)
 	
 	#define MF_RAND_SLEEP \
 		random_sleep()

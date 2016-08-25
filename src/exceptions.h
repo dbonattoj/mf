@@ -23,16 +23,28 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <stdexcept>
 #include <string>
+#include "debug.h"
 
-#define MF_DEFINE_EXCEPTION_(name, base) \
-	class name : public base { \
+#define MF_DEFINE_EXCEPTION_(__name__, __base__) \
+	class __name__ : public exception_derived<__base__> { \
+		using base = exception_derived<__base__>; \
 	public: \
-		explicit name(const std::string& what) : base(what) { } \
-		explicit name(const char* what) : base(what) { } \
+		__name__(const std::string& what) : \
+			base(std::string(#__name__) + ": " + what) { } \
 	};
 
 
 namespace mf {
+	
+template<typename Base>
+class exception_derived : public Base {
+	using base = Base;
+
+public:
+	explicit exception_derived(const std::string& what) : base(what) {
+		MF_DEBUG_BACKTRACE(what);
+	}
+};
 	
 MF_DEFINE_EXCEPTION_(invalid_flow_graph, std::logic_error); // TODO remove
 

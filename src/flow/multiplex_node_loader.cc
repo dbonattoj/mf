@@ -12,31 +12,53 @@ multiplex_node::loader::loader(multiplex_node& nd, thread_index tind) :
 
 ///////////////
 
-/*
-void multiplex_node::sync_loader::stop() {
-	
+
+multiplex_node::sync_loader::sync_loader(multiplex_node& nd) :
+	loader(nd, nd.input_at(0).reader_thread_index())
+{
+	Assert(! nd.outputs_on_different_threads_(),
+		"multiplex_node with sync_loader must have all outputs on same reader thread");
 }
 
 
-void multiplex_node::sync_loader::launch() {
+void multiplex_node::sync_loader::stop() { }
+
+
+void multiplex_node::sync_loader::launch() { }
+
+
+node::pull_result multiplex_node::sync_loader::pull(time_span span) {
+	// get expected input span, based on current time of the common successor node
+	time_unit successor_time = this_node().capture_successor_time_();
+	time_span expected_input_span = this_node().expected_input_span_(successor_time);
+	if(! expected_input_span.includes(span)) {
+		// tfail if pulled span not in this expected span
+		return node::pull_result::transitory_failure;
+	}
 	
+	successor_time = this_node().common_successor_node().current_time();
+	if(successor_time != this_node().successor_time_of_input_view_()) {
+		this_node().load_input_view_(successor_time);
+	}
+	
+	time_span input_span = this_node().input_view_().span();
+	if(input_span.includes(span)) return node::pull_result::success;
+	else return node::pull_result::transitory_failure;
 }
 
 
-node::pull_result multiplex_node::sync_loader::pull(time_span& span) {
+timed_frame_array_view multiplex_node::sync_loader::begin_read(time_span span) {	
+	timed_frame_array_view input_view = this_node().input_view_();
+		
+	std::ptrdiff_t start_index = input_view.time_index(span.start_time());
+	std::ptrdiff_t end_index = input_view.time_index(span.end_time());
 	
+	return input_view(start_index, end_index);
 }
 
 
-timed_frame_array_view multiplex_node::sync_loader::begin_read(time_unit duration) {
-	
-}
+void multiplex_node::sync_loader::end_read(time_unit duration) { }
 
-
-void multiplex_node::sync_loader::end_read(time_unit duration) {
-	
-}
-*/
 
 ///////////////
 
@@ -59,8 +81,8 @@ void multiplex_node::async_loader::thread_main_() {
 		std::unique_lock<std::mutex> lock(successor_time_mutex_);
 		successor_time_changed_cv_.wait(lock, [&] {
 			if(stopped_) return true;
-			successor_time = this_node().common_successor_node().current_time();
-			return (successor_time != this_node().input_view_time_());
+			successor_time = this_node().capture_successor_time_();
+			return (successor_time != this_node().successor_time_of_input_view_());
 		});
 		lock.unlock();
 		Assert(successor_time != -1);
@@ -106,15 +128,12 @@ void multiplex_node::async_loader::launch() {
 }
 
 
-node::pull_result multiplex_node::async_loader::pull(time_span& span) {
+node::pull_result multiplex_node::async_loader::pull(time_span span) {
 	// TODO prove formally
-	
-	// truncate span if necessary
-	time_unit end_time = this_node().end_time();
-	span = time_span(span.start_time(), std::min(span.end_time(), end_time));
-	
+		
 	// get expected input span, based on current time of the common successor node
-	time_span expected_input_span = this_node().expected_input_span_();
+	time_unit successor_time = this_node().capture_successor_time_();
+	time_span expected_input_span = this_node().expected_input_span_(successor_time);
 	if(! expected_input_span.includes(span)) {
 		// tfail if pulled span not in this expected span
 		return node::pull_result::transitory_failure;
@@ -126,7 +145,7 @@ node::pull_result multiplex_node::async_loader::pull(time_span& span) {
 	std::shared_lock<std::shared_timed_mutex> lock(input_view_mutex_);
 	
 	// wail until loader updates the input view for the current time of the common successor node
-	while(this_node().current_time() != this_node().common_successor_node().current_time()) {
+	while(this_node().current_time() != this_node().capture_successor_time_()) {
 		if(stopped_) return node::pull_result::stopped;
 		successor_time_changed_cv_.notify_one();
 		input_view_updated_cv_.wait(lock);

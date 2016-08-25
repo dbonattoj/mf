@@ -39,17 +39,9 @@ namespace detail {
 		const char* func;
 	};
 	
-	struct debug_backtrace {
-		constexpr static std::size_t max_size = 20;
-	
-		void* trace[max_size];
-		std::size_t size;
-	};	
-	
 	std::string debug_thread_color();	
 	std::mutex& debug_mutex();
 	std::FILE* debug_stream();
-	debug_backtrace debug_get_backtrace();
 
 	inline void debug_print_part(std::ostream& str, const std::string& sep) { }	
 	
@@ -96,7 +88,7 @@ namespace detail {
 		std::fprintf(output, "%s%s%s\n", head.c_str(), str.str().c_str(), tail.c_str());
 	}
 	
-	void debug_print_backtrace(const debug_header&, const debug_backtrace&);
+	void debug_print_backtrace(const debug_header&, const std::string& bt);
 }
 
 }
