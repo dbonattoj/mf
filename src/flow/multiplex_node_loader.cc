@@ -14,7 +14,7 @@ multiplex_node::loader::loader(multiplex_node& nd, thread_index tind) :
 
 
 multiplex_node::sync_loader::sync_loader(multiplex_node& nd) :
-	loader(nd, nd.input_at(0).reader_thread_index())
+	loader(nd, nd.output_at(0).reader_thread_index())
 {
 	Assert(! nd.outputs_on_different_threads_(),
 		"multiplex_node with sync_loader must have all outputs on same reader thread");

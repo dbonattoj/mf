@@ -18,7 +18,7 @@ std::string stack_backtrace_string() noexcept {
 	if(trace_strings == nullptr) return "could not get backtrace";
 	
 	std::ostringstream str;
-	for(std::ptrdiff_t i = 0; i < size; ++i)
+	for(std::ptrdiff_t i = 1; i < size; ++i) // don't include call to this function
 		str << trace_strings[i] << '\n';
 	
 	::free(trace_strings);

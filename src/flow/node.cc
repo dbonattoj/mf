@@ -103,7 +103,7 @@ const node& node::first_successor() const {
 
 
 void node::deduce_stream_properties_() {
-	Expects(stage_ == was_pre_setup);
+	Expects(stage_ == stage::was_pre_setup);
 	Expects(! is_source());
 
 	bool seekable = true;
@@ -128,18 +128,18 @@ void node::deduce_stream_properties_() {
 
 void node::propagate_pre_setup_() {
 	// do nothing if this node was already pre_setup
-	if(stage_ == was_pre_setup) return;
+	if(stage_ == stage::was_pre_setup) return;
 	
 	// do nothing if any of its direct successors are not yet pre_setup	
 	for(auto&& out : outputs()) {
 		const node& direct_successor = out->connected_node();
-		if(direct_successor.stage_ != was_pre_setup) return;
+		if(direct_successor.stage_ != stage::was_pre_setup) return;
 	}
 
 	// pre_setup this node
-	Assert(stage_ == construction);
+	Assert(stage_ == stage::construction);
 	this->pre_setup();
-	stage_ = was_pre_setup;
+	stage_ = stage::was_pre_setup;
 	
 	// recursively attempt to pre_setup direct predecessors
 	for(auto&& in : inputs()) {
@@ -151,7 +151,7 @@ void node::propagate_pre_setup_() {
 
 void node::propagate_setup_() {	
 	// do nothing if this node was already setup
-	if(stage_ == was_setup) return;
+	if(stage_ == stage::was_setup) return;
 	
 	// recursively attempt to setup its direct predecessors
 	for(auto&& in : inputs()) {
@@ -160,16 +160,16 @@ void node::propagate_setup_() {
 	}
 
 	// setup this node
-	Assert(stage_ == was_pre_setup);
+	Assert(stage_ == stage::was_pre_setup);
 	if(! is_source()) deduce_stream_properties_();
-	this->pre_setup();
-	stage_ = was_setup;
+	this->setup();
+	stage_ = stage::was_setup;
 }
 
 
 
 void node::define_source_stream_properties(const node_stream_properties& prop) {
-	Expects(stage_ == construction);
+	Expects(stage_ == stage::construction);
 	Expects(is_source());
 	
 	stream_properties_ = prop;
@@ -177,13 +177,13 @@ void node::define_source_stream_properties(const node_stream_properties& prop) {
 
 
 void node::setup_sink() {
-	Expects(stage_ == construction);
+	Expects(stage_ == stage::construction);
 	Expects(is_sink());
 	
 	propagate_pre_setup_();
 	propagate_setup_();
 
-	Ensures(stage_ == was_setup);
+	Ensures(stage_ == stage::was_setup);
 }
 
 

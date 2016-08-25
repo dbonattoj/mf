@@ -37,10 +37,12 @@ graph::~graph() {
 
 
 void graph::setup() {
-	Expects(! was_setup_);
-	Expects(sink_ != nullptr);
+	Assert(! was_setup_);
+	Assert(sink_ != nullptr);
 
 	sink_->setup_graph();
+	for(const auto& nd : nodes_) Assert(nd->was_setup());
+	
 	was_setup_ = true;
 }
 

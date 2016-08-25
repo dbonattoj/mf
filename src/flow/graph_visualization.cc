@@ -169,10 +169,8 @@ void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 	html << R"(<TR>)";
 	html << R"(<TD COLSPAN="3" BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR=")" << col << R"(">)";
 	html << nd.name();
-	html << R"(<BR/><FONT POINT-SIZE="10" COLOR=")" << col << R"(">)";
-	if(nd.is_async()) html << "async loader";
-	else html << "sync loader";
-	html << R"(</FONT>)";
+	if(nd.is_async()) html << " (async)";
+	else html << " (sync)";
 	html << R"(</TD>)";
 	html << R"(</TR>)";
 	

@@ -47,9 +47,9 @@ public:
 	enum pull_result { success, transitory_failure, stopped };
 
 private:
-	enum stage { construction, was_pre_setup, was_setup };
+	enum class stage { construction, was_pre_setup, was_setup };
 	
-	stage stage_ = construction;
+	stage stage_ = stage::construction;
 
 	graph& graph_;
 	std::vector<std::unique_ptr<node_output>> outputs_;
@@ -98,6 +98,8 @@ public:
 
 	const graph& this_graph() const noexcept { return graph_; }
 	graph& this_graph() noexcept { return graph_; }
+	
+	bool was_setup() const { return (stage_ == stage::was_setup); }
 
 	const auto& inputs() const noexcept { return inputs_; }
 	const auto& outputs() const noexcept { return outputs_; }
