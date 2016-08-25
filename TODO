@@ -1,5 +1,20 @@
+new (august)
+- pulled parameter
+- parallel branches
+- real-time stream policy, skipper
+- frozen time windows
+
+
+
+
+DETAILS
+- elem_tuple constructor
+- ring buffer: 0 length r/w test
+- view, time_span, etc: 0 length test
+
+
+
 FLOW
-- parallel node (multiple frames in parallel)
 - opencl node?
 
 - real time, push from source
@@ -11,21 +26,3 @@ FLOW
   - parse graph+node+filter params from file
   - sub-graph (-> composite node)
 
-
-
-new (august)
-- multiple output
-- pulled parameter
-- parallel branches
-- real-time stream policy, skipper
-- frozen time windows
-
-
-
-
-DETAILS
-- ndarray_view_cast + join finish
-- elem_tuple constructor
-- ring buffer: 0 length r/w test
-- view, time_span, etc: 0 length test
-- remove ndarray_ring, change tests

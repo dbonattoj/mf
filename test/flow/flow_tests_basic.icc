@@ -18,7 +18,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#if 1
+
 SECTION("basic") {	
 	flow::filter_graph gr;
 	auto shp = make_ndsize(10, 10);
@@ -28,7 +28,6 @@ SECTION("basic") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
-/*
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -563,7 +562,6 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
-	*/
 	
 	
 	SECTION("complex") {
@@ -574,7 +572,7 @@ SECTION("basic") {
 		std::size_t last = count - 1;
 		std::vector<int> seq(count);
 		for(int i = 0; i < seq.size(); ++i) seq[i] = i;
-		/*
+
 		SECTION("graph 1") {
 			INFO(R"(
 			source1' -+--> [-3, +1]passthrough1 --> [-1, +0]passthrough2' --> merge1 --> merge2' --> sink 
@@ -614,7 +612,7 @@ SECTION("basic") {
 			
 			REQUIRE(sink.check());
 		}
-		*/	
+
 		SECTION("graph 2") {
 			INFO(R"(
 			source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2 ------------> merge1' -------------> merge2' --> sink 
@@ -670,11 +668,8 @@ SECTION("basic") {
 			gr.setup();
 			gr.run();
 			
-			export_graph_visualization(*gr.node_graph_, "gr.gv");
-			
 			REQUIRE(sink.check());
 		}
 	}
 	
 }
-#endif

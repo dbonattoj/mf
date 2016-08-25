@@ -22,13 +22,20 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node.h"
 #include "sink_node.h"
 
+#include "graph_visualization.h"
+#include <thread>
+
 namespace mf { namespace flow {
 
+using namespace std::chrono_literals;
 
 void graph::pull_next_frame_() {
 	Expects(launched_);
 	sink_->pull_next_frame();	
 	if(callback_function) callback_function(sink_->current_time());
+	
+	export_graph_visualization(*this, "gr.gv");
+	std::this_thread::sleep_for(100ms);
 }
 
 graph::~graph() {

@@ -27,7 +27,7 @@ using namespace mf;
 int main(int argc, const char* argv[]) {
 	set_debug_mode(debug_mode::inactive);
 	//set_debug_filter({"multiplex"});
-	set_random_sleep_enabled(true);
+	set_random_sleep_enabled(false);
 
 	return Catch::Session().run(argc, argv);
 }

@@ -111,6 +111,12 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 	else if(async) html << "async node";
 	else html << "sync node";
 	html << R"(</FONT>)";
+	if(with_state_) {
+		html << R"(<BR/><BR/><FONT POINT-SIZE="10">)";
+		time_unit t = nd.current_time();
+		html << "t = " << t;
+		html << R"(</FONT>)";
+	}
 	html << R"(</TD>)";
 	html << R"(</TR>)";
 	
@@ -228,9 +234,20 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 		else if(p > 0) label = "[-"s + std::to_string(p) + "]  ";
 		else if(f > 0) label = "[+" + std::to_string(f) + "]  ";
 		
+		std::string arrow_shape, style;
+		if(!with_state_ || in.is_activated()) {
+			arrow_shape = "normal";
+			style = "";
+		} else {
+			arrow_shape = "nonetee";
+			style = "dotted";
+		}
+		
 		output_
 			<< '\t' << uid_(out.this_node(), "node") << ':' << uid_(out, "out")
 			<< " -> " << uid_(nd, "node") << ':' << uid_(in, "in") << " ["
+			<< "style=\"" << style << "\", "
+			<< "arrowhead=\"" << arrow_shape << "\", "
 			<< "color=" << in_col << ", "
 			<< "headlabel=\"" << label << "\", "
 			<< "fontsize=10, "

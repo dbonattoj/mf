@@ -42,6 +42,7 @@ private:
 	const graph& graph_;
 	std::string graph_id_ = "G";
 	bool thread_index_colors_ = true;
+	bool with_state_ = true;
 	std::map<std::uintptr_t, std::string> uids_;
 	
 	template<typename T> std::string uid_(const T& object, const std::string& prefix);
