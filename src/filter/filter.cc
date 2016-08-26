@@ -105,7 +105,7 @@ void filter::install(graph& gr) {
 	Assert(! was_installed());
 	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
-		nd.set_prefetch_duration(prefetch_duration_);
+		nd.set_prefetch_duration(10/*prefetch_duration_*/);
 		node_ = &nd;
 	} else {
 		sync_node& nd = gr.add_node<sync_node>();

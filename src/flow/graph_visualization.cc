@@ -41,13 +41,13 @@ namespace {
 		"red",
 		"forestgreen",
 		"orange",
-		"fuchsia",
+		"deeppink",
 		"turquoise",
 		"salmon",
-		"cadetblue",
-		"cornflowerblue",
+		"lightskyblue3",
+		"wheat4",
 		"yellowgreen",
-		"slategray",
+		"gray33",
 		"indigo"
 	};
 }
@@ -106,10 +106,14 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 	html << R"(<TR>)";
 	html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="1" STYLE="ROUNDED" CELLPADDING="4" COLOR=")" << col << R"(">)";
 	html << nd.name();
-	html << R"(<BR/><FONT POINT-SIZE="10" COLOR=")" << col << R"(">)";
+	html << R"(<BR/><FONT POINT-SIZE="10">)";
 	if(sink) html << "sink node";
 	else if(async) html << "async node";
 	else html << "sync node";
+	if(async) {
+		html << R"(<BR/>)";
+		html << "prefetch = " << static_cast<const async_node&>(nd).prefetch_duration();
+	}
 	html << R"(</FONT>)";
 	if(with_state_) {
 		html << R"(<BR/><BR/><FONT POINT-SIZE="10">)";

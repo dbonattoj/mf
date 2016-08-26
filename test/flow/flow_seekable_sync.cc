@@ -34,7 +34,7 @@ constexpr bool async1 = false;
 constexpr bool async2 = false;
 constexpr bool seekable = true;
 
-TEST_CASE("flow graph test: seekable, sync", "[flow][sync][seekable]") {
+TEST_CASE("flow graph test: seekable, sync", "[flow][sync]") {
 	#include "flow_tests_basic.icc"
 	#include "flow_tests_activation.icc"
 	#include "flow_tests_seek.icc"

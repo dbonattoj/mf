@@ -273,7 +273,7 @@ public:
 	std::vector<bool> activation1;
 	std::vector<bool> activation2;
 	
-	input_synchronize_test_filter(time_unit prefetch = 0) :
+	input_synchronize_test_filter() :
 		input1(*this), input2(*this), output(*this) { set_name("merge"); }
 
 

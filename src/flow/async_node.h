@@ -30,16 +30,13 @@ namespace mf { namespace flow {
 
 class graph;
 
-class async_node final : public processing_node {
-public:
-	constexpr static time_unit default_prefetch = 3;
-	
+class async_node final : public processing_node {	
 private:
 	enum class process_result { should_continue, should_pause, failure };
 
 	using request_id_type = int;
 	
-	time_unit prefetch_duration_ = default_prefetch;
+	time_unit prefetch_duration_ = 0;
 	
 	thread_index thread_index_ = undefined_thread_index;
 	std::thread thread_;

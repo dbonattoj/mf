@@ -35,7 +35,7 @@ void graph::pull_next_frame_() {
 	if(callback_function) callback_function(sink_->current_time());
 	
 	export_graph_visualization(*this, "gr.gv");
-	std::this_thread::sleep_for(100ms);
+	//std::this_thread::sleep_for(100ms);
 }
 
 graph::~graph() {
@@ -55,7 +55,7 @@ void graph::setup() {
 
 
 thread_index graph::new_thread_index() {
-	return last_thread_index_++;
+	return ++last_thread_index_;
 }
 
 
