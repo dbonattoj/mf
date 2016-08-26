@@ -91,7 +91,11 @@ void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_f
 	auto& convert_node_input = convert_node_->add_input();
 	auto& convert_node_output = convert_node_->output();
 	convert_node_output_channel_ = &convert_node_->add_output_channel();
-		
+	
+	convert_node_input.set_name("in");
+	convert_node_output.set_name("out");
+	convert_node_output_channel_->set_name("out");
+	
 	convert_node_input.connect(base::this_node_output());
 	base::this_node_input().connect(convert_node_output);
 }

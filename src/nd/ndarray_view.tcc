@@ -143,6 +143,17 @@ void ndarray_view<Dim, T>::reset(const ndarray_view& other) noexcept {
 
 
 template<std::size_t Dim, typename T> template<typename T2>
+void ndarray_view<Dim, T>::assign_static_cast(const ndarray_view<Dim, T2>& other) const {
+	// converting assignment
+	Assert_crit(shape() == other.shape(), "ndarray_view must have same shape for assignment");
+	if(shape().product() == 0) return;	
+	std::transform(other.begin(), other.end(), begin(), [](const T2& t) {
+		return static_cast<T>(t);
+	});
+}
+
+
+template<std::size_t Dim, typename T> template<typename T2>
 void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, T2>& other) const {
 	// converting assignment
 	Assert_crit(shape() == other.shape(), "ndarray_view must have same shape for assignment");

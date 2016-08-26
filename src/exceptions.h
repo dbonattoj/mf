@@ -42,7 +42,9 @@ class exception_derived : public Base {
 
 public:
 	explicit exception_derived(const std::string& what) : base(what) {
+		#ifdef MF_DEBUG_BUILD
 		MF_DEBUG_BACKTRACE(what);
+		#endif
 	}
 };
 	

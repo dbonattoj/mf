@@ -180,6 +180,7 @@ public:
 
 	/// \name Deep assignment
 	///@{
+	template<typename T2> void assign_static_cast(const ndarray_view<Dim, T2>&) const;
 	template<typename T2> void assign(const ndarray_view<Dim, T2>&) const;
 	void assign(const ndarray_view<Dim, const T>& other) const;
 

@@ -61,6 +61,7 @@ public:
 	time_unit end_time() const noexcept;
 
 	virtual std::size_t channels_count() const noexcept = 0;
+	virtual std::string channel_name_at(std::ptrdiff_t i) const = 0;
 	virtual node::pull_result pull(time_span& span, bool reconnect) = 0;
 	virtual timed_frame_array_view begin_read(time_unit duration) = 0;
 	virtual void end_read(time_unit duration) = 0;

@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "frame_exporter.h"
 #include "raw_video_frame_format.h"
-#include "../elem.h"
+#include "../elem/elem.h"
 #include "../image/image_view.h"
 #include <string>
 #include <iosfwd>

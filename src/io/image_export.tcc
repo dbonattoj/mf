@@ -21,10 +21,38 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../opencv.h"
 
 namespace mf {
+	
+inline void image_export(const image_view<rgb_color>& img, const std::string& filename) {
+	cv::Mat output_img;
+	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGR);
+	cv::imwrite(filename, output_img);
+}
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>& img, const std::string& filename, T min_value, T max_value, const rgb_color& background)
+
+template<typename Mask>
+void image_export(const masked_image_view<rgb_color, Mask>& img, const std::string& filename) {
+	cv::Mat output_img, holes;
+	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGRA);
+	cv::bitwise_not(img.cv_mask_mat(), holes);
+	output_img.setTo(cv::Scalar::all(0), holes);
+	cv::imwrite(filename, output_img);
+}
+
+
+template<typename Mask>
+void image_export(const masked_image_view<rgb_color, Mask>& img, const std::string& filename, const rgb_color& background) {
+	cv::Scalar cv_background(background.b, background.g, background.r);
+	cv::Mat output_img, holes;
+	cv::cvtColor(img.cv_mat(), output_img, CV_RGB2BGR);
+	cv::bitwise_not(img.cv_mask_mat(), holes);
+	output_img.setTo(cv_background, holes);
+	cv::imwrite(filename, output_img);
+}
+
+
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>& img, const std::string& filename, Scalar min_value, Scalar max_value, const rgb_color& background)
 {
 	cv::Mat output_img;
 	double alpha = 255.0 / (max_value - min_value);
@@ -41,9 +69,9 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 }
 
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>& img, const std::string& filename, const rgb_color& background)
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>& img, const std::string& filename, const rgb_color& background)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos, img.cv_mask_mat());
@@ -51,9 +79,9 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 }
 
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>& img, const std::string& filename, T min_value, T max_value)
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>& img, const std::string& filename, Scalar min_value, Scalar max_value)
 {
 	cv::Mat output_img;
 	double alpha = 255.0 / (max_value - min_value);
@@ -64,35 +92,39 @@ std::enable_if_t<std::is_arithmetic<T>::value> image_export
 	cv::cvtColor(output_img, output_rgba_img, CV_GRAY2RGBA);
 	cv::bitwise_not(img.cv_mask_mat(), holes);
 	output_rgba_img.setTo(cv::Scalar::all(0), holes);
+	
 	cv::imwrite(filename, output_rgba_img);
 }
 
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>& img, const std::string& filename)
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>& img, const std::string& filename)
 {
 	cv::Point min_pos, max_pos;
+	std::cout << "minmaxloc...." << std::endl;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos, img.cv_mask_mat());
+	std::cout << "minmaxloc." << std::endl;
 	image_export(img, filename, img.cv_mat()(min_pos), img.cv_mat()(max_pos));
 }
 
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image_view<T>& img, const std::string& filename, T min_value, T max_value)
+template<typename Scalar>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const image_view<Scalar>& img, const std::string& filename, Scalar min_value, Scalar max_value)
 {
 	cv::Mat output_img;
 	double alpha = 255.0 / (max_value - min_value);
 	double beta = alpha * min_value;
 	img.cv_mat().convertTo(output_img, CV_8U, alpha, beta);
+	
 	cv::imwrite(filename, output_img);
 }
 
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image_view<T>& img, const std::string& filename)
+template<typename Scalar>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const image_view<Scalar>& img, const std::string& filename)
 {
 	cv::Point min_pos, max_pos;
 	cv::minMaxLoc(img.cv_mat(), NULL, NULL, &min_pos, &max_pos);

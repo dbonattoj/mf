@@ -82,6 +82,8 @@ public:
 	using node_output::node_output;
 	
 	std::size_t channels_count() const noexcept override;
+	std::string channel_name_at(std::ptrdiff_t i) const override;
+	
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
@@ -151,7 +153,7 @@ public:
 	output_type& output() { return output_at(0); }
 	const output_type& output() const { return output_at(0); }
 
-	std::size_t output_channels_count() const noexcept;	
+	std::size_t output_channels_count() const { return output_channels_.size(); }
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
 };

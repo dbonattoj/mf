@@ -26,7 +26,12 @@ namespace mf { namespace flow {
 
 
 std::size_t processing_node_output::channels_count() const noexcept {
-	return this_node().output_channels_count();
+	return this_node().output_channels_.size();
+}
+
+
+std::string processing_node_output::channel_name_at(std::ptrdiff_t i) const {
+	return this_node().output_channels_.at(i)->name();
 }
 
 
@@ -84,6 +89,7 @@ void processing_node::handler_pre_process_(processing_node_job& job) {
 
 void processing_node::handler_process_(processing_node_job& job) {
 	Expects(handler_ != nullptr);
+	std::cout << name() << " process....................." << std::endl;
 	handler_->handler_process(*this, job);
 }
 
@@ -109,11 +115,6 @@ void processing_node::finish_job_(processing_node_job& job) {
 	}
 		
 	if(reached_end) mark_end_();
-}
-
-
-std::size_t processing_node::output_channels_count() const noexcept {
-	return output_channels_.size();
 }
 
 

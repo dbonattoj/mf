@@ -30,32 +30,36 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 void image_export(const image_view<rgb_color>&, const std::string& filename);
-void image_export(const masked_image_view<rgb_color>&, const std::string& filename);
-void image_export(const masked_image_view<rgb_color>&, const std::string& filename, const rgb_color& background);
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>&, const std::string& filename, T min_value, T max_value, const rgb_color& background);
+template<typename Mask>
+void image_export(const masked_image_view<rgb_color, Mask>&, const std::string& filename);
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>&, const std::string& filename, const rgb_color& background);
+template<typename Mask>
+void image_export(const masked_image_view<rgb_color, Mask>&, const std::string& filename, const rgb_color& background);
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>&, const std::string& filename, T min_value, T max_value);
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>&, const std::string& filename, Scalar min_value, Scalar max_value, const rgb_color& background);
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const masked_image_view<T>&, const std::string& filename);
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>&, const std::string& filename, const rgb_color& background);
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image_view<T>&, const std::string& filename, T min_value, T max_value);
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>&, const std::string& filename, Scalar min_value, Scalar max_value);
 
-template<typename T>
-std::enable_if_t<std::is_arithmetic<T>::value> image_export
-	(const image_view<T>&, const std::string& filename);
+template<typename Scalar, typename Mask>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const masked_image_view<Scalar, Mask>&, const std::string& filename);
+
+template<typename Scalar>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const image_view<Scalar>&, const std::string& filename, Scalar min_value, Scalar max_value);
+
+template<typename Scalar>
+std::enable_if_t<std::is_arithmetic<Scalar>::value> image_export
+	(const image_view<Scalar>&, const std::string& filename);
 
 }
 

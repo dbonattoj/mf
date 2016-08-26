@@ -148,7 +148,9 @@ void multiplex_node::setup() { }
 
 
 multiplex_node_output& multiplex_node::add_output(std::ptrdiff_t input_channel_index) {
-	return add_output_(*this, input_channel_index);
+	multiplex_node_output& out = add_output_(*this, input_channel_index);
+	out.set_name(input().connected_node().output_at(0).channel_name_at(input_channel_index));
+	return out;
 }
 
 
@@ -161,6 +163,11 @@ std::size_t multiplex_node_output::channels_count() const noexcept {
 	// multiplex node outputs always have 1 channel.
 	// (but different outputs can be created for the different input channels)
 	return 1;
+}
+
+
+std::string multiplex_node_output::channel_name_at(std::ptrdiff_t i) const {
+	return name();
 }
 
 

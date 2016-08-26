@@ -41,6 +41,7 @@ public:
 	multiplex_node_output(node& nd, std::ptrdiff_t input_channel_index);
 	
 	std::size_t channels_count() const noexcept override;
+	std::string channel_name_at(std::ptrdiff_t i) const override;
 	node::pull_result pull(time_span& span, bool reconnect) override;
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
