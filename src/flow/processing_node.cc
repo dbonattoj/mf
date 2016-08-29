@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "processing_node.h"
 #include "processing_node_job.h"
 #include "multiplex_node.h"
+#include "graph.h"
 
 namespace mf { namespace flow {
 
@@ -90,7 +91,14 @@ void processing_node::handler_pre_process_(processing_node_job& job) {
 void processing_node::handler_process_(processing_node_job& job) {
 	Expects(handler_ != nullptr);
 	std::cout << name() << " process....................." << std::endl;
+	
+	if(this_graph().has_diagnostic())
+		this_graph().diagnostic().processing_node_job_started(*this, job.time());
+	
 	handler_->handler_process(*this, job);
+
+	if(this_graph().has_diagnostic())
+		this_graph().diagnostic().processing_node_job_finished(*this, job.time());
 }
 
 

@@ -66,6 +66,8 @@ thread_index graph::root_thread_index() const {
 
 void graph::launch() {
 	if(launched_) return;
+	
+	if(has_diagnostic()) diagnostic().launched(*this);
 		
 	was_stopped_ = false;
 	launched_ = true;
@@ -75,6 +77,8 @@ void graph::launch() {
 
 void graph::stop() {
 	if(! launched_) return;
+	
+	if(has_diagnostic()) diagnostic().stopped(*this);
 	
 	MF_DEBUG_BACKTRACE("graph::stop");	
 	was_stopped_.store(true);

@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_GRAPH_H_
 
 #include "../common.h"
+#include "diagnostic/diagnostic_handler.h"
 #include "node.h"
 #include "sink_node.h"
 #include <utility>
@@ -49,6 +50,8 @@ private:
 	thread_index last_thread_index_ = 0;
 	
 	std::atomic<bool> was_stopped_ {false};
+
+	diagnostic_handler* diagnostic_handler_ = nullptr;
 
 	void pull_next_frame_();
 
@@ -78,6 +81,13 @@ public:
 	
 	thread_index new_thread_index();
 	thread_index root_thread_index() const;
+	bool was_stopped() const { return was_stopped_; }
+	
+	void set_diagnostic(diagnostic_handler& handler) { diagnostic_handler_ = &handler; }
+	void unset_diagnostic() { diagnostic_handler_ = nullptr; }
+	bool has_diagnostic() const { return (diagnostic_handler_ != nullptr); }
+	diagnostic_handler& diagnostic() { Assert(has_diagnostic()); return *diagnostic_handler_; }
+	const diagnostic_handler& diagnostic() const { Assert(has_diagnostic()); return *diagnostic_handler_; }
 	
 	std::size_t nodes_count() const { return nodes_.size(); }
 	const node& node_at(std::ptrdiff_t i) const { return *nodes_.at(i); }
@@ -88,7 +98,6 @@ public:
 	bool was_setup() const { return was_setup_; }
 	bool is_launched() const { return launched_; }
 	
-	bool was_stopped() const { return was_stopped_; }
 		
 	void setup();
 	
