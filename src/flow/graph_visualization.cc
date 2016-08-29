@@ -132,7 +132,8 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 		if(async) html << R"(<TR><TD></TD><TD BORDER="1" HEIGHT="3" COLOR=")" << col << R"("></TD><TD></TD></TR>)";
 		html << R"(<TR>)";
 		html << R"(<TD WIDTH="20"></TD>)";
-		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << uid_(nd.output(), "out") << R"(" COLOR=")" << output_col << R"(">)";
+		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")"
+			<< uid_(nd.output(), "out") << R"(" COLOR=")" << output_col << R"(">)";
 		html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
 		html << R"(<TR CELLPADDING="1">)";
 		for(std::ptrdiff_t i = 0; i < nd.output_channels_count(); ++i) {
@@ -190,7 +191,8 @@ void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 
 	if(nd.is_async()) {
 		std::size_t colspan = 2*nd.outputs_count() - 1;
-		html << R"(<TR><TD></TD><TD BORDER="1" HEIGHT="3" COLSPAN=")" << colspan << R"(" COLOR=")" << col << R"("></TD><TD></TD></TR>)";
+		html << R"(<TR><TD></TD><TD BORDER="1" HEIGHT="3" COLSPAN=")"
+			<< colspan << R"(" COLOR=")" << col << R"("></TD><TD></TD></TR>)";
 	}
 
 	html << R"(<TR>)";
@@ -257,7 +259,7 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 			<< "fontsize=10, "
 			<< "labelangle=45, "
 			<< "labeldistance=2.0, "
-			<< "labelfontcolor=" << in_col << ", "
+			<< "labelfontcolor=" << in_col <<
 			<< "];\n";
 	}
 }
