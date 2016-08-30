@@ -26,7 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Runtime description of data format in \ref ndarray.
+/// Description of data format in \ref ndarray.
 /** Defines byte size and alignment requirement of element type (aka `sizeof(Elem)`, `alignof(Elem)`),
  ** number of elements in array (corresponds to `ndarray::size()`), and stride between elements in bytes.
  ** Describes data in a \ref ndarray_view, with default (possibly padded) strides.

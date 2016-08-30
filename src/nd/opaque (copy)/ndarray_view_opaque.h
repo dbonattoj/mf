@@ -37,7 +37,7 @@ namespace mf {
  ** covers only one part, using extract_part().
  ** With single-part format, the \ref ndarray_view_opaque is a type-erased \ref ndarray_view: It can be casted to/from
  ** a concrete \ref ndarray_view using from_opaque() and to_opaque(). */
-template<std::size_t Dim, bool Mutable = true, typename Format>
+template<std::size_t Dim, bool Mutable = true>
 class ndarray_view_opaque : private ndarray_view<Dim + 1, std::conditional_t<Mutable, byte, const byte>> {
 	using base_value_type = std::conditional_t<Mutable, byte, const byte>;
 	using base = ndarray_view<Dim + 1, base_value_type>;

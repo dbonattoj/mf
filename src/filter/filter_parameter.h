@@ -1,26 +1,42 @@
 #ifndef MF_FLOW_FILTER_PARAMETER_H_
 #define MF_FLOW_FILTER_PARAMETER_H_
 
-namespace mf { namespace flow {
+#include <functional>
 
-enum class parameter_kind {
-	pulled,
-	dynamic,
-	deterministic
-};
+namespace mf { namespace flow {
 
 template<typename Value>
 class filter_parameter {
 public:
 	using value_type = Value;
-
+	using compute_function_type = Value(time_unit);
+	
 private:
-	parameter_kind kind_;
+	parameter_kind kind_ = parameter_kind::undefined;
+	std::function<compute_function_type> compute_function_;
+	bool dynamic_ = false;
+
+public:
+	parameter_kind kind() const { return kind_; }
+
+	void set_dynamic();
+	void set_constant(const Value&);
+	template<typename Function> void set_time_function(const Function&);
+	void set_mirror(const filter_parameter&);
 };
 
 
 template<typename Value>
-class filter_external_parameter {
+class filter_request_parameter : public filter_parameter<Value> {
+	using base = filter_parameter<Value>;
+	
+public:
+	using value_type = typename base::value_type;
+};
+
+
+template<typename Value>
+class filter_input_parameter {
 public:
 	using value_type = Value;
 	using parameter_type = filter_parameter<Value>;
@@ -33,71 +49,3 @@ private:
 }}
 
 #endif
-
-/*
-VALUATION (for non-internal)
-- pulled    ==> set 1 time by connected node in pre_process
-            ==> pulled from connected successor, response generated with that value, inhibits prefetch
-
-- dynamic   ==> set from outside (possib. multiple times), node uses latest value, can aggr. multiple updates
-
-- animated  ==> function of time or frame index
-
-- constant  ==> fixed before launch
-
-- internal  ==> set by node itself, per processed frame
-
-job.param(my_param) --> value to use
-                                <-- internal: determined value
-
-job.in_param(left_image_input.connected_filter().)
-
-
-
-
-
-
-
-class left_filter {
-	parameter<pose> left_pose;
-}
-
-
-class merge_filter {
-	parameter<pose> virtual_pose;
-
-	extern_parameter<pose> left_pose;
-
-	preprocess() {
-		job.pull_param(left_pose, pose1);
-	}
-	
-	process() {
-		print(job.param(left_pose));
-	}
-}
-
-
-
-setup() {
-	filter left_syn;
-	filter merge;
-	
-	merge.left_pose
-}
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-

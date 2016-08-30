@@ -62,7 +62,7 @@ std::string graph_visualization::thread_index_color_(thread_index tid) const {
 	if(! thread_index_colors_) return "black";
 	else if(tid == graph_.root_thread_index()) return "black";
 	else if(tid == undefined_thread_index) return "lightgray";
-	else return html_colors_.at(tid % html_colors_.size());
+	else return html_colors_.at((tid - 1) % html_colors_.size());
 }
 
 void graph_visualization::generate_node_dispatch_(const node& nd) {	
