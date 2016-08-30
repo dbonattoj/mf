@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_NDARRAY_OPAQUE_FORMAT_ARRAY_H_
 
 #include "../ndarray_format.h"
+#include "ndarray_view_opaque_fwd.h"
 
 namespace mf {
 
@@ -37,6 +38,7 @@ private:
 	ndarray_format array_format_;
 
 public:
+	ndarray_opaque_format_array() : array_format_() { }
 	explicit ndarray_opaque_format_array(const ndarray_format& frm) : array_format_(frm) { }
 	
 	ndarray_opaque_format_array(const ndarray_opaque_format_array&) = default;
@@ -74,7 +76,23 @@ inline bool operator!=(const ndarray_opaque_format_array& a, const ndarray_opaqu
 }
 
 
+/// Cast input \ref ndarray_view to opaque \ref ndarray_view_opaque with given dimension.
+template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>
+auto to_opaque(const ndarray_view<Concrete_dim, Concrete_elem>& concrete_view);
+
+
+
+/// Cast input \ref ndarray_view_opaque to concrete \ref ndarray_view with given dimension, frame shape and element type.
+template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Opaque_dim, bool Opaque_mutable>
+auto from_opaque(
+	const ndarray_view_opaque<Opaque_dim, ndarray_opaque_format_array, Opaque_mutable>& opaque_view,
+	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
+);
+
+
 }
+
+#include "ndarray_opaque_format_array.tcc"
 
 #endif
 

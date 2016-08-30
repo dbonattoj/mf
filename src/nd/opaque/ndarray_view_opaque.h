@@ -37,13 +37,19 @@ namespace mf {
  ** covers only one part, using extract_part().
  ** With single-part format, the \ref ndarray_view_opaque is a type-erased \ref ndarray_view: It can be casted to/from
  ** a concrete \ref ndarray_view using from_opaque() and to_opaque(). */
-template<std::size_t Dim, bool Mutable = true, typename Format>
+template<std::size_t Dim, typename Format = ndarray_opaque_format_array, bool Mutable = true>
 class ndarray_view_opaque : private ndarray_view<Dim + 1, std::conditional_t<Mutable, byte, const byte>> {
 	using base_value_type = std::conditional_t<Mutable, byte, const byte>;
 	using base = ndarray_view<Dim + 1, base_value_type>;
 
 public:	
-	using frame_ptr = std::conditional_t<Mutable, void*, const void*>;
+	using format_type = Format;
+
+	using frame_ptr = std::conditional_t<
+		Mutable,
+		typename format_type::frame_ptr,
+		typename format_type::const_frame_ptr
+	>;
 
 	using pointer = frame_ptr;
 	using index_type = std::ptrdiff_t;
@@ -55,9 +61,9 @@ public:
 	constexpr static std::size_t dimension = Dim;
 	
 private:
-	ndarray_opaque_frame_format format_;
+	format_type format_;
 
-	using fcall_type = detail::ndarray_view_fcall<ndarray_view_opaque<Dim, Mutable>, 1>;
+	using fcall_type = detail::ndarray_view_fcall<ndarray_view_opaque<Dim, format_type, Mutable>, 1>;
 
 protected:
 	ndarray_view_opaque section_(std::ptrdiff_t dim, std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step) const;
@@ -68,13 +74,13 @@ public:
 	///@{
 	ndarray_view_opaque() = default;
 
-	ndarray_view_opaque(const ndarray_view_opaque<Dim, true>& vw) :
+	ndarray_view_opaque(const ndarray_view_opaque<Dim, format_type, true>& vw) :
 		base(vw.base_view()), format_(vw.format()) { }
 	// if Mutable == false, then this is not the copy constructor
 	// --> and then additional, implicit copy constructor gets created
 
-	ndarray_view_opaque(const base& vw, const ndarray_opaque_frame_format& frm) : base(vw), format_(frm) { }
-	ndarray_view_opaque(frame_ptr start, const shape_type&, const strides_type&, const ndarray_opaque_frame_format&);
+	ndarray_view_opaque(const base& vw, const format_type& frm) : base(vw), format_(frm) { }
+	ndarray_view_opaque(frame_ptr start, const shape_type&, const strides_type&, const format_type&);
 
 	static ndarray_view_opaque null() { return ndarray_view_opaque(); }
 	bool is_null() const noexcept { return base::is_null(); }
@@ -112,8 +118,8 @@ public:
 	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
 	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 
-	const ndarray_opaque_frame_format& frame_format() const noexcept { return format_; }
-	[[deprecated]] const ndarray_opaque_frame_format& format() const noexcept { return format_; }
+	const format_type& frame_format() const noexcept { return format_; }
+	[[deprecated]] const format_type& format() const noexcept { return format_; }
 	///@}
 
 	
@@ -139,7 +145,7 @@ public:
 
 	/// \name Indexing
 	///@{
-	ndarray_view_opaque<0, Mutable> at(const coordinates_type&) const;
+	ndarray_view_opaque<0, format_type, Mutable> at(const coordinates_type&) const;
 	
 	ndarray_view_opaque section
 	(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const {
@@ -150,10 +156,10 @@ public:
 	}
 	
 	auto slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const {
-		return ndarray_view_opaque<Dim - 1, Mutable>(base::slice(c, dimension), format_);
+		return ndarray_view_opaque<Dim - 1, format_type, Mutable>(base::slice(c, dimension), format_);
 	}
 	auto operator[](std::ptrdiff_t c) const {
-		return ndarray_view_opaque<Dim - 1, Mutable>(base::operator[](c), format_);
+		return ndarray_view_opaque<Dim - 1, format_type, Mutable>(base::operator[](c), format_);
 	}
 
 	fcall_type operator()(std::ptrdiff_t start, std::ptrdiff_t end, std::ptrdiff_t step = 1) const {
@@ -168,7 +174,7 @@ public:
 	///@}
 };
 
-
+/*
 
 template<std::size_t Dim, bool Mutable>
 ndarray_view_opaque<Dim, Mutable> extract_part(const ndarray_view_opaque<Dim, Mutable>&, std::ptrdiff_t part_index);
@@ -187,6 +193,7 @@ auto from_opaque(
 	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
 );
 
+*/
 
 }
 

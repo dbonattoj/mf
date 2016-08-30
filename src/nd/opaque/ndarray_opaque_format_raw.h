@@ -25,7 +25,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+/// Format of ndarray opaque frame the consists raw data with a given size and alignment.
 class ndarray_opaque_format_raw {
+public:
+	using frame_ptr = void*;
+	using const_frame_ptr = const void*;
+
 private:
 	std::size_t frame_size_ = 0;
 	std::size_t frame_alignment_requirement_ = 1;
