@@ -21,9 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <catch.hpp>
 #include <cstdint>
 #include <array>
-#include <mf/nd/opaque/opaque_format_multi_array.h>
-#include <mf/nd/opaque/opaque_format_array.h>
-#include <mf/nd/opaque/opaque_format_raw.h>
+#include <mf/nd/opaque/ndarray_opaque_frame_format.h>
 
 using namespace mf;
 
@@ -34,14 +32,65 @@ unaligned_int32 u32(std::int32_t i) { return *reinterpret_cast<unaligned_int32*>
 unaligned_int64 u64(std::int64_t i) { return *reinterpret_cast<unaligned_int64*>(&i); };
 
 
-TEST_CASE("opaque_format_multi_array", "[nd][opaque_format_multi_array]") {
+TEST_CASE("ndarray_opaque_frame_format", "[nd][ndarray_opaque_frame_format]") {
 	SECTION("undefined") {
-		opaque_format_multi_array frm;
+		ndarray_opaque_frame_format frm;
 		REQUIRE_FALSE(frm.is_defined());
 	}
 
+	SECTION("single-part") {
+		ndarray_format afrm = make_ndarray_format<int>(100);
+		ndarray_opaque_frame_format frm(afrm);
+		
+		REQUIRE(frm.is_defined());
+		REQUIRE(frm.is_single_part());
+		REQUIRE_FALSE(frm.is_multi_part());
+		REQUIRE_FALSE(frm.is_raw());
+		REQUIRE(frm.parts_count() == 1);
+		
+		REQUIRE(frm.frame_size() == 100 * sizeof(int));
+		REQUIRE(frm.frame_alignment_requirement() == alignof(int));
+		REQUIRE(frm.part_at(0).offset == 0);
+		REQUIRE(frm.part_at(0).format == afrm);
+		REQUIRE(frm.array_format() == afrm);
+		REQUIRE(frm.is_contiguous());
+		
+		ndarray_opaque_frame_format frm2;
+		frm2.add_part(afrm);
+		REQUIRE(frm == frm2);
+		
+		std::vector<int> raw1(100), raw2(100);
+		for(std::ptrdiff_t i = 0; i < 100; ++i) {
+			raw1[i] = i;
+			raw2[i] = 2*i + 1;
+		}
+
+		REQUIRE(ndarray_opaque_frame_compare(
+			static_cast<const void*>(raw1.data()),
+			static_cast<const void*>(raw1.data()),
+			frm
+		));
+		REQUIRE_FALSE(ndarray_opaque_frame_compare(
+			static_cast<const void*>(raw1.data()),
+			static_cast<const void*>(raw2.data()),
+			frm
+		));
+		ndarray_opaque_frame_copy(
+			static_cast<void*>(&raw2[0]),
+			static_cast<const void*>(raw1.data()),
+			frm
+		);
+		REQUIRE(raw1 == raw2);
+		REQUIRE(ndarray_opaque_frame_compare(
+			static_cast<const void*>(raw1.data()),
+			static_cast<const void*>(raw2.data()),
+			frm
+		));
+	}
+
+
 	SECTION("multi-part") {
-		opaque_format_multi_array frm;
+		ndarray_opaque_frame_format frm;
 		ndarray_format afrm1 = make_ndarray_format<std::int32_t>(49);
 		ndarray_format afrm2 = make_ndarray_format<std::int64_t>(20, 2*8);
 		ndarray_format afrm3 = make_ndarray_format<std::int8_t>(3);
@@ -54,7 +103,11 @@ TEST_CASE("opaque_format_multi_array", "[nd][opaque_format_multi_array]") {
 		frm.add_part(afrm3);
 		
 		REQUIRE(frm.is_defined());
+		REQUIRE_FALSE(frm.is_single_part());
+		REQUIRE_FALSE(frm.is_raw());
+		REQUIRE(frm.is_multi_part());
 		REQUIRE(frm.parts_count() == 3);
+		REQUIRE_THROWS(frm.array_format());
 		
 		REQUIRE(frm.part_at(0).format == afrm1);
 		REQUIRE(frm.part_at(0).offset == 0);
@@ -108,17 +161,20 @@ TEST_CASE("opaque_format_multi_array", "[nd][opaque_format_multi_array]") {
 		frame2.part3.fill(0x11);
 		frame2.pad2.fill(7);
 		
-		REQUIRE(frm.compare_frame(
+		REQUIRE(ndarray_opaque_frame_compare(
 			static_cast<const void*>(&frame1),
-			static_cast<const void*>(&frame1)
-		));
-		REQUIRE_FALSE(frm.compare_frame(
 			static_cast<const void*>(&frame1),
-			static_cast<const void*>(&frame2)
+			frm
 		));
-		frm.copy_frame(
+		REQUIRE_FALSE(ndarray_opaque_frame_compare(
+			static_cast<const void*>(&frame1),
+			static_cast<const void*>(&frame2),
+			frm
+		));
+		ndarray_opaque_frame_copy(
 			static_cast<void*>(&frame2),
-			static_cast<const void*>(&frame1)
+			static_cast<const void*>(&frame1),
+			frm
 		);
 
 		REQUIRE(frame1 == frame2);	
@@ -126,71 +182,26 @@ TEST_CASE("opaque_format_multi_array", "[nd][opaque_format_multi_array]") {
 		REQUIRE(frame2.part2[0].pad[0] == 7);
 		REQUIRE(frame2.pad2[0] == 7);
 		
-		REQUIRE(frm.compare_frame(
+		REQUIRE(ndarray_opaque_frame_compare(
 			static_cast<const void*>(&frame1),
-			static_cast<const void*>(&frame2)
+			static_cast<const void*>(&frame2),
+			frm
 		));
-	}
-}
-
-
-TEST_CASE("opaque_format_array", "[nd][opaque_format_array]") {
-	SECTION("undefined") {
-		opaque_format_array frm;
-		REQUIRE_FALSE(frm.is_defined());
-	}
-
-	SECTION("single-part") {
-		ndarray_format afrm = make_ndarray_format<int>(100);
-		opaque_format_array frm(afrm);
-		
-		REQUIRE(frm.is_defined());
-		
-		REQUIRE(frm.frame_size() == 100 * sizeof(int));
-		REQUIRE(frm.frame_alignment_requirement() == alignof(int));
-		REQUIRE(frm.array_format() == afrm);
-		REQUIRE(frm.is_contiguous());
-		REQUIRE(frm.is_pod_contiguous());
-				
-		std::vector<int> raw1(100), raw2(100);
-		for(std::ptrdiff_t i = 0; i < 100; ++i) {
-			raw1[i] = i;
-			raw2[i] = 2*i + 1;
-		}
-
-		REQUIRE(frm.compare_frame(
-			static_cast<const void*>(raw1.data()),
-			static_cast<const void*>(raw1.data())
-		));
-		REQUIRE_FALSE(frm.compare_frame(
-			static_cast<const void*>(raw1.data()),
-			static_cast<const void*>(raw2.data())
-		));
-		frm.copy_frame(
-			static_cast<void*>(&raw2[0]),
-			static_cast<const void*>(raw1.data())
-		);
-		REQUIRE(raw1 == raw2);
-		REQUIRE(frm.compare_frame(
-			static_cast<const void*>(raw1.data()),
-			static_cast<const void*>(raw2.data())
-		));
-	}
-}
-
-
-TEST_CASE("opaque_format_raw", "[nd][opaque_format_raw]") {
-	SECTION("undefined") {
-		opaque_format_raw frm;
-		REQUIRE_FALSE(frm.is_defined());
 	}
 	
 	
 	SECTION("raw") {
-		opaque_format_raw frm(1024, 2);
+		ndarray_opaque_frame_format frm(1024, 2);
 		REQUIRE(frm.is_defined());
+		REQUIRE_FALSE(frm.is_single_part());
+		REQUIRE_FALSE(frm.is_multi_part());
+		REQUIRE(frm.is_raw());
+		REQUIRE(frm.parts_count() == 0);
 		REQUIRE(frm.frame_size() == 1024);
-		REQUIRE(frm.frame_alignment_requirement() == 2);		
+		REQUIRE(frm.frame_alignment_requirement() == 2);
+		REQUIRE_THROWS(frm.part_at(0));
+		REQUIRE_THROWS(frm.array_format());
+		
 
 		std::vector<byte> raw1(1024), raw2(1024);
 		for(std::ptrdiff_t i = 0; i < 1024; ++i) {
@@ -198,22 +209,26 @@ TEST_CASE("opaque_format_raw", "[nd][opaque_format_raw]") {
 			raw2[i] = (2*i + 1) % 255;;
 		}
 
-		REQUIRE(frm.compare_frame(
+		REQUIRE(ndarray_opaque_frame_compare(
 			static_cast<const void*>(raw1.data()),
-			static_cast<const void*>(raw1.data())
-		));
-		REQUIRE_FALSE(frm.compare_frame(
 			static_cast<const void*>(raw1.data()),
-			static_cast<const void*>(raw2.data())
+			frm
 		));
-		frm.copy_frame(
+		REQUIRE_FALSE(ndarray_opaque_frame_compare(
+			static_cast<const void*>(raw1.data()),
+			static_cast<const void*>(raw2.data()),
+			frm
+		));
+		ndarray_opaque_frame_copy(
 			static_cast<void*>(&raw2[0]),
-			static_cast<const void*>(raw1.data())
+			static_cast<const void*>(raw1.data()),
+			frm
 		);
 		REQUIRE(raw1 == raw2);
-		REQUIRE(frm.compare_frame(
+		REQUIRE(ndarray_opaque_frame_compare(
 			static_cast<const void*>(raw1.data()),
-			static_cast<const void*>(raw2.data())
+			static_cast<const void*>(raw2.data()),
+			frm
 		));
 	}
 }
