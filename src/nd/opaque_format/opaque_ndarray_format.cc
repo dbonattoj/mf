@@ -12,7 +12,7 @@ opaque_ndarray_format::opaque_ndarray_format(const ndarray_format& form) :
 }
 
 
-void opaque_ndarray_format::compare(const opaque_format& frm) {
+bool opaque_ndarray_format::compare(const opaque_format& frm) {
 	if(typeid(opaque_ndarray_format) == typeid(frm))
 		return (static_cast<const opaque_ndarray_format&>(frm) == *this);
 	else
@@ -22,6 +22,7 @@ void opaque_ndarray_format::compare(const opaque_format& frm) {
 	
 void opaque_ndarray_format::copy_frame(frame_ptr destination, const_frame_ptr origin) const {
 	ndarray_data_copy(destination, origin, array_format_);
+}
 
 
 bool opaque_ndarray_format::compare_frame(const_frame_ptr a, const_frame_ptr b) const {

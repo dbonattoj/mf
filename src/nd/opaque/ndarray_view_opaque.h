@@ -25,9 +25,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../ndarray_timed_view.h"
 #include "../../common.h"
 #include "../detail/ndarray_view_fcall.h"
-#include "../opaque_format/opaque_frame_format.h"
+#include "../opaque_format/opaque_format.h"
 #include <stdexcept>
-#include <shared_ptr>
+#include <memory>
 #include <utility>
 
 namespace mf {
@@ -52,7 +52,7 @@ public:
 	using strides_type = ndptrdiff<Dim>;
 	using span_type = ndspan<Dim>;
 	
-	using format_base_type = opaque_frame_format;
+	using format_base_type = opaque_format;
 	using format_ptr = std::shared_ptr<const format_base_type>;
 
 	constexpr static std::size_t dimension = Dim;
@@ -72,15 +72,22 @@ public:
 	ndarray_view_opaque() = default;
 	
 	ndarray_view_opaque(const ndarray_view_opaque<Dim, true>& vw) :
-		base(vw.base_view()), format_(vw.frame_format_ptr()) { }
+		base(vw.base_view()), frame_format_(vw.frame_format_ptr()) { }
 	// if Mutable == false, then this is not the copy constructor
 	// --> and then additional, implicit copy constructor gets created
 
-	ndarray_view_opaque(const base& vw, const std::shared_ptr<format_base_type>& frm) :
+	ndarray_view_opaque(const base& vw, const format_ptr& frm) :
 		base(vw), frame_format_(frm) { }
 
-	template<typename Format> ndarray_view_opaque(const base& vw, Format&& frm);
-	template<typename Format> ndarray_view_opaque(frame_ptr start, const shape_type&, const strides_type&, Format&&);
+	ndarray_view_opaque(frame_ptr start, const shape_type&, const strides_type&, const format_ptr&);
+
+	template<typename Format>
+	ndarray_view_opaque(const base& vw, Format&& frm) :
+		ndarray_view_opaque(vw, forward_make_shared(frm)) { }
+		
+	template<typename Format>
+	ndarray_view_opaque(frame_ptr start, const shape_type& shp, const strides_type& str, Format&& frm) :
+		ndarray_view_opaque(start, shp, str, forward_make_shared(frm)) { }
 
 	static ndarray_view_opaque null() { return ndarray_view_opaque(); }
 	bool is_null() const noexcept { return base::is_null(); }
@@ -114,7 +121,7 @@ public:
 	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
 
 	const format_ptr& frame_format_ptr() const noexcept { return frame_format_; }
-	const format_base_type& frame_format() const noexcept { Assert(frame_format_); return *format_; }
+	const format_base_type& frame_format() const noexcept { Assert(frame_format_); return *frame_format_; }
 	///@}
 
 	
@@ -123,7 +130,7 @@ public:
 	///@{
 	const ndarray_view_opaque& operator=(const ndarray_view_opaque& vw) const { assign(vw); return *this; }
 	
-	void assign(const ndarray_view_opaque<Dim, format_type, false>& vw) const;
+	void assign(const ndarray_view_opaque<Dim, false>& vw) const;
 	///@}
 	
 	
@@ -144,10 +151,10 @@ public:
 	
 	ndarray_view_opaque section
 	(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const {
-		return ndarray_view_opaque(base::section(start, end, steps), format_);
+		return ndarray_view_opaque(base::section(start, end, steps), frame_format_);
 	}
 	ndarray_view_opaque section(const span_type& span, const strides_type& steps = strides_type(1)) const {
-		return ndarray_view_opaque(base::section(span, steps), format_);
+		return ndarray_view_opaque(base::section(span, steps), frame_format_);
 	}
 	
 	auto slice(std::ptrdiff_t c, std::ptrdiff_t dimension) const {

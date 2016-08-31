@@ -45,13 +45,19 @@ ndarray_opaque<Dim, Allocator>::ndarray_opaque(const Allocator& allocator) :
 template<std::size_t Dim, typename Allocator> template<typename Format>
 ndarray_opaque<Dim, Allocator>::ndarray_opaque
 (const shape_type& shape, Format&& frm, std::size_t frame_padding, const Allocator& allocator) :
+	ndarray_opaque(shape, forward_make_shared(frm), frame_padding, allocator) { }
+
+
+template<std::size_t Dim, typename Allocator>
+ndarray_opaque<Dim, Allocator>::ndarray_opaque
+(const shape_type& shape, const format_ptr& frm, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	shape,
-	view_type::default_strides(shape, frm, frame_padding),
-	(frm.frame_size() + frame_padding) * shape.product(),
-	frm.frame_alignment_requirement(),
+	view_type::default_strides(shape, *frm, frame_padding),
+	(frm->frame_size() + frame_padding) * shape.product(),
+	frm->frame_alignment_requirement(),
 	allocator,
-	std::forward<Format>(frm)
+	frm
 ) {
 	construct_frames_();
 }

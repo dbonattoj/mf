@@ -24,8 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace test {
 
-opaque_format_multi_array opaque_frame_format() {
-	opaque_format_multi_array frm;
+opaque_multi_ndarray_format opaque_frame_format() {
+	opaque_multi_ndarray_format frm;
 	frm.add_part(make_ndarray_format<std::uint32_t>(7));
 	// padding needed between parts
 	frm.add_part(make_ndarray_format<std::uint64_t>(7, 2*8)); // padding between part elements
@@ -35,8 +35,8 @@ opaque_format_multi_array opaque_frame_format() {
 }
 
 
-ndarray_opaque_type<0> make_opaque_frame(int number) {
-	ndarray_opaque_type<0> arr(make_ndsize(), opaque_frame_format());
+ndarray_opaque<0> make_opaque_frame(int number) {
+	ndarray_opaque<0> arr(make_ndsize(), opaque_frame_format());
 	ndarray_view<1, std::uint32_t> part0 = from_opaque<1, std::uint32_t>(extract_part(arr, 0), make_ndsize(7));
 	ndarray_view<1, std::uint64_t> part1 = from_opaque<1, std::uint64_t>(extract_part(arr, 1), make_ndsize(7));
 	ndarray_view<1, std::uint8_t> part2  = from_opaque<1, std::uint8_t> (extract_part(arr, 2), make_ndsize(3));
@@ -47,7 +47,7 @@ ndarray_opaque_type<0> make_opaque_frame(int number) {
 }
 
 
-int opaque_frame_index(const ndarray_view_opaque_type<0>& vw, bool verify) {
+int opaque_frame_index(const ndarray_view_opaque<0>& vw, bool verify) {
 	ndarray_view<1, std::uint32_t> part0 = from_opaque<1, std::uint32_t>(extract_part(vw, 0), make_ndsize(7));
 	int number = part0[0];
 	if(verify)
@@ -56,7 +56,7 @@ int opaque_frame_index(const ndarray_view_opaque_type<0>& vw, bool verify) {
 }
 
 
-bool compare_opaque_frames(const ndarray_view_opaque_type<1>& frames, const std::vector<int>& is) {
+bool compare_opaque_frames(const ndarray_view_opaque<1>& frames, const std::vector<int>& is) {
 	if(frames.shape().front() != is.size()) return false;
 	for(std::ptrdiff_t i = 0; i < is.size(); ++i) {
 		auto expected = make_opaque_frame(is[i]);

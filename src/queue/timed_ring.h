@@ -32,7 +32,8 @@ namespace mf {
 class timed_ring : private ring {
 public:
 	using section_view_type = timed_frame_array_view;
-	using ring::frame_format_type;
+	using ring::format_base_type;
+	using ring::format_ptr;
 
 	static constexpr time_unit undefined_time = -1;
 
@@ -41,9 +42,12 @@ private:
 	time_unit end_time_ = undefined_time;
 
 public:
-	timed_ring(const frame_format_type&, std::size_t capacity, time_unit end_time = undefined_time);
-	
-	const ring::frame_format_type& frame_format() const noexcept { return ring::frame_format(); }	
+	template<typename Format> timed_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
+		timed_ring(forward_make_shared(frm), capacity, end_time) { }
+
+	timed_ring(const format_ptr&, std::size_t capacity, time_unit end_time);
+		
+	const format_base_type& frame_format() const { return ring::frame_format(); }	
 	time_unit end_time() const { return end_time_; }
 	
 	time_unit current_time() const;

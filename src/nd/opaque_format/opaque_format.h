@@ -2,7 +2,7 @@
 #define MF_NDARRAY_OPAQUE_FRAME_FORMAT_H_
 
 #include "../ndarray_format.h"
-#include <shared_ptr>
+#include <memory>
 
 namespace mf {
 

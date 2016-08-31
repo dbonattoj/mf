@@ -41,7 +41,8 @@ namespace mf {
 class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
-	using frame_format_type = timed_ring::frame_format_type;
+	using format_base_type = timed_ring::format_base_type;
+	using format_ptr = timed_ring::format_ptr;
 
 	static constexpr time_unit undefined_time = timed_ring::undefined_time;
 
@@ -70,15 +71,18 @@ private:
 	time_unit frames_reader_waits_for_() const { return std::max<time_unit>(reader_state_.load(), 0); }
 	time_unit frames_writer_waits_for_() const { return std::max<time_unit>(writer_state_.load(), 0); }
 
+	shared_ring(const format_ptr& frm, std::size_t capacity, time_unit end_time);
 
 public:
-	shared_ring(const ring::frame_format_type& frm, std::size_t capacity, time_unit end_time = undefined_time);
+	template<typename Format>
+	shared_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
+		shared_ring(forward_make_shared(frm), capacity, end_time) { }
 			
 	void break_reader();
 	void break_writer();
 	
 	
-	const ring::frame_format_type& frame_format() const noexcept { return ring_.frame_format(); }
+	const format_base_type& frame_format() const noexcept { return ring_.frame_format(); }
 
 	/// Capacity of buffer.
 	time_unit capacity() const { return ring_.capacity(); }

@@ -15,7 +15,7 @@ class opaque_multi_ndarray_format : public opaque_format {
 public:
 	struct part {
 		ndarray_format format;
-		std::ptrdiff_t offset;
+		std::size_t offset;
 	};
 	
 	friend bool operator==(const part& a, const part& b) { return (a.offset == b.offset) && (a.format == b.format); }
@@ -41,7 +41,7 @@ public:
 	
 	bool compare(const opaque_format&) override;
 
-	const part& part_at(std::ptrdiff_t index) { return parts_.at(index); }
+	const part& part_at(std::ptrdiff_t index) const { return parts_.at(index); }
 	const part& add_part(const ndarray_format& array_format);
 	
 	void copy_frame(frame_ptr destination, const_frame_ptr origin) const override;

@@ -24,6 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <string>
 #include <vector>
 #include <random>
+#include <memory>
+#include <type_traits>
 
 namespace mf {
 	
@@ -83,6 +85,13 @@ T randint(T a, T b) {
 	std::default_random_engine& engine = random_engine();
 	std::uniform_int_distribution<T> dist(a, b);
 	return dist(engine);
+}
+
+
+template<typename T>
+auto forward_make_shared(T&& t) {
+	using decayed_t = std::decay_t<T>;
+	return std::make_shared<decayed_t>(std::forward<T>(t));
 }
 
 

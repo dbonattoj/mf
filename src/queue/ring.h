@@ -29,28 +29,32 @@ namespace mf {
 /// Ring buffer.
 /** Circular buffer of *frames* of \ref ndarray_opaque_frame_format format.
  ** Derived from 1-dimensional \ref ndarray_opaque. FIFO interface to read/write frames to the ring buffer. */
-class ring : private ndarray_opaque<1, queue_frame_format_type, raw_ring_allocator> {
-	using base = ndarray_opaque<1, queue_frame_format_type, raw_ring_allocator>;
+class ring : private ndarray_opaque<1, raw_ring_allocator> {
+	using base = ndarray_opaque<1, raw_ring_allocator>;
 	
 public:
 	using section_view_type = frame_array_view;
-	using frame_format_type = queue_frame_format_type;
+	using base::format_base_type;
+	using base::format_ptr;
 
 private:
 	time_unit read_position_ = 0;
 	time_unit write_position_ = 0;
 	bool full_ = false;
 		
-	static std::size_t adjust_padding_(const frame_format_type&, std::size_t capacity); 
+	static std::size_t adjust_padding_(const format_base_type&, std::size_t capacity); 
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:
-	ring(const frame_format_type&, std::size_t capacity);
+	template<typename Format> ring(Format&& frm, std::size_t capacity) :
+		ring(forward_make_shared(frm), capacity) { }
+	
+	ring(const format_ptr&, std::size_t capacity);
 	
 	ring(const ring&) = delete;
 	ring& operator=(const ring&) = delete;
 		
-	const frame_format_type& frame_format() const noexcept { return base::format(); }
+	const format_base_type& frame_format() const noexcept { return base::frame_format(); }
 	
 	time_unit capacity() const noexcept { return base::shape().front(); }
 	

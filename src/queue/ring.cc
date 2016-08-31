@@ -27,11 +27,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 		
 
-ring::ring(const frame_format_type& frm, std::size_t capacity) :
-	base(make_ndsize(capacity), frm, adjust_padding_(frm, capacity)) { }
+ring::ring(const format_ptr& frm, std::size_t capacity) :
+	base(make_ndsize(capacity), frm, adjust_padding_(*frm, capacity)) { }
 
 
-std::size_t ring::adjust_padding_(const frame_format_type& frm, std::size_t capacity) {
+std::size_t ring::adjust_padding_(const format_base_type& frm, std::size_t capacity) {
 	std::size_t array_length = capacity; // array length, = number of frames
 	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
 	std::size_t page_size = system_page_size(); // system page size, in bytes
@@ -66,8 +66,8 @@ std::size_t ring::adjust_padding_(const frame_format_type& frm, std::size_t capa
 	std::size_t frame_padding = 0;
 	if(r != 0) frame_padding = (d - r) * a;
 	
-	Ensures(is_nonzero_multiple_of(array_length * (frame_size + frame_padding), page_size));
-	Ensures(is_nonzero_multiple_of(frame_size + frame_padding, a));
+	Assert(is_nonzero_multiple_of(array_length * (frame_size + frame_padding), page_size));
+	Assert(is_nonzero_multiple_of(frame_size + frame_padding, a));
 	return frame_padding;
 }
 
@@ -79,7 +79,7 @@ auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
 	auto new_shape = make_ndsize(duration);
 	auto new_strides = base::strides();
 	
-	return section_view_type(new_start, new_shape, new_strides, base::format());
+	return section_view_type(new_start, new_shape, new_strides, base::frame_format_ptr());
 }
 
 

@@ -23,20 +23,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 
-template<std::size_t Dim, bool Mutable> template<typename Format>
-ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque(const base& vw, Format&& frm) :
-	base(vw), frame_format_(std::make_shared<Format>(std::forward<Format>(frm))) { }
-	
-
-template<std::size_t Dim, bool Mutable> template<typename Format>
+template<std::size_t Dim, bool Mutable>
 ndarray_view_opaque<Dim, Mutable>::ndarray_view_opaque
-(frame_ptr start, const shape_type& shape, const strides_type& strides, Format&& frm) :
+(frame_ptr start, const shape_type& shape, const strides_type& strides, const format_ptr& frm) :
 	base(
 		static_cast<base_value_type*>(start),
 		ndcoord_cat(shape, 1),
-		ndcoord_cat(strides, frm.frame_size())
+		ndcoord_cat(strides, frm->frame_size())
 	),
-	frame_format_(std::make_shared<Format>(std::forward<Format>(frm))) { }
+	frame_format_(frm) { }
 
 
 template<std::size_t Dim, bool Mutable>
@@ -63,7 +58,7 @@ auto ndarray_view_opaque<Dim, Mutable>::default_strides
 template<std::size_t Dim, bool Mutable>
 bool ndarray_view_opaque<Dim, Mutable>::has_default_strides(std::ptrdiff_t minimal_dimension) const noexcept {
 	if(Dim == 0) return true;
-	if(strides().back() < format().frame_size()) return false;
+	if(strides().back() < frame_format().frame_size()) return false;
 	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
 		std::ptrdiff_t expected_stride = shape()[i + 1] * strides()[i + 1];
 		if(strides()[i] != expected_stride) return false;
@@ -100,14 +95,14 @@ auto ndarray_view_opaque<Dim, Mutable>::at(const coordinates_type& coord) const 
 
 
 template<std::size_t Dim, bool Mutable>
-void ndarray_view_opaque<Dim, Mutable>::assign(const ndarray_view_opaque<Dimc, false>& vw) const {
+void ndarray_view_opaque<Dim, Mutable>::assign(const ndarray_view_opaque<Dim, false>& vw) const {
 	Assert(!is_null() && !vw.is_null());
 	Assert(vw.frame_format().compare(frame_format()));
 	Assert(vw.shape() == shape());
 	
-	if(format_.is_contiguous_pod() && has_default_strides_without_padding() && vw.strides() == strides()) {
+	if(frame_format().is_contiguous_pod() && has_default_strides_without_padding() && vw.strides() == strides()) {
 		// directly copy entire memory segment
-		std::memcpy(start(), vw.start(), frame_format_.frame_size() * size());
+		std::memcpy(start(), vw.start(), frame_format().frame_size() * size());
 	} else {
 		// copy frame-by-frame, using copy function of frame format
 		auto it = base_view().begin();
@@ -126,9 +121,9 @@ bool ndarray_view_opaque<Dim, Mutable>::compare(const ndarray_view_opaque& vw) c
 	Assert(vw.frame_format().compare(frame_format()));
 	Assert(vw.shape() == shape());
 	
-	if(format_.is_pod_contiguous() && has_default_strides_without_padding() && vw.strides() == strides()) {
+	if(frame_format().is_pod_contiguous() && has_default_strides_without_padding() && vw.strides() == strides()) {
 		// directly compare entire memory segment
-		return (std::memcmp(start(), vw.start(), format_.frame_size() * size()) == 0);
+		return (std::memcmp(start(), vw.start(), frame_format().frame_size() * size()) == 0);
 	} else {
 		// compare frame-by-frame, using compare function of frame format
 		auto it = base_view().begin();

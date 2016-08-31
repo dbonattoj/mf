@@ -1,4 +1,5 @@
 #include "opaque_multi_ndarray_format.h"
+#include "opaque_ndarray_format.h"
 
 namespace mf {
 	
@@ -22,7 +23,7 @@ void opaque_multi_ndarray_format::update_frame_size_with_end_padding_() {
 
 
 auto opaque_multi_ndarray_format::add_part(const ndarray_format& new_part_format) -> const part& {
-	part new_part { 0, new_part_format };
+	part new_part { new_part_format, 0 };
 	
 	if(parts_.size() > 0) {
 		const part& previous_part = parts_.back();
@@ -48,7 +49,7 @@ auto opaque_multi_ndarray_format::add_part(const ndarray_format& new_part_format
 }
 
 	
-auto opaque_multi_ndarray_format::extract_part(std::ptrdiff_t index) const override -> extracted_part {
+auto opaque_multi_ndarray_format::extract_part(std::ptrdiff_t index) const -> extracted_part {
 	const auto& prt = part_at(index);	
 	return extracted_part {
 		std::make_shared<opaque_ndarray_format>(prt.format),

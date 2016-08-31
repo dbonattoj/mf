@@ -22,19 +22,17 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_TESTSUPPORT_NDARRAY_OPAQUE_H_
 
 #include <mf/nd/opaque/ndarray_opaque.h>
-#include <mf/nd/opaque/opaque_format_multi_array.h>
+#include <mf/nd/opaque/ndarray_view_opaque.h>
+#include <mf/nd/opaque_format/opaque_multi_ndarray_format.h>
 #include <sstream>
 #include <vector>
 
 namespace mf { namespace test {
 
-template<std::size_t Dim> using ndarray_opaque_type = ndarray_opaque<Dim, opaque_format_multi_array>;
-template<std::size_t Dim> using ndarray_view_opaque_type = ndarray_view_opaque<Dim, opaque_format_multi_array>;
-
-opaque_format_multi_array opaque_frame_format();
-ndarray_opaque_type<0> make_opaque_frame(int i);
-int opaque_frame_index(const ndarray_view_opaque_type<0>&, bool verify = false);
-bool compare_opaque_frames(const ndarray_view_opaque_type<1>& frames, const std::vector<int>& is);
+opaque_multi_ndarray_format opaque_frame_format();
+ndarray_opaque<0> make_opaque_frame(int i);
+int opaque_frame_index(const ndarray_view_opaque<0>&, bool verify = false);
+bool compare_opaque_frames(const ndarray_view_opaque<1>& frames, const std::vector<int>& is);
 
 
 }}

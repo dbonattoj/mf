@@ -19,7 +19,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "../nd/ndarray_view_cast.h"
-#include "../nd/opaque/ndarray_view_opaque_cast.h"
 #include "../flow/graph.h"
 #include <algorithm>
 

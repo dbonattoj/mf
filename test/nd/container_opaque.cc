@@ -20,7 +20,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <catch.hpp>
 #include <mf/nd/opaque/ndarray_view_opaque.h>
-#include <mf/nd/opaque/ndarray_timed_view_opaque.h>
 #include <mf/nd/opaque/ndarray_opaque.h>
 #include "../support/ndarray_opaque.h"
 
@@ -41,7 +40,7 @@ static void verify_ndarray_memory_(ndarray_opaque<2>& arr) {
 
 
 TEST_CASE("ndarray_opaque", "[nd][ndarray_opaque]") {
-	ndarray_opaque_frame_format frm = opaque_frame_format();
+	auto frm = opaque_frame_format();
 
 	constexpr std::ptrdiff_t pad = 64;
 	ndsize<2> shape{3, 4};

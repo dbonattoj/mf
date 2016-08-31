@@ -26,7 +26,7 @@ namespace mf {
 constexpr time_unit timed_ring::undefined_time;
 	
 
-timed_ring::timed_ring(const frame_format_type& frm, std::size_t capacity, time_unit end_time) :
+timed_ring::timed_ring(const format_ptr& frm, std::size_t capacity, time_unit end_time) :
 	ring(frm, capacity),
 	last_write_time_(-1),
 	end_time_(end_time) { }

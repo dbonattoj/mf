@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 shared_ring::shared_ring
-(const ring::frame_format_type& frm, std::size_t capacity, time_unit end_time) :
+(const format_ptr& frm, std::size_t capacity, time_unit end_time) :
 	ring_(frm, capacity, end_time)
 { 
 	reader_keep_waiting_.test_and_set();

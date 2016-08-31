@@ -39,12 +39,12 @@ private:
 	void destruct_frames_();
 
 public:
-	using typename base::format_base_type;
-	using typename base::format_ptr;
 	using typename base::view_type;
 	using typename base::const_view_type;
 	using typename base::shape_type;
 	using typename base::strides_type;
+	using format_base_type = typename view_type::format_base_type;
+	using format_ptr = typename view_type::format_ptr;
 	
 	/// \name Constructor
 	///@{
@@ -57,6 +57,11 @@ public:
 	template<typename Format>
 	ndarray_opaque(const shape_type&, Format&&, std::size_t frame_padding = 0, const Allocator& = Allocator());
 	
+	/// Construct empty \ref ndarray_opaque with given shape and frame format.
+	/** Gets default strides, optionally with specified frame padding. Memory is allocated, and frames are *constructed*
+	 ** is required by the format. */
+	ndarray_opaque(const shape_type&, const format_ptr&, std::size_t frame_padding = 0, const Allocator& = Allocator());
+
 	/// Construct \ref ndarray_opaque with shape and format, and copy of elements from a \ref ndarray_view_opaque.
 	/** Gets default strides, optionally with specified frame padding. Does not take strides from \a vw.
 	 ** Allocates memory, and *constructs* frames is required by the format. Then copies the frames. */
@@ -82,7 +87,7 @@ public:
 	/// Assign shape and elements from \ref vw.
 	/** Resets to default strides, optionally with specified frame padding. Reallocates memory if necessary.
 	 ** \a vw must have same frame format as this. 
-	 ** If required by format, *destructs* old frames and, and *constructs* new frames before copying. */fa
+	 ** If required by format, *destructs* old frames and, and *constructs* new frames before copying. */
 	void assign(const const_view_type& vw, std::size_t frame_padding = 0);
 	
 	/// Assign shape and elements from \ref vw.
@@ -103,7 +108,7 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const format_ptr& frame_format_ptr() const noexcept { return frame_format_; }
+	const format_ptr& frame_format_ptr() const noexcept { return base::get_view_().frame_format_ptr(); }
 	const format_base_type& frame_format() const noexcept { return base::get_view_().frame_format(); }
 	///@}
 };
