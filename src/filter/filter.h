@@ -47,7 +47,7 @@ class filter : public processing_node_handler {
 public:
 	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
-	template<typename Value> using parameter_type = filter_parameter<Value>;
+	//template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = filter_job;
 	
 	static const std::string default_filter_name;

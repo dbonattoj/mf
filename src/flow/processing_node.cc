@@ -164,8 +164,8 @@ const processing_node_output_channel& processing_node::output_channel_at(std::pt
 }
 
 
-ndarray_opaque_frame_format processing_node::output_frame_format_() const {
-	ndarray_opaque_frame_format frm;
+node_frame_format processing_node::output_frame_format_() const {
+	node_frame_format frm;
 	for(auto&& chan : output_channels_) {
 		const ndarray_format& channel_frame_format = chan->frame_format();
 		Assert(channel_frame_format.is_defined());

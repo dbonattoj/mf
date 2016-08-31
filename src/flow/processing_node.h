@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_input.h"
 #include "node_output.h"
 #include "../nd/ndarray_format.h"
+#include "node_frame_format.h"
 #include <memory>
 #include <utility>
 #include <iostream>
@@ -136,7 +137,7 @@ protected:
 	virtual timed_frame_array_view output_begin_read_(time_unit duration) = 0;
 	virtual void output_end_read_(time_unit duration) = 0;
 
-	ndarray_opaque_frame_format output_frame_format_() const;
+	node_frame_format output_frame_format_() const;
 
 public:
 	processing_node(graph&, bool with_output);

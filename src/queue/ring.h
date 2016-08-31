@@ -29,12 +29,12 @@ namespace mf {
 /// Ring buffer.
 /** Circular buffer of *frames* of \ref ndarray_opaque_frame_format format.
  ** Derived from 1-dimensional \ref ndarray_opaque. FIFO interface to read/write frames to the ring buffer. */
-class ring : private ndarray_opaque<1, raw_ring_allocator> {
-	using base = ndarray_opaque<1, raw_ring_allocator>;
+class ring : private ndarray_opaque<1, queue_frame_format_type, raw_ring_allocator> {
+	using base = ndarray_opaque<1, queue_frame_format_type, raw_ring_allocator>;
 	
 public:
 	using section_view_type = frame_array_view;
-	using frame_format_type = ndarray_opaque_frame_format;
+	using frame_format_type = queue_frame_format_type;
 
 private:
 	time_unit read_position_ = 0;

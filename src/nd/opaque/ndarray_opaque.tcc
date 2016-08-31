@@ -23,82 +23,88 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 
-template<std::size_t Dim, typename Format, typename Allocator>
-void ndarray_opaque<Dim, Format, Allocator>::construct_frames_() {
-	// TODO iterate and construct/descruct frames
-}
-
-
-template<std::size_t Dim, typename Format, typename Allocator>
-void ndarray_opaque<Dim, Format, Allocator>::destruct_frames_() {
+template<std::size_t Dim, typename Allocator>
+void ndarray_opaque<Dim, Allocator>::construct_frames_() {
+	if(frame_format().is_pod()) return;
 	
 }
 
 
-template<std::size_t Dim, typename Format, typename Allocator>
-ndarray_opaque<Dim, Format, Allocator>::ndarray_opaque(const Allocator& allocator) :
+template<std::size_t Dim, typename Allocator>
+void ndarray_opaque<Dim, Allocator>::destruct_frames_() {
+	if(frame_format().is_pod()) return;
+	
+}
+
+
+template<std::size_t Dim, typename Allocator>
+ndarray_opaque<Dim, Allocator>::ndarray_opaque(const Allocator& allocator) :
 	base(allocator) { }
 
 
-template<std::size_t Dim, typename Format, typename Allocator>
-ndarray_opaque<Dim, Format, Allocator>::ndarray_opaque
-(const shape_type& shape, const format_type& frm, std::size_t frame_padding, const Allocator& allocator) :
+template<std::size_t Dim, typename Allocator> template<typename Format>
+ndarray_opaque<Dim, Allocator>::ndarray_opaque
+(const shape_type& shape, Format&& frm, std::size_t frame_padding, const Allocator& allocator) :
 base(
 	shape,
 	view_type::default_strides(shape, frm, frame_padding),
 	(frm.frame_size() + frame_padding) * shape.product(),
 	frm.frame_alignment_requirement(),
 	allocator,
-	frm
+	std::forward<Format>(frm)
 ) {
 	construct_frames_();
 }
 
 	
-template<std::size_t Dim, typename Format, typename Allocator>
-ndarray_opaque<Dim, Format, Allocator>::ndarray_opaque
+template<std::size_t Dim, typename Allocator>
+ndarray_opaque<Dim, Allocator>::ndarray_opaque
 (const const_view_type& vw, std::size_t frame_padding, const Allocator& allocator) :
-base(
-	vw.shape(),
-	view_type::default_strides(vw.shape(), vw.format(), frame_padding),
-	(vw.format().frame_size() + frame_padding) * vw.shape().product(),
-	vw.format().frame_alignment_requirement(),
-	allocator,
-	vw.format()
-) {
+	base(allocator)
+{
+	if(vw.is_null()) return;
+	base::reset(
+		vw.shape(),
+		view_type::default_strides(vw.shape(), vw.frame_format(), frame_padding),
+		(vw.frame_format().frame_size() + frame_padding) * vw.shape().product(),
+		vw.format().frame_alignment_requirement(),
+		vw.frame_format_ptr()
+	);
 	construct_frames_();
-	if(! vw.is_null()) base::view().assign(vw);
+	base::view().assign(vw);
 }
 
 	
-template<std::size_t Dim, typename Format, typename Allocator>
-ndarray_opaque<Dim, Format, Allocator>::ndarray_opaque(const ndarray_opaque& arr) :
-base(
-	arr.shape(),
-	arr.strides(),
-	arr.allocated_byte_size(),
-	arr.format().frame_alignment_requirement(),
-	arr.get_allocator(),
-	arr.format()
-) {
+template<std::size_t Dim, typename Allocator>
+ndarray_opaque<Dim, Allocator>::ndarray_opaque(const ndarray_opaque& arr) :
+	base(arr.get_allocator())
+{
+	if(arr.is_null()) return;
+	base::reset(
+		arr.shape(),
+		arr.strides(),
+		arr.allocated_byte_size(),
+		arr.frame_format().frame_alignment_requirement(),
+		arr.frame_format()
+	);
 	construct_frames_();
-	if(!arr.is_null()) base::view().assign(arr.cview());
+	base::view().assign(arr.cview());
 }
 	
 
-template<std::size_t Dim, typename Format, typename Allocator>
-ndarray_opaque<Dim, Format, Allocator>::ndarray_opaque(ndarray_opaque&& arr) :
-base(std::move(arr)) { }
+template<std::size_t Dim, typename Allocator>
+ndarray_opaque<Dim, Allocator>::ndarray_opaque(ndarray_opaque&& arr) :
+	base(std::move(arr)) { }
 
 
-template<std::size_t Dim, typename Format, typename Allocator>
-ndarray_opaque<Dim, Format, Allocator>::~ndarray_opaque() {
+template<std::size_t Dim, typename Allocator>
+ndarray_opaque<Dim, Allocator>::~ndarray_opaque() {
 	destruct_frames_();
 }
 	
 
-template<std::size_t Dim, typename Format, typename Allocator>
-void ndarray_opaque<Dim, Format, Allocator>::assign(const const_view_type& vw, std::size_t frame_padding) {
+template<std::size_t Dim, typename Allocator>
+void ndarray_opaque<Dim, Allocator>::assign(const const_view_type& vw, std::size_t frame_padding) {
 	destruct_frames_();
 	if(vw.is_null()) {
 		base::reset_();
@@ -116,8 +122,8 @@ void ndarray_opaque<Dim, Format, Allocator>::assign(const const_view_type& vw, s
 }
 	
 
-template<std::size_t Dim, typename Format, typename Allocator>
-auto ndarray_opaque<Dim, Format, Allocator>::operator=(const ndarray_opaque& arr) -> ndarray_opaque& {
+template<std::size_t Dim, typename Allocator>
+auto ndarray_opaque<Dim, Allocator>::operator=(const ndarray_opaque& arr) -> ndarray_opaque& {
 	if(&arr == this) return *this;
 	destruct_frames_();
 	if(arr.is_null()) {
@@ -137,8 +143,8 @@ auto ndarray_opaque<Dim, Format, Allocator>::operator=(const ndarray_opaque& arr
 }
 
 
-template<std::size_t Dim, typename Format, typename Allocator>
-auto ndarray_opaque<Dim, Format, Allocator>::operator=(ndarray_opaque&& arr) -> ndarray_opaque& {
+template<std::size_t Dim, typename Allocator>
+auto ndarray_opaque<Dim, Allocator>::operator=(ndarray_opaque&& arr) -> ndarray_opaque& {
 	base::operator=(std::move(arr));
 	return *this;
 }

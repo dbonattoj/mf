@@ -24,13 +24,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../nd/opaque/ndarray_view_opaque.h"
 #include "../nd/opaque/ndarray_timed_view_opaque.h"
 #include "../nd/opaque/ndarray_opaque.h"
-#include "../nd/opaque/ndarray_opaque_frame_format.h"
+#include "../nd/opaque/opaque_format_multi_array.h"
 
 namespace mf {
 
-using timed_frame_array_view = ndarray_timed_view_opaque<1>;
-using frame_array_view = ndarray_view_opaque<1>;
-using frame_view = ndarray_view_opaque<0>;
+using queue_frame_format_type = opaque_format_multi_array;
+
+using timed_frame_array_view = ndarray_timed_view_opaque<1, queue_frame_format_type>;
+using frame_array_view = ndarray_view_opaque<1, queue_frame_format_type>;
+using frame_view = ndarray_view_opaque<0, queue_frame_format_type>;
 
 }
 

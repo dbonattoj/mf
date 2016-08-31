@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include "node_parameter_holder.h"
 
 namespace mf { namespace flow {
 

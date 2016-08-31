@@ -28,8 +28,37 @@ namespace mf {
 
 
 /// \ref ndarray_view_opaque with absolute time indices associated to first (opaque) dimension.
-template<std::size_t Dim, typename Format = opaque_format_array, bool Mutable = true>
-using ndarray_timed_view_opaque = detail::ndarray_timed_view_derived<ndarray_view_opaque<Dim, Format, Mutable>>;
+template<std::size_t Dim, bool Mutable = true>
+using ndarray_timed_view_opaque = detail::ndarray_timed_view_derived<ndarray_view_opaque<Dim, Mutable>>;
+
+
+template<std::size_t Dim, bool Mutable>
+auto extract_part(const ndarray_timed_view_opaque<Dim, Mutable>& vw, std::ptrdiff_t part_index) {
+	auto non_timed_vw = extract_part(vw.non_timed(), part_index);
+	return ndarray_timed_view_opaque<Dim, Mutable>(non_timed_vw, vw.start_time());
+}
+
+
+
+template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>
+auto to_opaque(const ndarray_timed_view<Concrete_dim, Concrete_elem>& concrete_view) {
+	auto non_timed_opaque = to_opaque(concrete_view.non_timed());
+	constexpr bool opaque_mutable = ! std::is_const<Concrete_elem>::value;
+	using opaque_view_type = ndarray_timed_view_opaque<Opaque_dim, opaque_mutable>;
+	return opaque_view_type(non_timed_opaque, concrete_view.start_time());
+}
+
+
+
+template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Opaque_dim, bool Opaque_mutable>
+auto from_opaque(
+	const ndarray_timed_view_opaque<Opaque_dim, Opaque_mutable>& opaque_view,
+	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
+) {
+	auto non_timed_concrete = from_opaque<Concrete_dim, Concrete_elem>(opaque_view.non_timed(), frame_shape);
+	return ndarray_timed_view<Concrete_dim, Concrete_elem>(non_timed_concrete, opaque_view.start_time());
+}
+
 
 
 }

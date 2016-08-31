@@ -21,7 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_NDARRAY_OPAQUE_H_
 #define MF_NDARRAY_OPAQUE_H_
 
-#include "opaque_format_array.h"
 #include "ndarray_view_opaque.h"
 #include "../detail/ndarray_wrapper.h"
 #include "../../os/memory.h"
@@ -30,17 +29,18 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Container for \ref ndarray_view_opaque.
-template<std::size_t Dim, typename Format = opaque_format_array, typename Allocator = raw_allocator>
+template<std::size_t Dim, typename Allocator = raw_allocator>
 class ndarray_opaque :
-public detail::ndarray_wrapper<ndarray_view_opaque<Dim, Format, true>, ndarray_view_opaque<Dim, Format, false>, Allocator> {
-	using base = detail::ndarray_wrapper<ndarray_view_opaque<Dim, Format, true>, ndarray_view_opaque<Dim, Format, false>, Allocator>;
+public detail::ndarray_wrapper<ndarray_view_opaque<Dim, true>, ndarray_view_opaque<Dim, false>, Allocator> {
+	using base = detail::ndarray_wrapper<ndarray_view_opaque<Dim, true>, ndarray_view_opaque<Dim, false>, Allocator>;
 
 private:
 	void construct_frames_();
 	void destruct_frames_();
 
 public:
-	using typename base::format_type;
+	using typename base::format_base_type;
+	using typename base::format_ptr;
 	using typename base::view_type;
 	using typename base::const_view_type;
 	using typename base::shape_type;
@@ -52,22 +52,27 @@ public:
 	explicit ndarray_opaque(const Allocator& = Allocator());
 	
 	/// Construct empty \ref ndarray_opaque with given shape and frame format.
-	/** Has default strides, optionally with specified frame padding. */
-	ndarray_opaque
-	(const shape_type& shape, const format_type& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
+	/** Gets default strides, optionally with specified frame padding. Memory is allocated, and frames are *constructed*
+	 ** is required by the format. */
+	template<typename Format>
+	ndarray_opaque(const shape_type&, Format&&, std::size_t frame_padding = 0, const Allocator& = Allocator());
 	
-	/// Construct \ref ndarray_opaque with shape and copy of elements from a \ref ndarray_view_opaque.
-	/** Has default strides, optionally with specified frame padding. Does not take strides from \a vw. */
+	/// Construct \ref ndarray_opaque with shape and format, and copy of elements from a \ref ndarray_view_opaque.
+	/** Gets default strides, optionally with specified frame padding. Does not take strides from \a vw.
+	 ** Allocates memory, and *constructs* frames is required by the format. Then copies the frames. */
 	explicit ndarray_opaque(const const_view_type& vw, std::size_t frame_padding = 0, const Allocator& = Allocator());
 	
 	/// Copy-construct from another \ref ndarray_opaque of same type.
-	/** Takes strides from \a arr. */
-	ndarray_opaque(const ndarray_opaque& arr);
+	/** Takes strides from \a arr.
+	 ** Allocates memory, and *constructs* frames is required by the format. Then copies the frames. */
+	ndarray_opaque(const ndarray_opaque&);
 	
 	/// Move-construct from another \ref ndarray_opaque of same type.
-	/** Takes strides from \a arr and sets \a arr to null. */
-	ndarray_opaque(ndarray_opaque&& arr);
+	/** Takes strides from \a arr and sets \a arr to null. Does not allocate, deallocate or copy memory. */
+	ndarray_opaque(ndarray_opaque&&);
 	
+	/// Destruct the \ref ndarray_opaque.
+	/** Deallocates memory, and *destructs* frames is required by the format. */
 	~ndarray_opaque();
 	///@}
 	
@@ -75,7 +80,9 @@ public:
 	/// \name Deep assignment
 	///@{
 	/// Assign shape and elements from \ref vw.
-	/** Resets to default strides, optionally with specified frame padding. Reallocates memory if necessary. */
+	/** Resets to default strides, optionally with specified frame padding. Reallocates memory if necessary.
+	 ** \a vw must have same frame format as this. 
+	 ** If required by format, *destructs* old frames and, and *constructs* new frames before copying. */fa
 	void assign(const const_view_type& vw, std::size_t frame_padding = 0);
 	
 	/// Assign shape and elements from \ref vw.
@@ -84,19 +91,20 @@ public:
 		{ assign(vw); return *this; }
 
 	/// Copy-assign from another \ref ndarray_opaque.
-	/** Takes strides from \a arr */
+	/** Takes strides and format from \a arr. Reallocates memory if necessary.
+	 ** If required by formats, *destructs* old frames and, and *constructs* new frames before copying. */
 	ndarray_opaque& operator=(const ndarray_opaque& arr);
 
 	/// Move-assign from another \ref ndarray_opaque.
-	/** Takes strides from \a arr and sets \a arr to null. */
+	/** Takes strides and format from \a arr and sets \a arr to null. Does not allocate, deallocate or copy memory. */
 	ndarray_opaque& operator=(ndarray_opaque&& arr);
 	///@}
 	
 	
 	/// \name Attributes
 	///@{
-	const format_type& frame_format() const noexcept { return base::get_view_().format(); }
-	[[deprecated]] const format_type& format() const noexcept { return base::get_view_().format(); }
+	const format_ptr& frame_format_ptr() const noexcept { return frame_format_; }
+	const format_base_type& frame_format() const noexcept { return base::get_view_().frame_format(); }
 	///@}
 };
 

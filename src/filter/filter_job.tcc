@@ -49,7 +49,7 @@ template<typename Output> decltype(auto) filter_job::out(Output& pt) {
 	
 	std::ptrdiff_t index = pt.index();
 	
-	frame_view gen_vw = extract_part(node_job_.output_view(), index);
+	auto gen_vw = extract_part(node_job_.output_view(), index);
 	return from_opaque<dimension, elem_type>(
 		gen_vw,
 		pt.frame_shape()

@@ -4,7 +4,7 @@
 #include <functional>
 
 namespace mf { namespace flow {
-
+/*
 template<typename Value>
 class filter_parameter {
 public:
@@ -44,7 +44,7 @@ public:
 private:
 	parameter_type* referenced_parameter_;
 };
-
+*/
 
 }}
 
