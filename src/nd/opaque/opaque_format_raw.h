@@ -26,7 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Format of ndarray opaque frame the consists raw data with a given size and alignment.
-class ndarray_opaque_format_raw {
+class opaque_format_raw {
 public:
 	using frame_ptr = void*;
 	using const_frame_ptr = const void*;
@@ -36,12 +36,12 @@ private:
 	std::size_t frame_alignment_requirement_ = 1;
 
 public:
-	ndarray_opaque_format_raw() = default;
-	explicit ndarray_opaque_format_raw(std::size_t frame_size, std::size_t frame_alignment_requirement = 1) :
+	opaque_format_raw() = default;
+	explicit opaque_format_raw(std::size_t frame_size, std::size_t frame_alignment_requirement = 1) :
 		frame_size_(frame_size), frame_alignment_requirement_(frame_alignment_requirement) { }
 	
-	ndarray_opaque_format_raw(const ndarray_opaque_format_raw&) = default;
-	ndarray_opaque_format_raw& operator=(const ndarray_opaque_format_raw&) = default;
+	opaque_format_raw(const opaque_format_raw&) = default;
+	opaque_format_raw& operator=(const opaque_format_raw&) = default;
 
 	bool is_defined() const noexcept { return (frame_size_ > 0); }
 	std::size_t frame_size() const noexcept { return frame_size_; }

@@ -18,20 +18,20 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "ndarray_opaque_format_multi_array.h"
+#include "opaque_format_multi_array.h"
 #include "../../utility/misc.h"
 #include <cstring>
 
 namespace mf {
 	
-ndarray_opaque_format_multi_array::ndarray_opaque_format_multi_array() :
+opaque_format_multi_array::opaque_format_multi_array() :
 	frame_size_without_end_padding_(0),
 	frame_alignment_requirement_(1),
 	frame_size_with_end_padding_(0),
 	contiguous_(true) { }
 
 
-void ndarray_opaque_format_multi_array::update_frame_size_with_end_padding_() {
+void opaque_format_multi_array::update_frame_size_with_end_padding_() {
 	if(is_multiple_of(frame_size_without_end_padding_, frame_alignment_requirement_)) {
 		frame_size_with_end_padding_ = frame_size_without_end_padding_;
 	} else {
@@ -42,7 +42,7 @@ void ndarray_opaque_format_multi_array::update_frame_size_with_end_padding_() {
 }
 
 
-auto ndarray_opaque_format_multi_array::add_part(const ndarray_format& new_part_format) -> const part& {
+auto opaque_format_multi_array::add_part(const ndarray_format& new_part_format) -> const part& {
 	part new_part { 0, new_part_format };
 	
 	if(parts_.size() > 0) {
@@ -69,24 +69,18 @@ auto ndarray_opaque_format_multi_array::add_part(const ndarray_format& new_part_
 }
 	
 
-bool operator==(const ndarray_opaque_format_multi_array& a, const ndarray_opaque_format_multi_array& b) {
-	return
-		(a.parts_ == b.parts_) &&
-		(a.frame_size_without_end_padding_ == b.frame_size_without_end_padding_) &&
-		(a.frame_alignment_requirement_ == b.frame_alignment_requirement_);
+bool operator==(const opaque_format_multi_array& a, const opaque_format_multi_array& b) {
+	return (a.parts_ == b.parts_);
 }
 
 
-bool operator!=(const ndarray_opaque_format_multi_array& a, const ndarray_opaque_format_multi_array& b) {
-	return
-		(a.parts_ != b.parts_) ||
-		(a.frame_size_without_end_padding_ != b.frame_size_without_end_padding_) ||
-		(a.frame_alignment_requirement_ != b.frame_alignment_requirement_); // TODO check (only parts enough?)
+bool operator!=(const opaque_format_multi_array& a, const opaque_format_multi_array& b) {
+	return (a.parts_ != b.parts_);
 }
 
 
 
-void ndarray_opaque_format_multi_array::copy_frame(frame_ptr destination, const_frame_ptr origin) const {
+void opaque_format_multi_array::copy_frame(frame_ptr destination, const_frame_ptr origin) const {
 	if(is_contiguous()) {
 		std::memcpy(destination, origin, frame_size());
 	} else {
@@ -102,7 +96,7 @@ void ndarray_opaque_format_multi_array::copy_frame(frame_ptr destination, const_
 }
 	
 
-bool ndarray_opaque_format_multi_array::compare_frame(const_frame_ptr a, const_frame_ptr b) const {
+bool opaque_format_multi_array::compare_frame(const_frame_ptr a, const_frame_ptr b) const {
 	if(is_contiguous()) {
 		return (std::memcmp(a, b, frame_size()) == 0);
 	} else {
@@ -120,10 +114,10 @@ bool ndarray_opaque_format_multi_array::compare_frame(const_frame_ptr a, const_f
 }
 	
 
-void ndarray_opaque_format_multi_array::construct_frame(frame_ptr) const { }
+void opaque_format_multi_array::construct_frame(frame_ptr) const { }
 
 	
-void ndarray_opaque_format_multi_array::destruct_frame(frame_ptr) const { }
+void opaque_format_multi_array::destruct_frame(frame_ptr) const { }
 
 
 }

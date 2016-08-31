@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_NDARRAY_VIEW_OPAQUE_H_
 #define MF_NDARRAY_VIEW_OPAQUE_H_
 
-#include "ndarray_opaque_frame_format.h"
+#include "opaque_format_array.h"
 #include "../ndarray_view.h"
 #include "../ndarray_timed_view.h"
 #include "../../common.h"
@@ -37,7 +37,7 @@ namespace mf {
  ** covers only one part, using extract_part().
  ** With single-part format, the \ref ndarray_view_opaque is a type-erased \ref ndarray_view: It can be casted to/from
  ** a concrete \ref ndarray_view using from_opaque() and to_opaque(). */
-template<std::size_t Dim, typename Format = ndarray_opaque_format_array, bool Mutable = true>
+template<std::size_t Dim, typename Format = opaque_format_array, bool Mutable = true>
 class ndarray_view_opaque : private ndarray_view<Dim + 1, std::conditional_t<Mutable, byte, const byte>> {
 	using base_value_type = std::conditional_t<Mutable, byte, const byte>;
 	using base = ndarray_view<Dim + 1, base_value_type>;
@@ -173,27 +173,6 @@ public:
 	}
 	///@}
 };
-
-/*
-
-template<std::size_t Dim, bool Mutable>
-ndarray_view_opaque<Dim, Mutable> extract_part(const ndarray_view_opaque<Dim, Mutable>&, std::ptrdiff_t part_index);
-
-
-/// Cast input \ref ndarray_view to opaque \ref ndarray_view_opaque with given dimension.
-template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>
-auto to_opaque(const ndarray_view<Concrete_dim, Concrete_elem>& concrete_view);
-
-
-
-/// Cast input \ref ndarray_view_opaque to concrete \ref ndarray_view with given dimension, frame shape and element type.
-template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Opaque_dim, bool Opaque_mutable>
-auto from_opaque(
-	const ndarray_view_opaque<Opaque_dim, Opaque_mutable>& opaque_view,
-	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
-);
-
-*/
 
 }
 

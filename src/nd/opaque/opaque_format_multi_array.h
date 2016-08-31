@@ -18,16 +18,22 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_NDARRAY_OPAQUE_FRAME_FORMAT_H_
-#define MF_NDARRAY_OPAQUE_FRAME_FORMAT_H_
+#ifndef MF_NDARRAY_OPAQUE_FORMAT_MULTI_ARRAY_H_
+#define MF_NDARRAY_OPAQUE_FORMAT_MULTI_ARRAY_H_
 
 #include "../ndarray_format.h"
 #include <vector>
 
 namespace mf {
 
-class ndarray_opaque_frame_format {
+/// Format of ndarray opaque frame composed of one or multiple arrays with different \ref ndarray_format.
+/** Frame consists of multiple arrays after each other. Necessary padding is inserted between arrays and at the end of
+ ** the frames, to satisfy alignment requirement of the parts. */
+class opaque_format_multi_array {
 public:
+	using frame_ptr = void*;
+	using const_frame_ptr = const void*;
+
 	struct part {
 		std::ptrdiff_t offset;
 		ndarray_format format;
@@ -47,40 +53,30 @@ private:
 	void update_frame_size_with_end_padding_();
 
 public:
-	ndarray_opaque_frame_format();
-	explicit ndarray_opaque_frame_format(std::size_t frame_size, std::size_t frame_alignment_requirement = 1);
-	explicit ndarray_opaque_frame_format(const ndarray_format&);
+	opaque_format_multi_array();
 	
-	ndarray_opaque_frame_format(const ndarray_opaque_frame_format&) = default;
-	ndarray_opaque_frame_format& operator=(const ndarray_opaque_frame_format&) = default;
+	opaque_format_multi_array(const opaque_format_multi_array&) = default;
+	opaque_format_multi_array& operator=(const opaque_format_multi_array&) = default;
 	
+	std::size_t parts_count() const { Assert(is_defined()); return parts_.size(); }
+	const part& part_at(std::ptrdiff_t part_index) const { Assert(is_defined()); return parts_.at(part_index); }
 	const part& add_part(const ndarray_format& format);
 	
+	bool is_contiguous() const { Assert(is_defined()); return contiguous_; }
+
+	bool is_defined() const noexcept { return (frame_size_without_end_padding_ > 0); }
 	std::size_t frame_size() const noexcept { return frame_size_with_end_padding_; }
 	std::size_t frame_alignment_requirement() const noexcept { return frame_alignment_requirement_; }
-	
-	bool is_defined() const noexcept { return (frame_size_without_end_padding_ > 0); }
-	bool is_raw() const noexcept { return is_defined() && (parts_.size() == 0); }
-		
-	std::size_t parts_count() const { Assert(is_defined()); return parts_.size(); }
-	bool is_multi_part() const { return (parts_count() > 1); }
-	const part& part_at(std::ptrdiff_t part_index) const { Assert(is_defined()); return parts_.at(part_index); }
+	bool is_contiguous_pod() { return is_contiguous(); }
 
-	bool is_single_part() const { return (parts_count() == 1); }
-	const ndarray_format& array_format() const { Assert_crit(is_single_part()); return parts_.front().format; }
+	void copy_frame(frame_ptr destination, const_frame_ptr origin) const;
+	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const;
+	void construct_frame(frame_ptr) const;
+	void destruct_frame(frame_ptr) const;
 	
-	bool is_contiguous() const { Assert(is_defined()); return contiguous_; }
-	
-	friend bool operator==(const ndarray_opaque_frame_format&, const ndarray_opaque_frame_format&);
-	friend bool operator!=(const ndarray_opaque_frame_format&, const ndarray_opaque_frame_format&);
+	friend bool operator==(const opaque_format_multi_array&, const opaque_format_multi_array&);
+	friend bool operator!=(const opaque_format_multi_array&, const opaque_format_multi_array&);
 };
-
-
-/// Compare two data stored in \a a and \a b, both having format \a frame_format.
-bool ndarray_opaque_frame_compare(const void* a, const void* b, const ndarray_opaque_frame_format& frame_format);
-
-/// Copy data at \a origin having format \a frame_format to \a destination.
-void ndarray_opaque_frame_copy(void* destination, const void* origin, const ndarray_opaque_frame_format& frame_format);
 
 
 }

@@ -1,6 +1,3 @@
-#include "ndarray_view_opaque.h"
-#include "../ndarray_view.h"
-
 namespace mf {
 
 template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>
@@ -9,8 +6,8 @@ auto to_opaque(const ndarray_view<Concrete_dim, Concrete_elem>& concrete_view) {
 		"opaque dimension must be lower or equal to concrete dimension");
 	constexpr std::size_t frame_dim = Concrete_dim - Opaque_dim;
 	
-	using opaque_view_type = ndarray_view_opaque<Opaque_dim, ndarray_opaque_format_array, ! std::is_const<Concrete_elem>::value>;
-	using frame_ptr = typename ndarray_opaque_format_array::frame_ptr;
+	using opaque_view_type = ndarray_view_opaque<Opaque_dim, opaque_format_array, ! std::is_const<Concrete_elem>::value>;
+	using frame_ptr = typename opaque_format_array::frame_ptr;
 	
 	if(concrete_view.is_null()) return opaque_view_type::null();
 	
@@ -31,7 +28,7 @@ auto to_opaque(const ndarray_view<Concrete_dim, Concrete_elem>& concrete_view) {
 
 template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Opaque_dim, bool Opaque_mutable>
 auto from_opaque(
-	const ndarray_view_opaque<Opaque_dim, ndarray_opaque_format_array, Opaque_mutable>& opaque_view,
+	const ndarray_view_opaque<Opaque_dim, opaque_format_array, Opaque_mutable>& opaque_view,
 	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
 ) {
 	if(opaque_view.is_null()) return ndarray_view<Concrete_dim, Concrete_elem>::null();
@@ -64,5 +61,19 @@ auto from_opaque(
 		
 	return ndarray_view<Concrete_dim, Concrete_elem>(new_start, new_shape, new_strides);
 }
+
+
+
+template<std::size_t Dim, bool Mutable>
+ndarray_view_opaque<Dim, opaque_format_array, Mutable> extract_part
+(const ndarray_view_opaque<Dim, opaque_format_multi_array, Mutable>& vw, std::ptrdiff_t part_index) {
+	const auto& format_part = vw.format().part_at(part_index);
+	auto new_start = advance_raw_ptr(vw.start(), format_part.offset);
+	opaque_format_array new_format(format_part.format);
+	return ndarray_view_opaque<Dim, opaque_format_array, Mutable>(new_start, vw.shape(), vw.strides(), new_format);
+}
+
+
+
 
 }

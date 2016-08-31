@@ -22,14 +22,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_NDARRAY_OPAQUE_FORMAT_ARRAY_H_
 
 #include "../ndarray_format.h"
-#include "ndarray_view_opaque_fwd.h"
 
 namespace mf {
 
 /// Format of ndarray opaque frame the consists of an array define by \ref ndarray_format.
 /** \ref ndarray_opaque_view with this format can be casted to and from \ref ndarray_view whose shape, dimension, 
  ** stride and element type agrees with the \ref ndarray_format. */
-class ndarray_opaque_format_array {
+class opaque_format_array {
 public:
 	using frame_ptr = void*;
 	using const_frame_ptr = const void*;
@@ -38,11 +37,11 @@ private:
 	ndarray_format array_format_;
 
 public:
-	ndarray_opaque_format_array() : array_format_() { }
-	explicit ndarray_opaque_format_array(const ndarray_format& frm) : array_format_(frm) { }
+	opaque_format_array() : array_format_() { }
+	explicit opaque_format_array(const ndarray_format& frm) : array_format_(frm) { }
 	
-	ndarray_opaque_format_array(const ndarray_opaque_format_array&) = default;
-	ndarray_opaque_format_array& operator=(const ndarray_opaque_format_array&) = default;	
+	opaque_format_array(const ndarray_opaque_format_array&) = default;
+	opaque_format_array& operator=(const ndarray_opaque_format_array&) = default;	
 		
 	const ndarray_format& array_format() const { return array_format_; }
 	ndarray_format& array_format() { return array_format_; }
@@ -66,28 +65,14 @@ public:
 };
 
 
-inline bool operator==(const ndarray_opaque_format_array& a, const ndarray_opaque_format_array& b) {
+inline bool operator==(const opaque_format_array& a, const opaque_format_array& b) {
 	return a.array_format() == b.array_format();
 }
 
 
-inline bool operator!=(const ndarray_opaque_format_array& a, const ndarray_opaque_format_array& b) {
+inline bool operator!=(const opaque_format_array& a, const opaque_format_array& b) {
 	return a.array_format() != b.array_format();
 }
-
-
-/// Cast input \ref ndarray_view to opaque \ref ndarray_view_opaque with given dimension.
-template<std::size_t Opaque_dim, std::size_t Concrete_dim, typename Concrete_elem>
-auto to_opaque(const ndarray_view<Concrete_dim, Concrete_elem>& concrete_view);
-
-
-
-/// Cast input \ref ndarray_view_opaque to concrete \ref ndarray_view with given dimension, frame shape and element type.
-template<std::size_t Concrete_dim, typename Concrete_elem, std::size_t Opaque_dim, bool Opaque_mutable>
-auto from_opaque(
-	const ndarray_view_opaque<Opaque_dim, ndarray_opaque_format_array, Opaque_mutable>& opaque_view,
-	const ndsize<Concrete_dim - Opaque_dim>& frame_shape
-);
 
 
 }

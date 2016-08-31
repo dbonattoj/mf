@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_NDARRAY_OPAQUE_H_
 #define MF_NDARRAY_OPAQUE_H_
 
+#include "opaque_format_array.h"
 #include "ndarray_view_opaque.h"
 #include "../detail/ndarray_wrapper.h"
 #include "../../os/memory.h"
@@ -29,12 +30,17 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Container for \ref ndarray_view_opaque.
-template<std::size_t Dim, typename Allocator = raw_allocator>
+template<std::size_t Dim, typename Format = opaque_format_array, typename Allocator = raw_allocator>
 class ndarray_opaque :
-public detail::ndarray_wrapper<ndarray_view_opaque<Dim, true>, ndarray_view_opaque<Dim, false>, Allocator> {
-	using base = detail::ndarray_wrapper<ndarray_view_opaque<Dim, true>, ndarray_view_opaque<Dim, false>, Allocator>;
-	
+public detail::ndarray_wrapper<ndarray_view_opaque<Dim, Format, true>, ndarray_view_opaque<Dim, Format, false>, Allocator> {
+	using base = detail::ndarray_wrapper<ndarray_view_opaque<Dim, Format, true>, ndarray_view_opaque<Dim, Format, false>, Allocator>;
+
+private:
+	void construct_frames_();
+	void destruct_frames_();
+
 public:
+	using typename base::format_type;
 	using typename base::view_type;
 	using typename base::const_view_type;
 	using typename base::shape_type;
@@ -48,7 +54,7 @@ public:
 	/// Construct empty \ref ndarray_opaque with given shape and frame format.
 	/** Has default strides, optionally with specified frame padding. */
 	ndarray_opaque
-	(const shape_type& shape, const ndarray_opaque_frame_format& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
+	(const shape_type& shape, const format_type& frm, std::size_t frame_padding = 0, const Allocator& = Allocator());
 	
 	/// Construct \ref ndarray_opaque with shape and copy of elements from a \ref ndarray_view_opaque.
 	/** Has default strides, optionally with specified frame padding. Does not take strides from \a vw. */
@@ -61,6 +67,8 @@ public:
 	/// Move-construct from another \ref ndarray_opaque of same type.
 	/** Takes strides from \a arr and sets \a arr to null. */
 	ndarray_opaque(ndarray_opaque&& arr);
+	
+	~ndarray_opaque();
 	///@}
 	
 
@@ -87,22 +95,10 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const ndarray_opaque_frame_format& frame_format() const noexcept { return base::get_view_().format(); }
-	[[deprecated]] const ndarray_opaque_frame_format& format() const noexcept { return base::get_view_().format(); }
+	const format_type& frame_format() const noexcept { return base::get_view_().format(); }
+	[[deprecated]] const format_type& format() const noexcept { return base::get_view_().format(); }
 	///@}
 };
-
-
-template<std::size_t Dim>
-ndarray_view_opaque<Dim, true> extract_part(ndarray_opaque<Dim>& arr, std::ptrdiff_t part_index) {
-	return extract_part(arr.view(), part_index);
-}
-
-
-template<std::size_t Dim>
-ndarray_view_opaque<Dim, false> extract_part(const ndarray_opaque<Dim>& arr, std::ptrdiff_t part_index) {
-	return extract_part(arr.cview(), part_index);
-}
 
 
 }
