@@ -26,7 +26,11 @@ namespace mf {
 template<std::size_t Dim, typename Allocator>
 void ndarray_opaque<Dim, Allocator>::construct_frames_() {
 	if(frame_format().is_pod()) return;
-	
+
+	auto it = base::get_base_view_().begin();
+	auto it_end = base::get_base_view_().end();
+	for(; it != it_end; ++it)
+		frame_format().construct_frame(it.ptr());
 }
 
 
@@ -34,6 +38,10 @@ template<std::size_t Dim, typename Allocator>
 void ndarray_opaque<Dim, Allocator>::destruct_frames_() {
 	if(frame_format().is_pod()) return;
 	
+	auto it = base::get_base_view_().begin();
+	auto it_end = base::get_base_view_().end();
+	for(; it != it_end; ++it)
+		frame_format().destruct_frame(it.ptr());
 }
 
 

@@ -117,6 +117,7 @@ auto extract_part(const ndarray_opaque<Dim, Allocator>& vw, std::ptrdiff_t part_
 	return extract_part(vw.cview(), part_index);
 }
 
+
 template<std::size_t Dim, typename Allocator>
 auto extract_part(ndarray_opaque<Dim, Allocator>& vw, std::ptrdiff_t part_index) {
 	return extract_part(vw.view(), part_index);

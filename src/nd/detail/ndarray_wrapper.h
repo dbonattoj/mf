@@ -65,7 +65,8 @@ private:
 
 protected:
 	const view_type& get_view_() const { return view_; }
-	// access view_ from const this
+	const auto& get_base_view_() const { return view_.base_view(); }
+	// access (non-const) view_ by reference from const this
 
 
 protected:
@@ -116,6 +117,8 @@ public:
 	
 	operator view_type () noexcept { return view(); }
 	operator const_view_type () const noexcept { return cview(); }
+	
+	const auto& base_view() const { return ; }
 	///@}
 	
 	
