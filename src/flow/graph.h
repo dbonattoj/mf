@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../common.h"
 #include "diagnostic/diagnostic_handler.h"
 #include "node.h"
-#include "sink_node.h"
+#include "processing/sink_node.h"
 #include <utility>
 #include <vector>
 #include <memory>

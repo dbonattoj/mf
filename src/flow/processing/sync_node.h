@@ -24,8 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <memory>
 #include "processing_node.h"
 #include "processing_node_job.h"
-#include "../queue/frame.h"
-#include "../queue/timed_ring.h"
+#include "../../queue/frame.h"
+#include "../../queue/timed_ring.h"
 
 namespace mf { namespace flow {
 

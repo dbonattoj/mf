@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_FILTER_PARAMETER_HOLDER_H_
 #define MF_FLOW_FILTER_PARAMETER_HOLDER_H_
 
-#include "../flow/node_parameter_holder.h"
+#include "../flow/parameter/node_parameter_holder.h"
 #include <utility>
 
 namespace mf { namespace flow {

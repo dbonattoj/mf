@@ -20,9 +20,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "graph.h"
 #include "node.h"
-#include "sink_node.h"
+#include "processing/sink_node.h"
 
-#include "graph_visualization.h"
+#include "diagnostic/graph_visualization.h"
 #include <thread>
 
 namespace mf { namespace flow {

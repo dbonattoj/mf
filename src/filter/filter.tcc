@@ -19,8 +19,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "../flow/node.h"
-#include "../flow/processing_node.h"
-#include "../flow/multiplex_node.h"
+#include "../flow/processing/processing_node.h"
+#include "../flow/multiplex/multiplex_node.h"
 #include "../flow/graph.h"
 
 namespace mf { namespace flow {

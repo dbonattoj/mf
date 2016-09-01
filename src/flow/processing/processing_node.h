@@ -21,11 +21,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_PROCESSING_NODE_H_
 #define MF_FLOW_PROCESSING_NODE_H_
 
-#include "node_derived.h"
-#include "node_input.h"
-#include "node_output.h"
-#include "../nd/ndarray_format.h"
-#include "node_frame_format.h"
+#include "../node_derived.h"
+#include "../node_input.h"
+#include "../node_output.h"
+#include "../../nd/ndarray_format.h"
+#include "../node_frame_format.h"
 #include <memory>
 #include <utility>
 #include <iostream>

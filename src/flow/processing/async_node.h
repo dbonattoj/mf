@@ -23,7 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_ASYNC_NODE_H_
 
 #include "processing_node.h"
-#include "../queue/shared_ring.h"
+#include "../../queue/shared_ring.h"
 #include <thread>
 
 namespace mf { namespace flow {

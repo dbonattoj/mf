@@ -20,7 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "processing_timeline.h"
 #include "../graph.h"
-#include "../processing_node.h"
+#include "../processing/processing_node.h"
 #include <ostream>
 
 namespace mf { namespace flow {

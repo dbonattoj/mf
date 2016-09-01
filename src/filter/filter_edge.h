@@ -22,8 +22,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_EDGE_H_
 
 #include "../utility/misc.h"
-#include "../flow/processing_node.h"
-#include "../flow/sync_node.h"
+#include "../flow/processing/processing_node.h"
+#include "../flow/processing/sync_node.h"
 #include "../nd/ndarray_timed_view.h"
 #include <type_traits>
 #include <utility>

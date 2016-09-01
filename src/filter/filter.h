@@ -22,8 +22,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_H_
 
 #include "../flow/node.h"
-#include "../flow/processing_node.h"
-#include "../flow/processing_node_job.h"
+#include "../flow/processing/processing_node.h"
+#include "../flow/processing/processing_node_job.h"
 #include "../queue/frame.h"
 #include "filter_edge.h"
 #include "filter_parameter.h"

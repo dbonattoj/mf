@@ -19,7 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "multiplex_node_loader.h"
-#include "graph.h"
+#include "../graph.h"
 #include <utility>
 #include <functional>
 

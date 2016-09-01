@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_FILTER_JOB_H_
 #define MF_FLOW_FILTER_JOB_H_
 
-#include "../flow/processing_node.h"
+#include "../flow/processing/processing_node.h"
 
 namespace mf { namespace flow {
 

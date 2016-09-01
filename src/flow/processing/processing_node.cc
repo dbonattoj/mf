@@ -20,8 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "processing_node.h"
 #include "processing_node_job.h"
-#include "multiplex_node.h"
-#include "graph.h"
+#include "../multiplex/multiplex_node.h"
+#include "../graph.h"
 
 namespace mf { namespace flow {
 

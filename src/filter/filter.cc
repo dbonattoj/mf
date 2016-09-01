@@ -21,9 +21,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "filter.h"
 #include "../flow/graph.h"
 #include "../flow/node.h"
-#include "../flow/sink_node.h"
-#include "../flow/sync_node.h"
-#include "../flow/async_node.h"
+#include "../flow/processing/sink_node.h"
+#include "../flow/processing/sync_node.h"
+#include "../flow/processing/async_node.h"
 #include <set>
 
 namespace mf { namespace flow {

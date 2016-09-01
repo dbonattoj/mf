@@ -25,11 +25,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include <typeinfo>
 #include <map>
-#include "graph.h"
-#include "sync_node.h"
-#include "async_node.h"
-#include "sink_node.h"
-#include "multiplex_node.h"
+#include "../graph.h"
+#include "../processing/sync_node.h"
+#include "../processing/async_node.h"
+#include "../processing/sink_node.h"
+#include "../multiplex/multiplex_node.h"
 
 namespace mf { namespace flow {
 

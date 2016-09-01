@@ -21,9 +21,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_MULTIPLEX_NODE_H_
 #define MF_FLOW_MULTIPLEX_NODE_H_
 
-#include "node_derived.h"
-#include "node_input.h"
-#include "node_output.h"
+#include "../node_derived.h"
+#include "../node_input.h"
+#include "../node_output.h"
 
 namespace mf { namespace flow {
 
