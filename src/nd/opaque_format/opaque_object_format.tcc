@@ -30,7 +30,6 @@ bool opaque_object_format<Object>::compare(const opaque_format& frm) const {
 
 template<typename Object>
 void opaque_object_format<Object>::copy_frame(frame_ptr destination, const_frame_ptr origin) const {
-	std::cout << "assign" << std::endl;
 	obj(destination) = obj(origin);
 }
 

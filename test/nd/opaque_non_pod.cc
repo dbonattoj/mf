@@ -1,6 +1,7 @@
 #include <catch.hpp>
 #include <mf/nd/opaque/ndarray_opaque.h>
 #include <mf/nd/opaque_format/opaque_format.h>
+#include <mf/nd/opaque_format/opaque_object_format.h>
 #include <cstdint>
 
 using namespace mf;
@@ -30,6 +31,18 @@ static void verify_destructed_(const ndarray_view_opaque<2, false>& vw) {
 		REQUIRE_FALSE(frame.constructed);
 	}
 }
+
+class custom_object {
+public:
+	static int counter;
+	
+	custom_object() { counter++; }
+	~custom_object() { counter--; }
+	custom_object& operator=(const custom_object&) = default;
+	bool operator==(const custom_object&) const { return true; }
+};
+
+int custom_object::counter = 0;
 
 class custom_frame_format : public opaque_format {
 public:
@@ -68,38 +81,62 @@ public:
 	}
 };
 
-
 TEST_CASE("non-pod frames", "[nd][ndarray_opaque]") {
-	custom_frame_format frm, frm_;
-	ndsize<2> shape{3, 4};
-	ndsize<2> shape_{5, 5};
-	
-	REQUIRE(frm.is_contiguous());
-	REQUIRE_FALSE(frm.is_pod());
-	REQUIRE_FALSE(frm.is_contiguous_pod());
-
-	REQUIRE(construction_counter == 0);
-	{
-		// construction with shape
-		ndarray_opaque<2> arr(shape, frm);
-		REQUIRE(arr.allocated_byte_size() >= arr.size()*frm.frame_size());
-		verify_constructed_(arr.cview());
-		ndarray_opaque<2> arr_(shape_, frm_);
-		REQUIRE(construction_counter > 0);
-	
-		// construction from view
-		ndarray_opaque<2> arr2(arr.cview());
-		verify_constructed_(arr2.cview());
-	
-		// assignment from view
-		arr = arr2.view();
-		verify_constructed_(arr.cview());
-	
-		// assignment from array
-		arr2 = arr_.cview();
-		verify_constructed_(arr2.cview());
+	SECTION("custom_frame_format") {
+		custom_frame_format frm, frm_;
+		ndsize<2> shape{3, 4};
+		ndsize<2> shape_{5, 5};
 		
-		// destruction of arr, arr2, arr_
+		REQUIRE(frm.is_contiguous());
+		REQUIRE_FALSE(frm.is_pod());
+		REQUIRE_FALSE(frm.is_contiguous_pod());
+	
+		REQUIRE(construction_counter == 0);
+		{
+			// construction with shape
+			ndarray_opaque<2> arr(shape, frm);
+			REQUIRE(arr.allocated_byte_size() >= arr.size()*frm.frame_size());
+			verify_constructed_(arr.cview());
+			ndarray_opaque<2> arr_(shape_, frm_);
+			REQUIRE(construction_counter > 0);
+		
+			// construction from view
+			ndarray_opaque<2> arr2(arr.cview());
+			verify_constructed_(arr2.cview());
+		
+			// assignment from view
+			arr = arr2.view();
+			verify_constructed_(arr.cview());
+		
+			// assignment from array
+			arr2 = arr_.cview();
+			verify_constructed_(arr2.cview());
+			
+			// destruction of arr, arr2, arr_
+		}
+		REQUIRE(construction_counter == 0);
 	}
-	REQUIRE(construction_counter == 0);
+	
+	
+	SECTION("custom_object frames") {
+		opaque_object_format<custom_object> frm, frm_;
+		ndsize<2> shape{3, 4};
+		ndsize<2> shape_{5, 5};
+		
+		REQUIRE(frm.is_contiguous());
+		REQUIRE_FALSE(frm.is_pod());
+		REQUIRE_FALSE(frm.is_contiguous_pod());
+	
+		REQUIRE(custom_object::counter == 0);
+		{
+			ndarray_opaque<2> arr(shape, frm);
+			REQUIRE(arr.allocated_byte_size() >= arr.size()*frm.frame_size());
+			ndarray_opaque<2> arr_(shape_, frm_);
+			REQUIRE(custom_object::counter > 0);
+			ndarray_opaque<2> arr2(arr.cview());
+			arr = arr2.view();
+			arr2 = arr_.cview();
+		}
+		REQUIRE(custom_object::counter == 0);
+	}
 }
