@@ -50,7 +50,9 @@ ndarray_wrapper<View, Const_view, Allocator>::ndarray_wrapper(
 	std::size_t allocate_alignment,
 	const Allocator& allocator,
 	const Arg&... view_arguments
-) : allocator_(allocator) {
+) :
+	allocator_(allocator)
+{
 	allocate_(allocate_size, allocate_alignment);
 	view_.reset(view_type(
 		static_cast<typename view_type::pointer>(allocated_buffer_),
@@ -60,11 +62,6 @@ ndarray_wrapper<View, Const_view, Allocator>::ndarray_wrapper(
 	));
 	Assert(static_cast<void*>(view_.start()) == allocated_buffer_, "first element in ndarray must be at buffer start");
 }
-
-
-template<typename View, typename Const_view, typename Allocator>
-ndarray_wrapper<View, Const_view, Allocator>::ndarray_wrapper(const Allocator& allocator) :
-	allocator_(allocator) { }
 	
 
 template<typename View, typename Const_view, typename Allocator>
@@ -112,6 +109,7 @@ void ndarray_wrapper<View, Const_view, Allocator>::reset_(
 	std::size_t allocate_alignment,
 	const Arg&... view_arguments
 ) {	
+	// reallocate memory only if necessary
 	if(allocate_size != allocated_size() || ! is_aligned(allocated_buffer_, allocate_alignment)) {
 		deallocate_();
 		allocate_(allocate_size, allocate_alignment);
@@ -124,14 +122,6 @@ void ndarray_wrapper<View, Const_view, Allocator>::reset_(
 		view_arguments...
 	));
 }
-
-
-template<typename View, typename Const_view, typename Allocator>
-void ndarray_wrapper<View, Const_view, Allocator>::reset_() {
-	deallocate_();
-	view_.reset();
-}
-
 
 
 }}

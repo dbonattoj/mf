@@ -21,11 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <utility>
 
 namespace mf {
-	
-template<std::size_t Dim, typename Elem, typename Allocator>
-ndarray<Dim, Elem, Allocator>::ndarray(const Allocator& allocator) :
-	base(allocator) { }
-
 
 template<std::size_t Dim, typename Elem, typename Allocator>
 ndarray<Dim, Elem, Allocator>::ndarray(const shape_type& shape, std::size_t elem_padding, const Allocator& allocator) :
@@ -48,6 +43,7 @@ base(
 	alignof(Elem),
 	allocator
 ) {
+	Assert(! vw.is_null());
 	base::view().assign(vw);
 }
 
@@ -72,6 +68,7 @@ base(std::move(arr)) { }
 
 template<std::size_t Dim, typename Elem, typename Allocator> template<typename Other_elem>
 void ndarray<Dim, Elem, Allocator>::assign(const ndarray_view<Dim, Other_elem>& vw, std::size_t elem_padding) {
+	Assert(! vw.is_null());
 	base::reset_(
 		vw.shape(),
 		view_type::default_strides(vw.shape(), elem_padding),

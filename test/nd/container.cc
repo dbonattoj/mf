@@ -47,13 +47,7 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 	ndarray_view<3, int> arr_vw_sec = arr_vw()(0, 4, 2)(0, 4, 2);
 	REQUIRE_FALSE(arr_vw_sec.has_default_strides());
 
-	ndarray<3, int> null_arr;
-
 	SECTION("construction") {
-		// null ndarray
-		REQUIRE(null_arr.is_null());
-		REQUIRE(null_arr.allocated_byte_size() == 0);
-	
 		// construction with shape
 		ndarray<3, int> arr(shape);
 		REQUIRE(arr.shape() == shape);
@@ -95,9 +89,7 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		REQUIRE((arr3_f.strides() == ndarray_view<3, float>::default_strides(arr_vw_sec.shape(), pad_f)));
 
 		// construction from null ndarray_view
-		ndarray<3, int> null_arr1(ndarray_view<3, int>::null());
-		REQUIRE(null_arr1.is_null());
-		REQUIRE(null_arr1.allocated_byte_size() == 0);
+		REQUIRE_THROWS((new ndarray<3, int>(ndarray_view<3, int>::null())));
 
 		// copy-construction from another ndarray (strides get copied)
 		ndarray<3, int> arr4 = arr3;
@@ -110,25 +102,14 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		REQUIRE(arr4[1][1][1] == 789);
 		REQUIRE_FALSE(arr3[1][1][1] == 789);
 		
-		// copy-construction from null ndarray
-		ndarray<3, int> null_arr2 = null_arr;
-		REQUIRE(null_arr2.is_null());
-		REQUIRE(null_arr2.allocated_byte_size() == 0);
-
 		// move construction from another ndarray (strides get copied)
 		ndarray<3, int> arr5_cmp = arr4;
 		ndarray<3, int> arr5 = std::move(arr4);
 		REQUIRE(arr5.view().compare(arr5_cmp));
 		REQUIRE(arr5.shape() == arr5_cmp.shape());
 		REQUIRE(arr5.strides() == arr5_cmp.strides());
-		REQUIRE(arr4.is_null());
 		REQUIRE(arr4.allocated_byte_size() == 0);
 		verify_ndarray_memory_(arr5);
-
-		// move-construction from null ndarray
-		ndarray<3, int> null_arr3 = std::move(null_arr);
-		REQUIRE(null_arr3.is_null());
-		REQUIRE(null_arr3.allocated_byte_size() == 0);
 	}
 
 
@@ -159,12 +140,8 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 
 		// assignment from null ndarray_view
 		ndarray<3, int> arr_4(previous_shape), arr_4_(previous_shape);
-		arr_4 = ndarray_view<3, int>::null();
-		REQUIRE(arr_4.is_null());
-		REQUIRE(arr_4.allocated_byte_size() == 0);
-		arr_4_.assign(ndarray_view<3, int>::null());
-		REQUIRE(arr_4_.is_null());
-		REQUIRE(arr_4_.allocated_byte_size() == 0);
+		REQUIRE_THROWS((arr_4 = ndarray_view<3, int>::null()));
+		REQUIRE_THROWS(arr_4_.assign(ndarray_view<3, int>::null()));
 
 		// copy-assignment from another ndarray (strides get copied)
 		ndarray<3, int> arr_5(previous_shape);
@@ -173,12 +150,6 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		REQUIRE(arr_5.shape() == arr_3.shape());
 		REQUIRE(arr_5.strides() == arr_3.strides());
 		arr_5[1][1][1] = 789; REQUIRE_FALSE(arr_3[1][1][1] == 789);
-
-		// copy-assignment from null ndarray
-		ndarray<3, int> arr_6(previous_shape);
-		arr_6 = null_arr;
-		REQUIRE(arr_6.is_null());
-		REQUIRE(arr_6.allocated_byte_size() == 0);
 		
 		// move-assignment from another ndarray (strides get copied)
 		ndarray<3, int> arr_7(previous_shape);
@@ -187,14 +158,7 @@ TEST_CASE("ndarray", "[nd][ndarray]") {
 		REQUIRE(arr_7.view().compare(arr_3_cmp));
 		REQUIRE(arr_7.shape() == arr_3_cmp.shape());
 		REQUIRE(arr_7.strides() == arr_3_cmp.strides());
-		REQUIRE(arr_3.is_null());
 		verify_ndarray_memory_(arr_7);
-
-		// move-assignment from null ndarray
-		ndarray<3, int> arr_8(previous_shape);
-		arr_8 = std::move(null_arr);
-		REQUIRE(arr_8.is_null());
-		REQUIRE(arr_8.allocated_byte_size() == 0);
 		
 		// assignment from ndarray_view with different element type
 		ndarray<3, float> arr_f(arr_vw_sec);

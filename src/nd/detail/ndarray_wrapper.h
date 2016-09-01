@@ -95,17 +95,12 @@ protected:
 		std::size_t allocate_alignment,
 		const Arg&... view_arguments
 	);
-	
-	void reset_();
 	///@}
 
 public:
 	/// \name Construction
 	///@{
 	~ndarray_wrapper();
-
-	bool is_null() const noexcept { return view_.is_null(); }
-	explicit operator bool () const noexcept { return ! is_null(); }
 	
 	std::size_t allocated_byte_size() const { return allocated_size_; }
 	const allocator_type& get_allocator() const { return allocator_; }

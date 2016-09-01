@@ -39,10 +39,7 @@ public:
 	using typename base::strides_type;
 	
 	/// \name Constructor
-	///@{
-	/// Construct null \ref ndarray.
-	explicit ndarray(const Allocator& = Allocator());
-	
+	///@{	
 	/// Construct empty \ref ndarray with given shape.
 	/** Has default strides, optionally with specified element padding. */
 	explicit ndarray(const shape_type& shape, std::size_t elem_padding = 0, const Allocator& = Allocator());

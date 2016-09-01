@@ -48,10 +48,7 @@ public:
 	using format_ptr = typename view_type::format_ptr;
 	
 	/// \name Constructor
-	///@{
-	/// Construct null \ref ndarray_opaque.
-	explicit ndarray_opaque(const Allocator& = Allocator());
-	
+	///@{	
 	/// Construct empty \ref ndarray_opaque with given shape and frame format.
 	/** Gets default strides, optionally with specified frame padding. Memory is allocated, and frames are *constructed*
 	 ** is required by the format. */
