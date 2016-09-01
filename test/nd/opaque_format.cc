@@ -21,8 +21,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <catch.hpp>
 #include <cstdint>
 #include <array>
+#include <string>
 #include <mf/nd/opaque_format/opaque_multi_ndarray_format.h>
 #include <mf/nd/opaque_format/opaque_ndarray_format.h>
+#include <mf/nd/opaque_format/opaque_object_format.h>
 
 using namespace mf;
 
@@ -171,5 +173,37 @@ TEST_CASE("opaque_multi_ndarray_format", "[nd][opaque_multi_ndarray_format]") {
 	REQUIRE(frm.compare_frame(
 		static_cast<const void*>(&frame1),
 		static_cast<const void*>(&frame2)
+	));
+}
+
+
+TEST_CASE("opaque_object_format", "[nd][opaque_object_format]") {
+	opaque_object_format<std::string> frm;
+		
+	REQUIRE(frm.frame_size() == sizeof(std::string));
+	REQUIRE(frm.frame_alignment_requirement() == alignof(std::string));
+	REQUIRE_FALSE(frm.has_array_format());
+	REQUIRE(frm.is_contiguous());
+	REQUIRE_FALSE(frm.is_pod());
+	REQUIRE_FALSE(frm.has_parts());
+			
+	std::string obj1("one"), obj2("two");
+
+	REQUIRE(frm.compare_frame(
+		static_cast<const void*>(&obj1),
+		static_cast<const void*>(&obj1)
+	));
+	REQUIRE_FALSE(frm.compare_frame(
+		static_cast<const void*>(&obj1),
+		static_cast<const void*>(&obj2)
+	));
+	frm.copy_frame(
+		static_cast<void*>(&obj2),
+		static_cast<const void*>(&obj1)
+	);
+	REQUIRE(obj1 == obj2);
+	REQUIRE(frm.compare_frame(
+		static_cast<const void*>(&obj1),
+		static_cast<const void*>(&obj2)
 	));
 }
