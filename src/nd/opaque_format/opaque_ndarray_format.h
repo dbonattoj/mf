@@ -27,7 +27,7 @@ public:
 	void construct_frame(frame_ptr) const override { }
 	void destruct_frame(frame_ptr) const override { }
 	
-	bool has_array_format() const override { return false; }
+	bool has_array_format() const override { return true; }
 	ndarray_format array_format() const override { return array_format_; }
 };
 

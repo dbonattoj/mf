@@ -22,17 +22,11 @@ public:
 	friend bool operator!=(const part& a, const part& b) { return (a.offset != b.offset) || (a.format != b.format); }
 
 private:
-	std::vector<part> parts_;
-	std::size_t frame_size_without_end_padding_ = 0;
-	std::size_t frame_alignment_requirement_ = 1;
-	
-	std::size_t frame_size_with_end_padding_ = 0;
-	bool contiguous_ = false;
-	
-	void update_frame_size_with_end_padding_();
+	std::vector<part> parts_;		
+	std::size_t frame_size_with_end_padding_(std::size_t frame_size_without_end_padding) const;
 
 public:
-	opaque_multi_ndarray_format() = default;
+	opaque_multi_ndarray_format();
 	opaque_multi_ndarray_format(const opaque_multi_ndarray_format&) = default;
 	opaque_multi_ndarray_format(opaque_multi_ndarray_format&&) = default;
 
