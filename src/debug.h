@@ -23,6 +23,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "os/backtrace.h"
 
+#ifndef NDEBUG
+	#define MF_DEBUG_BUILD
+#endif
+
 #ifdef MF_DEBUG_BUILD
 
 	#define MF_DEBUG_HEADER(caption, separator) \

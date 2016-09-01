@@ -25,7 +25,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <cassert>
 #include <exception>
 #include <stdexcept>
-
 #include "debug.h"
 #include "exceptions.h"
 
@@ -36,9 +35,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #define MF_GET_NARG_MACRO_2(_1, _2, NAME, ...) NAME
 
-#ifndef NDEBUG
-	#define MF_DEBUG_BUILD
-#endif
 
 #ifdef MF_DEBUG_BUILD
 	#define MF_ASSERT_CRIT_MSG_(__condition__, __msg__) \

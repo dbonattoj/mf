@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <stdexcept>
 #include <string>
+#include "common.h"
 #include "debug.h"
 
 #define MF_DEFINE_EXCEPTION_(__name__, __base__) \
