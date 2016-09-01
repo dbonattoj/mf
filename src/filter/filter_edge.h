@@ -86,7 +86,7 @@ private:
 	input_type& input_;
 	output_type& output_;
 	
-	node_input* node_input_ = nullptr;
+	node_input* node_input_ = nullptr; // TODO remove reference to nodes (allow filter edge == multiple node edges)
 	node_output* node_output_ = nullptr;
 	std::ptrdiff_t node_output_channel_index_ = -1;
 	

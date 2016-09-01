@@ -56,6 +56,7 @@ opaque_multi_ndarray_format::opaque_multi_ndarray_format() {
 
 auto opaque_multi_ndarray_format::add_part(const ndarray_format& new_part_format) -> const part& {
 	part new_part { new_part_format, 0 };
+	bool has_padding = false;
 	
 	if(parts_.size() > 0) {
 		const part& previous_part = parts_.back();
@@ -66,7 +67,7 @@ auto opaque_multi_ndarray_format::add_part(const ndarray_format& new_part_format
 			new_part.offset = min_offset;
 		} else {
 			new_part.offset = (1 + (min_offset / alignment_requirement)) * alignment_requirement;
-			set_contiguous_(false);
+			has_padding = true;
 		}
 
 		Assert(is_multiple_of(new_part.offset, alignment_requirement));
@@ -74,18 +75,25 @@ auto opaque_multi_ndarray_format::add_part(const ndarray_format& new_part_format
 	}
 	
 	parts_.push_back(new_part);
-		
-	std::size_t previous_frame_alignment_requirement = frame_alignment_requirement();
+	
+	this->readjust_for_added_part_(new_part, has_padding);
+			
+	return parts_.back();
+}
+
+
+void opaque_multi_ndarray_format::readjust_for_added_part_(const part& new_part, bool has_padding) {
+	if(has_padding) set_contiguous_(false);
+	
+	std::size_t old_frame_alignment_requirement = frame_alignment_requirement();
 	set_frame_alignment_requirement_(lcm(
-		previous_frame_alignment_requirement,
+		old_frame_alignment_requirement,
 		new_part.format.frame_alignment_requirement())
 	);
-	
+
 	std::size_t frame_size_without_end_padding = new_part.offset + new_part.format.frame_size();
 	std::size_t frame_size_with_end_padding = frame_size_with_end_padding_(frame_size_without_end_padding);
 	set_frame_size_(frame_size_with_end_padding);
-	
-	return parts_.back();
 }
 
 	

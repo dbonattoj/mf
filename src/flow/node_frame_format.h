@@ -24,8 +24,65 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../nd/opaque_format/opaque_multi_ndarray_format.h"
 
 namespace mf { namespace flow {
+	
+class node_frame_satellite;
 
-using node_frame_format = opaque_multi_ndarray_format;
+/// Opaque frame format of frames passed between nodes.
+/** Derives from \ref opaque_multi_ndarray_format, also contains for each channel one \ref ndarray_format part.
+ ** Additionally contains owning pointer to \ref node_frame_satellite.
+ ** Also allows direct access to its first array_format, so that from_opaque() can be used directly without prior
+ ** use of extract_part(), on single-part frames. */
+class node_frame_format : public opaque_multi_ndarray_format {
+	using base = opaque_multi_ndarray_format;
+	
+	/*
+	Memory layout of frame:
+	---  <-- ndarray for with part, at offset 0
+	XXX      offset 0 needed for direct access to array_frame by from_opaque
+	XXX
+	---  <-- ndarray for following parts,
+	 :       with padding in-between as needed for
+	---      alignment requirements
+	XXX
+	XXX
+	XXX
+	---
+	XXX
+	---
+	 :       after ndarray parts: padding as needed, and
+	  *  <-- pointer to node_frame_satellite object
+	 :   <-- at end: padding as needed for frame alignment
+	*/
+	
+private:
+	std::size_t satellite_pointer_offset_ = 0;
+	
+	void* frame_satellite_ptr(frame_ptr) const;
+	const void* frame_satellite_ptr(const_frame_ptr) const;
+
+protected:
+	void readjust_for_added_part_(const part& new_part, bool has_padding) override;
+		
+public:
+	node_frame_format();
+	
+	node_frame_satellite& frame_satellite(frame_ptr frame) const {
+		return *reinterpret_cast<node_frame_satellite*>(frame_satellite_ptr(frame));
+	}
+	
+	const node_frame_satellite& frame_satellite(const_frame_ptr frame) const {
+		return *reinterpret_cast<const node_frame_satellite*>(frame_satellite_ptr(frame));
+	}
+	
+	void copy_frame(frame_ptr destination, const_frame_ptr origin) const override;
+	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const override;
+	void construct_frame(frame_ptr) const override;
+	void destruct_frame(frame_ptr) const override;
+	
+	bool has_array_format() const override;
+	ndarray_format array_format() const override;
+};
+
 
 }}
 

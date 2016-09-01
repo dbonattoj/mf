@@ -88,6 +88,9 @@ T randint(T a, T b) {
 }
 
 
+
+/// Get `shared_ptr` to new object copy- or move- constructed from \a t.
+/** Returns `std::shared_ptr<T>` (with `T` decayed). */
 template<typename T>
 auto forward_make_shared_(T&& t) {
 	using decayed_t = std::decay_t<T>;
@@ -95,11 +98,17 @@ auto forward_make_shared_(T&& t) {
 }
 
 
+/// Get `shared_ptr` to new const object copy- or move- constructed from \a t.
+/** Returns `std::shared_ptr<const T>` (with `T` decayed). */
 template<typename T>
 auto forward_make_shared_const(T&& t) {
 	using decayed_t = std::decay_t<T>;
 	return std::make_shared<const decayed_t>(std::forward<T>(t));
 }
+
+
+static constexpr std::size_t pointer_size = sizeof(void*);
+static constexpr std::size_t pointer_alignment_requirement = alignof(void*);
 
 
 /*

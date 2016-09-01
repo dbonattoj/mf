@@ -43,6 +43,9 @@ public:
 
 private:
 	std::vector<part> parts_;		
+
+protected:
+	virtual void readjust_for_added_part_(const part& new_part, bool has_padding);
 	std::size_t frame_size_with_end_padding_(std::size_t frame_size_without_end_padding) const;
 
 public:
@@ -56,7 +59,7 @@ public:
 	bool compare(const opaque_format&) const override;
 
 	const part& part_at(std::ptrdiff_t index) const { return parts_.at(index); }
-	const part& add_part(const ndarray_format& array_format);
+	virtual const part& add_part(const ndarray_format& array_format);
 	
 	void copy_frame(frame_ptr destination, const_frame_ptr origin) const override;
 	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const override;
