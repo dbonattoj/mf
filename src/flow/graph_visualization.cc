@@ -259,7 +259,7 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 			<< "fontsize=10, "
 			<< "labelangle=45, "
 			<< "labeldistance=2.0, "
-			<< "labelfontcolor=" << in_col <<
+			<< "labelfontcolor=" << in_col
 			<< "];\n";
 	}
 }

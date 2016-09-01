@@ -26,6 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../../common.h"
 #include "../detail/ndarray_view_fcall.h"
 #include "../opaque_format/opaque_format.h"
+#include "../../utility/misc.h"
 #include <stdexcept>
 #include <memory>
 #include <utility>
@@ -81,13 +82,13 @@ public:
 
 	ndarray_view_opaque(frame_ptr start, const shape_type&, const strides_type&, const format_ptr&);
 
-	template<typename Format>
+	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
 	ndarray_view_opaque(const base& vw, Format&& frm) :
 		ndarray_view_opaque(vw, forward_make_shared(frm)) { }
 		
-	template<typename Format>
+	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
 	ndarray_view_opaque(frame_ptr start, const shape_type& shp, const strides_type& str, Format&& frm) :
-		ndarray_view_opaque(start, shp, str, forward_make_shared(frm)) { }
+		ndarray_view_opaque(start, shp, str, forward_make_shared_const(frm)) { }
 
 	static ndarray_view_opaque null() { return ndarray_view_opaque(); }
 	bool is_null() const noexcept { return base::is_null(); }

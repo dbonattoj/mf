@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include "ring.h"
 #include "frame.h"
+#include "../utility/misc.h"
 
 namespace mf {
 
@@ -42,8 +43,9 @@ private:
 	time_unit end_time_ = undefined_time;
 
 public:
-	template<typename Format> timed_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
-		timed_ring(forward_make_shared(frm), capacity, end_time) { }
+	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
+	timed_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
+		timed_ring(forward_make_shared_const(frm), capacity, end_time) { }
 
 	timed_ring(const format_ptr&, std::size_t capacity, time_unit end_time);
 		

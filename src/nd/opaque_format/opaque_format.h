@@ -3,6 +3,7 @@
 
 #include "../ndarray_format.h"
 #include <memory>
+#include <type_traits>
 
 namespace mf {
 
@@ -13,7 +14,7 @@ public:
 	using const_frame_ptr = const void*;
 	
 	struct extracted_part {
-		std::shared_ptr<opaque_format> format;
+		std::shared_ptr<const opaque_format> format;
 		std::size_t offset;
 	};
 
@@ -32,7 +33,7 @@ protected:
 public:
 	virtual ~opaque_format() { }
 	
-	virtual bool compare(const opaque_format&) = 0;
+	virtual bool compare(const opaque_format&) const = 0;
 	
 	std::size_t frame_size() const { return frame_size_; }
 	std::size_t frame_alignment_requirement() const { return frame_alignment_requirement_; }
@@ -52,6 +53,11 @@ public:
 	virtual std::size_t parts_count() const { throw std::logic_error("not implemented"); }
 	virtual extracted_part extract_part(std::ptrdiff_t index) const { throw std::logic_error("not implemented"); }
 };
+
+
+template<typename Format>
+using enable_if_derived_from_opaque_format
+	= std::enable_if_t<std::is_base_of<opaque_format, std::decay_t<Format>>::value>;
 
 }
 

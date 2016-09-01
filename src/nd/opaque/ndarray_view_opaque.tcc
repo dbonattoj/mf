@@ -121,7 +121,7 @@ bool ndarray_view_opaque<Dim, Mutable>::compare(const ndarray_view_opaque& vw) c
 	Assert(vw.frame_format().compare(frame_format()));
 	Assert(vw.shape() == shape());
 	
-	if(frame_format().is_pod_contiguous() && has_default_strides_without_padding() && vw.strides() == strides()) {
+	if(frame_format().is_contiguous_pod() && has_default_strides_without_padding() && vw.strides() == strides()) {
 		// directly compare entire memory segment
 		return (std::memcmp(start(), vw.start(), frame_format().frame_size() * size()) == 0);
 	} else {

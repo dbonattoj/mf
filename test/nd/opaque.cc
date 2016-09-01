@@ -58,7 +58,8 @@ TEST_CASE("ndarray_view_opaque", "[nd][ndarray_view_opaque]") {
 			raw2[i] = 2*i + 1;
 		}
 		opaque_ndarray_format frm(make_ndarray_format<int>(10));
-		REQUIRE(frm.is_pod_contiguous());
+		REQUIRE(frm.is_contiguous());
+		REQUIRE(frm.is_pod());
 		auto str = ndarray_view_opaque<2>::default_strides(shp, frm);
 		ndarray_view_opaque<2> vw1(static_cast<void*>(&raw1[0]), shp, str, frm);
 		ndarray_view_opaque<2> vw2(static_cast<void*>(&raw2[0]), shp, str, frm);
@@ -98,6 +99,10 @@ TEST_CASE("ndarray_view_opaque", "[nd][ndarray_view_opaque]") {
 		// creating two views to different data
 		auto shp = make_ndsize(2, 3);
 		auto frm = opaque_frame_format();
+
+		REQUIRE_FALSE(frm.is_contiguous());
+		REQUIRE(frm.is_pod());
+
 		raw_allocator alloc;
 		std::size_t f = frm.frame_size(); // frame size
 		std::size_t p = 32; // additional stride padding between frames (4)
@@ -174,7 +179,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op0.shape() == make_ndsize());
 			REQUIRE(op0.strides() == make_ndptrdiff());
 			
-			REQUIRE(op0.frame_format().is_defined());
+			REQUIRE(op0.frame_format().has_array_format());
 			REQUIRE(op0.frame_format().array_format() == format(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op0, make_ndsize(3, 4, 4));
@@ -190,7 +195,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op1.shape() == make_ndsize(3));
 			REQUIRE(op1.strides() == head<1>(str));
 
-			REQUIRE(op1.frame_format().is_defined());
+			REQUIRE(op1.frame_format().has_array_format());
 			REQUIRE(op1.frame_format().array_format() == tail_format<2>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op1, make_ndsize(4, 4));
@@ -210,7 +215,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op2.shape() == head<2>(shp));
 			REQUIRE(op2.strides() == head<2>(str));
 
-			REQUIRE(op2.frame_format().is_defined());
+			REQUIRE(op2.frame_format().has_array_format());
 			REQUIRE(op2.frame_format().array_format() == tail_format<1>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op2, make_ndsize(4));
@@ -241,7 +246,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op1.shape() == head<1>(shp));
 			REQUIRE(op1.strides() == head<1>(str));
 
-			REQUIRE(op1.frame_format().is_defined());
+			REQUIRE(op1.frame_format().has_array_format());
 			REQUIRE(op1.frame_format().array_format() == tail_format<2>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op1, make_ndsize(4, 4));
@@ -254,7 +259,7 @@ TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") 
 			REQUIRE(op2.shape() == head<2>(shp));
 			REQUIRE(op2.strides() == head<2>(str));
 
-			REQUIRE(op2.frame_format().is_defined());
+			REQUIRE(op2.frame_format().has_array_format());
 			REQUIRE(op2.frame_format().array_format() == tail_format<1>(vw));
 
 			ndarray_view<3, int> re = from_opaque<3, int>(op2, make_ndsize(4));

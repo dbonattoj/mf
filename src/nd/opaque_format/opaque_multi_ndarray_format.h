@@ -39,7 +39,7 @@ public:
 	opaque_multi_ndarray_format& operator=(const opaque_multi_ndarray_format&) = default;
 	opaque_multi_ndarray_format& operator=(opaque_multi_ndarray_format&&) = default;
 	
-	bool compare(const opaque_format&) override;
+	bool compare(const opaque_format&) const override;
 
 	const part& part_at(std::ptrdiff_t index) const { return parts_.at(index); }
 	const part& add_part(const ndarray_format& array_format);

@@ -12,7 +12,7 @@ opaque_ndarray_format::opaque_ndarray_format(const ndarray_format& form) :
 }
 
 
-bool opaque_ndarray_format::compare(const opaque_format& frm) {
+bool opaque_ndarray_format::compare(const opaque_format& frm) const {
 	if(typeid(opaque_ndarray_format) == typeid(frm))
 		return (static_cast<const opaque_ndarray_format&>(frm) == *this);
 	else

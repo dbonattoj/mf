@@ -20,7 +20,7 @@ public:
 	opaque_ndarray_format& operator=(const opaque_ndarray_format&) = default;
 	opaque_ndarray_format& operator=(opaque_ndarray_format&&) = default;
 	
-	bool compare(const opaque_format&) override;
+	bool compare(const opaque_format&) const override;
 
 	void copy_frame(frame_ptr destination, const_frame_ptr origin) const override;
 	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const override;

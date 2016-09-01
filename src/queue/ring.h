@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../nd/opaque/ndarray_opaque.h"
 #include "frame.h"
+#include "../utility/misc.h"
 
 namespace mf {
 
@@ -46,8 +47,9 @@ private:
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:
-	template<typename Format> ring(Format&& frm, std::size_t capacity) :
-		ring(forward_make_shared(frm), capacity) { }
+	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
+	ring(Format&& frm, std::size_t capacity) :
+		ring(forward_make_shared_const(frm), capacity) { }
 	
 	ring(const format_ptr&, std::size_t capacity);
 	

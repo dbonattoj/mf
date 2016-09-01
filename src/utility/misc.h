@@ -89,9 +89,16 @@ T randint(T a, T b) {
 
 
 template<typename T>
-auto forward_make_shared(T&& t) {
+auto forward_make_shared_(T&& t) {
 	using decayed_t = std::decay_t<T>;
 	return std::make_shared<decayed_t>(std::forward<T>(t));
+}
+
+
+template<typename T>
+auto forward_make_shared_const(T&& t) {
+	using decayed_t = std::decay_t<T>;
+	return std::make_shared<const decayed_t>(std::forward<T>(t));
 }
 
 

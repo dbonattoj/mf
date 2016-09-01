@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray_view_opaque.h"
 #include "../detail/ndarray_wrapper.h"
 #include "../../os/memory.h"
+#include "../../utility/misc.h"
 
 
 namespace mf {
@@ -54,7 +55,7 @@ public:
 	/// Construct empty \ref ndarray_opaque with given shape and frame format.
 	/** Gets default strides, optionally with specified frame padding. Memory is allocated, and frames are *constructed*
 	 ** is required by the format. */
-	template<typename Format>
+	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
 	ndarray_opaque(const shape_type&, Format&&, std::size_t frame_padding = 0, const Allocator& = Allocator());
 	
 	/// Construct empty \ref ndarray_opaque with given shape and frame format.
@@ -112,6 +113,19 @@ public:
 	const format_base_type& frame_format() const noexcept { return base::get_view_().frame_format(); }
 	///@}
 };
+
+
+template<std::size_t Dim, typename Allocator>
+auto extract_part(const ndarray_opaque<Dim, Allocator>& vw, std::ptrdiff_t part_index) {
+	return extract_part(vw.cview(), part_index);
+}
+
+template<std::size_t Dim, typename Allocator>
+auto extract_part(ndarray_opaque<Dim, Allocator>& vw, std::ptrdiff_t part_index) {
+	return extract_part(vw.view(), part_index);
+}
+
+
 
 
 }

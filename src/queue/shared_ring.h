@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_SHARED_RING_H_
 
 #include "timed_ring.h"
+#include "../utility/misc.h"
 #include <mutex>
 #include <condition_variable>
 #include <stdexcept>
@@ -74,9 +75,9 @@ private:
 	shared_ring(const format_ptr& frm, std::size_t capacity, time_unit end_time);
 
 public:
-	template<typename Format>
+	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
 	shared_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
-		shared_ring(forward_make_shared(frm), capacity, end_time) { }
+		shared_ring(forward_make_shared_const(frm), capacity, end_time) { }
 			
 	void break_reader();
 	void break_writer();

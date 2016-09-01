@@ -1,9 +1,10 @@
 #include "opaque_multi_ndarray_format.h"
 #include "opaque_ndarray_format.h"
+#include <cstring>
 
 namespace mf {
 	
-bool opaque_multi_ndarray_format::compare(const opaque_format& frm) {
+bool opaque_multi_ndarray_format::compare(const opaque_format& frm) const {
 	if(typeid(opaque_multi_ndarray_format) == typeid(frm))
 		return (static_cast<const opaque_multi_ndarray_format&>(frm) == *this);
 	else
@@ -55,6 +56,40 @@ auto opaque_multi_ndarray_format::extract_part(std::ptrdiff_t index) const -> ex
 		std::make_shared<opaque_ndarray_format>(prt.format),
 		prt.offset
 	};
+}
+
+
+void opaque_multi_ndarray_format::copy_frame(frame_ptr destination, const_frame_ptr origin) const {
+	if(is_contiguous_pod()) {
+		std::memcpy(destination, origin, frame_size());
+	} else {
+		for(std::ptrdiff_t part_index = 0; part_index < parts_count(); ++part_index) {
+			const auto& pt = part_at(part_index);			
+			ndarray_data_copy(
+				advance_raw_ptr(destination, pt.offset),
+				advance_raw_ptr(origin, pt.offset),
+				pt.format
+			);
+		}
+	}
+}
+
+
+bool opaque_multi_ndarray_format::compare_frame(const_frame_ptr a, const_frame_ptr b) const {
+	if(is_contiguous_pod()) {
+		return (std::memcmp(a, b, frame_size()) == 0);
+	} else {
+		for(std::ptrdiff_t part_index = 0; part_index < parts_count(); ++part_index) {
+			const auto& pt = part_at(part_index);
+			bool part_equal = ndarray_data_compare(
+				advance_raw_ptr(a, pt.offset),
+				advance_raw_ptr(b, pt.offset),
+				pt.format
+			);
+			if(!part_equal) return false;
+		}
+		return true;
+	}
 }
 
 }

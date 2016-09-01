@@ -24,7 +24,7 @@ void node_parameter_valuation::add(const node_parameter& par) {
 
 node_parameter_valuation combine(const node_parameter_valuation& a, const node_parameter_valuation& b) {
 	node_parameter_valuation ab = a;
-	ab.insert(b.cbegin(), b.cend());
+	ab.values_.insert(b.values_.cbegin(), b.values_.cend());
 	return ab;
 }
 

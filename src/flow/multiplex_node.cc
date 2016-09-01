@@ -21,7 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "multiplex_node.h"
 #include "multiplex_node_loader.h"
 #include "graph.h"
-#include "../nd/opaque/ndarray_view_opaque_cast.h"
 #include <utility>
 #include <functional>
 
