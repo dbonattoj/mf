@@ -56,6 +56,10 @@ public:
 };
 
 
+inline bool is_sink_node(const node& nd) {
+	return (dynamic_cast<const sink_node*>(&nd) != nullptr);
+}
+
 }}
 
 #endif

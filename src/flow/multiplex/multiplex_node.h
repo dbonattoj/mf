@@ -126,6 +126,11 @@ inline thread_index multiplex_node_input::reader_thread_index() const {
 }
 
 
+inline bool is_multiplex_node(const node& nd) {
+	return (dynamic_cast<const multiplex_node*>(&nd) != nullptr);
+}
+
+
 
 }}
 

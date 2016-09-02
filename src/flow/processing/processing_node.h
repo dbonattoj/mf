@@ -174,6 +174,11 @@ inline thread_index processing_node_input::reader_thread_index() const {
 }
 
 
+inline bool is_processing_node(const node& nd) {
+	return (dynamic_cast<const processing_node*>(&nd) != nullptr);
+}
+
+
 
 }}
 

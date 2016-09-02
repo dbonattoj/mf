@@ -53,6 +53,9 @@ public:
 };
 
 
+inline bool is_sync_node(const node& nd) {
+	return (dynamic_cast<const sync_node*>(&nd) != nullptr);
+}
 
 
 }}

@@ -79,6 +79,11 @@ public:
 };
 
 
+inline bool is_async_node(const node& nd) {
+	return (dynamic_cast<const async_node*>(&nd) != nullptr);
+}
+
+
 }}
 
 #endif
