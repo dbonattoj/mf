@@ -57,8 +57,11 @@ class node_frame_format : public opaque_multi_ndarray_format {
 private:
 	std::size_t satellite_pointer_offset_ = 0;
 	
-	void* frame_satellite_ptr(frame_ptr) const;
-	const void* frame_satellite_ptr(const_frame_ptr) const;
+	///@{
+	/// Get in-frame pointer to pointer to \ref node_frame_satellite.
+	auto frame_satellite_ptr(frame_ptr) const;
+	auto frame_satellite_ptr(const_frame_ptr) const;
+	///@}
 
 protected:
 	void readjust_for_added_part_(const part& new_part, bool has_padding) override;
@@ -66,13 +69,11 @@ protected:
 public:
 	node_frame_format();
 	
-	node_frame_satellite& frame_satellite(frame_ptr frame) const {
-		return *reinterpret_cast<node_frame_satellite*>(frame_satellite_ptr(frame));
-	}
-	
-	const node_frame_satellite& frame_satellite(const_frame_ptr frame) const {
-		return *reinterpret_cast<const node_frame_satellite*>(frame_satellite_ptr(frame));
-	}
+	///@{
+	/// Get \ref node_frame_satellite object associated to the \a frame.
+	node_frame_satellite& frame_satellite(frame_ptr frame) const;
+	const node_frame_satellite& frame_satellite(const_frame_ptr frame) const;
+	///@}
 	
 	void copy_frame(frame_ptr destination, const_frame_ptr origin) const override;
 	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const override;

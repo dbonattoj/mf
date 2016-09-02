@@ -22,13 +22,26 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_FRAME_SATELLITE_H_
 
 #include <iostream>
+#include <new>
 
 namespace mf { namespace flow {
 
+/// Satellite object attached to frame.
+/** Each frame being passed between nodes contains an instance of this class. */
 class node_frame_satellite {
-public:
-	node_frame_satellite() { std::cout << "CONS" << std::endl; }
-	~node_frame_satellite() { std::cout << "DEST" << std::endl; }
+private:
+	int stuff[100];
+	
+public:	
+	static void* operator new (std::size_t sz) {
+		std::cout << "CONS" << std::endl;
+		return ::operator new(sz);
+	}
+	
+	static void operator delete (void* ptr) {
+		std::cout << "DEST" << std::endl;
+		::operator delete(ptr);
+	}
 };
 
 inline bool operator==(node_frame_satellite, node_frame_satellite) { return true; }

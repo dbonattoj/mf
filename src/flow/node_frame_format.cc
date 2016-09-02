@@ -37,13 +37,25 @@ node_frame_format::node_frame_format() :
 }
 
 
-void* node_frame_format::frame_satellite_ptr(frame_ptr frame) const {
-	return advance_raw_ptr(frame, satellite_pointer_offset_);
+auto node_frame_format::frame_satellite_ptr(frame_ptr frame) const {
+	auto raw_ptr = advance_raw_ptr(frame, satellite_pointer_offset_);
+	return reinterpret_cast<node_frame_satellite**>(raw_ptr);
 }
 
 
-const void* node_frame_format::frame_satellite_ptr(const_frame_ptr frame) const {
-	return advance_raw_ptr(frame, satellite_pointer_offset_);
+auto node_frame_format::frame_satellite_ptr(const_frame_ptr frame) const {
+	auto raw_ptr = advance_raw_ptr(frame, satellite_pointer_offset_);
+	return reinterpret_cast<const node_frame_satellite* const*>(raw_ptr);
+}
+
+
+node_frame_satellite& node_frame_format::frame_satellite(frame_ptr frame) const {
+	return **frame_satellite_ptr(frame);
+}
+
+
+const node_frame_satellite& node_frame_format::frame_satellite(const_frame_ptr frame) const {
+	return **frame_satellite_ptr(frame);
 }
 
 
@@ -91,12 +103,12 @@ bool node_frame_format::compare_frame(const_frame_ptr a, const_frame_ptr b) cons
 
 
 void node_frame_format::construct_frame(frame_ptr frame) const {
-	new(frame_satellite_ptr(frame)) node_frame_satellite();
+	*frame_satellite_ptr(frame) = new node_frame_satellite();
 }
 
 
 void node_frame_format::destruct_frame(frame_ptr frame) const {
-	frame_satellite(frame).~node_frame_satellite();
+	delete *frame_satellite_ptr(frame);
 }
 
 
