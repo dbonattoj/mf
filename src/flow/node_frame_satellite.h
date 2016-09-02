@@ -33,15 +33,8 @@ private:
 	int stuff[100];
 	
 public:	
-	static void* operator new (std::size_t sz) {
-		std::cout << "CONS" << std::endl;
-		return ::operator new(sz);
-	}
-	
-	static void operator delete (void* ptr) {
-		std::cout << "DEST" << std::endl;
-		::operator delete(ptr);
-	}
+	node_frame_satellite() { std::cout << "CON" << std::endl; }
+	~node_frame_satellite() { std::cout << "DES" << std::endl; }
 };
 
 inline bool operator==(node_frame_satellite, node_frame_satellite) { return true; }
