@@ -48,7 +48,7 @@ processing_timeline_json_exporter::processing_timeline_json_exporter(const proce
 
 
 void processing_timeline_json_exporter::generate(std::ostream& out) {
-	compute_earliest_clock_time_();
+	if(timeline_.jobs_count() > 0) compute_earliest_clock_time_();
 
 	json j_nodes = json::array();
 

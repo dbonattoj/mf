@@ -26,7 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../support/flow.h"
 
 #include <mf/flow/diagnostic/graph_visualization.h>
-
+/*
 using namespace mf;
 using namespace mf::test;
 
@@ -40,3 +40,4 @@ TEST_CASE("flow graph test: seekable, async", "[flow][async]") {
 	#include "flow_tests_seek.icc"
 }
 
+*/

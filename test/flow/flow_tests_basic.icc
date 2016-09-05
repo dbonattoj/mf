@@ -28,6 +28,7 @@ SECTION("basic") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
+#if 0
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -562,8 +563,8 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
-	
-	
+#endif	
+
 	SECTION("complex") {
 		flow::filter_graph gr;
 		auto shp = make_ndsize(10, 10);
@@ -608,11 +609,20 @@ SECTION("basic") {
 			sink.input.connect(merge2.output);
 	
 			gr.setup();
+			
+			flow::processing_timeline timeline(*gr.node_graph_);
+			gr.node_graph_->set_diagnostic(timeline);
+			
 			gr.run();
+
+			flow::processing_timeline_json_exporter timeline_export(timeline);
+			std::ofstream json("timeline.json");
+			timeline_export.generate(json);
 			
 			REQUIRE(sink.check());
 		}
-
+		
+return;
 		SECTION("graph 2") {
 			INFO(R"(
 			source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2 ------------> merge1' -------------> merge2' --> sink 

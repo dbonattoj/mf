@@ -191,7 +191,7 @@ auto from_opaque(
 	constexpr std::size_t frame_dim = Concrete_dim - Opaque_dim;
 
 	Assert(opaque_view.frame_format().has_array_format(),
-		"opaque frame format must have array")
+		"opaque frame format must have array");
 	
 	const ndarray_format& array_format = opaque_view.frame_format().array_format();
 
