@@ -29,18 +29,9 @@ namespace mf { namespace flow {
 
 using node_parameter_id = int;
 
-/// Container of node parameter value.
-class node_parameter_value {
-private:	
-	std::unique_ptr<node_parameter_holder> holder_;
-
-public:
-	node_parameter_value();
-	node_parameter_value(const node_parameter_value&);
-	node_parameter_value(node_parameter_value&&);
-	
-	node_parameter_value& operator=(const node_parameter_value&);
-	node_parameter_value& operator=(node_parameter_value&&);
+enum class node_parameter_kind {
+	deterministic,
+	dynamic
 };
 
 
@@ -48,14 +39,13 @@ public:
 class node_parameter {
 private:
 	node_parameter_id id_;
-	node_parameter_value value_;
+	node_parameter_kind kind_;
 
 public:
-	explicit node_parameter(node_parameter_id id);
+	node_parameter(node_parameter_id id, node_parameter_kind kind);
 	
 	node_parameter_id id() const { return id_; }
-	node_parameter_value& current_value() { return value_; }
-	const node_parameter_value& current_value() const { return value_; }
+	node_parameter_kind kind() const { return kind_; }
 };
 
 

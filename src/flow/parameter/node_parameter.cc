@@ -22,29 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-node_parameter_value::node_parameter_value() :
-	holder_() { }
-
-
-node_parameter_value::node_parameter_value(const node_parameter_value& val) {
-	if(val.holder_) holder_.reset(val.holder_->clone());
-}
-
-
-node_parameter_value::node_parameter_value(node_parameter_value&& val) :
-	holder_(std::move(val.holder_)) { }
-	
-
-node_parameter_value& node_parameter_value::operator=(const node_parameter_value& val) {
-	if(val.holder_) holder_.reset(val.holder_->clone());
-	else holder_.reset();
-	return *this;
-}
-
-
-node_parameter_value& node_parameter_value::operator=(node_parameter_value&& val) {
-	holder_ = std::move(val.holder_);
-	return *this;
-}
+node_parameter::node_parameter(node_parameter_id id, node_parameter_kind kind) :
+	id_(id), kind_(kind) { }
 
 }}

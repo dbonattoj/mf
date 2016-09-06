@@ -33,6 +33,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray.h"
 #include "thread.h"
 
+#include <chrono>
+
 namespace mf { namespace test {
 
 constexpr int noframe = -2;
@@ -72,7 +74,7 @@ public:
 		if(t == last_frame_) job.mark_end();
 		
 		previous_frame_ = t;
-		
+				
 		//std::cout << "       >> " << t << '\n';
 	}
 	

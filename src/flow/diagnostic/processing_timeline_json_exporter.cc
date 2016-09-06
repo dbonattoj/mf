@@ -10,13 +10,14 @@ namespace mf { namespace flow {
 
 using json = nlohmann::json;
 
-void processing_timeline_json_exporter::compute_earliest_clock_time_() {
+void processing_timeline_json_exporter::compute_clock_time_bounds_() {
 	earliest_clock_time_ = timeline_.job_at(0).start_clock_time;
+	latest_clock_time_ = timeline_.job_at(0).end_clock_time;
 	
 	for(std::ptrdiff_t i = 1; i < timeline_.jobs_count(); ++i) {
 		const processing_timeline::job& job = timeline_.job_at(i);
-		clock_time_type start_clock_time = job.start_clock_time;
-		if(start_clock_time < earliest_clock_time_) earliest_clock_time_ = start_clock_time;
+		if(job.start_clock_time < earliest_clock_time_) earliest_clock_time_ = job.start_clock_time;
+		if(job.end_clock_time > latest_clock_time_) latest_clock_time_ = job.end_clock_time;
 	}
 }
 
@@ -34,9 +35,9 @@ json processing_timeline_json_exporter::generate_node_jobs_(const node& nd) cons
 		if(job.end_clock_time == clock_time_type()) continue;
 		
 		j_jobs.push_back({
-			{ "frame_time", job.frame_time },
-			{ "start_clock_time", generate_clock_time_(job.start_clock_time).count() },
-			{ "end_clock_time", generate_clock_time_(job.end_clock_time).count() }
+			{ "t", job.frame_time },
+			{ "from", generate_clock_time_(job.start_clock_time).count() },
+			{ "to", generate_clock_time_(job.end_clock_time).count() }
 		});
 	}
 	return j_jobs;
@@ -48,7 +49,7 @@ processing_timeline_json_exporter::processing_timeline_json_exporter(const proce
 
 
 void processing_timeline_json_exporter::generate(std::ostream& out) {
-	if(timeline_.jobs_count() > 0) compute_earliest_clock_time_();
+	if(timeline_.jobs_count() > 0) compute_clock_time_bounds_();
 
 	json j_nodes = json::array();
 
@@ -72,7 +73,8 @@ void processing_timeline_json_exporter::generate(std::ostream& out) {
 	}
 	
 	json j = {
-		{ "nodes", j_nodes }
+		{ "nodes", j_nodes },
+		{ "duration", generate_clock_time_(latest_clock_time_).count() }
 	};
 	
 	out << j;
