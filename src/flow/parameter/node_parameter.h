@@ -23,29 +23,38 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <string>
 #include <memory>
-#include "node_parameter_holder.h"
+#include <functional>
+#include <utility>
 
 namespace mf { namespace flow {
 
-using node_parameter_id = int;
+using parameter_id = int;
+static constexpr undefined_parameter_id = 0;
 
-enum class node_parameter_kind {
-	deterministic,
-	dynamic
-};
-
+class node_parameter_value;
 
 /// Node parameter with its current value.
 class node_parameter {
+public:
+	using deterministic_value_function = node_parameter_value(time_unit);
+
 private:
-	node_parameter_id id_;
-	node_parameter_kind kind_;
+	parameter_id id_;
+	std::function<deterministic_value_function> value_function_;
 
 public:
-	node_parameter(node_parameter_id id, node_parameter_kind kind);
+	explicit node_parameter(parameter_id id);
 	
-	node_parameter_id id() const { return id_; }
-	node_parameter_kind kind() const { return kind_; }
+	parameter_id id() const { return id_; }	
+	bool is_deterministic() const;
+	bool is_dynamic() const;
+
+	template<typename Function> set_value_function(Function&& func)
+		{ value_function_ = std::forward<Function>(func); }
+	void set_constant_value(const node_parameter_value&);
+	void set_dynamic();
+	
+	node_parameter_value deterministic_value(time_unit frame_time) const;
 };
 
 

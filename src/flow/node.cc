@@ -238,6 +238,43 @@ time_unit node::end_time() const noexcept {
 }
 
 
+node_parameter& node::add_parameter(parameter_id id) {
+	parameters_.emplace(id, node_parameter(id));
+}
+
+
+bool node::has_parameter(parameter_id id) const {
+	return (parameters_.find(id) != parameters_.end());
+}
+
+
+node_parameter& node::parameter_at(parameter_id id) const {
+	return parameters_.at(id);
+}
+
+
+void node::add_input_parameter(parameter_id id) {
+	input_parameters_.push_back(id);
+}
+
+
+bool node::has_input_parameter(parameter_id id) const {
+	return std::find(input_parameters_.cbegin(), input_parameters_.cend(), id) != input_parameters_.cend();
+}
+
+
+bool node::needs_output_parameter(parameter_id id) const {
+	if(has_input_parameter(id)) return true;
+	else return std::any_of(outputs_.begin(), outputs_.end(), [id](auto&& out) {
+		return out->needs_output_parameter(id);
+	});
+}
+
+
+
+
+
+
 
 }}
 

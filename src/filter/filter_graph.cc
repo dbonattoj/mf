@@ -31,6 +31,12 @@ filter_graph::~filter_graph() {
 	node_graph_.reset();
 }
 
+
+parameter_id filter_graph::new_parameter_id() {
+	return ++parameter_id;
+}
+
+
 void filter_graph::setup() {
 	Expects(! was_setup());
 	node_graph_.reset(new graph);

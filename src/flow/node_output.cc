@@ -33,6 +33,17 @@ thread_index node_output::reader_thread_index() const {
 }
 
 
+bool needs_output_parameter(parameter_id) {
+	Assert(is_connected());
+	
+}
+
+
+void add_output_parameter(parameter_id) {
+	
+}
+
+
 void node_output::input_has_connected(node_input& input) {
 	connected_input_ = &input;
 }

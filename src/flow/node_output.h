@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_OUTPUT_H_
 
 #include "node.h"
+#include "parameter/node_parameter.h"
 
 namespace mf { namespace flow {
 
@@ -36,6 +37,8 @@ private:
 
 	node_input* connected_input_ = nullptr;
 	
+	std::vector<parameter_id> output_parameters_;
+	
 protected:
 	node_output(const node_output&) = delete;
 	node_output& operator=(const node_output&) = delete;
@@ -45,6 +48,9 @@ public:
 	virtual ~node_output() = default;
 
 	node& this_node() const noexcept { return node_; }
+	
+	bool needs_output_parameter(parameter_id);
+	void add_output_parameter(parameter_id);
 
 	thread_index reader_thread_index() const;
 

@@ -23,8 +23,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../common.h"
 #include "../queue/frame.h"
+#include "parameter/node_parameter.h"
 #include "node_stream_properties.h"
+
 #include <vector>
+#include <map>
+#include <set>
 #include <atomic>
 #include <string>
 #include <memory>
@@ -59,6 +63,9 @@ private:
 	std::atomic<online_state> state_ {online};
 	std::atomic<time_unit> current_time_ {-1};
 	std::atomic<bool> reached_end_ {false};
+	
+	std::map<parameter_id, node_parameter> parameters_;
+	std::vector<parameter_id> input_parameters_;
 	
 	std::string name_ = "node";
 	
@@ -113,6 +120,13 @@ public:
 	
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
+	
+	node_parameter& add_parameter(parameter_id);
+	bool has_parameter(parameter_id) const;
+	node_parameter& parameter_at(parameter_id) const;
+	void add_input_parameter(parameter_id);
+	bool has_input_parameter(parameter_id) const;
+	bool needs_output_parameter(parameter_id) const;
 
 	bool precedes(const node&) const;
 	bool precedes_strict(const node&) const;

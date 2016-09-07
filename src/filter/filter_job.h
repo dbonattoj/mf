@@ -25,6 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+template<typename Value> class filter_parameter;
+
 class filter_job {
 private:
 	processing_node_job& node_job_;
@@ -39,6 +41,9 @@ public:
 	template<typename Input> decltype(auto) in(Input&);
 	template<typename Output> decltype(auto) out(Output&);
 	template<typename Param> decltype(auto) param(Param&);
+	
+	template<typename Value>
+	void update_param(filter_parameter<Value>& parameter, const Value& new_value);
 };
 
 }}

@@ -21,8 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_NODE_FRAME_SATELLITE_H_
 #define MF_FLOW_NODE_FRAME_SATELLITE_H_
 
-#include <iostream>
-#include <new>
+#include "parameter/node_parameter_valuation.h"
 
 namespace mf { namespace flow {
 
@@ -30,11 +29,8 @@ namespace mf { namespace flow {
 /** Each frame being passed between nodes contains an instance of this class. */
 class node_frame_satellite {
 private:
-	int stuff[100];
+	node_parameter_valuation output_parameters_;
 	
-public:	
-	node_frame_satellite() { std::cout << "CON" << std::endl; }
-	~node_frame_satellite() { std::cout << "DES" << std::endl; }
 };
 
 inline bool operator==(node_frame_satellite, node_frame_satellite) { return true; }

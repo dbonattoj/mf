@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_GRAPH_H_
 
 #include "../flow/graph.h"
+#include "../flow/parameter/parameter.h"
 #include "filter.h"
 #include <vector>
 #include <memory>
@@ -34,11 +35,15 @@ public:
 	std::vector<std::unique_ptr<filter>> filters_;
 	std::unique_ptr<graph> node_graph_;
 	
+	parameter_id last_parameter_id_ = 0;
+	
 public:
 	filter_graph() = default;
 	filter_graph(const filter_graph&) = delete;
 	filter_graph& operator=(const filter_graph&) = delete;
 	~filter_graph();
+	
+	parameter_id new_parameter_id();
 
 	template<typename Filter, typename... Args>
 	Filter& add_filter(Args&&... args) {

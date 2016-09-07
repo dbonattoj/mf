@@ -22,49 +22,60 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_PARAMETER_H_
 
 #include <functional>
+#include "../flow/parameter/node_parameter.h"
 
 namespace mf { namespace flow {
-/*
+
+class filter;
+
+template<typename Value> class filter_extern_parameter;
+
+/// Parameter of type \a Value belonging to a filter.
 template<typename Value>
 class filter_parameter {
 public:
 	using value_type = Value;
-	using compute_function_type = Value(time_unit);
-	
+	using extern_parameter_type = filter_extern_parameter<Value>;
+
 private:
-	parameter_kind kind_ = parameter_kind::undefined;
-	std::function<compute_function_type> compute_function_;
-	bool dynamic_ = false;
+	filter& filter_;
+	parameter_id id_;
+	std::string name_;
 
 public:
-	parameter_kind kind() const { return kind_; }
-
-	void set_dynamic();
-	void set_constant(const Value&);
-	template<typename Function> void set_time_function(const Function&);
-	void set_mirror(const filter_parameter&);
-};
-
-
-template<typename Value>
-class filter_request_parameter : public filter_parameter<Value> {
-	using base = filter_parameter<Value>;
+	explicit filter_parameter(filter&);
 	
-public:
-	using value_type = typename base::value_type;
+	void set_name(const std::string& nm) { name_ = nm; }
+	const std::string& name() const { return name_; }
 };
 
 
+/// Link to a parameter of type \a Value belonging to another filter.
 template<typename Value>
-class filter_input_parameter {
+class filter_extern_parameter {
 public:
 	using value_type = Value;
 	using parameter_type = filter_parameter<Value>;
 
 private:
-	parameter_type* referenced_parameter_;
+	filter& filter_;
+	parameter_id linked_id_;
+	bool readable_;
+	bool writable_;
+	std::string name_;
+
+public:
+	explicit filter_extern_parameter(filter&);
+	
+	void link(parameter_type&);
+	bool is_linked() const;
+	
+	void set_name(const std::string& nm) { name_ = nm; }
+	const std::string& name() const { return name_; }	
 };
-*/
+
+
+#include "filter_parameter.tcc"
 
 }}
 
