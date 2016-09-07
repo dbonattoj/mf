@@ -44,16 +44,14 @@ private:
 	std::function<deterministic_value_function> value_function_;
 
 public:
-	explicit node_parameter(parameter_id id);
+	explicit node_parameter(parameter_id id) :
+		id_(id) { }
+		
+	template<typename Function>
+	void set_value_function(Function func) { value_function_ = func; }
+	void unset_value_function() { value_function_ = nullptr; }
 	
 	parameter_id id() const { return id_; }	
-	bool is_deterministic() const;
-	bool is_dynamic() const;
-
-	template<typename Function> void set_value_function(Function&& func)
-		{ value_function_ = std::forward<Function>(func); }
-	void set_constant_value(const node_parameter_value&);
-	void set_dynamic();
 	
 	node_parameter_value deterministic_value(time_unit frame_time) const;
 };

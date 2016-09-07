@@ -27,8 +27,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 class filter;
+class node;
 
 template<typename Value> class filter_extern_parameter;
+
+class filter_parameter_base {
+public:
+	virtual ~filter_parameter_base() = default;
+	virtual void install(node&) = 0;
+};
 
 /// Parameter of type \a Value belonging to a filter.
 template<typename Value>
@@ -36,17 +43,29 @@ class filter_parameter {
 public:
 	using value_type = Value;
 	using extern_parameter_type = filter_extern_parameter<Value>;
+	using deterministic_value_function = Value(time_unit);
 
 private:
 	filter& filter_;
 	parameter_id id_;
+	std::function<deterministic_value_function> value_function_;
 	std::string name_;
 
 public:
 	explicit filter_parameter(filter&);
 	
+	parameter_id id() const { return id_; }	
+	bool is_deterministic() const;
+	bool is_dynamic() const;
+
+	template<typename Function> void set_value_function(Function func);
+	void set_constant_value(const Value&);
+	void set_dynamic();
+	
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const { return name_; }
+	
+	void install(node&);
 };
 
 
@@ -59,7 +78,7 @@ public:
 
 private:
 	filter& filter_;
-	parameter_id linked_id_;
+	const parameter_type* linked_parameter_ = nullptr;
 	bool readable_;
 	bool writable_;
 	std::string name_;
@@ -69,9 +88,12 @@ public:
 	
 	void link(parameter_type&);
 	bool is_linked() const;
+	const parameter_type& linked_parameter() const;
 	
 	void set_name(const std::string& nm) { name_ = nm; }
-	const std::string& name() const { return name_; }	
+	const std::string& name() const { return name_; }
+	
+	void install(node&);
 };
 
 }}

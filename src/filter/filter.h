@@ -39,6 +39,7 @@ class filter_output_base;
 class multiplex_node;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
+template<typename Value> class filter_parameter;
 
 /// Filter which performs concrete processing, base class.
 /** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
@@ -46,7 +47,7 @@ class filter : public processing_node_handler {
 public:
 	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
-	//template<typename Value> using parameter_type = filter_parameter<Value>;
+	template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = filter_job;
 	
 	static const std::string default_filter_name;
