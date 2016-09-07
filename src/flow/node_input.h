@@ -48,6 +48,10 @@ public:
 	virtual ~node_input() { }
 
 	node& this_node() const noexcept { return node_; }
+	
+	bool has_output_parameter(parameter_id) const;
+	std::size_t output_parameters_count() const;
+	parameter_id output_parameter_at(std::ptrdiff_t i) const;
 
 	virtual thread_index reader_thread_index() const = 0;
 	

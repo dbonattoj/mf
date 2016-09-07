@@ -25,11 +25,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <memory>
 #include <functional>
 #include <utility>
+#include "../../common.h"
 
 namespace mf { namespace flow {
 
 using parameter_id = int;
-static constexpr undefined_parameter_id = 0;
+static constexpr parameter_id undefined_parameter_id = 0;
 
 class node_parameter_value;
 
@@ -49,7 +50,7 @@ public:
 	bool is_deterministic() const;
 	bool is_dynamic() const;
 
-	template<typename Function> set_value_function(Function&& func)
+	template<typename Function> void set_value_function(Function&& func)
 		{ value_function_ = std::forward<Function>(func); }
 	void set_constant_value(const node_parameter_value&);
 	void set_dynamic();

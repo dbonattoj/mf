@@ -26,7 +26,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/processing/processing_node_job.h"
 #include "../queue/frame.h"
 #include "filter_edge.h"
-#include "filter_parameter.h"
 #include "filter_job.h"
 #include <vector>
 #include <memory>

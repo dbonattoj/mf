@@ -163,6 +163,9 @@ void node::propagate_setup_() {
 	Assert(stage_ == stage::was_pre_setup);
 	if(! is_source()) deduce_stream_properties_();
 	this->setup();
+	
+	deduce_output_parameters_();
+	
 	stage_ = stage::was_setup;
 }
 
@@ -238,8 +241,25 @@ time_unit node::end_time() const noexcept {
 }
 
 
+void node::deduce_output_parameters_() {
+	std::set<parameter_id> all_output_parameters;
+	for(auto&& in : inputs_) {
+		for(std::ptrdiff_t i = 0; i < in->output_parameters_count(); ++i) {
+			parameter_id par = in->output_parameter_at(i);
+			all_output_parameters.insert(par);
+		}
+	}
+	for(auto&& out : outputs_) {
+		for(parameter_id par : all_output_parameters) {
+			if(out->needs_output_parameter(par)) out->add_output_parameter(par);
+		}
+	}
+}
+
+
 node_parameter& node::add_parameter(parameter_id id) {
-	parameters_.emplace(id, node_parameter(id));
+	auto res = parameters_.emplace(id, node_parameter(id));
+	return res.first->second;
 }
 
 
@@ -248,7 +268,12 @@ bool node::has_parameter(parameter_id id) const {
 }
 
 
-node_parameter& node::parameter_at(parameter_id id) const {
+node_parameter& node::parameter_at(parameter_id id) {
+	return parameters_.at(id);
+}
+
+
+const node_parameter& node::parameter_at(parameter_id id) const {
 	return parameters_.at(id);
 }
 

@@ -28,17 +28,17 @@ node_parameter::node_parameter(parameter_id id) :
 
 
 bool node_parameter::is_deterministic() const {
-	return value_function_;
+	return value_function_ ? true : false;
 }
 
 
 bool node_parameter::is_dynamic() const {
-	return ! value_function_;
+	return value_function_ ? false : true;
 }
 
 
 void node_parameter::set_constant_value(const node_parameter_value& val) {
-	set_value_function([val] { return val; });
+	set_value_function([val](time_unit) { return val; });
 }
 
 

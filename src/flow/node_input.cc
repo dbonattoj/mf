@@ -102,4 +102,22 @@ void node_input::set_activated(bool activated) {
 	}
 }
 
+
+bool node_input::has_output_parameter(parameter_id id) const {
+	Assert(is_connected());
+	return connected_output_->has_output_parameter(id);
+}
+
+
+std::size_t node_input::output_parameters_count() const {
+	Assert(is_connected());
+	return connected_output_->output_parameters_count();
+}
+
+
+parameter_id node_input::output_parameter_at(std::ptrdiff_t i) const {
+	Assert(is_connected());
+	return connected_output_->output_parameter_at(i);
+}
+
 }}

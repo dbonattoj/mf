@@ -16,7 +16,7 @@ private:
 public:
 	node_parameter_value(const node_parameter_value&);
 	node_parameter_value(node_parameter_value&&);
-	template<typename T> node_parameter_value(const T& val)	:
+	template<typename T> node_parameter_value(const T&);
 	template<typename T> node_parameter_value(T&&);
 	
 	node_parameter_value& operator=(const node_parameter_value&);

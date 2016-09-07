@@ -74,9 +74,8 @@ public:
 	const std::string& name() const { return name_; }	
 };
 
+}}
 
 #include "filter_parameter.tcc"
-
-}}
 
 #endif

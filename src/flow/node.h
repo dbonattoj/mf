@@ -82,6 +82,10 @@ private:
 	
 	void deduce_stream_properties_();
 
+
+	void deduce_output_parameters_();
+	
+
 protected:
 	explicit node(graph& gr) : graph_(gr) { }
 	node(const node&) = delete;
@@ -123,7 +127,8 @@ public:
 	
 	node_parameter& add_parameter(parameter_id);
 	bool has_parameter(parameter_id) const;
-	node_parameter& parameter_at(parameter_id) const;
+	node_parameter& parameter_at(parameter_id);
+	const node_parameter& parameter_at(parameter_id) const;
 	void add_input_parameter(parameter_id);
 	bool has_input_parameter(parameter_id) const;
 	bool needs_output_parameter(parameter_id) const;

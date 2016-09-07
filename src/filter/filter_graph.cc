@@ -33,7 +33,7 @@ filter_graph::~filter_graph() {
 
 
 parameter_id filter_graph::new_parameter_id() {
-	return ++parameter_id;
+	return ++last_parameter_id_;
 }
 
 

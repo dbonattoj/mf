@@ -7,7 +7,7 @@ node_parameter_value::node_parameter_value(const T& t) :
 
 
 template<typename T>
-node_parameter_value::node_parameter_value(T&&);
+node_parameter_value::node_parameter_value(T&& t) :
 	holder_(std::make_unique<holder<T>>(std::move(t))) { }
 
 

@@ -50,7 +50,12 @@ public:
 	node& this_node() const noexcept { return node_; }
 	
 	bool needs_output_parameter(parameter_id);
+	
 	void add_output_parameter(parameter_id);
+
+	bool has_output_parameter(parameter_id) const;	
+	std::size_t output_parameters_count() const { return output_parameters_.size(); }
+	parameter_id output_parameter_at(std::ptrdiff_t i) const { return output_parameters_.at(i); }
 
 	thread_index reader_thread_index() const;
 

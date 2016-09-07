@@ -23,12 +23,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <map>
 #include "node_parameter.h"
+#include "node_parameter_value.h"
 
 namespace mf { namespace flow {
 
 class node_parameter_valuation {
 private:
-	std::map<node_parameter_id, node_parameter_value> values_;
+	std::map<parameter_id, node_parameter_value> values_;
 
 public:
 	node_parameter_valuation() = default;
@@ -38,11 +39,10 @@ public:
 	node_parameter_valuation& operator=(const node_parameter_valuation&) = default;
 	node_parameter_valuation& operator=(node_parameter_valuation&&) = default;
 	
-	bool contains_parameter(node_parameter_id) const;
-	const node_parameter_value& operator()(node_parameter_id) const;
-	node_parameter_value& operator()(node_parameter_id);
+	bool contains_parameter(parameter_id) const;
+	const node_parameter_value& operator()(parameter_id) const;
+	node_parameter_value& operator()(parameter_id);
 
-	void add(const node_parameter&);
 	friend node_parameter_valuation combine(const node_parameter_valuation&, const node_parameter_valuation&);
 };
 

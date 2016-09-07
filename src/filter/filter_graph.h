@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_GRAPH_H_
 
 #include "../flow/graph.h"
-#include "../flow/parameter/parameter.h"
+#include "../flow/parameter/node_parameter.h"
 #include "filter.h"
 #include <vector>
 #include <memory>
