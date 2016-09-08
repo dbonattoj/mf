@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../common.h"
 #include "../queue/frame.h"
 #include "parameter/node_parameter.h"
+#include "parameter/node_parameter_valuation.h"
 #include "node_stream_properties.h"
 
 #include <vector>
@@ -33,6 +34,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <memory>
 #include <utility>
 #include <type_traits>
+#include <mutex>
 
 namespace mf { namespace flow {
 
@@ -64,6 +66,9 @@ private:
 	std::atomic<bool> reached_end_ {false};
 	
 	std::map<parameter_id, node_parameter> parameters_;
+	node_parameter_valuation parameter_valuation_;
+	mutable std::mutex parameters_mutex_;
+	
 	std::vector<parameter_id> input_parameters_;
 	
 	std::string name_ = "node";
@@ -102,6 +107,9 @@ protected:
 		
 	void set_current_time_(time_unit t) noexcept;
 	void mark_end_();
+	
+	void update_parameter_(parameter_id, const node_parameter_value&);
+	node_parameter_valuation current_parameter_valuation_() const;
 	
 public:
 	virtual ~node();

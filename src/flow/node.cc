@@ -296,6 +296,18 @@ bool node::needs_output_parameter(parameter_id id) const {
 }
 
 
+void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
+	std::lock<std::mutex> lock(parameters_mutex_);
+	parameters_.set(id, val);
+}
+
+
+node_parameter_valuation node::current_parameter_valuation_() const {
+	std::lock<std::mutex> lock(parameters_mutex_);
+	return parameters_;
+}
+
+
 
 
 

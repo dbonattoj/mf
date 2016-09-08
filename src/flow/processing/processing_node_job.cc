@@ -22,8 +22,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-processing_node_job::processing_node_job(processing_node& nd) :
+processing_node_job::processing_node_job(processing_node& nd, const node_parameter_valuation& params) :
 	node_(nd),
+	node_parameters_(params),
 	input_views_(nd.inputs_count()) { }
 
 

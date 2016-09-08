@@ -58,7 +58,7 @@ public:
 	bool is_deterministic() const;
 	bool is_dynamic() const;
 
-	template<typename Function> void set_value_function(Function func);
+	template<typename Function> void set_value_function(Function&& func);
 	void set_constant_value(const Value&);
 	void set_dynamic();
 	

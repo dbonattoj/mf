@@ -36,24 +36,14 @@ class node_parameter_value;
 
 /// Node parameter with its current value.
 class node_parameter {
-public:
-	using deterministic_value_function = node_parameter_value(time_unit);
-
 private:
 	parameter_id id_;
-	std::function<deterministic_value_function> value_function_;
 
 public:
 	explicit node_parameter(parameter_id id) :
 		id_(id) { }
-		
-	template<typename Function>
-	void set_value_function(Function func) { value_function_ = func; }
-	void unset_value_function() { value_function_ = nullptr; }
-	
+			
 	parameter_id id() const { return id_; }	
-	
-	node_parameter_value deterministic_value(time_unit frame_time) const;
 };
 
 

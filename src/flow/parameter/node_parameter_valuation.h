@@ -39,9 +39,11 @@ public:
 	node_parameter_valuation& operator=(const node_parameter_valuation&) = default;
 	node_parameter_valuation& operator=(node_parameter_valuation&&) = default;
 	
-	bool contains_parameter(parameter_id) const;
+	bool has(parameter_id) const;
 	const node_parameter_value& operator()(parameter_id) const;
-	node_parameter_value& operator()(parameter_id);
+	void set(parameter_id, const node_parameter_value&);
+	void erase(parameter_id);
+	void clear();
 
 	friend node_parameter_valuation combine(const node_parameter_valuation&, const node_parameter_valuation&);
 };

@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_PROCESSING_NODE_JOB_H_
 
 #include "processing_node.h"
+#include "../parameter/node_parameter_valuation.h"
 #include <vector>
 
 namespace mf { namespace flow {
@@ -38,13 +39,14 @@ namespace mf { namespace flow {
 class processing_node_job {
 private:
 	processing_node& node_;
+	const node_parameter_valuation& node_parameters_;
 	std::vector<timed_frame_array_view> input_views_;
 	frame_view output_view_;
 
 	bool end_marked_ = false;
 	
 public:
-	explicit processing_node_job(processing_node& nd);
+	processing_node_job(processing_node& nd, const node_parameter_valuation& params);
 	processing_node_job(const processing_node_job&) = delete;
 	processing_node_job(processing_node_job&&) = default;
 	~processing_node_job();

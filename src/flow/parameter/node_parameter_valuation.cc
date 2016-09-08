@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-bool node_parameter_valuation::contains_parameter(parameter_id id) const {
+bool node_parameter_valuation::has(parameter_id id) const {
 	return (values_.find(id) != values_.end());
 }
 
@@ -32,9 +32,21 @@ const node_parameter_value& node_parameter_valuation::operator()(parameter_id id
 }
 
 
-node_parameter_value& node_parameter_valuation::operator()(parameter_id id) {
-	return values_.at(id);
+void node_parameter_valuation::set(parameter_id id, const node_parameter_value& val) {
+	if(has(id)) values_.at(id) = val;
+	else values_.emplace(id, val);
 }
+
+
+void node_parameter_valuation::erase(parameter_id id) {
+	values_.erase(id);
+}
+
+
+void node_parameter_valuation::clear() {
+	values_.clear();
+}
+
 
 node_parameter_valuation combine(const node_parameter_valuation& a, const node_parameter_valuation& b) {
 	node_parameter_valuation ab = a;

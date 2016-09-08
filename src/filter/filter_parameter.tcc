@@ -26,7 +26,7 @@ bool filter_parameter<Value>::is_dynamic() const {
 
 template<typename Value> template<typename Function>
 void filter_parameter<Value>::set_value_function(Function&& func) {
-	value_function_ = func;
+	value_function_ = std::forward<Function&&>(func);
 }
 
 
@@ -44,13 +44,7 @@ void filter_parameter<Value>::set_dynamic() {
 
 template<typename Value>
 void filter_parameter<Value>::install(node& nd) {
-	node_parameter& par = nd.add_parameter(id_);
-	if(is_deterministic()) {
-		auto fn = [&value_function_](time_unit t) {
-			return node_parameter_value(value_function_(t));
-		}
-		par.set_value_function(fn);
-	}
+	if(is_dynamic()) nd.add_parameter(id_);
 }
 
 
