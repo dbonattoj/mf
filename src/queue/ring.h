@@ -67,7 +67,7 @@ public:
 	void end_write(time_unit written_duration);
 	
 	section_view_type begin_read(time_unit duration);
-	void end_read(time_unit read_duration);
+	void end_read(time_unit read_duration, bool initialize_frames = true);
 		
 	void skip(time_unit duration);
 };

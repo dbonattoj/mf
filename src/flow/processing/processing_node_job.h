@@ -38,15 +38,16 @@ namespace mf { namespace flow {
  ** \ref processing_node_job must not be destructed with the output view still attached. */
 class processing_node_job {
 private:
-	processing_node& node_;
-	const node_parameter_valuation& node_parameters_;
-	std::vector<timed_frame_array_view> input_views_;
-	frame_view output_view_;
+	processing_node& node_; ///< The processing node.
+	std::vector<timed_frame_array_view> input_views_; ///< For each input (index), view to frames with time window.
+	frame_view output_view_; ///< View to (multi-channel) output frame.
+	node_parameter_valuation node_parameters_;
 
 	bool end_marked_ = false;
 	
 public:
 	processing_node_job(processing_node& nd, const node_parameter_valuation& params);
+	processing_node_job(processing_node& nd, node_parameter_valuation&& params);
 	processing_node_job(const processing_node_job&) = delete;
 	processing_node_job(processing_node_job&&) = default;
 	~processing_node_job();
@@ -71,6 +72,16 @@ public:
 	
 	bool has_output_view() const noexcept;
 	const frame_view& output_view() const;
+	
+	bool has_parameter(parameter_id) const;
+	node_parameter_value& parameter(parameter_id);
+	const node_parameter_value& parameter(parameter_id) const;
+	const node_parameter_valuation& parameters() const;
+	
+	bool has_input_parameter(parameter_id);
+	const node_parameter_value& input_parameter(parameter_id) const;
+	
+	
 };
 
 }}

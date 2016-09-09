@@ -46,6 +46,9 @@ public:
 	using typename base::strides_type;
 	using format_base_type = typename view_type::format_base_type;
 	using format_ptr = typename view_type::format_ptr;
+
+	using frame_ptr = typename view_type::frame_ptr;
+	using const_frame_ptr = typename const_view_type::frame_ptr;
 	
 	/// \name Constructor
 	///@{	
@@ -109,6 +112,9 @@ public:
 	const format_ptr& frame_format_ptr() const noexcept { return base::get_view_().frame_format_ptr(); }
 	const format_base_type& frame_format() const noexcept { return base::get_view_().frame_format(); }
 	///@}
+	
+	
+	void initialize_frame(frame_ptr);
 };
 
 

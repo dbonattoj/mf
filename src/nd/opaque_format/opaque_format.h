@@ -65,6 +65,7 @@ public:
 	virtual bool compare_frame(const_frame_ptr a, const_frame_ptr b) const = 0;
 	virtual void construct_frame(frame_ptr) const = 0;
 	virtual void destruct_frame(frame_ptr) const = 0;
+	virtual void initialize_frame(frame_ptr) const = 0;
 	
 	virtual bool has_array_format() const { return false; }
 	virtual ndarray_format array_format() const { throw std::logic_error("not implemented"); }

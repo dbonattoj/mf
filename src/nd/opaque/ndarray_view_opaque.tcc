@@ -86,10 +86,10 @@ std::size_t ndarray_view_opaque<Dim, Mutable>::default_strides_padding(std::ptrd
 
 
 template<std::size_t Dim, bool Mutable>
-auto ndarray_view_opaque<Dim, Mutable>::at(const coordinates_type& coord) const -> ndarray_view_opaque<0, Mutable> {
+auto ndarray_view_opaque<Dim, Mutable>::at(const coordinates_type& coord) const -> frame_view {
 	auto base_coord = ndcoord_cat(coord, 0);
 	auto new_start = static_cast<frame_ptr>(base::coordinates_to_pointer(base_coord));
-	return ndarray_view_opaque<0, Mutable>(new_start, make_ndsize(), make_ndptrdiff(), frame_format_);
+	return frame_view(new_start, make_ndsize(), make_ndptrdiff(), frame_format_);
 }
 
 

@@ -33,19 +33,18 @@ thread_index node_output::reader_thread_index() const {
 }
 
 
-bool node_output::needs_output_parameter(parameter_id id) {
+bool node_output::add_propagated_parameter_if_needed(parameter_id id) {
 	Assert(is_connected());
-	return connected_node().needs_output_parameter(id);
+	if(has_propagated_parameter(id)) return true;
+	bool needed = connected_node().add_propagated_parameter_if_needed(id);
+	if(needed) propagated_parameters_.push_back(id);
+	return needed;
 }
 
 
-bool node_output::has_output_parameter(parameter_id id) const {
-	return (std::find(output_parameters_.cbegin(), output_parameters_.cend(), id) == output_parameters_.cend());
-}
-
-
-void node_output::add_output_parameter(parameter_id id) {
-	if(! has_output_parameter(id)) output_parameters_.push_back(id);
+bool node_output::has_propagated_parameter(parameter_id id) const {
+	auto it = std::find(propagated_parameters_.cbegin(), propagated_parameters_.cend(), id);
+	return (it == propagated_parameters_.cend());
 }
 
 

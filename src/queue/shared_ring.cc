@@ -268,13 +268,13 @@ bool shared_ring::wait_readable() {
 }
 
 
-void shared_ring::end_read(time_unit read_duration) {
+void shared_ring::end_read(time_unit read_duration, bool initialize_frames) {
 	if(reader_state_ != accessing) throw sequencing_error("was not reading");
 	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		
-		ring_.end_read(read_duration);
+		ring_.end_read(read_duration, initialize_frames);
 		read_start_time_ += read_duration;
 		Assert(read_start_time_ == ring_.read_start_time());	
 	}

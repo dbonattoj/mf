@@ -116,8 +116,8 @@ auto timed_ring::begin_read_span(time_span span) -> section_view_type {
 }
 
 
-void timed_ring::end_read(time_unit read_duration) {
-	ring::end_read(read_duration);
+void timed_ring::end_read(time_unit read_duration, bool initialize_frames) {
+	ring::end_read(read_duration, initialize_frames);
 }
 
 

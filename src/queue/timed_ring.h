@@ -69,7 +69,7 @@ public:
 	
 	section_view_type begin_read(time_unit);
 	section_view_type begin_read_span(time_span);
-	void end_read(time_unit read_duration);
+	void end_read(time_unit read_duration, bool initialize_frames);
 	void skip(time_unit duration);
 	void seek(time_unit);
 	bool reader_reached_end() const;

@@ -164,7 +164,7 @@ void node::propagate_setup_() {
 	if(! is_source()) deduce_stream_properties_();
 	this->setup();
 	
-	deduce_output_parameters_();
+	deduce_propagated_parameters_();
 	
 	stage_ = stage::was_setup;
 }
@@ -241,20 +241,24 @@ time_unit node::end_time() const noexcept {
 }
 
 
-void node::deduce_output_parameters_() {
-	std::set<parameter_id> all_output_parameters;
-	for(auto&& in : inputs_) {
-		for(std::ptrdiff_t i = 0; i < in->output_parameters_count(); ++i) {
-			parameter_id par = in->output_parameter_at(i);
-			all_output_parameters.insert(par);
-		}
-	}
-	for(auto&& out : outputs_) {
-		for(parameter_id par : all_output_parameters) {
-			if(out->needs_output_parameter(par)) out->add_output_parameter(par);
-		}
+void node::deduce_propagated_parameters_() {
+	for(auto&& ip : parameters_) {
+		parameter_id id = ip.first;
+		add_propagated_parameter_if_needed(id);
 	}
 }
+
+
+bool node::add_propagated_parameter_if_needed(parameter_id id) {
+	bool needed = false;
+	for(auto&& out : outputs_) {
+		bool needed_by_output = out->add_propagated_parameter_if_needed(id);
+		if(needed_by_output) needed = true;
+	}
+	if(has_input_parameter(id)) needed = true;
+	return needed;
+}
+
 
 
 node_parameter& node::add_parameter(parameter_id id) {
@@ -288,17 +292,27 @@ bool node::has_input_parameter(parameter_id id) const {
 }
 
 
-bool node::needs_output_parameter(parameter_id id) const {
-	if(has_input_parameter(id)) return true;
-	else return std::any_of(outputs_.begin(), outputs_.end(), [id](auto&& out) {
-		return out->needs_output_parameter(id);
-	});
+void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
+	std::lock<std::mutex> lock(parameters_mutex_);
+	parameters_.set(id, val);
 }
 
 
 void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
 	std::lock<std::mutex> lock(parameters_mutex_);
-	parameters_.set(id, val);
+	parameters_.set(id, std::move(val));
+}
+
+
+void node::update_parameters_(parameter_id id, const node_parameter_valuation& val) {
+	std::lock<std::mutex> lock(parameters_mutex_);
+	parameters_.set_all(val);
+}
+
+
+void node::update_parameters_(parameter_id id, const node_parameter_valuation& val) {
+	std::lock<std::mutex> lock(parameters_mutex_);
+	parameters_.set_all(std::move(val));
 }
 
 
@@ -306,9 +320,6 @@ node_parameter_valuation node::current_parameter_valuation_() const {
 	std::lock<std::mutex> lock(parameters_mutex_);
 	return parameters_;
 }
-
-
-
 
 
 

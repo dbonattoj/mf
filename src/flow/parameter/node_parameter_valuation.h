@@ -42,6 +42,8 @@ public:
 	bool has(parameter_id) const;
 	const node_parameter_value& operator()(parameter_id) const;
 	void set(parameter_id, const node_parameter_value&);
+	void set_all(const node_parameter_valuation&);
+	void set_all(node_parameter_valuation&&);
 	void erase(parameter_id);
 	void clear();
 

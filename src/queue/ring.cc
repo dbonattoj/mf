@@ -73,7 +73,7 @@ std::size_t ring::adjust_padding_(const format_base_type& frm, std::size_t capac
 
 
 auto ring::section_(time_unit start, time_unit duration) -> section_view_type {
-	Assert(duration <= capacity());
+	Assert_crit(duration <= capacity());
 		
 	auto new_start = advance_raw_ptr(base::start(), base::strides().front() * start);
 	auto new_shape = make_ndsize(duration);
@@ -117,10 +117,15 @@ auto ring::begin_read(time_unit duration) -> section_view_type {
 }
 
 
-void ring::end_read(time_unit read_duration) {
+void ring::end_read(time_unit read_duration, bool initialize_frames) {
 	if(read_duration == 0) return;
 	Assert_crit(read_duration <= readable_duration());
 	if(read_duration > readable_duration()) throw sequencing_error("reported read duration too large");
+	if(initialize_frames) {
+		auto section = section_(read_position_, read_duration);
+		auto it = section.begin(), end_it = section.end();
+		for(; it != end_it; ++it) base::initialize_frame(it.ptr());
+	}
 	read_position_ = (read_position_ + read_duration) % capacity();
 	full_ = false;
 }

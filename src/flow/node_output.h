@@ -37,7 +37,8 @@ private:
 
 	node_input* connected_input_ = nullptr;
 	
-	std::vector<parameter_id> output_parameters_;
+	std::vector<parameter_id> propagated_parameters_;
+	// = parameters which are added to frames passing through this output
 	
 protected:
 	node_output(const node_output&) = delete;
@@ -49,13 +50,8 @@ public:
 
 	node& this_node() const noexcept { return node_; }
 	
-	bool needs_output_parameter(parameter_id);
-	
-	void add_output_parameter(parameter_id);
-
-	bool has_output_parameter(parameter_id) const;	
-	std::size_t output_parameters_count() const { return output_parameters_.size(); }
-	parameter_id output_parameter_at(std::ptrdiff_t i) const { return output_parameters_.at(i); }
+	bool add_propagated_parameter_if_needed(parameter_id);
+	bool has_propagated_parameter(parameter_id) const;
 
 	thread_index reader_thread_index() const;
 

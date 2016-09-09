@@ -69,7 +69,9 @@ private:
 	node_parameter_valuation parameter_valuation_;
 	mutable std::mutex parameters_mutex_;
 	
+
 	std::vector<parameter_id> input_parameters_;
+	// = parameters that will be read by this node: valuation needs to be included with input frames
 	
 	std::string name_ = "node";
 	
@@ -87,7 +89,7 @@ private:
 	void deduce_stream_properties_();
 
 
-	void deduce_output_parameters_();
+	void deduce_propagated_parameters_();
 	
 
 protected:
@@ -109,6 +111,9 @@ protected:
 	void mark_end_();
 	
 	void update_parameter_(parameter_id, const node_parameter_value&);
+	void update_parameter_(parameter_id, node_parameter_value&&);
+	void update_parameters_(parameter_id, const node_parameter_valuation&);
+	void update_parameters_(parameter_id, node_parameter_valuation&&);
 	node_parameter_valuation current_parameter_valuation_() const;
 	
 public:
@@ -138,8 +143,9 @@ public:
 	const node_parameter& parameter_at(parameter_id) const;
 	void add_input_parameter(parameter_id);
 	bool has_input_parameter(parameter_id) const;
-	bool needs_output_parameter(parameter_id) const;
-
+	
+	bool add_propagated_parameter_if_needed(parameter_id);
+	
 	bool precedes(const node&) const;
 	bool precedes_strict(const node&) const;
 	const node& first_successor() const;

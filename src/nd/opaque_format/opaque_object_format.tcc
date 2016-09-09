@@ -72,4 +72,10 @@ void opaque_object_format<Object>::destruct_frame(frame_ptr frame) const {
 }
 
 
+template<typename Object>
+void opaque_object_format<Object>::initialize_frame(frame_ptr) const {
+	obj(frame) = Object();
+}
+
+
 }

@@ -27,8 +27,8 @@ template<std::size_t Dim, typename Allocator>
 void ndarray_opaque<Dim, Allocator>::construct_frames_() {
 	if(frame_format().is_pod()) return;
 
-	auto it = base::get_base_view_().begin();
-	auto it_end = base::get_base_view_().end();
+	auto it = base::begin();
+	auto it_end = base::end();
 	for(; it != it_end; ++it)
 		frame_format().construct_frame(it.ptr());
 }
@@ -38,8 +38,8 @@ template<std::size_t Dim, typename Allocator>
 void ndarray_opaque<Dim, Allocator>::destruct_frames_() {
 	if(frame_format().is_pod()) return;
 	
-	auto it = base::get_base_view_().begin();
-	auto it_end = base::get_base_view_().end();
+	auto it = base::begin();
+	auto it_end = base::end();
 	for(; it != it_end; ++it)
 		frame_format().destruct_frame(it.ptr());
 }
@@ -147,6 +147,12 @@ template<std::size_t Dim, typename Allocator>
 auto ndarray_opaque<Dim, Allocator>::operator=(ndarray_opaque&& arr) -> ndarray_opaque& {
 	base::operator=(std::move(arr));
 	return *this;
+}
+
+
+template<std::size_t Dim, typename Allocator>
+void ndarray_opaque<Dim, Allocator>::initialize_frame(frame_ptr ptr) {
+	frame_format().initialize_frame(ptr);
 }
 
 

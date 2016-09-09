@@ -19,6 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "node_parameter_valuation.h"
+#include <iterator>
 
 namespace mf { namespace flow {
 
@@ -35,6 +36,16 @@ const node_parameter_value& node_parameter_valuation::operator()(parameter_id id
 void node_parameter_valuation::set(parameter_id id, const node_parameter_value& val) {
 	if(has(id)) values_.at(id) = val;
 	else values_.emplace(id, val);
+}
+
+
+void node_parameter_valuation::set_all(const node_parameter_valuation& val) {
+	for(const auto& iv : val.values_) set(iv.first, iv.second);
+}
+
+
+void node_parameter_valuation::set_all(node_parameter_valuation&& val) {
+	for(const auto& iv : val.values_) set(iv.first, std::move(iv.second));
 }
 
 

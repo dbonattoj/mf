@@ -27,9 +27,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../detail/ndarray_view_fcall.h"
 #include "../opaque_format/opaque_format.h"
 #include "../../utility/misc.h"
+#include "ndarray_opaque_iterator.h"
 #include <stdexcept>
 #include <memory>
 #include <utility>
+#include <type_traits>
 
 namespace mf {
 
@@ -53,8 +55,11 @@ public:
 	using strides_type = ndptrdiff<Dim>;
 	using span_type = ndspan<Dim>;
 	
+	using iterator = ndarray_opaque_iterator<Dim, Mutable>;
+	
 	using format_base_type = opaque_format;
 	using format_ptr = std::shared_ptr<const format_base_type>;
+	using frame_view = ndarray_view_opaque<0, Mutable>;
 
 	constexpr static std::size_t dimension = Dim;
 	
@@ -143,12 +148,20 @@ public:
 	bool operator==(const ndarray_view_opaque& vw) const { return compare(vw); }
 	bool operator!=(const ndarray_view_opaque& vw) const { return ! compare(vw); }
 	///@}
+	
+	
+	
+	/// \name Iteration
+	///@{
+	iterator begin() const { return iterator(base::begin()); }
+	iterator end() const { return iterator(base::end()); }
+	///@\
 
 
 
 	/// \name Indexing
 	///@{
-	ndarray_view_opaque<0, Mutable> at(const coordinates_type&) const;
+	frame_view at(const coordinates_type&) const;
 	
 	ndarray_view_opaque section
 	(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const {

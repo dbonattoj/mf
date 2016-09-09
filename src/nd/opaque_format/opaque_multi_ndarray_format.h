@@ -65,6 +65,7 @@ public:
 	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const override;
 	void construct_frame(frame_ptr) const override { }
 	void destruct_frame(frame_ptr) const override { }
+	void initialize_frame(frame_ptr) const override { }
 	
 	bool has_parts() const override { return true; }
 	std::size_t parts_count() const override { return parts_.size(); }

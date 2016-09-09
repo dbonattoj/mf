@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "processing_node_job.h"
 #include "../multiplex/multiplex_node.h"
 #include "../graph.h"
+#include <utility>
 
 namespace mf { namespace flow {
 
@@ -103,11 +104,11 @@ void processing_node::handler_process_(processing_node_job& job) {
 
 
 processing_node_job processing_node::begin_job_() {
-	return processing_node_job(*this);
+	return processing_node_job(*this, std::move(current_parameter_valuation_()));
 }
 
 
-void processing_node::finish_job_(processing_node_job& job) {
+void processing_node::finish_job_(processing_node_job& job) {	
 	bool reached_end = false;
 	
 	if(stream_properties().duration_is_defined()
@@ -123,6 +124,8 @@ void processing_node::finish_job_(processing_node_job& job) {
 	}
 		
 	if(reached_end) mark_end_();
+	
+	update_parameters_(job.parameters()); // TODO move instead of copy
 }
 
 
