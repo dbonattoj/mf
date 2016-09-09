@@ -22,12 +22,5 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_parameter_value.h"
 
 namespace mf { namespace flow {
-	
-
-node_parameter_value node_parameter::deterministic_value(time_unit frame_time) const {
-	Assert(value_function_);
-	return value_function_(frame_time);
-}
-
 
 }}

@@ -79,6 +79,7 @@ public:
 	bool compare_frame(const_frame_ptr a, const_frame_ptr b) const override;
 	void construct_frame(frame_ptr) const override;
 	void destruct_frame(frame_ptr) const override;
+	void initialize_frame(frame_ptr) const override;
 	
 	bool has_array_format() const override;
 	ndarray_format array_format() const override;

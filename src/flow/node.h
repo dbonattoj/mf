@@ -112,8 +112,8 @@ protected:
 	
 	void update_parameter_(parameter_id, const node_parameter_value&);
 	void update_parameter_(parameter_id, node_parameter_value&&);
-	void update_parameters_(parameter_id, const node_parameter_valuation&);
-	void update_parameters_(parameter_id, node_parameter_valuation&&);
+	void update_parameters_(const node_parameter_valuation&);
+	void update_parameters_(node_parameter_valuation&&);
 	node_parameter_valuation current_parameter_valuation_() const;
 	
 public:

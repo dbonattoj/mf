@@ -30,7 +30,9 @@ namespace mf { namespace flow {
 class node_frame_satellite {
 private:
 	node_parameter_valuation output_parameters_;
-	
+
+public:
+	void initialize();
 };
 
 inline bool operator==(node_frame_satellite, node_frame_satellite) { return true; }

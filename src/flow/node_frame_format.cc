@@ -122,6 +122,11 @@ void node_frame_format::destruct_frame(frame_ptr frame) const {
 }
 
 
+void node_frame_format::initialize_frame(frame_ptr frame) const {
+	frame_satellite(frame).initialize();
+}
+
+
 bool node_frame_format::has_array_format() const {
 	return (parts_count() == 1);
 }

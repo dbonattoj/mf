@@ -33,6 +33,11 @@ const node_parameter_value& node_parameter_valuation::operator()(parameter_id id
 }
 
 
+node_parameter_value& node_parameter_valuation::operator()(parameter_id id) {
+	return values_.at(id);
+}
+
+
 void node_parameter_valuation::set(parameter_id id, const node_parameter_value& val) {
 	if(has(id)) values_.at(id) = val;
 	else values_.emplace(id, val);

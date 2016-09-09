@@ -154,7 +154,7 @@ public:
 	/// End reading \a did_read_duration frames.
 	/** Must be called after begin_read() or begin_read_span(). \a did_read_duration must be lower or equal to duration
 	 ** of section returned by that function. */
-	void end_read(time_unit did_read_duration, bool initialize_frames);	
+	void end_read(time_unit did_read_duration, bool initialize_frames = true);	
 	
 	/// Skips \a skip_duration frames.
 	/** Equivalent to `seek(read_start_time() + skip_duration)`, except that \a skip_duration gets truncated if it

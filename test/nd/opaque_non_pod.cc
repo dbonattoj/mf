@@ -99,6 +99,10 @@ public:
 		val(frame).constructed = false;
 		construction_counter--;
 	}
+	
+	void initialize_frame(frame_ptr frame) const override {
+		REQUIRE(val(frame).constructed);
+	}
 };
 
 TEST_CASE("non-pod frames", "[nd][ndarray_opaque]") {

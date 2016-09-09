@@ -293,32 +293,32 @@ bool node::has_input_parameter(parameter_id id) const {
 
 
 void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
-	std::lock<std::mutex> lock(parameters_mutex_);
-	parameters_.set(id, val);
+	std::lock_guard<std::mutex> lock(parameters_mutex_);
+	parameter_valuation_.set(id, val);
 }
 
 
-void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
-	std::lock<std::mutex> lock(parameters_mutex_);
-	parameters_.set(id, std::move(val));
+void node::update_parameter_(parameter_id id, node_parameter_value&& val) {
+	std::lock_guard<std::mutex> lock(parameters_mutex_);
+	parameter_valuation_.set(id, std::move(val));
 }
 
 
-void node::update_parameters_(parameter_id id, const node_parameter_valuation& val) {
-	std::lock<std::mutex> lock(parameters_mutex_);
-	parameters_.set_all(val);
+void node::update_parameters_(const node_parameter_valuation& val) {
+	std::lock_guard<std::mutex> lock(parameters_mutex_);
+	parameter_valuation_.set_all(val);
 }
 
 
-void node::update_parameters_(parameter_id id, const node_parameter_valuation& val) {
-	std::lock<std::mutex> lock(parameters_mutex_);
-	parameters_.set_all(std::move(val));
+void node::update_parameters_(node_parameter_valuation&& val) {
+	std::lock_guard<std::mutex> lock(parameters_mutex_);
+	parameter_valuation_.set_all(std::move(val));
 }
 
 
 node_parameter_valuation node::current_parameter_valuation_() const {
-	std::lock<std::mutex> lock(parameters_mutex_);
-	return parameters_;
+	std::lock_guard<std::mutex> lock(parameters_mutex_);
+	return parameter_valuation_;
 }
 
 
