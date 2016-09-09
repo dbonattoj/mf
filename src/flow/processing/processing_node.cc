@@ -100,6 +100,12 @@ void processing_node::handler_process_(processing_node_job& job) {
 
 	if(this_graph().has_diagnostic())
 		this_graph().diagnostic().processing_node_job_finished(*this, job.time());
+
+	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
+		parameter_id id = output().propagated_parameter_at(i);
+		const node_parameter_value& val = job.parameter(id);
+		frame_satellite(job.output_view()).propagated_parameters().set(id, val);
+	}
 }
 
 

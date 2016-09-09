@@ -210,7 +210,7 @@ async_node::process_result async_node::process_frame_() {
 	
 	MF_DEBUG("process ", t);
 	handler_process_(job);
-
+	
 	finish_job_(job);
 	
 	job.detach_output_view();

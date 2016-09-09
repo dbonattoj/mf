@@ -29,9 +29,12 @@ namespace mf { namespace flow {
 /** Each frame being passed between nodes contains an instance of this class. */
 class node_frame_satellite {
 private:
-	node_parameter_valuation output_parameters_;
+	node_parameter_valuation propagated_parameters_;
 
 public:
+	node_parameter_valuation& propagated_parameters() { return propagated_parameters_; }
+	const node_parameter_valuation& propagated_parameters() const { return propagated_parameters_; }
+
 	void initialize();
 };
 

@@ -139,4 +139,17 @@ ndarray_format node_frame_format::array_format() const {
 }
 
 
+node_frame_satellite& frame_satellite(const frame_view& vw) {
+	const node_frame_format& frm = static_cast<const node_frame_format&>(vw.frame_format()); // TODO verify, simplify code...
+	return frm.frame_satellite(vw.start());
+}
+
+
+const node_frame_satellite& frame_satellite(const const_frame_view& vw) {
+	const node_frame_format& frm = static_cast<const node_frame_format&>(vw.frame_format());
+	return frm.frame_satellite(vw.start());
+}
+
+
+
 }}

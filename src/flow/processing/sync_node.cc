@@ -91,7 +91,7 @@ bool sync_node::process_next_frame_() {
 
 
 	handler_process_(job);
-	
+		
 	job.detach_output_view();
 	ring_->end_write(1);
 

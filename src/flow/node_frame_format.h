@@ -22,6 +22,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_FRAME_FORMAT_H_
 
 #include "../nd/opaque_format/opaque_multi_ndarray_format.h"
+#include "node_frame_satellite.h"
+#include "../queue/frame.h"
 
 namespace mf { namespace flow {
 	
@@ -84,6 +86,11 @@ public:
 	bool has_array_format() const override;
 	ndarray_format array_format() const override;
 };
+
+
+node_frame_satellite& frame_satellite(const frame_view&);
+const node_frame_satellite& frame_satellite(const const_frame_view&);
+
 
 
 }}

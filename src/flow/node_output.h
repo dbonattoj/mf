@@ -52,6 +52,8 @@ public:
 	
 	bool add_propagated_parameter_if_needed(parameter_id);
 	bool has_propagated_parameter(parameter_id) const;
+	std::size_t propagated_parameters_count() const { return propagated_parameters_.size(); }
+	parameter_id propagated_parameter_at(std::ptrdiff_t i) const { return propagated_parameters_.at(i); }
 
 	thread_index reader_thread_index() const;
 

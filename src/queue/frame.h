@@ -27,9 +27,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-using timed_frame_array_view = ndarray_timed_view_opaque<1>;
-using frame_array_view = ndarray_view_opaque<1>;
-using frame_view = ndarray_view_opaque<0>;
+using timed_frame_array_view = ndarray_timed_view_opaque<1, true>;
+using frame_array_view = ndarray_view_opaque<1, true>;
+using frame_view = ndarray_view_opaque<0, true>;
+
+using const_timed_frame_array_view = ndarray_timed_view_opaque<1, false>;
+using const_frame_array_view = ndarray_view_opaque<1, false>;
+using const_frame_view = ndarray_view_opaque<0, false>;
 
 }
 
