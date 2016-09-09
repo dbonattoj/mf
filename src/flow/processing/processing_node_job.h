@@ -81,7 +81,7 @@ public:
 	bool has_input_parameter(parameter_id);
 	const node_parameter_value& input_parameter(parameter_id) const;
 	
-	
+	// TODO parameter() : read both node + input param (used for output parameter prop)
 };
 
 }}

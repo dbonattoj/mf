@@ -88,11 +88,6 @@ public:
 };
 
 
-node_frame_satellite& frame_satellite(const frame_view&);
-const node_frame_satellite& frame_satellite(const const_frame_view&);
-
-
-
 }}
 
 #endif
