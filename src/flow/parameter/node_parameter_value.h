@@ -23,6 +23,10 @@ public:
 	node_parameter_value& operator=(node_parameter_value&&);
 	template<typename T> node_parameter_value& operator=(const T&);
 	template<typename T> node_parameter_value& operator=(T&&);
+	
+	template<typename T> bool is_type() const;
+	template<typename T> const T& get() const;
+	template<typename T> T& get();
 };
 
 
@@ -46,6 +50,9 @@ public:
 	
 	std::unique_ptr<holder_base> clone() const override
 		{ return std::make_unique<holder>(value_); } 
+	
+	const T& value() const { return value_; }
+	T& value() { return value_; }
 };
 
 }}

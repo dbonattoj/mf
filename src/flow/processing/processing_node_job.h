@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "processing_node.h"
 #include "../parameter/node_parameter_valuation.h"
+#include "../frame/node_frame_view.h"
 #include <vector>
 
 namespace mf { namespace flow {
@@ -39,12 +40,12 @@ namespace mf { namespace flow {
 class processing_node_job {
 private:
 	processing_node& node_; ///< The processing node.
-	std::vector<timed_frame_array_view> input_views_; ///< For each input (index), view to frames with time window.
-	frame_view output_view_; ///< View to (multi-channel) output frame.
-	node_parameter_valuation node_parameters_;
+	std::vector<node_frame_window_view> input_views_; ///< For each input (index), view to frames with time window.
+	node_frame_view output_view_; ///< View to (multi-channel) output frame.
+	node_parameter_valuation node_parameters_; ///< Copy of the current node parameters valuation.
 
-	bool end_marked_ = false;
-	
+	bool end_marked_ = false;	
+		
 public:
 	processing_node_job(processing_node& nd, const node_parameter_valuation& params);
 	processing_node_job(processing_node& nd, node_parameter_valuation&& params);
@@ -55,6 +56,8 @@ public:
 	processing_node_job& operator=(const processing_node_job&) = delete;
 	processing_node_job& operator=(processing_node_job&&) = default;
 	
+	/// Set up interface for \ref processing_node
+	///@{
 	void attach_output_view(const frame_view&);
 	void detach_output_view();
 
@@ -62,26 +65,33 @@ public:
 	void end_input(processing_node_input&);
 	void cancel_inputs();
 	
+	const node_parameter_value* propagated_parameter(parameter_id id) const;
+	///@}
+	
 	bool end_was_marked() const noexcept { return end_marked_; }
 		
 	time_unit time() const noexcept { return node_.current_time(); }
 	void mark_end() noexcept { end_marked_ = true; }
 	
+	/// Access to input frame views.
+	///@{
 	bool has_input_view(std::ptrdiff_t index) const noexcept;
-	const timed_frame_array_view& input_view(std::ptrdiff_t index) const;
+	const node_frame_window_view& input_view(std::ptrdiff_t index) const;
+	///@}
 	
+	/// Access to output frame view.
+	///@{
 	bool has_output_view() const noexcept;
-	const frame_view& output_view() const;
+	const node_frame_view& output_view() const;
+	///@}
 	
+	/// Access to node paramters.
+	///@{
 	bool has_parameter(parameter_id) const;
 	node_parameter_value& parameter(parameter_id);
 	const node_parameter_value& parameter(parameter_id) const;
 	const node_parameter_valuation& parameters() const;
-	
-	bool has_input_parameter(parameter_id);
-	const node_parameter_value& input_parameter(parameter_id) const;
-	
-	// TODO parameter() : read both node + input param (used for output parameter prop)
+	///@}
 };
 
 }}

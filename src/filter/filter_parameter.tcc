@@ -48,6 +48,13 @@ void filter_parameter<Value>::install(node& nd) {
 }
 
 
+template<typename Value>
+Value deterministic_value(time_unit t) const {
+	Assert(is_deterministic());
+	return value_function_(t);
+}
+
+
 ///////////////
 
 

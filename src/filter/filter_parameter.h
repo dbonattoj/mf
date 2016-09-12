@@ -62,6 +62,8 @@ public:
 	void set_constant_value(const Value&);
 	void set_dynamic();
 	
+	Value deterministic_value(time_unit t) const;
+	
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const { return name_; }
 	

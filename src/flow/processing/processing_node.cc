@@ -52,6 +52,12 @@ void processing_node_output::end_read(time_unit duration) {
 }
 
 
+void processing_node_output::added_propagated_parameter_(parameter_id id, const node_input& source) {
+	auto& guide = this_node().propagated_parameters_guide_;
+	guide.emplace(id, source.index());
+}
+
+
 ///////////////
 
 
@@ -103,8 +109,8 @@ void processing_node::handler_process_(processing_node_job& job) {
 
 	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
 		parameter_id id = output().propagated_parameter_at(i);
-		const node_parameter_value& val = job.parameter(id);
-		frame_satellite(job.output_view()).propagated_parameters().set(id, val);
+		const node_parameter_value* value = job.propagated_parameter(id);
+		if(value) job.output_view().propagated_parameters().set(id, *value);
 	}
 }
 
@@ -181,6 +187,12 @@ node_frame_format processing_node::output_frame_format_() const {
 		frm.add_part(channel_frame_format);
 	}
 	return frm;
+}
+
+
+auto processing_node::propagated_parameters_inputs(parameter_id id) const -> std::vector<input_index_type> {
+	auto ii = propagated_parameters_guide_.equal_range(id);
+	return std::vector<input_index_type>(ii.first, ii.second);
 }
 
 

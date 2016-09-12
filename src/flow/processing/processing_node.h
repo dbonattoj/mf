@@ -28,7 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../node_frame_format.h"
 #include <memory>
 #include <utility>
-#include <iostream>
+#include <vector>
 
 namespace mf { namespace flow {
 
@@ -44,6 +44,7 @@ public:
 	virtual void handler_pre_process(processing_node&, processing_node_job&) = 0;
 	virtual void handler_process(processing_node&, processing_node_job&) = 0;
 };
+
 
 
 /// Channel of the \ref processing_node_output of a \ref processing_node.
@@ -72,13 +73,17 @@ public:
 };
 
 
+
 /// Output of \ref processing_node.
 /** The \ref processing_node has no or one output. Its implementation is delegated to \ref processing_node. */
 class processing_node_output final : public node_output {
 private:
 	processing_node& this_node();
 	const processing_node& this_node() const;	
-	
+
+protected:
+	void added_propagated_parameter_(parameter_id, const node_input& source) override;
+
 public:
 	using node_output::node_output;
 	
@@ -89,6 +94,7 @@ public:
 	timed_frame_array_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 };
+
 
 
 /// Input of \ref processing_node.
@@ -118,10 +124,12 @@ class processing_node : public node_derived<processing_node_input, processing_no
 
 public:
 	using output_channel_type = processing_node_output_channel;
+	using input_index_type = std::ptrdiff_t;
 
 private:
 	processing_node_handler* handler_ = nullptr;
 	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
+	std::multimap<parameter_id, input_index_type> propagated_parameters_guide_;
 
 protected:
 	void verify_connections_validity_() const;
@@ -157,6 +165,8 @@ public:
 	std::size_t output_channels_count() const { return output_channels_.size(); }
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
+	
+	std::vector<input_index_type> propagated_parameters_inputs(parameter_id) const;
 };
 
 

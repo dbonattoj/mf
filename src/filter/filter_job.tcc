@@ -37,9 +37,14 @@ template<typename Input> decltype(auto) filter_job::in_full(Input& pt) {
 
 
 template<typename Input> decltype(auto) filter_job::in(Input& pt) {
+	return in(node_job_.time());
+}
+
+
+template<typename Input> decltype(auto) filter_job::in(Input& pt, time_unit t) {
 	auto full_vw = in_full(pt);
-	if(full_vw) return full_vw.at_time(node_job_.time());
-	return decltype(full_vw[0])();
+	if(full_vw) return full_vw.at_time(t);
+	return full_vw.null();
 }
 
 
@@ -56,6 +61,43 @@ template<typename Output> decltype(auto) filter_job::out(Output& pt) {
 	);
 }
 
+// TODO allow returning deterministic by reference
+
+template<typename Value>
+Value filter_job::param(const filter_parameter<Value>& param) {
+	// read parameter of this node
+	if(param.is_deterministic()) {
+		return param.deterministic_value(time());
+	} else {
+		Assert(node_job_.has_parameter(id()));
+		const node_parameters_value& value = node_job_.parameter(id());
+		return value.get<Value>();
+	}
+}
+
+
+template<typename Value>
+Value filter_job::param(const filter_extern_parameter<Value>& extern_param) {
+	return param(extern_param, time());
+}
+
+
+template<typename Value>
+Value filter_job::param(const filter_extern_parameter<Value>& extern_param, time_unit t) {
+	if(extern_param.linked_parameter().is_deterministic()) {
+		return extern_param.linked_parameter().deterministic_value(t);
+	} else {
+		
+	}
+}
+
+
+template<typename Value>
+void filter_job::update_param(filter_extern_parameter<Value>& extern_param, const Value& new_value) {
+	
+}
+
+
 
 template<typename Param> decltype(auto) filter_job::param(Param& param) {
 	return param.get(time());
@@ -63,3 +105,4 @@ template<typename Param> decltype(auto) filter_job::param(Param& param) {
 
 
 }}
+

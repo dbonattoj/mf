@@ -252,7 +252,8 @@ void node::deduce_propagated_parameters_() {
 bool node::add_propagated_parameter_if_needed(parameter_id id) {
 	bool needed = false;
 	for(auto&& out : outputs_) {
-		bool needed_by_output = out->add_propagated_parameter_if_needed(id);
+		node_input& connected_input = out.connected_input();
+		bool needed_by_output = out->add_propagated_parameter_if_needed(id, connected_input);
 		if(needed_by_output) needed = true;
 	}
 	if(has_input_parameter(id)) needed = true;

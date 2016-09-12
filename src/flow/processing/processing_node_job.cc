@@ -83,7 +83,7 @@ bool processing_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
 }
 
 
-const timed_frame_array_view& processing_node_job::input_view(std::ptrdiff_t index) const {
+const node_frame_window_view& processing_node_job::input_view(std::ptrdiff_t index) const {
 	Expects(has_input_view(index));
 	return input_views_.at(index);
 }
@@ -94,7 +94,7 @@ bool processing_node_job::has_output_view() const noexcept {
 }
 
 
-const frame_view& processing_node_job::output_view() const {
+const node_frame_view& processing_node_job::output_view() const {
 	Expects(has_output_view());
 	return output_view_;
 }
@@ -117,6 +117,19 @@ const node_parameter_value& processing_node_job::parameter(parameter_id id) cons
 
 const node_parameter_valuation& processing_node_job::parameters() const {
 	return node_parameters_;
+}
+
+
+const node_parameter_value* processing_node_job::propagated_parameter(parameter_id id) const {
+	if(has_parameter(id)) {
+		return &parameter(id);
+	} else {
+		for(const node_frame_window_view& input_view : input_views_) {
+			if(input_view && input_view.now().propagated_parameters().has(id))
+				return &input_view.now().propagated_parameters()(id);
+		}
+	}
+	return nullptr;
 }
 
 
