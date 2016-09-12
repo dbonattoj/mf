@@ -1,6 +1,6 @@
 #include "processing_timeline_json_exporter.h"
 #include "processing_timeline.h"
-#include "../graph.h"
+#include "../node_graph.h"
 #include "../processing/processing_node.h"
 #include "../processing/sync_node.h"
 #include "../processing/async_node.h"
@@ -53,7 +53,7 @@ void processing_timeline_json_exporter::generate(std::ostream& out) {
 
 	json j_nodes = json::array();
 
-	const graph& gr = timeline_.this_graph();
+	const node_graph& gr = timeline_.graph();
 	for(std::ptrdiff_t i = 0; i < gr.nodes_count(); ++i) {
 		const node& nd = gr.node_at(i);
 		if(! is_processing_node(nd)) continue;

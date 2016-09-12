@@ -19,7 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "multiplex_node_loader.h"
-#include "../graph.h"
+#include "../node_graph.h"
 #include <utility>
 #include <functional>
 
@@ -84,7 +84,7 @@ void multiplex_node::sync_loader::end_read(time_unit duration) { }
 
 
 multiplex_node::async_loader::async_loader(multiplex_node& nd) :
-	loader(nd, nd.this_graph().new_thread_index()),
+	loader(nd, nd.graph().new_thread_index()),
 	stopped_(false) { }
 
 
@@ -128,7 +128,7 @@ void multiplex_node::async_loader::thread_main_() {
 
 
 void multiplex_node::async_loader::stop() {
-	Assert(this_node().this_graph().was_stopped());
+	Assert(this_node().graph().was_stopped());
 	Assert(thread_.joinable());
 	
 	stopped_ = true;

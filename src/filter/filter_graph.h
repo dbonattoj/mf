@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_FILTER_GRAPH_H_
 #define MF_FLOW_FILTER_GRAPH_H_
 
-#include "../flow/graph.h"
+#include "../flow/node_graph.h"
 #include "../flow/parameter/node_parameter.h"
 #include "filter.h"
 #include <vector>
@@ -33,7 +33,7 @@ namespace mf { namespace flow {
 class filter_graph {
 public:
 	std::vector<std::unique_ptr<filter>> filters_;
-	std::unique_ptr<graph> node_graph_;
+	std::unique_ptr<node_graph> node_graph_;
 	
 	parameter_id last_parameter_id_ = 0;
 	

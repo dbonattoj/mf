@@ -26,7 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class graph;
+class node_graph;
 
 /// Sink node base class.
 /** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
@@ -37,7 +37,7 @@ protected:
 	void output_end_read_(time_unit duration) override { throw 0; }
 
 public:	
-	explicit sink_node(graph&);
+	explicit sink_node(node_graph&);
 	
 	thread_index processing_thread_index() const override;
 	

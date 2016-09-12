@@ -38,7 +38,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class graph;
+class node_graph;
 class node_output;
 class node_input;
 
@@ -56,7 +56,7 @@ private:
 	
 	stage stage_ = stage::construction;
 
-	graph& graph_;
+	node_graph& graph_;
 	std::vector<std::unique_ptr<node_output>> outputs_;
 	std::vector<std::unique_ptr<node_input>> inputs_;	
 	node_stream_properties stream_properties_;
@@ -93,7 +93,7 @@ private:
 	
 
 protected:
-	explicit node(graph& gr) : graph_(gr) { }
+	explicit node(node_graph& gr) : graph_(gr) { }
 	node(const node&) = delete;
 	node& operator=(const node&) = delete;
 	
@@ -119,8 +119,8 @@ protected:
 public:
 	virtual ~node();
 
-	const graph& this_graph() const noexcept { return graph_; }
-	graph& this_graph() noexcept { return graph_; }
+	const node_graph& graph() const noexcept { return graph_; }
+	node_graph& graph() noexcept { return graph_; }
 	
 	bool was_setup() const { return (stage_ == stage::was_setup); }
 

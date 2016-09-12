@@ -39,7 +39,7 @@ parameter_id filter_graph::new_parameter_id() {
 
 void filter_graph::setup() {
 	Expects(! was_setup());
-	node_graph_.reset(new graph);
+	node_graph_.reset(new node_graph);
 	for(auto&& filt : filters_) filt->install(*node_graph_);
 	node_graph_->setup();
 }

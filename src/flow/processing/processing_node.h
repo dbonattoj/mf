@@ -148,7 +148,7 @@ protected:
 	node_frame_format output_frame_format_() const;
 
 public:
-	processing_node(graph&, bool with_output);
+	processing_node(node_graph&, bool with_output);
 	~processing_node() override;
 	
 	void set_handler(processing_node_handler&);

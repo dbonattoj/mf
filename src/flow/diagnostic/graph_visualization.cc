@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include <typeinfo>
 #include <map>
-#include "../graph.h"
+#include "../node_graph.h"
 #include "../processing/sync_node.h"
 #include "../processing/async_node.h"
 #include "../processing/sink_node.h"
@@ -53,7 +53,7 @@ namespace {
 }
 
 
-graph_visualization::graph_visualization(const graph& gr, std::ostream& output) :
+graph_visualization::graph_visualization(const node_graph& gr, std::ostream& output) :
 	output_(output),
 	graph_(gr) { }
 
@@ -64,6 +64,7 @@ std::string graph_visualization::thread_index_color_(thread_index tid) const {
 	else if(tid == undefined_thread_index) return "lightgray";
 	else return html_colors_.at((tid - 1) % html_colors_.size());
 }
+
 
 void graph_visualization::generate_node_dispatch_(const node& nd) {	
 	if(typeid(nd) == typeid(sync_node))
@@ -290,7 +291,7 @@ void graph_visualization::generate() {
 }
 
 
-void export_graph_visualization(const graph& gr, const std::string& filename) {
+void export_graph_visualization(const node_graph& gr, const std::string& filename) {
 	std::ofstream fstr(filename);
 	graph_visualization vis(gr, fstr);
 	vis.generate();

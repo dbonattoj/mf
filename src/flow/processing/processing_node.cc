@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "processing_node.h"
 #include "processing_node_job.h"
 #include "../multiplex/multiplex_node.h"
-#include "../graph.h"
+#include "../node_graph.h"
 #include <utility>
 
 namespace mf { namespace flow {
@@ -100,13 +100,13 @@ void processing_node::handler_process_(processing_node_job& job) {
 	Expects(handler_ != nullptr);
 	std::cout << name() << " process....................." << std::endl;
 	
-	if(this_graph().has_diagnostic())
-		this_graph().diagnostic().processing_node_job_started(*this, job.time());
+	if(graph().has_diagnostic())
+		graph().diagnostic().processing_node_job_started(*this, job.time());
 	
 	handler_->handler_process(*this, job);
 
-	if(this_graph().has_diagnostic())
-		this_graph().diagnostic().processing_node_job_finished(*this, job.time());
+	if(graph().has_diagnostic())
+		graph().diagnostic().processing_node_job_finished(*this, job.time());
 
 	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
 		parameter_id id = output().propagated_parameter_at(i);
@@ -144,7 +144,7 @@ void processing_node::finish_job_(processing_node_job& job) {
 }
 
 
-processing_node::processing_node(graph& gr, bool with_output) :
+processing_node::processing_node(node_graph& gr, bool with_output) :
 	base(gr)
 {
 	if(with_output) add_output_(*this);

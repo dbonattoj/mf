@@ -28,7 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class graph;
+class node_graph;
 
 class async_node final : public processing_node {	
 private:
@@ -61,7 +61,7 @@ private:
 	void output_end_read_(time_unit duration) override;
 
 public:
-	async_node(graph&);
+	async_node(node_graph&);
 	~async_node() override;
 	
 	thread_index processing_thread_index() const override;

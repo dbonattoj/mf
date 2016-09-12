@@ -18,8 +18,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_GRAPH_H_
-#define MF_FLOW_GRAPH_H_
+#ifndef MF_FLOW_NODE_GRAPH_H_
+#define MF_FLOW_NODE_GRAPH_H_
 
 #include "../common.h"
 #include "diagnostic/diagnostic_handler.h"
@@ -38,7 +38,7 @@ class node;
 
 /// Graph containing interconnected nodes through which media frames flow.
 /** Low-level graph composed of \ref node objects. High-level graph of \ref filter obbjects is \ref filter_graph. */
-class graph {
+class node_graph {
 public:
 	using frame_callback_function_type = void(time_unit t);
 	
@@ -58,8 +58,8 @@ private:
 public:
 	std::function<frame_callback_function_type> callback_function;
 
-	graph() = default;
-	~graph();
+	node_graph() = default;
+	~node_graph();
 	
 	template<typename Node, typename... Args>
 	Node& add_node(Args&&... args) {

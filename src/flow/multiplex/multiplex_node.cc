@@ -20,14 +20,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "multiplex_node.h"
 #include "multiplex_node_loader.h"
-#include "../graph.h"
+#include "../node_graph.h"
 #include <utility>
 #include <functional>
 
 namespace mf { namespace flow {
 
 
-multiplex_node::multiplex_node(graph& gr) : base(gr) {
+multiplex_node::multiplex_node(node_graph& gr) : base(gr) {
 	add_input_(*this);
 	set_name("multiplex");
 }

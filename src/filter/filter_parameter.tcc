@@ -1,8 +1,7 @@
 #include "filter.h"
 #include "filter_graph.h"
 #include "../flow/node.h"
-#include "../flow/node_parameter.h"
-#include "../flow/node_parameter_value.h"
+#include "../flow/parameter/node_parameter_value.h"
 
 namespace mf { namespace flow {
 

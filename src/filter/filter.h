@@ -33,13 +33,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class graph;
+class node_graph;
 class filter_input_base;
 class filter_output_base;
 class multiplex_node;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
 template<typename Value> class filter_parameter;
+template<typename Value> class filter_extern_parameter;
 
 /// Filter which performs concrete processing, base class.
 /** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
@@ -48,6 +49,7 @@ public:
 	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
+	template<typename Value> using extern_parameter_type = filter_extern_parameter<Value>;
 	using job_type = filter_job;
 	
 	static const std::string default_filter_name;
@@ -86,7 +88,7 @@ public:
 	time_unit prefetch_duration() const;
 	
 	bool was_installed() const { return (node_ != nullptr); }
-	virtual void install(graph&);
+	virtual void install(node_graph&);
 	
 	void handler_setup(processing_node&) final override;
 	void handler_pre_process(processing_node&, processing_node_job&) final override;
@@ -103,7 +105,7 @@ public:
 
 class sink_filter : public filter {
 public:
-	void install(graph&) override;
+	void install(node_graph&) override;
 };
 
 
@@ -117,7 +119,7 @@ public:
 	void define_source_stream_properties(const node_stream_properties&);
 	const node_stream_properties& stream_properties() const noexcept;
 
-	void install(graph&) override;
+	void install(node_graph&) override;
 };
 
 

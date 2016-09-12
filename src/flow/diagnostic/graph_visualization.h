@@ -29,7 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class graph;
+class node_graph;
 class node;
 class node_input;
 class node_output;
@@ -39,7 +39,7 @@ class multiplex_node;
 class graph_visualization {
 private:	
 	std::ostream& output_;
-	const graph& graph_;
+	const node_graph& graph_;
 	std::string graph_id_ = "G";
 	bool thread_index_colors_ = true;
 	bool with_state_ = true;
@@ -56,13 +56,13 @@ private:
 	std::string thread_index_color_(thread_index) const;
 
 public:
-	graph_visualization(const graph&, std::ostream&);
+	graph_visualization(const node_graph&, std::ostream&);
 	
 	void generate();
 };
 
 
-void export_graph_visualization(const graph&, const std::string& filename);
+void export_graph_visualization(const node_graph&, const std::string& filename);
 
 
 template<typename T>

@@ -111,7 +111,7 @@ public:
 	const filter& origin_filter() const override { return output_.this_filter(); }
 	const filter& destination_filter() const override { return input_.this_filter(); }
 	
-	graph& this_graph();
+	node_graph& this_node_graph();
 	node_input& this_node_input() { Assert(node_input_ != nullptr); return *node_input_; }
 	const node_input& this_node_input() const { Assert(node_input_ != nullptr); return *node_input_; }
 	node_output& this_node_output() { Assert(node_output_ != nullptr); return *node_output_; }
@@ -149,7 +149,7 @@ public:
 	using typename base::output_frame_shape_type;
 
 protected:
-	void install_(graph&) override;
+	void install_(node_graph&) override;
 
 public:
 	filter_direct_edge(input_type& in, output_type& out) :
@@ -198,7 +198,7 @@ private:
 	sync_node::output_channel_type* convert_node_output_channel_ = nullptr; 
 
 protected:
-	void install_(graph&) override;
+	void install_(node_graph&) override;
 
 public:
 	filter_converting_edge(input_type& in, output_type& out, Convert_function&& func) :

@@ -19,13 +19,13 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "processing_timeline.h"
-#include "../graph.h"
+#include "../node_graph.h"
 #include "../processing/processing_node.h"
 #include <ostream>
 
 namespace mf { namespace flow {
 
-processing_timeline::processing_timeline(graph& gr) :
+processing_timeline::processing_timeline(node_graph& gr) :
 	graph_(gr) { }
 
 
@@ -52,12 +52,12 @@ void processing_timeline::processing_node_job_finished(const processing_node& nd
 }
 
 
-void processing_timeline::launched(const graph& gr) {
+void processing_timeline::launched(const node_graph& gr) {
 	
 }
 
 
-void processing_timeline::stopped(const graph& gr) {
+void processing_timeline::stopped(const node_graph& gr) {
 	
 }
 

@@ -19,12 +19,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "sync_node.h"
-#include "../graph.h"
+#include "../node_graph.h"
 #include <unistd.h>
 
 namespace mf { namespace flow {
 
-sync_node::sync_node(graph& gr) :
+sync_node::sync_node(node_graph& gr) :
 	processing_node(gr, true) { }
 
 
@@ -133,7 +133,7 @@ node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
 		Ensures(ring_->readable_duration() >= span.duration());
 		return pull_result::success;
 	} else {
-		if(this_graph().was_stopped()) return pull_result::stopped;
+		if(graph().was_stopped()) return pull_result::stopped;
 		else return pull_result::transitory_failure;
 	}
 }

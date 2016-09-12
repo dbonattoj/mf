@@ -19,7 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "filter.h"
-#include "../flow/graph.h"
+#include "../flow/node_graph.h"
 #include "../flow/node.h"
 #include "../flow/processing/sink_node.h"
 #include "../flow/processing/sync_node.h"
@@ -101,7 +101,7 @@ bool filter::need_multiplex_node_() const {
 }
 
 
-void filter::install(graph& gr) {
+void filter::install(node_graph& gr) {
 	Assert(! was_installed());
 	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
@@ -128,7 +128,7 @@ void filter::install(graph& gr) {
 }
 
 
-void sink_filter::install(graph& gr) {
+void sink_filter::install(node_graph& gr) {
 	Assert(! was_installed());
 	Assert(outputs_.size() == 0, "sink filter must have no outputs");
 	Assert(! is_asynchonous(), "sink filter cannot be asynchonous");
@@ -160,7 +160,7 @@ const node_stream_properties& source_filter::stream_properties() const noexcept 
 
 
 
-void source_filter::install(graph& gr) {
+void source_filter::install(node_graph& gr) {
 	Assert(! was_installed());
 	Assert(inputs_.size() == 0, "source filter must have no inputs");
 

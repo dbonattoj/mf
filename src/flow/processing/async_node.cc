@@ -19,14 +19,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "async_node.h"
-#include "../graph.h"
+#include "../node_graph.h"
 
 namespace mf { namespace flow {
 	
-async_node::async_node(graph& gr) :
+async_node::async_node(node_graph& gr) :
 	processing_node(gr, true)
 {
-	thread_index_ = this_graph().new_thread_index();
+	thread_index_ = graph().new_thread_index();
 }
 	
 
@@ -102,8 +102,8 @@ bool async_node::pause_() {
 	
 	auto may_continue = [&]()->bool {
 		time_unit next_write_time = ring_->write_start_time();
-		MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time(), this_graph().was_stopped());
-		if(this_graph().was_stopped()) return true;
+		MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time(), graph().was_stopped());
+		if(graph().was_stopped()) return true;
 		else if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
 		else if(next_write_time >= time_limit_) return false;
 		else if(ring_->end_time() != -1 && next_write_time >= ring_->end_time()) return false;
@@ -114,7 +114,7 @@ bool async_node::pause_() {
 	std::unique_lock<std::mutex> lock(continuation_mutex_);
 	MF_DEBUG("pause..waiting");
 	continuation_cv_.wait(lock, may_continue);
-	return ! this_graph().was_stopped();
+	return ! graph().was_stopped();
 }
 
 
@@ -254,7 +254,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 		MF_RAND_SLEEP;		
 		Assert(ring_->read_start_time() == pull_span.start_time());
 		
-		if(this_graph().was_stopped()) return pull_result::stopped;
+		if(graph().was_stopped()) return pull_result::stopped;
 		
 		MF_DEBUG("output: pull ", pull_span, " : wait_readable...");
 		ring_->wait_readable();
@@ -268,7 +268,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 		if(ring_->readable_duration() >= pull_span.duration()) {
 			MF_DEBUG("output: pull -> success");
 			return pull_result::success;
-		} else if(this_graph().was_stopped()) {
+		} else if(graph().was_stopped()) {
 			MF_DEBUG("output: pull -> stopped");
 			return pull_result::stopped;
 		} else if(this_request_failed) {

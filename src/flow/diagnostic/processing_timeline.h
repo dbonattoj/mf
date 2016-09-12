@@ -29,6 +29,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+class node_graph;
+
 class processing_timeline : public diagnostic_handler {
 public:
 	using clock_type = std::chrono::high_resolution_clock;
@@ -42,21 +44,21 @@ public:
 	};
 	
 private:
-	graph& graph_;
+	node_graph& graph_;
 	std::vector<job> jobs_;
 	std::map<const processing_node*, job*> current_node_jobs_;
 	std::mutex jobs_mutex_;
 	
 public:
-	explicit processing_timeline(graph&);
+	explicit processing_timeline(node_graph&);
 
 	void processing_node_job_started(const processing_node&, time_unit t) override;
 	void processing_node_job_finished(const processing_node&, time_unit t) override;
-	void launched(const graph&) override;
-	void stopped(const graph&) override;
+	void launched(const node_graph&) override;
+	void stopped(const node_graph&) override;
 	
-	graph& this_graph() { return graph_; }
-	const graph& this_graph() const { return graph_; }
+	node_graph& graph() { return graph_; }
+	const node_graph& graph() const { return graph_; }
 	
 	std::size_t jobs_count() const { return jobs_.size(); }
 	const job& job_at(std::ptrdiff_t index) const { return jobs_.at(index); }

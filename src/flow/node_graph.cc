@@ -18,7 +18,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "graph.h"
+#include "node_graph.h"
 #include "node.h"
 #include "processing/sink_node.h"
 
@@ -29,7 +29,7 @@ namespace mf { namespace flow {
 
 using namespace std::chrono_literals;
 
-void graph::pull_next_frame_() {
+void node_graph::pull_next_frame_() {
 	Expects(launched_);
 	sink_->pull_next_frame();	
 	if(callback_function) callback_function(sink_->current_time());
@@ -38,12 +38,12 @@ void graph::pull_next_frame_() {
 	//std::this_thread::sleep_for(100ms);
 }
 
-graph::~graph() {
+node_graph::~node_graph() {
 	if(launched_) stop();
 }
 
 
-void graph::setup() {
+void node_graph::setup() {
 	Assert(! was_setup_);
 	Assert(sink_ != nullptr);
 
@@ -54,17 +54,17 @@ void graph::setup() {
 }
 
 
-thread_index graph::new_thread_index() {
+thread_index node_graph::new_thread_index() {
 	return ++last_thread_index_;
 }
 
 
-thread_index graph::root_thread_index() const {
+thread_index node_graph::root_thread_index() const {
 	return 0;
 }
 
 
-void graph::launch() {
+void node_graph::launch() {
 	if(launched_) return;
 	
 	if(has_diagnostic()) diagnostic().launched(*this);
@@ -75,7 +75,7 @@ void graph::launch() {
 }
 
 
-void graph::stop() {
+void node_graph::stop() {
 	if(! launched_) return;
 	
 	if(has_diagnostic()) diagnostic().stopped(*this);
@@ -88,12 +88,12 @@ void graph::stop() {
 }
 
 
-time_unit graph::current_time() const {
+time_unit node_graph::current_time() const {
 	Expects(was_setup_);
 	return sink_->current_time();
 }
 
-void graph::run_until(time_unit last_frame) {
+void node_graph::run_until(time_unit last_frame) {
 	Expects(was_setup_);
 
 	MF_DEBUG_BACKTRACE("graph::run_until");
@@ -105,12 +105,12 @@ void graph::run_until(time_unit last_frame) {
 }
 
 
-void graph::run_for(time_unit duration) {
+void node_graph::run_for(time_unit duration) {
 	run_until(current_time() + duration);
 }
 
 
-bool graph::run() {
+bool node_graph::run() {
 	Expects(was_setup_);
 	Expects(sink_->is_bounded());
 
@@ -123,7 +123,7 @@ bool graph::run() {
 }
 
 
-void graph::seek(time_unit target_time) {
+void node_graph::seek(time_unit target_time) {
 	Expects(was_setup_);
 	Expects(sink_->stream_properties().is_seekable());
 	sink_->seek(target_time);

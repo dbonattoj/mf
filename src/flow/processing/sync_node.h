@@ -38,7 +38,7 @@ private:
 	bool process_next_frame_();
 
 public:
-	explicit sync_node(graph&);
+	explicit sync_node(node_graph&);
 	
 	thread_index processing_thread_index() const override;
 		

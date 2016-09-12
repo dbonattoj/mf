@@ -19,23 +19,23 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "../nd/ndarray_view_cast.h"
-#include "../flow/graph.h"
+#include "../flow/node_graph.h"
 #include <algorithm>
 
 namespace mf { namespace flow {
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem>
-graph& filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::this_graph() {
+node_graph& filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::this_node_graph() {
 	Expects(node_input_ != nullptr);
-	return node_input_->this_node().this_graph();
+	return node_input_->this_node().graph();
 }
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem>
 void filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::set_node_input(node_input& in) {
 	Expects(node_input_ == nullptr);
 	node_input_ = &in;
-	if(is_connected_()) this->install_(this_graph());
+	if(is_connected_()) this->install_(this_node_graph());
 }
 
 
@@ -44,7 +44,7 @@ void filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::set_node_output(nod
 	Expects(node_output_ == nullptr);
 	node_output_ = &out;
 	node_output_channel_index_ = channel_index;
-	if(is_connected_()) this->install_(this_graph());
+	if(is_connected_()) this->install_(this_node_graph());
 }
 
 
@@ -74,7 +74,7 @@ cast_connected_node_output_view(const timed_frame_array_view& opaque_output_view
 
 
 template<std::size_t Dim, typename Output_elem, typename Input_elem>
-void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(graph&) {
+void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(node_graph&) {
 	base::this_node_input().connect( base::this_node_output() );
 }
 
@@ -84,7 +84,7 @@ void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(graph&) {
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
-void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::install_(graph& gr) {	
+void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::install_(node_graph& gr) {	
 	convert_node_ = &gr.add_node<sync_node>();
 	convert_node_->set_name("convert");
 	convert_node_->set_handler(*this);

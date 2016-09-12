@@ -27,7 +27,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-class graph;
+class node_graph;
 class multiplex_node;
 
 class multiplex_node_output final : public node_output {
@@ -91,7 +91,7 @@ private:
 	///@}
 	
 public:
-	explicit multiplex_node(graph&);
+	explicit multiplex_node(node_graph&);
 	~multiplex_node() override;
 
 	time_unit minimal_offset_to(const node&) const override;
