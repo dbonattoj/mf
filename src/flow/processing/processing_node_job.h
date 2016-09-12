@@ -38,6 +38,9 @@ namespace mf { namespace flow {
  ** However the output view must be opened and closed by the caller, and attached to the \ref processing_node_job.
  ** \ref processing_node_job must not be destructed with the output view still attached. */
 class processing_node_job {
+public:
+	using input_index_type = std::ptrdiff_t;
+	
 private:
 	processing_node& node_; ///< The processing node.
 	std::vector<node_frame_window_view> input_views_; ///< For each input (index), view to frames with time window.
@@ -56,7 +59,7 @@ public:
 	processing_node_job& operator=(const processing_node_job&) = delete;
 	processing_node_job& operator=(processing_node_job&&) = default;
 	
-	/// Set up interface for \ref processing_node
+	/// Set up interface for \ref processing_node.
 	///@{
 	void attach_output_view(const frame_view&);
 	void detach_output_view();
@@ -64,8 +67,6 @@ public:
 	bool begin_input(processing_node_input&);
 	void end_input(processing_node_input&);
 	void cancel_inputs();
-	
-	const node_parameter_value* propagated_parameter(parameter_id id) const;
 	///@}
 	
 	bool end_was_marked() const noexcept { return end_marked_; }
@@ -75,8 +76,8 @@ public:
 	
 	/// Access to input frame views.
 	///@{
-	bool has_input_view(std::ptrdiff_t index) const noexcept;
-	const node_frame_window_view& input_view(std::ptrdiff_t index) const;
+	bool has_input_view(input_index_type) const noexcept;
+	const node_frame_window_view& input_view(input_index_type) const;
 	///@}
 	
 	/// Access to output frame view.
@@ -85,12 +86,18 @@ public:
 	const node_frame_view& output_view() const;
 	///@}
 	
-	/// Access to node paramters.
+	/// Access to node parameters.
 	///@{
 	bool has_parameter(parameter_id) const;
 	node_parameter_value& parameter(parameter_id);
 	const node_parameter_value& parameter(parameter_id) const;
 	const node_parameter_valuation& parameters() const;
+	///@}
+	
+	/// Access to input parameters.
+	///@{
+	bool has_input_parameter(parameter_id, time_unit t);
+	const node_parameter_value& input_parameter(parameter_id, time_unit t);
 	///@}
 };
 

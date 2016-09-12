@@ -49,8 +49,8 @@ public:
 	template<typename Value> Value param(const filter_extern_parameter<Value>&);
 	template<typename Value> Value param(const filter_extern_parameter<Value>&, time_unit t);
 	
-	template<typename Value>
-	void update_param(filter_extern_parameter<Value>& parameter, const Value& new_value);
+	template<typename Value> void set_param(const filter_parameter<Value>&, const Value&);
+	template<typename Value> void update_param(const filter_extern_parameter<Value>&, const Value&);
 };
 
 }}

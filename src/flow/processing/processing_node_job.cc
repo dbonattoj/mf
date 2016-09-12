@@ -78,12 +78,12 @@ void processing_node_job::detach_output_view() {
 }
 
 
-bool processing_node_job::has_input_view(std::ptrdiff_t index) const noexcept {
+bool processing_node_job::has_input_view(input_index_type index) const noexcept {
 	return ! input_views_.at(index).is_null();
 }
 
 
-const node_frame_window_view& processing_node_job::input_view(std::ptrdiff_t index) const {
+const node_frame_window_view& processing_node_job::input_view(input_index_type index) const {
 	Expects(has_input_view(index));
 	return input_views_.at(index);
 }
@@ -120,17 +120,31 @@ const node_parameter_valuation& processing_node_job::parameters() const {
 }
 
 
-const node_parameter_value* processing_node_job::propagated_parameter(parameter_id id) const {
-	if(has_parameter(id)) {
-		return &parameter(id);
-	} else {
-		for(const node_frame_window_view& input_view : input_views_) {
-			if(input_view && input_view.now().propagated_parameters().has(id))
-				return &input_view.now().propagated_parameters()(id);
-		}
+bool processing_node_job::has_input_parameter(parameter_id id, time_unit t) {
+	auto possible_inputs = node_.propagated_parameters_inputs(id);
+	for(input_index_type input_index : possible_inputs) {
+		if(! has_input_view(input_index)) continue;
+		const node_frame_window_view& vw = input_view(input_index);
+		if(t < vw.start_time() || t >= vw.end_time()) continue;
+		const node_parameter_valuation& input_parameter_valuation = vw.at_time(t).propagated_parameters();
+		if(input_parameter_valuation.has(id)) return true;
 	}
-	return nullptr;
+	return false;
 }
+
+
+const node_parameter_value& processing_node_job::input_parameter(parameter_id id, time_unit t) {
+	auto possible_inputs = node_.propagated_parameters_inputs(id);
+	for(input_index_type input_index : possible_inputs) {
+		if(! has_input_view(input_index)) continue;
+		const node_frame_window_view& vw = input_view(input_index);
+		if(t < vw.start_time() || t >= vw.end_time()) continue;
+		const node_parameter_valuation& input_parameter_valuation = vw.at_time(t).propagated_parameters();
+		if(input_parameter_valuation.has(id)) return input_parameter_valuation(id);
+	}
+	throw std::logic_error("input parameter not present");
+}
+
 
 
 }}

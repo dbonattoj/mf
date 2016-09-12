@@ -37,14 +37,14 @@ template<typename Input> decltype(auto) filter_job::in_full(Input& pt) {
 
 
 template<typename Input> decltype(auto) filter_job::in(Input& pt) {
-	return in(node_job_.time());
+	return in(pt, time());
 }
 
 
 template<typename Input> decltype(auto) filter_job::in(Input& pt, time_unit t) {
 	auto full_vw = in_full(pt);
 	if(full_vw) return full_vw.at_time(t);
-	return full_vw.null();
+	return decltype(full_vw[0])();
 }
 
 
@@ -69,8 +69,8 @@ Value filter_job::param(const filter_parameter<Value>& param) {
 	if(param.is_deterministic()) {
 		return param.deterministic_value(time());
 	} else {
-		Assert(node_job_.has_parameter(id()));
-		const node_parameters_value& value = node_job_.parameter(id());
+		Assert(node_job_.has_parameter(param.id()));
+		const node_parameter_value& value = node_job_.parameter(param.id());
 		return value.get<Value>();
 	}
 }
@@ -87,20 +87,25 @@ Value filter_job::param(const filter_extern_parameter<Value>& extern_param, time
 	if(extern_param.linked_parameter().is_deterministic()) {
 		return extern_param.linked_parameter().deterministic_value(t);
 	} else {
-		
+		// TODO handle not availble
+		const node_parameter_value& value = node_job_.input_parameter(extern_param.id(), t);
+		return value.get<Value>();
 	}
 }
 
 
 template<typename Value>
-void filter_job::update_param(filter_extern_parameter<Value>& extern_param, const Value& new_value) {
-	
+void filter_job::set_param(const filter_parameter<Value>& param, const Value& new_value) {
+	Assert(param.is_dynamic());
+	node_parameter_value& value = node_job_.parameter(param.id());
+	value.get<Value>() = new_value;
 }
 
 
-
-template<typename Param> decltype(auto) filter_job::param(Param& param) {
-	return param.get(time());
+template<typename Value>
+void filter_job::update_param(const filter_extern_parameter<Value>& extern_param, const Value& new_value) {
+	Assert(extern_param.is_dynamic());
+	// TODO update extern param
 }
 
 
