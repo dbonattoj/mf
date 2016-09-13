@@ -116,12 +116,22 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 		html << "prefetch = " << static_cast<const async_node&>(nd).prefetch_duration();
 	}
 	html << R"(</FONT>)";
+	
+	if(with_parameters_ && nd.parameters_count() + nd.input_parameters_count() > 0) {
+		html << R"(<BR/><BR/>)";
+		for(std::ptrdiff_t i = 0; i < nd.parameters_count(); ++i)
+			html << R"(&#x25A0; <FONT POINT-SIZE="10">)" << nd.parameter_at(i).id() << R"( ()" << nd.parameter_at(i).name() << R"()</FONT><BR/>)";
+		for(std::ptrdiff_t i = 0; i < nd.input_parameters_count(); ++i)
+			html << R"(&#x25A1; <FONT POINT-SIZE="10">*)" << nd.input_parameter_at(i) << R"(</FONT><BR/>)";
+	}
+	
 	if(with_state_) {
 		html << R"(<BR/><BR/><FONT POINT-SIZE="10">)";
 		time_unit t = nd.current_time();
 		html << "t = " << t;
 		html << R"(</FONT>)";
 	}
+	
 	html << R"(</TD>)";
 	html << R"(</TR>)";
 	
@@ -250,13 +260,22 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 			style = "dotted";
 		}
 		
+		if(with_parameters_ && out.propagated_parameters_count() > 0) {
+			std::string pars;
+			for(std::ptrdiff_t j = 0; j < out.propagated_parameters_count(); ++j) {
+				if(j > 0) pars += ", ";
+				pars += R"(&#x25A1; )" + std::to_string(out.propagated_parameter_at(j));
+			}
+			label = pars + R"(<BR/>)" + label;
+		}
+				
 		output_
 			<< '\t' << uid_(out.this_node(), "node") << ':' << uid_(out, "out")
 			<< " -> " << uid_(nd, "node") << ':' << uid_(in, "in") << " ["
 			<< "style=\"" << style << "\", "
 			<< "arrowhead=\"" << arrow_shape << "\", "
 			<< "color=" << in_col << ", "
-			<< "headlabel=\"" << label << "\", "
+			<< "headlabel=<" << label << ">, "
 			<< "fontsize=10, "
 			<< "labelangle=45, "
 			<< "labeldistance=2.0, "

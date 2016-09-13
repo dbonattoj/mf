@@ -59,21 +59,28 @@ private:
 	std::vector<std::unique_ptr<node_output>> outputs_;
 	std::vector<std::unique_ptr<node_input>> inputs_;	
 	node_stream_properties stream_properties_;
-		
-	std::atomic<online_state> state_ {online};
-	std::atomic<time_unit> current_time_ {-1};
-	std::atomic<bool> reached_end_ {false};
-	
+			
 
 	std::vector<node_parameter> parameters_; ///< Parameters of this node.
-	node_parameter_valuation parameter_valuation_; ///< Current valuation of node parameters.
-	mutable std::mutex parameters_mutex_; ///< Mutex to protect parameter_valuation_ during concurrent access.
 	
 	/// Parameters of preceding nodes whose values this node receives with input frames.
 	/** Propagated parameters on node outputs are set up such that the node receives these parameters. */
 	std::vector<node_parameter_id> input_parameters_;
 	
 	std::string name_ = "node";
+
+
+	/// Dynamic state (varies during execution).
+	///@{
+	std::atomic<online_state> state_ {online};
+	std::atomic<time_unit> current_time_ {-1};
+	std::atomic<bool> reached_end_ {false};
+
+	node_parameter_valuation parameter_valuation_; ///< Current valuation of node parameters.
+	mutable std::mutex parameters_mutex_; ///< Mutex to protect parameter_valuation_ during concurrent access.
+	///@}
+
+
 	
 	/// Recursively pre-setup nodes in sink-to-source order.
 	/** Must be called on sink node. Calls pre_setup() once on each node in graph, in an order such that when one node
@@ -139,8 +146,13 @@ public:
 	
 	node_parameter& add_parameter(node_parameter_id, const node_parameter_value& initial_value);
 	bool has_parameter(node_parameter_id) const;
+	std::size_t parameters_count() const { return parameters_.size(); }
+	const node_parameter& parameter_at(std::ptrdiff_t i) const { return parameters_.at(i); }
+	
 	void add_input_parameter(node_parameter_id);
 	bool has_input_parameter(node_parameter_id) const;
+	std::size_t input_parameters_count() const { return input_parameters_.size(); }
+	node_parameter_id input_parameter_at(std::ptrdiff_t i) const { return input_parameters_.at(i); }
 	
 	bool add_propagated_parameter_if_needed(node_parameter_id);
 	

@@ -80,7 +80,10 @@ template<typename Value>
 void filter_parameter<Value>::install(filter_graph& gr, node& nd) {
 	if(was_installed()) return;
 	id_ = gr.new_node_parameter_id();
-	if(is_dynamic()) nd.add_parameter(id_, initial_value_);
+	if(is_dynamic()) {
+		node_parameter& par = nd.add_parameter(id_, initial_value_);
+		par.set_name(name_);
+	}
 }
 
 

@@ -31,10 +31,12 @@ using namespace std::chrono_literals;
 
 void node_graph::pull_next_frame_() {
 	Expects(launched_);
+
+	export_graph_visualization(*this, "gr.gv");
+
 	sink_->pull_next_frame();	
 	if(callback_function) callback_function(sink_->current_time());
 	
-	export_graph_visualization(*this, "gr.gv");
 	//std::this_thread::sleep_for(100ms);
 }
 

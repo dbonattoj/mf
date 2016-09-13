@@ -51,6 +51,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		pass1.set_name("param orig");
 		auto& par = pass1.add_param(false);
 		par.set_constant_value("value");
+		par.set_name("par");
 
 		pass2.input.connect(pass1.output);
 		pass2.set_name("param dest");
@@ -77,6 +78,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		par.set_value_function([](time_unit t)->std::string {
 			return std::to_string(t);
 		});
+		par.set_name("par");
 
 		pass2.input.connect(pass1.output);
 		pass2.set_name("param dest");
@@ -100,6 +102,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		pass1.set_name("param orig");
 		auto& par = pass1.add_param(true);
 		par.set_dynamic();
+		par.set_name("par");
 
 		pass2.input.connect(pass1.output);
 		pass2.set_name("param dest");
