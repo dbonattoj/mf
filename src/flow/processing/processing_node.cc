@@ -52,13 +52,6 @@ void processing_node_output::end_read(time_unit duration) {
 }
 
 
-void processing_node_output::added_propagated_parameter_(node_parameter_id id, const node_input& raw_source) {
-	const processing_node_input& source = static_cast<const processing_node_input&>(raw_source);
-	auto& guide = this_node().propagated_parameters_guide_;
-	guide.emplace(id, source.index());
-}
-
-
 ///////////////
 
 
@@ -76,6 +69,17 @@ void processing_node::verify_connections_validity_() const {
 		node& successor = output().connected_node();
 		if(typeid(successor) != typeid(multiplex_node))
 			throw invalid_node_graph("processing_node output with >1 channel must be connected to multiplex_node");
+	}
+}
+
+
+void processing_node::compute_propagated_parameters_guide_() const {
+	Assert(propagated_parameters_guide_.size() == 0);
+	for(input_index_type input_index = 0; input_index < inputs_count(); ++input_index) {
+		const node_input& in = input_at(input_index);
+		const node_output& out = in.connected_output();
+		for(std::ptrdiff_t i = 0; i < out.propagated_parameters_count(); ++i)
+			propagated_parameters_guide_.emplace(out.propagated_parameter_at(i), input_index);
 	}
 }
 
@@ -111,6 +115,7 @@ void processing_node::handler_process_(processing_node_job& job) {
 	if(! has_output()) return;
 	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
 		node_parameter_id id = output().propagated_parameter_at(i);
+		std::cout << "propagating parameter " << id << "................." << std::endl;
 		if(job.has_parameter(id))
 			job.output_view().propagated_parameters().set(id, job.parameter(id));
 		else if(job.has_input_parameter(id, job.time()))
@@ -195,6 +200,10 @@ node_frame_format processing_node::output_frame_format_() const {
 
 
 auto processing_node::propagated_parameters_inputs(node_parameter_id id) const -> std::vector<input_index_type> {
+std::cout << name() << " propagated par in (" << id << ")" << std::endl;
+	if(propagated_parameters_guide_.size() == 0)
+		compute_propagated_parameters_guide_();
+
 	auto ii = propagated_parameters_guide_.equal_range(id);
 	std::vector<input_index_type> indices;
 	for(auto it = ii.first; it != ii.second; ++it)

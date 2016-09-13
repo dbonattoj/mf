@@ -264,7 +264,7 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 			std::string pars;
 			for(std::ptrdiff_t j = 0; j < out.propagated_parameters_count(); ++j) {
 				if(j > 0) pars += ", ";
-				pars += R"(&#x25A1; )" + std::to_string(out.propagated_parameter_at(j));
+				pars += R"(&#x25AB; )" + std::to_string(out.propagated_parameter_at(j));
 			}
 			label = pars + R"(<BR/>)" + label;
 		}

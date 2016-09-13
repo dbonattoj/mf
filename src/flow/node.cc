@@ -249,12 +249,11 @@ void node::deduce_propagated_parameters_() {
 
 
 bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
-	std::cout << "node::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
+	std::cout << "node(" << name_ << ")::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
 	
 	bool needed = false;
 	for(auto&& out : outputs_) {
-		node_input& connected_input = out->connected_input();
-		bool needed_by_output = out->add_propagated_parameter_if_needed(id, connected_input);
+		bool needed_by_output = out->add_propagated_parameter_if_needed(id);
 		if(needed_by_output) needed = true;
 	}
 	if(has_input_parameter(id)) needed = true;

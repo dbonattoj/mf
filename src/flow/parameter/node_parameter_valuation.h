@@ -39,6 +39,7 @@ public:
 	node_parameter_valuation& operator=(const node_parameter_valuation&) = default;
 	node_parameter_valuation& operator=(node_parameter_valuation&&) = default;
 	
+	std::size_t count() const { return values_.size(); }
 	bool has(node_parameter_id) const;
 	const node_parameter_value& operator()(node_parameter_id) const;
 	node_parameter_value& operator()(node_parameter_id);

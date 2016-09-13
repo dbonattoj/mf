@@ -81,9 +81,6 @@ private:
 	processing_node& this_node();
 	const processing_node& this_node() const;	
 
-protected:
-	void added_propagated_parameter_(node_parameter_id, const node_input& source) override;
-
 public:
 	using node_output::node_output;
 	
@@ -129,7 +126,9 @@ public:
 private:
 	processing_node_handler* handler_ = nullptr;
 	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
-	std::multimap<node_parameter_id, input_index_type> propagated_parameters_guide_;
+	mutable std::multimap<node_parameter_id, input_index_type> propagated_parameters_guide_;
+
+	void compute_propagated_parameters_guide_() const;
 
 protected:
 	void verify_connections_validity_() const;

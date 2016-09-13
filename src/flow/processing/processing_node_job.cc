@@ -135,11 +135,16 @@ bool processing_node_job::has_input_parameter(node_parameter_id id, time_unit t)
 
 const node_parameter_value& processing_node_job::input_parameter(node_parameter_id id, time_unit t) {
 	auto possible_inputs = node_.propagated_parameters_inputs(id);
+	
+	std::cout << "input parameter? " << id << " (t=" << t << ")" << std::endl;
+
 	for(input_index_type input_index : possible_inputs) {
+		std::cout << "trying input " << input_index << std::endl;
 		if(! has_input_view(input_index)) continue;
 		const node_frame_window_view& vw = input_view(input_index);
 		if(t < vw.start_time() || t >= vw.end_time()) continue;
 		const node_parameter_valuation& input_parameter_valuation = vw.at_time(t).propagated_parameters();
+		std::cout << "present parameters count: " << vw.at_time(t).propagated_parameters().count() << std::endl;
 		if(input_parameter_valuation.has(id)) return input_parameter_valuation(id);
 	}
 	throw std::logic_error("input parameter not present");

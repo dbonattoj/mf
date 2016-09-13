@@ -47,15 +47,13 @@ protected:
 	node_output(const node_output&) = delete;
 	node_output& operator=(const node_output&) = delete;
 	
-	virtual void added_propagated_parameter_(node_parameter_id, const node_input& source) { }
-
 public:	
 	explicit node_output(node& nd);
 	virtual ~node_output() = default;
 
 	node& this_node() const noexcept { return node_; }
 	
-	bool add_propagated_parameter_if_needed(node_parameter_id, const node_input& source);
+	bool add_propagated_parameter_if_needed(node_parameter_id);
 	bool has_propagated_parameter(node_parameter_id) const;
 	std::size_t propagated_parameters_count() const { return propagated_parameters_.size(); }
 	node_parameter_id propagated_parameter_at(std::ptrdiff_t i) const { return propagated_parameters_.at(i); }

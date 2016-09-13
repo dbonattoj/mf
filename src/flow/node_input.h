@@ -59,7 +59,7 @@ public:
 
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
-	
+		
 	void connect(node_output& out);
 	void disconnect();
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
