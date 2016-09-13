@@ -38,7 +38,6 @@ public:
 	virtual void install(filter_graph&, node&) = 0;
 };
 
-
 class filter_extern_parameter_base {
 public:
 	virtual ~filter_extern_parameter_base() = default;
@@ -47,9 +46,11 @@ public:
 
 
 /// Parameter of type \a Value belonging to a filter.
-/** Can be either _deterministic_ or _dynamic_. Deterministic parameters have either a constant value, or a value
- ** computed in function of the frame index (animation). Dynamic parameters are updated at will by the node(s) during
- ** execution. */
+/** The filter that the parameter belongs to is called the _owning_ filter. Can be either _deterministic_ or _dynamic_.
+ ** Deterministic parameters have either a constant value, or a be computed in function of the frame index (animation).
+ ** Dynamic parameters are updated by the node(s) during execution. They can be updated by the owning filter during
+ ** pre-process or process. They can also be updated by a linked \ref filter_extern_parameter from another filter with
+ ** send access. */
 template<typename Value>
 class filter_parameter : public filter_parameter_base {
 public:
@@ -85,7 +86,16 @@ public:
 
 
 /// Link to a parameter of type \a Value belonging to another filter.
-/** ... */
+/** Must be added to filter if it is going to access the linked parameter of the other filter. Must be linked to a
+ ** \ref filter_parameter of the same value type, on a _preceding_ node in the filter graph.
+ ** When the linked parameter is deterministic, it can only be used to get/compute its value the same way like directly
+ ** from the owning filter.
+ ** When the linked parameter is dynamic, two kinds of access are possible:
+ ** - Receiving: The filter receives the value of the parameter along with the input frames. The value which the
+ **   parameter had when a frame got generated is propagated along with each frame. For inputs with time windows, the
+ **   value on each of the past/future frames can be retrieved.
+ ** - Send: The filter can send a new value to the parameter. The owning filter will use the last new value that was
+ **   sent to it when processing the next frame. */
 template<typename Value>
 class filter_extern_parameter : public filter_extern_parameter_base {
 public:
@@ -95,16 +105,19 @@ public:
 private:
 	filter& filter_;
 	parameter_type* linked_parameter_ = nullptr;
-	bool readable_;
-	bool writable_;
+	bool receive_;
+	bool send_;
 	std::string name_;
 
 public:
-	explicit filter_extern_parameter(filter&);
+	filter_extern_parameter(filter&, bool can_receive = true, bool can_send = false);
 	
 	void link(parameter_type&);
 	bool is_linked() const;
 	const parameter_type& linked_parameter() const;
+	
+	bool can_receive() const { return receive_; }
+	bool can_send() const { return send_; }
 	
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const { return name_; }

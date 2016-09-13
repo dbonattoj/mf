@@ -64,9 +64,11 @@ Value filter_parameter<Value>::deterministic_value(time_unit t) const {
 
 
 template<typename Value>
-filter_extern_parameter<Value>::filter_extern_parameter(filter& filt) :
+filter_extern_parameter<Value>::filter_extern_parameter(filter& filt, bool receive, bool send) :
 	filter_(filt),
-	linked_parameter_(nullptr) { }
+	linked_parameter_(nullptr),
+	receive_(receive),
+	send_(send) { }
 
 
 template<typename Value>
@@ -92,7 +94,7 @@ auto filter_extern_parameter<Value>::linked_parameter() const -> const parameter
 template<typename Value>
 void filter_extern_parameter<Value>::install(filter_graph& gr, node& nd) {
 	Assert(is_linked());
-	if(linked_parameter().is_dynamic() && readable_) {
+	if(linked_parameter().is_dynamic() && receive_) {
 		if(! linked_parameter().was_installed()) linked_parameter_->install(gr, nd);
 		nd.add_input_parameter(linked_parameter().id());
 	}

@@ -61,10 +61,10 @@ public:
 			job.set_param(*par, t_str);
 
 		for(extern_param_type* par : verify_is_t_params_)
-			REQUIRE(job.param(*par) == t_str);
+			REQUIRE(job.in(*par) == t_str);
 			
 		for(auto&& pv : expected_values_)
-			REQUIRE(job.param(*pv.first) == pv.second);
+			REQUIRE(job.in(*pv.first) == pv.second);
 	}
 };
 

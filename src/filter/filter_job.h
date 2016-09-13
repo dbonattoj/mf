@@ -25,6 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+template<std::size_t Dim, typename Elem> class filter_input;
+template<std::size_t Dim, typename Elem> class filter_output;
 template<typename Value> class filter_parameter;
 template<typename Value> class filter_extern_parameter;
 
@@ -38,19 +40,19 @@ public:
 	time_unit time() const noexcept { return node_job_.time(); }
 	void mark_end() noexcept { node_job_.mark_end(); }
 
-	template<typename Input> decltype(auto) in_full(Input&);
-	template<typename Input> decltype(auto) in(Input&);
-	template<typename Input> decltype(auto) in(Input&, time_unit t);
-	
-	template<typename Output> decltype(auto) out(Output&);
+	template<std::size_t Dim, typename Elem> ndarray_timed_view<Dim + 1, Elem> in_full(filter_input<Dim, Elem>&);
+	template<std::size_t Dim, typename Elem> ndarray_view<Dim, Elem> in(filter_input<Dim, Elem>&);
+	template<std::size_t Dim, typename Elem> ndarray_view<Dim, Elem> in(filter_input<Dim, Elem>&, time_unit t);
+
+	template<typename Value> Value in(const filter_extern_parameter<Value>&);
+	template<typename Value> Value in(const filter_extern_parameter<Value>&, time_unit t);
+
+	template<std::size_t Dim, typename Elem> ndarray_view<Dim, Elem> out(filter_output<Dim, Elem>&);
 
 	template<typename Value> Value param(const filter_parameter<Value>&);
-	
-	template<typename Value> Value param(const filter_extern_parameter<Value>&);
-	template<typename Value> Value param(const filter_extern_parameter<Value>&, time_unit t);
-	
 	template<typename Value> void set_param(const filter_parameter<Value>&, const Value&);
-	template<typename Value> void update_param(const filter_extern_parameter<Value>&, const Value&);
+	
+	template<typename Value> void send_param(const filter_extern_parameter<Value>&, const Value&);
 };
 
 }}

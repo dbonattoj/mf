@@ -20,46 +20,63 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-template<typename Input> decltype(auto) filter_job::in_full(Input& pt) {
-	constexpr std::size_t dimension = Input::dimension;
-	using elem_type = typename Input::elem_type;
-			
+template<std::size_t Dim, typename Elem>
+ndarray_timed_view<Dim + 1, Elem> filter_job::in_full(filter_input<Dim, Elem>& pt) {
 	std::ptrdiff_t index = pt.index();
 	if(! node_job_.has_input_view(index))
-		return ndarray_timed_view<dimension + 1, elem_type>();
+		return ndarray_timed_view<Dim + 1, Elem>();
 			
 	timed_frame_array_view gen_vw = node_job_.input_view(index);
-	return from_opaque<dimension + 1, elem_type>(
+	return from_opaque<Dim + 1, Elem>(
 		gen_vw,
 		pt.frame_shape()
 	);
 }
 
 
-template<typename Input> decltype(auto) filter_job::in(Input& pt) {
+template<std::size_t Dim, typename Elem>
+ndarray_view<Dim, Elem> filter_job::in(filter_input<Dim, Elem>& pt) {
 	return in(pt, time());
 }
 
 
-template<typename Input> decltype(auto) filter_job::in(Input& pt, time_unit t) {
+template<std::size_t Dim, typename Elem>
+ndarray_view<Dim, Elem> filter_job::in(filter_input<Dim, Elem>& pt, time_unit t) {
 	auto full_vw = in_full(pt);
 	if(full_vw) return full_vw.at_time(t);
 	return decltype(full_vw[0])();
 }
 
 
-template<typename Output> decltype(auto) filter_job::out(Output& pt) {
-	constexpr std::size_t dimension = Output::dimension;
-	using elem_type = typename Output::elem_type;
-	
+template<std::size_t Dim, typename Elem>
+ndarray_view<Dim, Elem> filter_job::out(filter_output<Dim, Elem>& pt) {
 	std::ptrdiff_t index = pt.index();
 	
 	auto gen_vw = extract_part(node_job_.output_view(), index);
-	return from_opaque<dimension, elem_type>(
+	return from_opaque<Dim, Elem>(
 		gen_vw,
 		pt.frame_shape()
 	);
 }
+
+
+template<typename Value>
+Value filter_job::in(const filter_extern_parameter<Value>& extern_param) {
+	return in(extern_param, time());
+}
+
+
+template<typename Value>
+Value filter_job::in(const filter_extern_parameter<Value>& extern_param, time_unit t) {
+	if(extern_param.linked_parameter().is_deterministic()) {
+		return extern_param.linked_parameter().deterministic_value(t);
+	} else {
+		// TODO handle not availble
+		const node_parameter_value& value = node_job_.input_parameter(extern_param.linked_parameter().id(), t);
+		return value.get<Value>();
+	}
+}
+
 
 // TODO allow returning deterministic by reference
 
@@ -77,24 +94,6 @@ Value filter_job::param(const filter_parameter<Value>& param) {
 
 
 template<typename Value>
-Value filter_job::param(const filter_extern_parameter<Value>& extern_param) {
-	return param(extern_param, time());
-}
-
-
-template<typename Value>
-Value filter_job::param(const filter_extern_parameter<Value>& extern_param, time_unit t) {
-	if(extern_param.linked_parameter().is_deterministic()) {
-		return extern_param.linked_parameter().deterministic_value(t);
-	} else {
-		// TODO handle not availble
-		const node_parameter_value& value = node_job_.input_parameter(extern_param.linked_parameter().id(), t);
-		return value.get<Value>();
-	}
-}
-
-
-template<typename Value>
 void filter_job::set_param(const filter_parameter<Value>& param, const Value& new_value) {
 	Assert(param.is_dynamic());
 	node_parameter_value& value = node_job_.parameter(param.id());
@@ -103,8 +102,7 @@ void filter_job::set_param(const filter_parameter<Value>& param, const Value& ne
 
 
 template<typename Value>
-void filter_job::update_param(const filter_extern_parameter<Value>& extern_param, const Value& new_value) {
-	Assert(extern_param.is_dynamic());
+void filter_job::send_param(const filter_extern_parameter<Value>& extern_param, const Value& new_value) {
 	// TODO update extern param
 }
 
