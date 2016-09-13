@@ -611,14 +611,14 @@ SECTION("basic") {
 			gr.setup();
 			
 			flow::processing_timeline timeline(*gr.node_graph_);
-			gr.node_graph_->set_diagnostic(timeline);
+			//gr.node_graph_->set_diagnostic(timeline);
 			
 			gr.run();
 
-			flow::processing_timeline_json_exporter timeline_export(timeline);
+/*			flow::processing_timeline_json_exporter timeline_export(timeline);
 			std::ofstream json("timeline.json");
 			timeline_export.generate(json);
-			
+*/			
 			REQUIRE(sink.check());
 		}
 		

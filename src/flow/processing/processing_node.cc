@@ -108,6 +108,7 @@ void processing_node::handler_process_(processing_node_job& job) {
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_finished(*this, job.time());
 
+	if(! has_output()) return;
 	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
 		node_parameter_id id = output().propagated_parameter_at(i);
 		if(job.has_parameter(id))
