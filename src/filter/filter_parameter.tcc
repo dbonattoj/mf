@@ -7,7 +7,10 @@ namespace mf { namespace flow {
 
 template<typename Value>
 filter_parameter<Value>::filter_parameter(filter& filt) :
-	filter_(filt) { }
+	filter_(filt)
+{
+	filter_.register_parameter(*this);
+}
 
 template<typename Value>
 bool filter_parameter<Value>::is_deterministic() const {
@@ -34,8 +37,16 @@ void filter_parameter<Value>::set_constant_value(const Value& val) {
 
 
 template<typename Value>
-void filter_parameter<Value>::set_dynamic() {
+void filter_parameter<Value>::set_dynamic(const Value& initial_value) {
 	value_function_ = nullptr;
+	initial_value_ = initial_value;
+}
+
+
+template<typename Value>
+const Value& filter_parameter<Value>::dynamic_initial_value() const {
+	Assert(is_dynamic());
+	return initial_value_;
 }
 
 
@@ -49,7 +60,7 @@ template<typename Value>
 void filter_parameter<Value>::install(filter_graph& gr, node& nd) {
 	if(was_installed()) return;
 	id_ = gr.new_node_parameter_id();
-	if(is_dynamic()) nd.add_parameter(id_);
+	if(is_dynamic()) nd.add_parameter(id_, initial_value_);
 }
 
 
@@ -68,7 +79,10 @@ filter_extern_parameter<Value>::filter_extern_parameter(filter& filt, bool recei
 	filter_(filt),
 	linked_parameter_(nullptr),
 	receive_(receive),
-	send_(send) { }
+	send_(send)
+{
+	filter_.register_extern_parameter(*this);
+}
 
 
 template<typename Value>

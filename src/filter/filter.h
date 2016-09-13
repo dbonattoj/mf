@@ -45,6 +45,7 @@ class filter_extern_parameter_base;
 template<typename Value> class filter_parameter;
 template<typename Value> class filter_extern_parameter;
 
+
 /// Filter which performs concrete processing, base class.
 /** Concrete filters are implemented as classes derived from \ref filter, \ref source_filter or \ref sink_filter. */
 class filter : public processing_node_handler {			

@@ -3,9 +3,13 @@
 
 #include <utility>
 #include <memory>
+#include <type_traits>
 
 namespace mf { namespace flow {
 
+/// Type-erased container for node parameter value.
+/** Can hold value of any type. Copy or move assignment reallocates the held value and may change its type.
+ ** Value is retrieved (for reading and writing) using `get<T>()`, where `T` must be the correct type. */
 class node_parameter_value {
 private:
 	class holder_base;
@@ -16,12 +20,10 @@ private:
 public:
 	node_parameter_value(const node_parameter_value&);
 	node_parameter_value(node_parameter_value&&);
-	template<typename T> node_parameter_value(const T&);
 	template<typename T> node_parameter_value(T&&);
 	
 	node_parameter_value& operator=(const node_parameter_value&);
 	node_parameter_value& operator=(node_parameter_value&&);
-	template<typename T> node_parameter_value& operator=(const T&);
 	template<typename T> node_parameter_value& operator=(T&&);
 	
 	template<typename T> bool is_type() const;
@@ -44,8 +46,8 @@ private:
 
 public:
 	holder() : value_() { }
-	holder(const T& t) : value_(t) { }
-	holder(T&& t) : value_(std::move(t)) { }
+	explicit holder(const T& t) : value_(t) { }
+	explicit holder(T&& t) : value_(std::move(t)) { }
 	~holder() override = default;
 	
 	std::unique_ptr<holder_base> clone() const override

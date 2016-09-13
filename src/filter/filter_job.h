@@ -35,24 +35,56 @@ private:
 	processing_node_job& node_job_;
 
 public:
-	filter_job(processing_node_job& job) : node_job_(job) { }
+	explicit filter_job(processing_node_job& job) : node_job_(job) { }
 	
 	time_unit time() const noexcept { return node_job_.time(); }
 	void mark_end() noexcept { node_job_.mark_end(); }
 
-	template<std::size_t Dim, typename Elem> ndarray_timed_view<Dim + 1, Elem> in_full(filter_input<Dim, Elem>&);
-	template<std::size_t Dim, typename Elem> ndarray_view<Dim, Elem> in(filter_input<Dim, Elem>&);
-	template<std::size_t Dim, typename Elem> ndarray_view<Dim, Elem> in(filter_input<Dim, Elem>&, time_unit t);
-
-	template<typename Value> Value in(const filter_extern_parameter<Value>&);
-	template<typename Value> Value in(const filter_extern_parameter<Value>&, time_unit t);
-
-	template<std::size_t Dim, typename Elem> ndarray_view<Dim, Elem> out(filter_output<Dim, Elem>&);
-
-	template<typename Value> Value param(const filter_parameter<Value>&);
-	template<typename Value> void set_param(const filter_parameter<Value>&, const Value&);
+	/// Input view.
+	///@{
+	template<std::size_t Dim, typename Elem>
+	ndarray_timed_view<Dim + 1, Elem> in_full(filter_input<Dim, Elem>&);
 	
-	template<typename Value> void send_param(const filter_extern_parameter<Value>&, const Value&);
+	template<std::size_t Dim, typename Elem>
+	ndarray_view<Dim, Elem> in(filter_input<Dim, Elem>&);
+	
+	template<std::size_t Dim, typename Elem>
+	ndarray_view<Dim, Elem> in(filter_input<Dim, Elem>&, time_unit t);
+	///@}
+
+
+	/// Output view.
+	///@{
+	template<std::size_t Dim, typename Elem>
+	ndarray_view<Dim, Elem> out(filter_output<Dim, Elem>&);
+	///@}
+
+	
+	/// Access own parameters.
+	///@{
+	template<typename Value>
+	Value param(const filter_parameter<Value>&);
+	
+	template<typename Value>
+	void set_param(const filter_parameter<Value>&, const Value&);
+	///@}
+	
+	
+	/// Receive extern parameters.
+	///@{
+	template<typename Value>
+	Value in(const filter_extern_parameter<Value>&);
+	
+	template<typename Value>
+	Value in(const filter_extern_parameter<Value>&, time_unit t);
+	///@}
+	
+	
+	/// Send extern parameters.
+	///@{
+	template<typename Value>
+	void send_param(const filter_extern_parameter<Value>&, const Value&);
+	///@}
 };
 
 }}

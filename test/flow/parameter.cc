@@ -20,6 +20,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
+/*
 	SECTION("deterministic (constant)") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 		auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
@@ -67,8 +68,29 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		gr.setup();
 		gr.run();
 	}
-	
-	
+*/
+
+	SECTION("dynamic") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+		auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+		
+		pass1.input.connect(source.output);
+		pass1.set_name("param orig");
+		auto& par = pass1.add_param(true);
+		par.set_dynamic();
+
+		pass2.input.connect(pass1.output);
+		pass2.set_name("param dest");
+		auto& e_par = pass2.add_extern_param(true);
+		e_par.link(par);
+				
+		sink.input.connect(pass2.output);
+		
+		gr.setup();
+		gr.run();
+	}
 }
 
 
