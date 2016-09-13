@@ -47,14 +47,14 @@ public:
 
 private:
 	filter& filter_;
-	parameter_id id_;
+	node_parameter_id id_ = undefined_node_parameter_id;
 	std::function<deterministic_value_function> value_function_;
 	std::string name_;
 
 public:
 	explicit filter_parameter(filter&);
 	
-	parameter_id id() const { return id_; }	
+	node_parameter_id id() const { return id_; }
 	bool is_deterministic() const;
 	bool is_dynamic() const;
 

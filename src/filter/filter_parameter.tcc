@@ -7,9 +7,7 @@ namespace mf { namespace flow {
 
 template<typename Value>
 filter_parameter<Value>::filter_parameter(filter& filt) :
-	filter_(filt),
-	id_(filter_.this_graph().new_parameter_id()) { }
-
+	filter_(filt) { }
 
 template<typename Value>
 bool filter_parameter<Value>::is_deterministic() const {
@@ -31,7 +29,7 @@ void filter_parameter<Value>::set_value_function(Function&& func) {
 
 template<typename Value>
 void filter_parameter<Value>::set_constant_value(const Value& val) {
-	value_function_ = [val](time_unit) -> Value { return val; }
+	value_function_ = [val](time_unit) -> Value { return val; };
 }
 
 
@@ -43,12 +41,15 @@ void filter_parameter<Value>::set_dynamic() {
 
 template<typename Value>
 void filter_parameter<Value>::install(node& nd) {
-	if(is_dynamic()) nd.add_parameter(id_);
+	if(is_dynamic()) {
+		node_parameter& par = nd.add_parameter();
+		id_ = par.id(); // TODO handle multi node per filter
+	}
 }
 
 
 template<typename Value>
-Value deterministic_value(time_unit t) const {
+Value filter_parameter<Value>::deterministic_value(time_unit t) const {
 	Assert(is_deterministic());
 	return value_function_(t);
 }
@@ -60,7 +61,7 @@ Value deterministic_value(time_unit t) const {
 template<typename Value>
 filter_extern_parameter<Value>::filter_extern_parameter(filter& filt) :
 	filter_(filt),
-	linked_id_(undefined_parameter_id) { }
+	linked_parameter_(nullptr) { }
 
 
 template<typename Value>

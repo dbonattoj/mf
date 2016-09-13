@@ -34,17 +34,13 @@ class filter_graph {
 public:
 	std::vector<std::unique_ptr<filter>> filters_;
 	std::unique_ptr<node_graph> node_graph_;
-	
-	parameter_id last_parameter_id_ = 0;
-	
+		
 public:
 	filter_graph() = default;
 	filter_graph(const filter_graph&) = delete;
 	filter_graph& operator=(const filter_graph&) = delete;
 	~filter_graph();
 	
-	parameter_id new_parameter_id();
-
 	template<typename Filter, typename... Args>
 	Filter& add_filter(Args&&... args) {
 		static_assert(std::is_base_of<filter, Filter>::value, "filter must be derived class from `filter`");

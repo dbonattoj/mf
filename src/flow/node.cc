@@ -21,6 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node.h"
 #include "node_output.h"
 #include "node_input.h"
+#include "node_graph.h"
 #include <limits>
 #include <algorithm>
 
@@ -243,13 +244,13 @@ time_unit node::end_time() const noexcept {
 
 void node::deduce_propagated_parameters_() {
 	for(auto&& ip : parameters_) {
-		parameter_id id = ip.first;
+		node_parameter_id id = ip.first;
 		add_propagated_parameter_if_needed(id);
 	}
 }
 
 
-bool node::add_propagated_parameter_if_needed(parameter_id id) {
+bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
 	bool needed = false;
 	for(auto&& out : outputs_) {
 		node_input& connected_input = out->connected_input();
@@ -262,44 +263,45 @@ bool node::add_propagated_parameter_if_needed(parameter_id id) {
 
 
 
-node_parameter& node::add_parameter(parameter_id id) {
+node_parameter& node::add_parameter() {
+	node_parameter_id id = graph_.new_parameter_id();
 	auto res = parameters_.emplace(id, node_parameter(id));
 	return res.first->second;
 }
 
 
-bool node::has_parameter(parameter_id id) const {
+bool node::has_parameter(node_parameter_id id) const {
 	return (parameters_.find(id) != parameters_.end());
 }
 
 
-node_parameter& node::parameter_at(parameter_id id) {
+node_parameter& node::parameter_at(node_parameter_id id) {
 	return parameters_.at(id);
 }
 
 
-const node_parameter& node::parameter_at(parameter_id id) const {
+const node_parameter& node::parameter_at(node_parameter_id id) const {
 	return parameters_.at(id);
 }
 
 
-void node::add_input_parameter(parameter_id id) {
+void node::add_input_parameter(node_parameter_id id) {
 	input_parameters_.push_back(id);
 }
 
 
-bool node::has_input_parameter(parameter_id id) const {
+bool node::has_input_parameter(node_parameter_id id) const {
 	return std::find(input_parameters_.cbegin(), input_parameters_.cend(), id) != input_parameters_.cend();
 }
 
 
-void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
+void node::update_parameter_(node_parameter_id id, const node_parameter_value& val) {
 	std::lock_guard<std::mutex> lock(parameters_mutex_);
 	parameter_valuation_.set(id, val);
 }
 
 
-void node::update_parameter_(parameter_id id, node_parameter_value&& val) {
+void node::update_parameter_(node_parameter_id id, node_parameter_value&& val) {
 	std::lock_guard<std::mutex> lock(parameters_mutex_);
 	parameter_valuation_.set(id, std::move(val));
 }

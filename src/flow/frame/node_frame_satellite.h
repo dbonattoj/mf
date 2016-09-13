@@ -21,7 +21,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_NODE_FRAME_SATELLITE_H_
 #define MF_FLOW_NODE_FRAME_SATELLITE_H_
 
-#include "parameter/node_parameter_valuation.h"
+#include "../parameter/node_parameter_valuation.h"
 
 namespace mf { namespace flow {
 

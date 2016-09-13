@@ -26,24 +26,25 @@ private:
 	std::map<const extern_param_type*, std::string> expected_values_;
 
 public:
-	parameter_passthrough_filter() : passthrough_filter() { }
+	parameter_passthrough_filter(time_unit past_window, time_unit future_window) :
+		passthrough_filter(past_window, future_window) { }
 
 	param_type& add_param(bool set_to_t) {
 		params_.emplace_back(*this);
-		param_type& param = params.back();
-		extern_params_.push_back(&param);
+		param_type& param = params_.back();
+		if(set_to_t) set_to_t_params_.push_back(&param);
 		return param;
 	}
 	
 	extern_param_type& add_extern_param(bool verify_is_t) {
 		extern_params_.emplace_back(*this);
-		extern_param& param = extern_params_.back();
+		extern_param_type& param = extern_params_.back();
 		if(verify_is_t) verify_is_t_params_.push_back(&param);
 		return param;
 	}
 	
 	void set_expected_value(const extern_param_type& par, const std::string& val) {
-		expected_values_[par] = val;
+		expected_values_[&par] = val;
 	}
 	
 	void reset_expected_values() {
@@ -63,7 +64,7 @@ public:
 			REQUIRE(job.param(*par) == t_str);
 			
 		for(auto&& pv : expected_values_)
-			REQUIRE(job.param(pv.first) == pv.second);
+			REQUIRE(job.param(*pv.first) == pv.second);
 	}
 };
 

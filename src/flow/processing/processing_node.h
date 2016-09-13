@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../node_input.h"
 #include "../node_output.h"
 #include "../../nd/ndarray_format.h"
-#include "../node_frame_format.h"
+#include "../frame/node_frame_format.h"
 #include <memory>
 #include <utility>
 #include <vector>
@@ -82,7 +82,7 @@ private:
 	const processing_node& this_node() const;	
 
 protected:
-	void added_propagated_parameter_(parameter_id, const node_input& source) override;
+	void added_propagated_parameter_(node_parameter_id, const node_input& source) override;
 
 public:
 	using node_output::node_output;
@@ -129,7 +129,7 @@ public:
 private:
 	processing_node_handler* handler_ = nullptr;
 	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
-	std::multimap<parameter_id, input_index_type> propagated_parameters_guide_;
+	std::multimap<node_parameter_id, input_index_type> propagated_parameters_guide_;
 
 protected:
 	void verify_connections_validity_() const;
@@ -166,7 +166,7 @@ public:
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
 	
-	std::vector<input_index_type> propagated_parameters_inputs(parameter_id) const;
+	std::vector<input_index_type> propagated_parameters_inputs(node_parameter_id) const;
 };
 
 

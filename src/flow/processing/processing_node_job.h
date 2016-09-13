@@ -88,16 +88,16 @@ public:
 	
 	/// Access to node parameters.
 	///@{
-	bool has_parameter(parameter_id) const;
-	node_parameter_value& parameter(parameter_id);
-	const node_parameter_value& parameter(parameter_id) const;
+	bool has_parameter(node_parameter_id) const;
+	node_parameter_value& parameter(node_parameter_id);
+	const node_parameter_value& parameter(node_parameter_id) const;
 	const node_parameter_valuation& parameters() const;
 	///@}
 	
 	/// Access to input parameters.
 	///@{
-	bool has_input_parameter(parameter_id, time_unit t);
-	const node_parameter_value& input_parameter(parameter_id, time_unit t);
+	bool has_input_parameter(node_parameter_id, time_unit t);
+	const node_parameter_value& input_parameter(node_parameter_id, time_unit t);
 	///@}
 };
 

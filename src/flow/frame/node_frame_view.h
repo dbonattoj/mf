@@ -2,8 +2,8 @@
 #define MF_FLOW_NODE_FRAME_VIEW_H_
 
 #include "../../queue/frame.h"
-#include "../node_frame_satellite.h"
-#include "../node_frame_format.h"
+#include "node_frame_satellite.h"
+#include "node_frame_format.h"
 
 namespace mf { namespace flow {
 

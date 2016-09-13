@@ -29,21 +29,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-using parameter_id = int;
-static constexpr parameter_id undefined_parameter_id = 0;
+using node_parameter_id = int;
+static constexpr node_parameter_id undefined_node_parameter_id = 0;
 
 class node_parameter_value;
 
-/// Node parameter with its current value.
+/// Node parameter.
+/** Owned by a \ref node. Has node graph-wide unique ID. */
 class node_parameter {
 private:
-	parameter_id id_;
+	node_parameter_id id_;
 
 public:
-	explicit node_parameter(parameter_id id) :
+	explicit node_parameter(node_parameter_id id) :
 		id_(id) { }
 			
-	parameter_id id() const { return id_; }	
+	node_parameter_id id() const { return id_; }	
 };
 
 

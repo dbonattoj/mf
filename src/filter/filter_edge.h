@@ -100,7 +100,7 @@ protected:
 	
 	casted_full_view_type output_view_to_casted_view_(const timed_frame_array_view& generic_output_view) const;
 	
-	virtual void install_(graph&) = 0;
+	virtual void install_(node_graph&) = 0;
 
 public:	
 	virtual ~filter_edge() = default;

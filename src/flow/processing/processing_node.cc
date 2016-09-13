@@ -52,7 +52,7 @@ void processing_node_output::end_read(time_unit duration) {
 }
 
 
-void processing_node_output::added_propagated_parameter_(parameter_id id, const node_input& raw_source) {
+void processing_node_output::added_propagated_parameter_(node_parameter_id id, const node_input& raw_source) {
 	const processing_node_input& source = static_cast<const processing_node_input&>(raw_source);
 	auto& guide = this_node().propagated_parameters_guide_;
 	guide.emplace(id, source.index());
@@ -109,7 +109,7 @@ void processing_node::handler_process_(processing_node_job& job) {
 		graph().diagnostic().processing_node_job_finished(*this, job.time());
 
 	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
-		parameter_id id = output().propagated_parameter_at(i);
+		node_parameter_id id = output().propagated_parameter_at(i);
 		if(job.has_parameter(id))
 			job.output_view().propagated_parameters().set(id, job.parameter(id));
 		else if(job.has_input_parameter(id, job.time()))
@@ -193,7 +193,7 @@ node_frame_format processing_node::output_frame_format_() const {
 }
 
 
-auto processing_node::propagated_parameters_inputs(parameter_id id) const -> std::vector<input_index_type> {
+auto processing_node::propagated_parameters_inputs(node_parameter_id id) const -> std::vector<input_index_type> {
 	auto ii = propagated_parameters_guide_.equal_range(id);
 	std::vector<input_index_type> indices;
 	for(auto it = ii.first; it != ii.second; ++it)

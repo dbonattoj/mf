@@ -20,7 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "node_frame_format.h"
 #include "node_frame_satellite.h"
-#include "../utility/misc.h"
+#include "../../utility/misc.h"
 
 namespace mf { namespace flow {
 

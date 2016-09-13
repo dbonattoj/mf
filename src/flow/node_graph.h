@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "diagnostic/diagnostic_handler.h"
 #include "node.h"
 #include "processing/sink_node.h"
+#include "parameter/node_parameter.h"
 #include <utility>
 #include <vector>
 #include <memory>
@@ -47,7 +48,9 @@ private:
 	sink_node* sink_ = nullptr;
 	bool was_setup_ = false;
 	bool launched_ = false;
+	
 	thread_index last_thread_index_ = 0;
+	node_parameter_id last_node_parameter_id_ = 0;
 	
 	std::atomic<bool> was_stopped_ {false};
 
@@ -81,6 +84,7 @@ public:
 	
 	thread_index new_thread_index();
 	thread_index root_thread_index() const;
+	node_parameter_id new_parameter_id();
 	bool was_stopped() const { return was_stopped_; }
 	
 	void set_diagnostic(diagnostic_handler& handler) { diagnostic_handler_ = &handler; }

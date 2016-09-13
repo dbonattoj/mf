@@ -92,7 +92,7 @@ public:
 
 
 class passthrough_filter : public flow::filter {
-private:
+protected:
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
 	}

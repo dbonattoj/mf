@@ -88,7 +88,7 @@ Value filter_job::param(const filter_extern_parameter<Value>& extern_param, time
 		return extern_param.linked_parameter().deterministic_value(t);
 	} else {
 		// TODO handle not availble
-		const node_parameter_value& value = node_job_.input_parameter(extern_param.id(), t);
+		const node_parameter_value& value = node_job_.input_parameter(extern_param.linked_parameter().id(), t);
 		return value.get<Value>();
 	}
 }

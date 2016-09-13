@@ -33,7 +33,7 @@ thread_index node_output::reader_thread_index() const {
 }
 
 
-bool node_output::add_propagated_parameter_if_needed(parameter_id id, const node_input& source) {
+bool node_output::add_propagated_parameter_if_needed(node_parameter_id id, const node_input& source) {
 	Assert(is_connected());
 	if(has_propagated_parameter(id)) return true;
 	bool needed = connected_node().add_propagated_parameter_if_needed(id);
@@ -45,7 +45,7 @@ bool node_output::add_propagated_parameter_if_needed(parameter_id id, const node
 }
 
 
-bool node_output::has_propagated_parameter(parameter_id id) const {
+bool node_output::has_propagated_parameter(node_parameter_id id) const {
 	auto it = std::find(propagated_parameters_.cbegin(), propagated_parameters_.cend(), id);
 	return (it == propagated_parameters_.cend());
 }

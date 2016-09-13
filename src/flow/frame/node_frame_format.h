@@ -21,9 +21,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_FLOW_NODE_FRAME_FORMAT_H_
 #define MF_FLOW_NODE_FRAME_FORMAT_H_
 
-#include "../nd/opaque_format/opaque_multi_ndarray_format.h"
+#include "../../nd/opaque_format/opaque_multi_ndarray_format.h"
 #include "node_frame_satellite.h"
-#include "../queue/frame.h"
+#include "../../queue/frame.h"
 
 namespace mf { namespace flow {
 	

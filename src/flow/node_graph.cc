@@ -64,6 +64,11 @@ thread_index node_graph::root_thread_index() const {
 }
 
 
+node_parameter_id node_graph::new_parameter_id() {
+	return ++last_node_parameter_id_;
+}
+
+
 void node_graph::launch() {
 	if(launched_) return;
 	

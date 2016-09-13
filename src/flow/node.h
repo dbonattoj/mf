@@ -65,12 +65,12 @@ private:
 	std::atomic<time_unit> current_time_ {-1};
 	std::atomic<bool> reached_end_ {false};
 	
-	std::map<parameter_id, node_parameter> parameters_;
+	std::map<node_parameter_id, node_parameter> parameters_; // TODO use vector
 	node_parameter_valuation parameter_valuation_;
 	mutable std::mutex parameters_mutex_;
 	
 
-	std::vector<parameter_id> input_parameters_;
+	std::vector<node_parameter_id> input_parameters_;
 	// = parameters that will be read by this node: valuation needs to be included with input frames
 	
 	std::string name_ = "node";
@@ -110,8 +110,8 @@ protected:
 	void set_current_time_(time_unit t) noexcept;
 	void mark_end_();
 	
-	void update_parameter_(parameter_id, const node_parameter_value&);
-	void update_parameter_(parameter_id, node_parameter_value&&);
+	void update_parameter_(node_parameter_id, const node_parameter_value&);
+	void update_parameter_(node_parameter_id, node_parameter_value&&);
 	void update_parameters_(const node_parameter_valuation&);
 	void update_parameters_(node_parameter_valuation&&);
 	node_parameter_valuation current_parameter_valuation_() const;
@@ -137,14 +137,14 @@ public:
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 	
-	node_parameter& add_parameter(parameter_id);
-	bool has_parameter(parameter_id) const;
-	node_parameter& parameter_at(parameter_id);
-	const node_parameter& parameter_at(parameter_id) const;
-	void add_input_parameter(parameter_id);
-	bool has_input_parameter(parameter_id) const;
+	node_parameter& add_parameter();
+	bool has_parameter(node_parameter_id) const;
+	node_parameter& parameter_at(node_parameter_id);
+	const node_parameter& parameter_at(node_parameter_id) const;
+	void add_input_parameter(node_parameter_id);
+	bool has_input_parameter(node_parameter_id) const;
 	
-	bool add_propagated_parameter_if_needed(parameter_id);
+	bool add_propagated_parameter_if_needed(node_parameter_id);
 	
 	bool precedes(const node&) const;
 	bool precedes_strict(const node&) const;
