@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_PARAMETER_VALUATION_H_
 
 #include <map>
-#include "node_parameter.h"
+#include "../types.h"
 #include "node_parameter_value.h"
 
 namespace mf { namespace flow {

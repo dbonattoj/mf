@@ -33,12 +33,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+class filter_graph;
 class node_graph;
 class filter_input_base;
 class filter_output_base;
 class multiplex_node;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
+class filter_parameter_base;
+class filter_extern_parameter_base;
 template<typename Value> class filter_parameter;
 template<typename Value> class filter_extern_parameter;
 
@@ -61,6 +64,8 @@ protected:
 
 	std::vector<filter_input_base*> inputs_;
 	std::vector<filter_output_base*> outputs_;
+	std::vector<filter_parameter_base*> parameters_;
+	std::vector<filter_extern_parameter_base*> extern_parameters_;
 
 	bool asynchronous_ = false;
 	time_unit prefetch_duration_ = 0;
@@ -81,6 +86,8 @@ public:
 	
 	void register_input(filter_input_base&);
 	void register_output(filter_output_base&);
+	void register_parameter(filter_parameter_base&);
+	void register_extern_parameter(filter_extern_parameter_base&);
 	
 	void set_asynchonous(bool);
 	bool is_asynchonous() const;
@@ -88,7 +95,7 @@ public:
 	time_unit prefetch_duration() const;
 	
 	bool was_installed() const { return (node_ != nullptr); }
-	virtual void install(node_graph&);
+	virtual void install(filter_graph&, node_graph&);
 	
 	void handler_setup(processing_node&) final override;
 	void handler_pre_process(processing_node&, processing_node_job&) final override;
@@ -105,7 +112,7 @@ public:
 
 class sink_filter : public filter {
 public:
-	void install(node_graph&) override;
+	void install(filter_graph&, node_graph&) override;
 };
 
 
@@ -119,7 +126,7 @@ public:
 	void define_source_stream_properties(const node_stream_properties&);
 	const node_stream_properties& stream_properties() const noexcept;
 
-	void install(node_graph&) override;
+	void install(filter_graph&, node_graph&) override;
 };
 
 

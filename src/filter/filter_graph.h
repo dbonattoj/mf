@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_GRAPH_H_
 
 #include "../flow/node_graph.h"
-#include "../flow/parameter/node_parameter.h"
+#include "../flow/types.h"
 #include "filter.h"
 #include <vector>
 #include <memory>
@@ -30,16 +30,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
+/// Graph containing interconnected filters.
+/** Set up by the application. Creates an internal (low-level) \ref node_graph that handles data flow. */
 class filter_graph {
 public:
 	std::vector<std::unique_ptr<filter>> filters_;
 	std::unique_ptr<node_graph> node_graph_;
-		
+	
+	node_parameter_id last_node_parameter_id_ = 0;
+	
 public:
 	filter_graph() = default;
 	filter_graph(const filter_graph&) = delete;
 	filter_graph& operator=(const filter_graph&) = delete;
 	~filter_graph();
+	
+	node_parameter_id new_node_parameter_id();
 	
 	template<typename Filter, typename... Args>
 	Filter& add_filter(Args&&... args) {

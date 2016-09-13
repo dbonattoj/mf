@@ -243,10 +243,8 @@ time_unit node::end_time() const noexcept {
 
 
 void node::deduce_propagated_parameters_() {
-	for(auto&& ip : parameters_) {
-		node_parameter_id id = ip.first;
+	for(node_parameter_id id : parameters_)
 		add_propagated_parameter_if_needed(id);
-	}
 }
 
 
@@ -263,25 +261,13 @@ bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
 
 
 
-node_parameter& node::add_parameter() {
-	node_parameter_id id = graph_.new_parameter_id();
-	auto res = parameters_.emplace(id, node_parameter(id));
-	return res.first->second;
+void node::add_parameter(node_parameter_id id) {
+	parameters_.push_back(id);
 }
 
 
 bool node::has_parameter(node_parameter_id id) const {
-	return (parameters_.find(id) != parameters_.end());
-}
-
-
-node_parameter& node::parameter_at(node_parameter_id id) {
-	return parameters_.at(id);
-}
-
-
-const node_parameter& node::parameter_at(node_parameter_id id) const {
-	return parameters_.at(id);
+	return std::find(parameters_.cbegin(), parameters_.cend(), id) != parameters_.cend();
 }
 
 

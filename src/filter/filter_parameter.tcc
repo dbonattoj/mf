@@ -40,11 +40,16 @@ void filter_parameter<Value>::set_dynamic() {
 
 
 template<typename Value>
-void filter_parameter<Value>::install(node& nd) {
-	if(is_dynamic()) {
-		node_parameter& par = nd.add_parameter();
-		id_ = par.id(); // TODO handle multi node per filter
-	}
+bool filter_parameter<Value>::was_installed() const {
+	return (id_ != undefined_node_parameter_id);
+}
+
+
+template<typename Value>
+void filter_parameter<Value>::install(filter_graph& gr, node& nd) {
+	if(was_installed()) return;
+	id_ = gr.new_node_parameter_id();
+	if(is_dynamic()) nd.add_parameter(id_);
 }
 
 
@@ -85,10 +90,12 @@ auto filter_extern_parameter<Value>::linked_parameter() const -> const parameter
 
 
 template<typename Value>
-void filter_extern_parameter<Value>::install(node& nd) {
+void filter_extern_parameter<Value>::install(filter_graph& gr, node& nd) {
 	Assert(is_linked());
-	if(linked_parameter().is_dynamic() && readable_)
+	if(linked_parameter().is_dynamic() && readable_) {
+		if(! linked_parameter().was_installed()) linked_parameter_->install(gr, nd);
 		nd.add_input_parameter(linked_parameter().id());
+	}
 }
 
 

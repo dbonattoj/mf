@@ -23,12 +23,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "../common.h"
 #include "../queue/frame.h"
-#include "parameter/node_parameter.h"
+#include "types.h"
 #include "parameter/node_parameter_valuation.h"
 #include "node_stream_properties.h"
 
 #include <vector>
-#include <map>
 #include <atomic>
 #include <string>
 #include <memory>
@@ -41,9 +40,6 @@ namespace mf { namespace flow {
 class node_graph;
 class node_output;
 class node_input;
-
-using thread_index = int;
-static constexpr thread_index undefined_thread_index = -1;
 
 /// Node in flow graph, base class.
 class node {
@@ -65,13 +61,14 @@ private:
 	std::atomic<time_unit> current_time_ {-1};
 	std::atomic<bool> reached_end_ {false};
 	
-	std::map<node_parameter_id, node_parameter> parameters_; // TODO use vector
+	/// Parameters of this node.
+	std::vector<node_parameter_id> parameters_;
 	node_parameter_valuation parameter_valuation_;
 	mutable std::mutex parameters_mutex_;
 	
-
+	/// Parameters of preceding nodes whose values this node receives with input frames.
+	/** Propagated parameters on node outputs are set up such that the node receives these parameters. */
 	std::vector<node_parameter_id> input_parameters_;
-	// = parameters that will be read by this node: valuation needs to be included with input frames
 	
 	std::string name_ = "node";
 	
@@ -137,10 +134,8 @@ public:
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 	
-	node_parameter& add_parameter();
+	void add_parameter(node_parameter_id);
 	bool has_parameter(node_parameter_id) const;
-	node_parameter& parameter_at(node_parameter_id);
-	const node_parameter& parameter_at(node_parameter_id) const;
 	void add_input_parameter(node_parameter_id);
 	bool has_input_parameter(node_parameter_id) const;
 	

@@ -22,7 +22,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_OUTPUT_H_
 
 #include "node.h"
-#include "parameter/node_parameter.h"
 
 namespace mf { namespace flow {
 

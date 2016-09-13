@@ -22,11 +22,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_PARAMETER_H_
 
 #include <functional>
-#include "../flow/parameter/node_parameter.h"
+#include "../flow/types.h"
 
 namespace mf { namespace flow {
 
 class filter;
+class filter_graph;
 class node;
 
 template<typename Value> class filter_extern_parameter;
@@ -34,12 +35,23 @@ template<typename Value> class filter_extern_parameter;
 class filter_parameter_base {
 public:
 	virtual ~filter_parameter_base() = default;
-	virtual void install(node&) = 0;
+	virtual void install(filter_graph&, node&) = 0;
 };
 
+
+class filter_extern_parameter_base {
+public:
+	virtual ~filter_extern_parameter_base() = default;
+	virtual void install(filter_graph&, node&) = 0;
+};
+
+
 /// Parameter of type \a Value belonging to a filter.
+/** Can be either _deterministic_ or _dynamic_. Deterministic parameters have either a constant value, or a value
+ ** computed in function of the frame index (animation). Dynamic parameters are updated at will by the node(s) during
+ ** execution. */
 template<typename Value>
-class filter_parameter {
+class filter_parameter : public filter_parameter_base {
 public:
 	using value_type = Value;
 	using extern_parameter_type = filter_extern_parameter<Value>;
@@ -67,20 +79,22 @@ public:
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const { return name_; }
 	
-	void install(node&);
+	bool was_installed() const;
+	void install(filter_graph&, node&);
 };
 
 
 /// Link to a parameter of type \a Value belonging to another filter.
+/** ... */
 template<typename Value>
-class filter_extern_parameter {
+class filter_extern_parameter : public filter_extern_parameter_base {
 public:
 	using value_type = Value;
 	using parameter_type = filter_parameter<Value>;
 
 private:
 	filter& filter_;
-	const parameter_type* linked_parameter_ = nullptr;
+	parameter_type* linked_parameter_ = nullptr;
 	bool readable_;
 	bool writable_;
 	std::string name_;
@@ -95,7 +109,7 @@ public:
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const { return name_; }
 	
-	void install(node&);
+	void install(filter_graph&, node&);
 };
 
 }}

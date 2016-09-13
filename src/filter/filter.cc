@@ -19,6 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "filter.h"
+#include "filter_parameter.h"
 #include "../flow/node_graph.h"
 #include "../flow/node.h"
 #include "../flow/processing/sink_node.h"
@@ -67,6 +68,18 @@ void filter::register_output(filter_output_base& out) {
 }
 
 
+void filter::register_parameter(filter_parameter_base& param) {
+	Assert(! was_installed());
+	parameters_.push_back(&param);
+}
+
+
+void filter::register_extern_parameter(filter_extern_parameter_base& extern_param) {
+	Assert(! was_installed());
+	extern_parameters_.push_back(&extern_param);
+}
+
+
 void filter::set_asynchonous(bool async) {
 	Assert(! was_installed());
 	asynchronous_ = async;
@@ -101,7 +114,7 @@ bool filter::need_multiplex_node_() const {
 }
 
 
-void filter::install(node_graph& gr) {
+void filter::install(filter_graph& fg, node_graph& gr) {
 	Assert(! was_installed());
 	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
@@ -123,12 +136,15 @@ void filter::install(node_graph& gr) {
 	} else {
 		for(filter_output_base* out : outputs_) out->install(*node_);
 	}
+	
+	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
+	for(filter_extern_parameter_base* extern_param : extern_parameters_) extern_param->install(fg, *node_);
 
 	Assert(was_installed());
 }
 
 
-void sink_filter::install(node_graph& gr) {
+void sink_filter::install(filter_graph& fg, node_graph& gr) {
 	Assert(! was_installed());
 	Assert(outputs_.size() == 0, "sink filter must have no outputs");
 	Assert(! is_asynchonous(), "sink filter cannot be asynchonous");
@@ -140,6 +156,10 @@ void sink_filter::install(node_graph& gr) {
 	node_->set_handler(*this);
 
 	for(filter_input_base* in : inputs_) in->install(*node_);
+	
+	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
+	for(filter_extern_parameter_base* extern_param : extern_parameters_) extern_param->install(fg, *node_);
+	
 	Assert(was_installed());
 }
 
@@ -160,7 +180,7 @@ const node_stream_properties& source_filter::stream_properties() const noexcept 
 
 
 
-void source_filter::install(node_graph& gr) {
+void source_filter::install(filter_graph& fg, node_graph& gr) {
 	Assert(! was_installed());
 	Assert(inputs_.size() == 0, "source filter must have no inputs");
 
@@ -183,6 +203,9 @@ void source_filter::install(node_graph& gr) {
 	} else {
 		for(filter_output_base* out : outputs_) out->install(*node_);
 	}
+
+	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
+	for(filter_extern_parameter_base* extern_param : extern_parameters_) extern_param->install(fg, *node_);
 
 	Assert(was_installed());
 }
