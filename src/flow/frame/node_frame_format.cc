@@ -134,9 +134,38 @@ bool node_frame_format::has_array_format() const {
 
 ndarray_format node_frame_format::array_format() const {
 	Assert(has_array_format(), "can only get array_format of node_frame_format that has only 1 part (channel)");
-	Assert(part_at(0).offset == 0);
 	return part_at(0).format;
 }
+
+
+std::ptrdiff_t node_frame_format::array_offset() const {
+	Assert(has_array_format(), "can only get array_format of node_frame_format that has only 1 part (channel)");
+	return part_at(0).offset;
+}
+
+
+///////////////
+
+
+node_selected_channel_frame_format::node_selected_channel_frame_format(const base& frm, std::ptrdiff_t sel_channel) :
+	base(frm),
+	selected_channel_(sel_channel) { }
+
+	
+bool node_selected_channel_frame_format::has_array_format() const {
+	return true;
+}
+
+
+ndarray_format node_selected_channel_frame_format::array_format() const {
+	return part_at(selected_channel_).format;
+}
+
+
+std::ptrdiff_t node_selected_channel_frame_format::array_offset() const {
+	return part_at(selected_channel_).offset;
+}
+
 
 
 }}

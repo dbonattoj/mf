@@ -66,6 +66,9 @@ private:
 
 	std::string name_;
 
+	filter_parameter(const filter_parameter&) = delete;
+	filter_parameter& operator=(const filter_parameter&) = delete;
+
 public:
 	explicit filter_parameter(filter&);
 	
@@ -113,6 +116,9 @@ private:
 	bool receive_;
 	bool send_;
 	std::string name_;
+
+	filter_extern_parameter(const filter_extern_parameter&) = delete;
+	filter_extern_parameter& operator=(const filter_extern_parameter&) = delete;
 
 public:
 	filter_extern_parameter(filter&, bool can_receive = true, bool can_send = false);

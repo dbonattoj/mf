@@ -57,7 +57,7 @@ private:
 	void thread_main_();
 
 	pull_result output_pull_(time_span&, bool reconnected) override;
-	timed_frame_array_view output_begin_read_(time_unit duration) override;
+	node_frame_window_view output_begin_read_(time_unit duration) override;
 	void output_end_read_(time_unit duration) override;
 
 public:

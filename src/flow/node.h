@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "types.h"
 #include "../common.h"
 #include "../queue/frame.h"
+#include "frame/node_frame_view.h"
 #include "parameter/node_parameter.h"
 #include "parameter/node_parameter_value.h"
 #include "parameter/node_parameter_valuation.h"

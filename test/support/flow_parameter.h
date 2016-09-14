@@ -26,6 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/filter/filter_parameter.h>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace mf { namespace test {
 
@@ -37,8 +38,8 @@ public:
 	using extern_param_type = extern_parameter_type<std::string>;
 
 private:
-	std::vector<param_type> params_;
-	std::vector<extern_param_type> extern_params_;
+	std::vector<std::unique_ptr<param_type>> params_;
+	std::vector<std::unique_ptr<extern_param_type>> extern_params_;
 
 	std::vector<param_type*> set_to_t_params_;
 	std::vector<extern_param_type*> verify_is_t_params_;
@@ -50,15 +51,15 @@ public:
 		passthrough_filter(past_window, future_window) { }
 
 	param_type& add_param(bool set_to_t) {
-		params_.emplace_back(*this);
-		param_type& param = params_.back();
+		params_.emplace_back(new param_type(*this));
+		param_type& param = *params_.back();
 		if(set_to_t) set_to_t_params_.push_back(&param);
 		return param;
 	}
 	
 	extern_param_type& add_extern_param(bool verify_is_t) {
-		extern_params_.emplace_back(*this);
-		extern_param_type& param = extern_params_.back();
+		extern_params_.emplace_back(new extern_param_type(*this));
+		extern_param_type& param = *extern_params_.back();
 		if(verify_is_t) verify_is_t_params_.push_back(&param);
 		return param;
 	}
@@ -74,14 +75,20 @@ public:
 	void process(flow::filter_job& job) override {
 		base::process(job);
 		
+		time_unit start_t = job.in_full(input).start_time();
+		time_unit end_t = job.in_full(input).end_time();
+		
 		time_unit t = job.time();
 		std::string t_str = std::to_string(t);
 		
 		for(param_type* par : set_to_t_params_)
 			job.set_param(*par, t_str);
 
-		for(extern_param_type* par : verify_is_t_params_)
+		for(extern_param_type* par : verify_is_t_params_) {
+			for(time_unit t = start_t; t < end_t; ++t)
+				REQUIRE(job.in(*par, t) == std::to_string(t));
 			REQUIRE(job.in(*par) == t_str);
+		}
 			
 		for(auto&& pv : expected_values_)
 			REQUIRE(job.in(*pv.first) == pv.second);

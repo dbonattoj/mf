@@ -50,6 +50,7 @@ public:
 	
 	bool has_array_format() const override { return true; }
 	ndarray_format array_format() const override { return array_format_; }
+	std::ptrdiff_t array_offset() const override { return 0; }
 };
 
 

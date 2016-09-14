@@ -181,17 +181,17 @@ node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
 }
 
 
-timed_frame_array_view multiplex_node_output::begin_read(time_unit duration) {	
+node_frame_window_view multiplex_node_output::begin_read(time_unit duration) {	
 	Assert(this_node().loader_);
 
 	time_span pulled_span = connected_input().pulled_span();
 	Assert(duration == pulled_span.duration()); // can duration be smaller? (node interface contract)
 
-	timed_frame_array_view vw = this_node().loader_->begin_read(pulled_span);
+	node_frame_window_view vw = this_node().loader_->begin_read(pulled_span);
 	Assert(! vw.is_null());
 	Assert(vw.span().includes(pulled_span), "multiplex input view span does not include span to read");
 
-	return extract_part(vw, input_channel_index_);
+	return extract_channel(vw, input_channel_index_);
 }
 
 

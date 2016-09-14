@@ -69,6 +69,7 @@ public:
 	
 	virtual bool has_array_format() const { return false; }
 	virtual ndarray_format array_format() const { throw std::logic_error("not implemented"); }
+	virtual std::ptrdiff_t array_offset() const { throw std::logic_error("not implemented"); }
 	
 	virtual bool has_parts() const { return false; }
 	virtual std::size_t parts_count() const { throw std::logic_error("not implemented"); }

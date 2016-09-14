@@ -30,8 +30,8 @@ namespace mf { namespace flow {
 class node_frame_satellite;
 
 /// Opaque frame format of frames passed between nodes.
-/** Derives from \ref opaque_multi_ndarray_format and contains for each channel one \ref ndarray_format part.
- ** Additionally contains \ref node_frame_satellite object, which gets constructed and destructed with frame.
+/** Derives from \ref opaque_multi_ndarray_format. Frame contains for each channel one \ref ndarray_format part.
+ ** Additionally frame contains \ref node_frame_satellite object, which gets constructed and destructed with the frame.
  ** Also allows direct access to its first array_format, so that from_opaque() can be used directly without prior
  ** use of extract_part(), on single-part frames. */
 class node_frame_format : public opaque_multi_ndarray_format {
@@ -40,7 +40,7 @@ class node_frame_format : public opaque_multi_ndarray_format {
 	/*
 	Memory layout of frame:
 	---  <-- ndarray for with part, at offset 0
-	XXX      offset 0 needed for direct access to array_frame by from_opaque
+	XXX      
 	XXX
 	---  <-- ndarray for following parts,
 	 :       with padding in-between as needed for
@@ -85,6 +85,31 @@ public:
 	
 	bool has_array_format() const override;
 	ndarray_format array_format() const override;
+	std::ptrdiff_t array_offset() const override;
+};
+
+
+/// Same frame format as \ref node_frame_format, with one selected channel.
+/** Describes the same frame format, but one of the multiple channels is _selected_, and becomes the ndarray associated
+ ** with the frame. The ndarray for this channel is accessed using from_opaque().
+ ** Format is not used for storage in buffers, but is used for temporary views, e.g. those read from the multiplex node
+ ** output. */
+class node_selected_channel_frame_format : public node_frame_format {
+	using base = node_frame_format;
+
+private:
+	std::ptrdiff_t selected_channel_;
+
+public:
+	node_selected_channel_frame_format(const base& frm, std::ptrdiff_t sel_channel);
+	
+	bool has_parts() const override { return false; }
+	std::size_t parts_count() const override { throw std::logic_error("not implemented");; }
+	extracted_part extract_part(std::ptrdiff_t index) const override { throw std::logic_error("not implemented"); }
+
+	bool has_array_format() const override;
+	ndarray_format array_format() const override;
+	std::ptrdiff_t array_offset() const override;
 };
 
 

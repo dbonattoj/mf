@@ -139,7 +139,7 @@ node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
 }
 
 	
-timed_frame_array_view sync_node::output_begin_read_(time_unit duration) {
+node_frame_window_view sync_node::output_begin_read_(time_unit duration) {
 	Expects(ring_->readable_duration() >= duration);
 	
 	if(reached_end() && ring_->read_start_time() + duration > current_time())

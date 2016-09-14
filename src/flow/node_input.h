@@ -78,7 +78,7 @@ public:
 	///@{
 	node::pull_result pull();
 	const time_span& pulled_span() const noexcept { return pulled_span_; }
-	timed_frame_array_view begin_read_frame();
+	node_frame_window_view begin_read_frame();
 	void end_read_frame();
 	void cancel_read_frame();
 	time_unit end_time() const { return connected_output_->end_time(); }

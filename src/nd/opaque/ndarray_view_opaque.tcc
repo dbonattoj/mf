@@ -194,6 +194,7 @@ auto from_opaque(
 		"opaque frame format must have array");
 	
 	const ndarray_format& array_format = opaque_view.frame_format().array_format();
+	std::ptrdiff_t array_offset = opaque_view.frame_format().array_offset();
 
 	Assert(array_format.elem_size() == sizeof(Concrete_elem),
 		"opaque frame format has incorrect element type");
@@ -205,7 +206,7 @@ auto from_opaque(
 	ndptrdiff<frame_dim> concrete_frame_strides =
 		ndarray_view<frame_dim, Concrete_elem>::default_strides(frame_shape, array_format.elem_padding());
 	
-	auto new_start = reinterpret_cast<Concrete_elem*>(opaque_view.start());
+	auto new_start = reinterpret_cast<Concrete_elem*>(advance_raw_ptr(opaque_view.start(), array_offset));
 	auto new_shape = ndcoord_cat(opaque_view.shape(), frame_shape);
 	auto new_strides = ndcoord_cat(opaque_view.strides(), concrete_frame_strides);
 		

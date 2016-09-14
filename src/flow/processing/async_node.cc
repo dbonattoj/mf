@@ -282,7 +282,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 }
 
 
-timed_frame_array_view async_node::output_begin_read_(time_unit duration)  {
+node_frame_window_view async_node::output_begin_read_(time_unit duration)  {
 	return ring_->try_begin_read(duration);
 }
 

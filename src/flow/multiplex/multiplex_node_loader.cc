@@ -67,7 +67,7 @@ node::pull_result multiplex_node::sync_loader::pull(time_span span) {
 }
 
 
-timed_frame_array_view multiplex_node::sync_loader::begin_read(time_span span) {	
+node_frame_window_view multiplex_node::sync_loader::begin_read(time_span span) {	
 	timed_frame_array_view input_view = this_node().input_view_();
 		
 	std::ptrdiff_t start_index = input_view.time_index(span.start_time());
@@ -180,7 +180,7 @@ node::pull_result multiplex_node::async_loader::pull(time_span span) {
 }
 
 
-timed_frame_array_view multiplex_node::async_loader::begin_read(time_span span) {
+node_frame_window_view multiplex_node::async_loader::begin_read(time_span span) {
 	input_view_mutex_.lock_shared();
 	
 	timed_frame_array_view input_view = this_node().input_view_();

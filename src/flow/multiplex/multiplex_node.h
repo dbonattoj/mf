@@ -43,7 +43,7 @@ public:
 	std::size_t channels_count() const noexcept override;
 	std::string channel_name_at(std::ptrdiff_t i) const override;
 	node::pull_result pull(time_span& span, bool reconnect) override;
-	timed_frame_array_view begin_read(time_unit duration) override;
+	node_frame_window_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 };
 
@@ -71,7 +71,7 @@ private:
 	time_unit input_future_window_ = -1;
 	
 	std::unique_ptr<loader> loader_;
-	timed_frame_array_view loaded_input_view_;
+	node_frame_window_view loaded_input_view_;
 	
 	bool outputs_on_different_threads_() const;
 
@@ -86,8 +86,8 @@ private:
 	void unload_input_view_();
 	
 	time_unit successor_time_of_input_view_() const;
-	const timed_frame_array_view& input_view_() const { return loaded_input_view_; }
-	timed_frame_array_view& input_view_() { return loaded_input_view_; }
+	const node_frame_window_view& input_view_() const { return loaded_input_view_; }
+	node_frame_window_view& input_view_() { return loaded_input_view_; }
 	///@}
 	
 public:

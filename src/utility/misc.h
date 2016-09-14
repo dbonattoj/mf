@@ -92,7 +92,7 @@ T randint(T a, T b) {
 /// Get `shared_ptr` to new object copy- or move- constructed from \a t.
 /** Returns `std::shared_ptr<T>` (with `T` decayed). */
 template<typename T>
-auto forward_make_shared_(T&& t) {
+auto forward_make_shared(T&& t) {
 	using decayed_t = std::decay_t<T>;
 	return std::make_shared<decayed_t>(std::forward<T>(t));
 }

@@ -40,7 +40,7 @@ public:
 	node_frame_view(const base& vw) : base(vw) { }
 
 	const node_frame_format& frame_format() const {
-		return static_cast<const node_frame_format&>(base::frame_format());
+		return dynamic_cast<const node_frame_format&>(base::frame_format());
 	}
 
 	node_frame_satellite& satellite() const {
@@ -55,24 +55,18 @@ public:
 
 /// View for timed frame array accessed by node.
 /** Convenience wrapper for \ref mf::timed_frame_array_view with format \ref node_frame_format.
- ** Provides access to singular frames as \ref node_frame_view, and stores index of _center_ frame (for _current time
- ** index_ of node). */
+ ** Gives access to singular frames as \ref node_frame_view. */
 class node_frame_window_view : public timed_frame_array_view {
 	using base = timed_frame_array_view;
 	
-private:
-	std::ptrdiff_t center_index_;
-
 public:
 	node_frame_window_view() = default;
 	node_frame_window_view(const node_frame_window_view&) = default;
 
-	node_frame_window_view(const base& vw, time_unit center_time) :
-		base(vw),
-		center_index_(center_time - vw.start_time()) { }
-		
+	node_frame_window_view(const base& vw) : base(vw) { }
+
 	const node_frame_format& frame_format() const {
-		return static_cast<const node_frame_format&>(base::frame_format());
+		return dynamic_cast<const node_frame_format&>(base::frame_format());
 	}
 	
 	node_frame_view operator[](std::ptrdiff_t index) const {
@@ -82,11 +76,13 @@ public:
 	node_frame_view at_time(time_unit t) const {
 		return operator[](t - start_time());
 	}
-	
-	node_frame_view now() const {
-		return operator[](center_index_);
-	}
 };
+
+
+/// Cast from multi-channel \ref node_frame_window_view to single-channel view to one channel.
+/** Returned view gets \ref node_selected_channel_frame_format format.  */
+node_frame_window_view extract_channel(const node_frame_window_view& vw, std::ptrdiff_t channel_index);
+
 
 }}
 

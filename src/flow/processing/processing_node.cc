@@ -42,7 +42,7 @@ node::pull_result processing_node_output::pull(time_span& span, bool reconnect) 
 }
 
 
-timed_frame_array_view processing_node_output::begin_read(time_unit duration) {
+node_frame_window_view processing_node_output::begin_read(time_unit duration) {
 	return this_node().output_begin_read_(duration);
 }
 

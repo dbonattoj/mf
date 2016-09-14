@@ -33,7 +33,7 @@ class node_graph;
 class sink_node final : public processing_node {
 protected:
 	pull_result output_pull_(time_span&, bool reconnected) override { throw 0; }
-	timed_frame_array_view output_begin_read_(time_unit duration) override { throw 0; }
+	node_frame_window_view output_begin_read_(time_unit duration) override { throw 0; }
 	void output_end_read_(time_unit duration) override { throw 0; }
 
 public:	

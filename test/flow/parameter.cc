@@ -40,11 +40,10 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
-/*
 	SECTION("deterministic (constant)") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 		auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
-		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(1, 1);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
 		pass1.input.connect(source.output);
@@ -69,7 +68,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	SECTION("deterministic (value function)") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 		auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
-		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(1, 1);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
 		pass1.input.connect(source.output);
@@ -90,12 +89,11 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		gr.setup();
 		gr.run();
 	}
-*/
 
-	SECTION("dynamic") {
+	SECTION("dynamic, simple") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 		auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
-		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& pass2 = gr.add_filter<parameter_passthrough_filter>(1, 1);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
 		pass1.input.connect(source.output);
@@ -110,6 +108,74 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		e_par.link(par);
 				
 		sink.input.connect(pass2.output);
+		
+		gr.setup();
+		gr.run();
+	}
+	
+	SECTION("dynamic, 3 pass") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+		auto& passA = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& passB = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& passC = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+
+		passA.input.connect(source.output);
+		passA.set_name("A");
+		passB.input.connect(passA.output);
+		passB.set_name("B");
+		passC.input.connect(passB.output);
+		passC.set_name("C");
+		sink.input.connect(passC.output);
+		
+		auto& par_x = passA.add_param(true);
+		par_x.set_dynamic();
+		par_x.set_name("x");
+		auto& par_y = passA.add_param(true);
+		par_y.set_dynamic();
+		par_y.set_name("y");
+		auto& par_z = passB.add_param(true);
+		par_z.set_dynamic();
+		par_z.set_name("z");
+		auto& par_w = passA.add_param(true);
+		par_w.set_dynamic();
+		par_w.set_name("w");
+		
+		passB.add_extern_param(true).link(par_x);
+		passB.add_extern_param(true).link(par_w);
+		passC.add_extern_param(true).link(par_y);
+		passC.add_extern_param(true).link(par_z);
+		
+		gr.setup();
+		gr.run();
+	}
+	
+	SECTION("dynamic, multi-out") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+		auto& passA = gr.add_filter<parameter_passthrough_filter>(0, 0);
+		auto& multiout = gr.add_filter<multiple_output_filter>();
+		auto& passB = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& passC = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& merge = gr.add_filter<input_synchronize_test_filter>();
+		auto& passD = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+		
+		passA.input.connect(source.output);
+		passA.set_name("A");
+		multiout.input.connect(passA.output);
+		passB.input.connect(multiout.output1);
+		passB.set_name("B");
+		passC.input.connect(multiout.output1);
+		passC.set_name("C");
+		merge.input1.connect(passB.output);
+		merge.input2.connect(passC.output);
+		passD.input.connect(merge.output);
+		passD.set_name("D");
+		sink.input.connect(passD.output);
+		
+		auto& par_2b = passA.add_param(true);
+		par_2b.set_name("to B");
+		passB.add_extern_param(true).link(par_2b);
 		
 		gr.setup();
 		gr.run();

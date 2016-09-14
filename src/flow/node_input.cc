@@ -62,7 +62,7 @@ node::pull_result node_input::pull() {
 }
 
 
-timed_frame_array_view node_input::begin_read_frame() {
+node_frame_window_view node_input::begin_read_frame() {
 	Expects(pulled_span_.duration() > 0);
 
 	time_unit t = this_node().current_time();
