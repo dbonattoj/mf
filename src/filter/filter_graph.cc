@@ -20,6 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "filter_graph.h"
 
+#include "diagnostic/filter_graph_visualization.h"
+
 namespace mf { namespace flow {
 
 filter_graph::~filter_graph() {
@@ -42,6 +44,9 @@ void filter_graph::setup() {
 	node_graph_.reset(new node_graph);
 	for(auto&& filt : filters_) filt->install(*this, *node_graph_);
 	node_graph_->setup();
+
+	export_filter_graph_visualization(*this, "fg.gv");
+
 }
 
 

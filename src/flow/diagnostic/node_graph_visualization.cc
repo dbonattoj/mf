@@ -18,7 +18,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "graph_visualization.h"
+#include "node_graph_visualization.h"
 #include <ostream>
 #include <sstream>
 #include <fstream>
@@ -53,12 +53,12 @@ namespace {
 }
 
 
-graph_visualization::graph_visualization(const node_graph& gr, std::ostream& output) :
+node_graph_visualization::node_graph_visualization(const node_graph& gr, std::ostream& output) :
 	output_(output),
 	graph_(gr) { }
 
 
-std::string graph_visualization::thread_index_color_(thread_index tid) const {
+std::string node_graph_visualization::thread_index_color_(thread_index tid) const {
 	if(! thread_index_colors_) return "black";
 	else if(tid == graph_.root_thread_index()) return "black";
 	else if(tid == undefined_thread_index) return "lightgray";
@@ -66,7 +66,7 @@ std::string graph_visualization::thread_index_color_(thread_index tid) const {
 }
 
 
-void graph_visualization::generate_node_dispatch_(const node& nd) {	
+void node_graph_visualization::generate_node_dispatch_(const node& nd) {	
 	if(typeid(nd) == typeid(sync_node))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, false);
 	else if(typeid(nd) == typeid(async_node))
@@ -80,7 +80,7 @@ void graph_visualization::generate_node_dispatch_(const node& nd) {
 }
 
 
-void graph_visualization::generate_processing_node_(const processing_node& nd, bool async, bool sink) {
+void node_graph_visualization::generate_processing_node_(const processing_node& nd, bool async, bool sink) {
 	std::string node_id = uid_(nd, "node");
 		
 	std::ostringstream html;
@@ -171,7 +171,7 @@ void graph_visualization::generate_processing_node_(const processing_node& nd, b
 }
 
 
-void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
+void node_graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 	std::string node_id = uid_(nd, "node");
 	
 	std::ostringstream html;
@@ -236,7 +236,7 @@ void graph_visualization::generate_multiplex_node_(const multiplex_node& nd) {
 }
 
 
-void graph_visualization::generate_node_input_connections_(const node& nd) {
+void node_graph_visualization::generate_node_input_connections_(const node& nd) {
 	for(std::ptrdiff_t i = 0; i < nd.inputs_count(); ++i) {
 		const node_input& in = nd.input_at(i);
 		if(! in.is_connected()) continue;
@@ -285,7 +285,7 @@ void graph_visualization::generate_node_input_connections_(const node& nd) {
 }
 
 
-void graph_visualization::generate_ranks_() {
+void node_graph_visualization::generate_ranks_() {
 	output_ << "\t{rank=source;";
 	for(std::ptrdiff_t i = 0; i < graph_.nodes_count(); ++i) {
 		const node& nd = graph_.node_at(i);
@@ -298,7 +298,7 @@ void graph_visualization::generate_ranks_() {
 }
 
 
-void graph_visualization::generate() {
+void node_graph_visualization::generate() {
 	output_ << "digraph " << graph_id_ << "{\n";
 	output_ << "\trankdir=TB\n";
 
@@ -306,13 +306,13 @@ void graph_visualization::generate() {
 	for(std::ptrdiff_t i = 0; i < graph_.nodes_count(); ++i) generate_node_input_connections_(graph_.node_at(i));
 	generate_ranks_();	
 			
-	output_ << '}' << std::flush;
+	output_ << "}\n" << std::flush;
 }
 
 
-void export_graph_visualization(const node_graph& gr, const std::string& filename) {
+void export_node_graph_visualization(const node_graph& gr, const std::string& filename) {
 	std::ofstream fstr(filename);
-	graph_visualization vis(gr, fstr);
+	node_graph_visualization vis(gr, fstr);
 	vis.generate();
 }
 

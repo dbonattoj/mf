@@ -90,6 +90,11 @@ public:
 	void register_parameter(filter_parameter_base&);
 	void register_extern_parameter(filter_extern_parameter_base&);
 	
+	std::size_t inputs_count() const { return inputs_.size(); }
+	const filter_input_base& input_at(std::ptrdiff_t i) const { return *inputs_.at(i); }
+	std::size_t outputs_count() const { return outputs_.size(); }
+	const filter_output_base& output_at(std::ptrdiff_t i) const { return *outputs_.at(i); }
+	
 	void set_asynchonous(bool);
 	bool is_asynchonous() const;
 	void set_prefetch_duration(time_unit);
@@ -133,6 +138,7 @@ public:
 
 class filter_output_base {
 public:
+	virtual const std::string& name() const = 0;
 	virtual std::size_t edges_count() const = 0;
 	virtual const filter& connected_filter_at_edge(std::ptrdiff_t index) const = 0;
 	virtual void install(processing_node&) = 0;
@@ -144,8 +150,11 @@ public:
 
 class filter_input_base {
 public:
+	virtual const std::string& name() const = 0;
 	virtual void install(processing_node&) = 0;
+	virtual bool is_connected() const = 0;
 	virtual const filter& connected_filter() const = 0;
+	virtual const filter_output_base& connected_output() const = 0;
 };
 
 
@@ -175,7 +184,7 @@ public:
 	filter& this_filter() { return filter_; }
 	const filter& this_filter() const { return filter_; }
 
-	const std::string& name() const { return name_; }
+	const std::string& name() const override { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
 		
 	processing_node_output_channel& this_node_output_channel()
@@ -226,12 +235,14 @@ private:
 public:
 	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
 
+	bool is_connected() const override { return (edge_ != nullptr); }
 	const filter& connected_filter() const override { return edge_->origin_filter(); }
+	const filter_output_base& connected_output() const override { return edge_->origin(); }
 
 	filter& this_filter() { return filter_; }
 	const filter& this_filter() const { return filter_; }
 
-	const std::string& name() const { return name_; }
+	const std::string& name() const override { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
 
 	processing_node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }

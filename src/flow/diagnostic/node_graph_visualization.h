@@ -18,14 +18,15 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_GRAPH_VISUALIZATION_H_
-#define MF_FLOW_GRAPH_VISUALIZATION_H_
+#ifndef MF_FLOW_NODE_GRAPH_VISUALIZATION_H_
+#define MF_FLOW_NODE_GRAPH_VISUALIZATION_H_
 
 #include <iosfwd>
 #include <string>
 #include <map>
 #include <cstdint>
 #include "../node.h"
+#include "../../utility/uid_pool.h"
 
 namespace mf { namespace flow {
 
@@ -36,7 +37,7 @@ class node_output;
 class processing_node;
 class multiplex_node;
 
-class graph_visualization {
+class node_graph_visualization {
 private:	
 	std::ostream& output_;
 	const node_graph& graph_;
@@ -58,17 +59,17 @@ private:
 	std::string thread_index_color_(thread_index) const;
 
 public:
-	graph_visualization(const node_graph&, std::ostream&);
+	node_graph_visualization(const node_graph&, std::ostream&);
 	
 	void generate();
 };
 
 
-void export_graph_visualization(const node_graph&, const std::string& filename);
+void export_node_graph_visualization(const node_graph&, const std::string& filename);
 
 
 template<typename T>
-std::string graph_visualization::uid_(const T& object, const std::string& prefix) {
+std::string node_graph_visualization::uid_(const T& object, const std::string& prefix) {
 	std::uintptr_t address = reinterpret_cast<std::uintptr_t>(&object);
 	auto it = uids_.find(address);
 	if(it != uids_.end()) {

@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../support/ndarray.h"
 #include "../support/flow.h"
 
-#include <mf/flow/diagnostic/graph_visualization.h>
+#include <mf/flow/diagnostic/node_graph_visualization.h>
 #include <mf/flow/diagnostic/processing_timeline.h>
 #include <mf/flow/diagnostic/processing_timeline_json_exporter.h>
 #include <fstream>

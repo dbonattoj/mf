@@ -56,6 +56,10 @@ public:
 		return *filt;
 	}
 	
+	std::size_t filters_count() const { return filters_.size(); }
+	const filter& filter_at(std::ptrdiff_t i) const { return *filters_.at(i); }
+	filter& filter_at(std::ptrdiff_t i) { return *filters_.at(i); }
+	
 	bool was_setup() const { return (node_graph_ != nullptr); }
 	void setup();
 

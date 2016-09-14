@@ -32,6 +32,8 @@ namespace mf { namespace flow {
 
 class filter;
 
+class filter_output_base;
+class filter_input_base;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
 
@@ -42,6 +44,7 @@ public:
 	using input_frame_shape_type = ndsize<Input_dim>;
 	using input_full_view_type = ndarray_timed_view<Input_dim + 1, Input_elem>;
 
+	virtual const filter_output_base& origin() const = 0;
 	virtual const filter& origin_filter() const = 0;
 	virtual void set_node_input(node_input&) = 0;
 	virtual const input_frame_shape_type& input_frame_shape() const = 0;
@@ -56,7 +59,8 @@ class filter_edge_output_base {
 public:
 	using output_type = filter_output<Output_dim, Output_elem>;
 	using output_frame_shape_type = ndsize<Output_dim>;
-
+	
+	virtual const filter_input_base& destination() const = 0;
 	virtual const filter& destination_filter() const = 0;
 	virtual void set_node_output(node_output&, std::ptrdiff_t channel_index) = 0;
 	virtual std::ptrdiff_t node_output_channel_index() const = 0;
@@ -108,9 +112,12 @@ public:
 	void set_node_input(node_input& in) override;
 	void set_node_output(node_output& out, std::ptrdiff_t channel_index) override;
 	
+	const output_type& origin() const override { return output_; }
 	const filter& origin_filter() const override { return output_.this_filter(); }
+	const input_type& destination() const override { return input_; }	
 	const filter& destination_filter() const override { return input_.this_filter(); }
 	
+	// TODO remove.....
 	node_graph& this_node_graph();
 	node_input& this_node_input() { Assert(node_input_ != nullptr); return *node_input_; }
 	const node_input& this_node_input() const { Assert(node_input_ != nullptr); return *node_input_; }
