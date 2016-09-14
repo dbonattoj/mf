@@ -1,6 +1,7 @@
 #include "filter_graph_visualization.h"
 #include "../filter.h"
 #include "../filter_graph.h"
+#include "../filter_parameter.h"
 #include <ostream>
 #include <fstream>
 
@@ -38,20 +39,18 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 	html << R"(<TR>)";
 	html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="1" CELLPADDING="4">)";
 	html << filt.name();
-	html << R"(<BR/><FONT POINT-SIZE="10">)";
+	html << R"(<BR/><FONT POINT-SIZE="10">&nbsp;)";
 	if(filt.is_asynchonous()) html << "prefetch = " << filt.prefetch_duration();
-	else html << "synchronous";
 	html << R"(</FONT>)";
 	
-	/*
-	if(with_parameters_ && nd.parameters_count() + nd.input_parameters_count() > 0) {
+
+	if(with_parameters_ && filt.parameters_count() + filt.extern_parameters_count() > 0) {
 		html << R"(<BR/><BR/>)";
-		for(std::ptrdiff_t i = 0; i < nd.parameters_count(); ++i)
-			html << R"(&#x25A0; <FONT POINT-SIZE="10">)" << nd.parameter_at(i).id() << R"( ()" << nd.parameter_at(i).name() << R"()</FONT><BR/>)";
-		for(std::ptrdiff_t i = 0; i < nd.input_parameters_count(); ++i)
-			html << R"(&#x25A1; <FONT POINT-SIZE="10">*)" << nd.input_parameter_at(i) << R"(</FONT><BR/>)";
+		for(std::ptrdiff_t i = 0; i < filt.parameters_count(); ++i)
+			html << R"(&#x25A0; <FONT POINT-SIZE="10">)" << filt.parameter_at(i).name() << R"(</FONT><BR/>)";
+		for(std::ptrdiff_t i = 0; i < filt.extern_parameters_count(); ++i)
+			html << R"(&#x25A1; <FONT POINT-SIZE="10">*)" << filt.extern_parameter_at(i).name() << R"(</FONT><BR/>)";
 	}
-	*/
 		
 	html << R"(</TD>)";
 	html << R"(</TR>)";

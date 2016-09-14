@@ -54,6 +54,8 @@ public:
 	node& this_node() const noexcept { return node_; }
 	
 	bool add_propagated_parameter_if_needed(node_parameter_id);
+	bool add_relayed_parameter_if_needed(node_parameter_id);
+	
 	bool has_propagated_parameter(node_parameter_id) const;
 	std::size_t propagated_parameters_count() const { return propagated_parameters_.size(); }
 	node_parameter_id propagated_parameter_at(std::ptrdiff_t i) const { return propagated_parameters_.at(i); }

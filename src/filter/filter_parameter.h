@@ -32,15 +32,21 @@ class node;
 
 template<typename Value> class filter_extern_parameter;
 
+
 class filter_parameter_base {
 public:
 	virtual ~filter_parameter_base() = default;
+	virtual const std::string& name() const = 0;
 	virtual void install(filter_graph&, node&) = 0;
 };
+
 
 class filter_extern_parameter_base {
 public:
 	virtual ~filter_extern_parameter_base() = default;
+	virtual const std::string& name() const = 0;
+	virtual bool is_linked() const = 0;
+	virtual const filter_parameter_base& linked_parameter() const = 0;
 	virtual void install(filter_graph&, node&) = 0;
 };
 
@@ -86,7 +92,7 @@ public:
 	Value deterministic_value(time_unit t) const;
 	
 	void set_name(const std::string& nm) { name_ = nm; }
-	const std::string& name() const { return name_; }
+	const std::string& name() const override { return name_; }
 	
 	bool was_installed() const;
 	void install(filter_graph&, node&);
@@ -124,14 +130,14 @@ public:
 	filter_extern_parameter(filter&, bool can_receive = true, bool can_send = false);
 	
 	void link(parameter_type&);
-	bool is_linked() const;
-	const parameter_type& linked_parameter() const;
+	bool is_linked() const override;
+	const parameter_type& linked_parameter() const override;
 	
 	bool can_receive() const { return receive_; }
 	bool can_send() const { return send_; }
 	
 	void set_name(const std::string& nm) { name_ = nm; }
-	const std::string& name() const { return name_; }
+	const std::string& name() const override { return name_; }
 	
 	void install(filter_graph&, node&);
 };

@@ -46,6 +46,7 @@ private:
 	std::vector<node_frame_window_view> input_views_; ///< For each input (index), view to frames with time window.
 	node_frame_view output_view_; ///< View to (multi-channel) output frame.
 	node_parameter_valuation node_parameters_; ///< Copy of the current node parameters valuation.
+	std::map<>
 
 	bool end_marked_ = false;	
 		
@@ -98,6 +99,11 @@ public:
 	///@{
 	bool has_input_parameter(node_parameter_id, time_unit t);
 	const node_parameter_value& input_parameter(node_parameter_id, time_unit t);
+	///@}
+	
+	///
+	///@{
+	
 	///@}
 };
 

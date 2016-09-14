@@ -28,6 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "parameter/node_parameter.h"
 #include "parameter/node_parameter_value.h"
 #include "parameter/node_parameter_valuation.h"
+#include "parameter/node_parameter_relay.h"
 #include "node_stream_properties.h"
 
 #include <vector>
@@ -59,14 +60,22 @@ private:
 	node_graph& graph_;
 	std::vector<std::unique_ptr<node_output>> outputs_;
 	std::vector<std::unique_ptr<node_input>> inputs_;	
-	node_stream_properties stream_properties_;
-			
+	node_stream_properties stream_properties_;			
 
-	std::vector<node_parameter> parameters_; ///< Parameters of this node.
+	/// Parameters owned by this node.
+	/** Values are stored in `parameter_valuation_`. */
+	std::vector<node_parameter> parameters_;
 	
 	/// Parameters of preceding nodes whose values this node receives with input frames.
 	/** Propagated parameters on node outputs are set up such that the node receives these parameters. */
 	std::vector<node_parameter_id> input_parameters_;
+	
+	/// Parameters of preceding nodes to which this node can send a new value.
+	/** Parameter relays between owning node and this node are set up to transfer the new value to the owning node. */
+	std::vector<node_parameter_id> sent_parameters_;
+	
+	/// Relay for sent parameter values from suceeding node to this or preceding node.
+	node_parameter_relay sent_parameters_relay_;
 	
 	std::string name_ = "node";
 
@@ -98,6 +107,9 @@ private:
 
 
 	void deduce_propagated_parameters_();
+	
+	
+	void deduce_sent_parameters_relay_();
 	
 
 protected:
@@ -145,17 +157,32 @@ public:
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 	
+	/// Owned parameters.
+	///@{
 	node_parameter& add_parameter(node_parameter_id, const node_parameter_value& initial_value);
 	bool has_parameter(node_parameter_id) const;
 	std::size_t parameters_count() const { return parameters_.size(); }
 	const node_parameter& parameter_at(std::ptrdiff_t i) const { return parameters_.at(i); }
+	///@}
 	
+	/// Input parameters.
+	///@{
 	void add_input_parameter(node_parameter_id);
 	bool has_input_parameter(node_parameter_id) const;
 	std::size_t input_parameters_count() const { return input_parameters_.size(); }
 	node_parameter_id input_parameter_at(std::ptrdiff_t i) const { return input_parameters_.at(i); }
+	///@}
+	
+	/// Output parameters.
+	///@{
+	void add_sent_parameter(node_parameter_id);
+	bool has_sent_parameter(node_parameter_id) const;
+	std::size_t sent_parameters_count() const { return sent_parameters_.size(); }
+	node_parameter_id sent_parameter_at(std::ptrdiff_t i) const { return sent_parameters_.at(i); }
+	///@}
 	
 	bool add_propagated_parameter_if_needed(node_parameter_id);
+	bool add_relayed_parameter_if_needed(node_parameter_id);
 	
 	bool precedes(const node&) const;
 	bool precedes_strict(const node&) const;

@@ -188,7 +188,6 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		gr.run();
 	}
 
-	return;
 	SECTION("dynamic, one-to-many") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 		auto& passA = gr.add_filter<parameter_passthrough_filter>(1, 1);

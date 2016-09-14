@@ -33,6 +33,12 @@ thread_index node_output::reader_thread_index() const {
 }
 
 
+bool node_output::add_relayed_parameter_if_needed(node_parameter_id id) {
+	Assert(is_connected());
+	return connected_node().add_relayed_parameter_if_needed(id);
+}
+
+
 bool node_output::add_propagated_parameter_if_needed(node_parameter_id id) {
 	std::cout << "node_output(" << this_node().name() << ")::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
 

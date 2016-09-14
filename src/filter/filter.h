@@ -94,6 +94,10 @@ public:
 	const filter_input_base& input_at(std::ptrdiff_t i) const { return *inputs_.at(i); }
 	std::size_t outputs_count() const { return outputs_.size(); }
 	const filter_output_base& output_at(std::ptrdiff_t i) const { return *outputs_.at(i); }
+	std::size_t parameters_count() const { return parameters_.size(); }
+	const filter_parameter_base& parameter_at(std::ptrdiff_t i) const { return *parameters_.at(i); }
+	std::size_t extern_parameters_count() const { return extern_parameters_.size(); }
+	const filter_extern_parameter_base& extern_parameter_at(std::ptrdiff_t i) const { return *extern_parameters_.at(i); }
 	
 	void set_asynchonous(bool);
 	bool is_asynchonous() const;

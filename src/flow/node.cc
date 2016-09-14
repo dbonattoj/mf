@@ -166,6 +166,7 @@ void node::propagate_setup_() {
 	this->setup();
 	
 	deduce_propagated_parameters_();
+	deduce_sent_parameters_relay_();
 	
 	stage_ = stage::was_setup;
 }
@@ -248,6 +249,18 @@ void node::deduce_propagated_parameters_() {
 }
 
 
+void node::deduce_sent_parameters_relay_() {
+	// install relays for parameters owned by this node:
+	for(const node_parameter& param : parameters_)
+		sent_parameters_relay_.set_handler(
+			param.id(),
+			[id, this](const node_parameter_value& val) { update_parameter_(id, val); }
+		);
+	
+	
+}
+
+
 bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
 	std::cout << "node(" << name_ << ")::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
 	
@@ -257,6 +270,24 @@ bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
 		if(needed_by_output) needed = true;
 	}
 	if(has_input_parameter(id)) needed = true;
+	return needed;
+}
+
+
+
+bool node::add_relayed_parameter_if_needed(node_parameter_id id) {
+	bool needed = false;
+	for(auto&& out : outputs_) {
+		bool needed_by_output = out->add_relayed_parameter_if_needed(id);
+		if(needed_by_output) needed = true;
+	}
+	if(has_sent_parameter(id)) {
+		needed = true;
+	
+	} else if(needed) {
+		
+	}
+	
 	return needed;
 }
 
@@ -283,6 +314,16 @@ void node::add_input_parameter(node_parameter_id id) {
 
 bool node::has_input_parameter(node_parameter_id id) const {
 	return std::find(input_parameters_.cbegin(), input_parameters_.cend(), id) != input_parameters_.cend();
+}
+
+
+void node::add_sent_parameter(node_parameter_id id) {
+	sent_parameters_.push_back(id);
+}
+
+
+bool node::has_sent_parameter(node_parameter_id id) const {
+	return std::find(sent_parameters_.cbegin(), sent_parameters_.cend(), id) != sent_parameters_.cend();
 }
 
 
