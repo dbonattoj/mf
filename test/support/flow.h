@@ -192,7 +192,12 @@ public:
 	output_type<2, int> output2;
 	
 	multiple_output_filter() :
-		input(*this), output1(*this), output2(*this) { set_name("multiout"); }
+		input(*this), output1(*this), output2(*this)
+	{
+		set_name("multiout");
+		output1.set_name("out1");
+		output2.set_name("out2");
+	}
 };
 
 
@@ -276,7 +281,12 @@ public:
 	std::vector<bool> activation2;
 	
 	input_synchronize_test_filter() :
-		input1(*this), input2(*this), output(*this) { set_name("merge"); }
+		input1(*this), input2(*this), output(*this)
+	{
+		set_name("merge");
+		input1.set_name("in1");
+		input2.set_name("in2");
+	}
 
 
 	void setup() override {

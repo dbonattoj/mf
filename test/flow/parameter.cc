@@ -39,7 +39,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	std::size_t last = count - 1;
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
-
+/*
 	SECTION("deterministic (constant)") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 		auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
@@ -165,7 +165,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		multiout.input.connect(passA.output);
 		passB.input.connect(multiout.output1);
 		passB.set_name("B");
-		passC.input.connect(multiout.output1);
+		passC.input.connect(multiout.output2);
 		passC.set_name("C");
 		merge.input1.connect(passB.output);
 		merge.input2.connect(passC.output);
@@ -173,10 +173,51 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		passD.set_name("D");
 		sink.input.connect(passD.output);
 		
-		auto& par_2b = passA.add_param(true);
-		par_2b.set_name("to B");
-		passB.add_extern_param(true).link(par_2b);
+		auto& par_x = passA.add_param(true);
+		par_x.set_name("x");
+		auto& par_y = passA.add_param(true);
+		par_y.set_name("y");
+		auto& par_z = passC.add_param(true);
+		par_z.set_name("z");
+
+		passC.add_extern_param(true).link(par_x);
+		passD.add_extern_param(true).link(par_y);
+		passD.add_extern_param(true).link(par_z);
+
+		gr.setup();
+		gr.run();
+	}
+*/	
+	
+	SECTION("dynamic, one-to-many") {
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+		auto& passA = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& passB = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& merge = gr.add_filter<input_synchronize_test_filter>();
+		auto& passD = gr.add_filter<parameter_passthrough_filter>(1, 1);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
+		passA.input.connect(source.output);
+		passA.set_name("A");
+		passB.input.connect(passA.output);
+		passB.set_name("B");
+		merge.input2.connect(passA.output);
+		merge.input1.connect(passB.output);
+		passD.input.connect(merge.output);
+		passD.set_name("D");
+		sink.input.connect(passD.output);
+		/*
+		auto& par_x = passA.add_param(true);
+		par_x.set_name("x");
+		auto& par_y = passA.add_param(true);
+		par_y.set_name("y");
+		auto& par_z = passB.add_param(true);
+		par_z.set_name("z");
+
+		passB.add_extern_param(true).link(par_x);
+		passD.add_extern_param(true).link(par_y);
+		passD.add_extern_param(true).link(par_z);
+*/
 		gr.setup();
 		gr.run();
 	}

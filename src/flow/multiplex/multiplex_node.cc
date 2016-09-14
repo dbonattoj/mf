@@ -121,6 +121,9 @@ void multiplex_node::pre_setup() {
 		const node_input& in = out->connected_input();
 		time_unit min_offset = in.this_node().minimal_offset_to(*common_successor_node_) - in.past_window_duration();
 		time_unit max_offset = in.this_node().maximal_offset_to(*common_successor_node_) + in.future_window_duration();
+		
+		std::cout << "common succ=" << common_successor_node_->name() << std::endl;
+		
 		Assert(min_offset <= 0);
 		Assert(max_offset >= 0);
 		input_past_window_ = std::max(input_past_window_, -min_offset);
