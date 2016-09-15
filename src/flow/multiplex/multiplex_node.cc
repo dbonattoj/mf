@@ -44,7 +44,7 @@ time_unit multiplex_node::capture_successor_time_() const {
 time_span multiplex_node::expected_input_span_(time_unit successor_time) const {
 	return time_span(
 		std::max(successor_time - input_past_window_, time_unit(0)),
-		std::min(successor_time + input_future_window_ + 1, stream_properties().duration())
+		std::min(successor_time + input_future_window_ + 1, stream_timing().duration()) // TODO undef duration
 	);
 }
 

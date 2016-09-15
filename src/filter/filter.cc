@@ -165,18 +165,18 @@ void sink_filter::install(filter_graph& fg, node_graph& gr) {
 
 
 source_filter::source_filter(bool seekable, time_unit stream_duration) {
-	auto policy = seekable ? node_stream_properties::seekable : node_stream_properties::forward;
-	node_stream_properties_ = node_stream_properties(policy, stream_duration);
+	//auto policy = seekable ? node_stream_ properties::seekable : node_stream_properties::forward;
+	node_stream_timing_.set_duration(stream_duration);
 }
 
 
-void source_filter::define_source_stream_properties(const node_stream_properties& prop) {
-	node_stream_properties_ = prop;
+void source_filter::define_source_stream_timing(const node_stream_timing& tm) {
+	node_stream_timing_ = tm;
 	// TODO cleanup
 }
 
 
-const node_stream_properties& source_filter::stream_properties() const noexcept { return node_stream_properties_; }
+const node_stream_timing& source_filter::stream_timing() const noexcept { return node_stream_timing_; }
 
 
 
@@ -194,7 +194,7 @@ void source_filter::install(filter_graph& fg, node_graph& gr) {
 	}
 	node_->set_name(name_.empty() ? "source" : name_);
 	node_->set_handler(*this);
-	node_->define_source_stream_properties(node_stream_properties_);
+	node_->define_source_stream_timing(node_stream_timing_);
 
 	if(need_multiplex_node_()) {
 		multiplex_node_ = &gr.add_node<multiplex_node>();

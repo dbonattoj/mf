@@ -132,8 +132,7 @@ processing_node_job processing_node::begin_job_() {
 void processing_node::finish_job_(processing_node_job& job) {	
 	bool reached_end = false;
 	
-	if(stream_properties().duration_is_defined()
-		&& current_time() == stream_properties().duration() - 1) reached_end = true;
+	if(stream_timing().has_duration() && current_time() == stream_timing().duration() - 1) reached_end = true;
 	else if(job.end_was_marked()) reached_end = true;
 	
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {

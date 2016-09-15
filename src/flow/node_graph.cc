@@ -132,7 +132,6 @@ bool node_graph::run() {
 
 void node_graph::seek(time_unit target_time) {
 	Expects(was_setup_);
-	Expects(sink_->stream_properties().is_seekable());
 	sink_->seek(target_time);
 }
 

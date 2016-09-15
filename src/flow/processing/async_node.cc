@@ -48,8 +48,7 @@ void async_node::setup() {
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 	
 	auto buffer_frame_format = output_frame_format_();
-	Assert(stream_properties().is_seekable());
-	ring_.reset(new shared_ring(buffer_frame_format, required_capacity, stream_properties().duration()));
+	ring_.reset(new shared_ring(buffer_frame_format, required_capacity, stream_timing().duration()));
 }
 
 void async_node::launch() {
@@ -235,7 +234,8 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 		
 		// multi-channel: foreach. first: set next_write_time variable
 		// writer: pause if next_write_time != ring_.write_start_time for any ring
-		if(stream_properties().is_seekable()) ring_->seek(pull_span.start_time());
+		//if(stream_ properties().is_seekable()) 
+		ring_->seek(pull_span.start_time());
 		
 		if(reconnect) reconnect_flag_ = true;
 		
@@ -245,9 +245,9 @@ node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect)
 	MF_RAND_SLEEP;
 	continuation_cv_.notify_one();
 	
-	if(! stream_properties().is_seekable()) {
+	/*if(! stream_ properties().is_seekable()) {
 		throw std::logic_error("forward async currently unsupported");
-	}
+	}*/
 	
 
 	while(ring_->readable_duration() < pull_span.duration()) {

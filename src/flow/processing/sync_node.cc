@@ -62,7 +62,7 @@ bool sync_node::process_next_frame_() {
 	timed_frame_array_view out_vw = ring_->begin_write(1);
 	time_unit t = out_vw.start_time();
 	
-	if(stream_properties().duration_is_defined()) Assert(t < stream_properties().duration());
+	if(stream_timing().has_duration()) Assert(t < stream_timing().duration());
 	
 	set_current_time_(t);
 	processing_node_job job = begin_job_();

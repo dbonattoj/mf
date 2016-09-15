@@ -51,8 +51,6 @@ void sink_node::pull(time_unit t) {
 	// fail if reading past current_time, but end already reached
 	if(t > current_time() && reached_end())
 		throw std::invalid_argument("cannot pull frame beyond end");
-	if(stream_properties().policy() != node_stream_properties::seekable && t <= current_time())
-		throw std::invalid_argument("cannot pull frame before current time on non-seekable sink");
 
 	//if(stream_duration_is_defined()) MF_ASSERT(t < stream_duration());
 	
@@ -113,8 +111,7 @@ bool sink_node::process_next_frame() {
 }
 
 void sink_node::seek(time_unit t) {
-	MF_EXPECTS(stream_properties().policy() == node_stream_properties::seekable);
-	if(t < 0 || t >= stream_properties().duration()) throw std::invalid_argument("seek target time out of bounds");
+	if(t < 0 || t >= stream_timing().duration()) throw std::invalid_argument("seek target time out of bounds");
 	set_current_time_(t - 1);
 	
 }

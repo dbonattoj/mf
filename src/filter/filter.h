@@ -128,18 +128,19 @@ public:
 
 class source_filter : public filter {
 private:
-	node_stream_properties node_stream_properties_;
+	node_stream_timing node_stream_timing_;
 	
 public:
-	explicit source_filter(bool seekable = false, time_unit stream_duration = -1);
+	explicit source_filter(bool seekable = false, time_unit stream_duration = -1); // TODO timing define interface
 
-	void define_source_stream_properties(const node_stream_properties&);
-	const node_stream_properties& stream_properties() const noexcept;
+	void define_source_stream_timing(const node_stream_timing&);
+	const node_stream_timing& stream_timing() const noexcept;
 
 	void install(filter_graph&, node_graph&) override;
 };
 
 
+/// Output port of filter, abstract base class.
 class filter_output_base {
 public:
 	virtual const std::string& name() const = 0;
@@ -151,7 +152,7 @@ public:
 };
 
 
-
+/// Input port of filter, abstract base class.
 class filter_input_base {
 public:
 	virtual const std::string& name() const = 0;

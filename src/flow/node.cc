@@ -103,26 +103,31 @@ const node& node::first_successor() const {
 }
 
 
-void node::deduce_stream_properties_() {
+void node::deduce_stream_timing_() {
 	Expects(stage_ == stage::was_pre_setup);
 	Expects(! is_source());
-
-	bool seekable = true;
-	time_unit duration = std::numeric_limits<time_unit>::max();
-
-	for(auto&& in : inputs()) {
-		node& connected_node = in->connected_node();
-		const node_stream_properties& connected_prop = connected_node.stream_properties();	
-		bool connected_node_seekable = (connected_prop.policy() == node_stream_properties::seekable);
-		
-		duration = std::min(duration, connected_prop.duration());
-		seekable = seekable && connected_node_seekable;
-	}
-
-	Assert(!(seekable && (duration == -1)));
 	
-	auto policy = (seekable ? node_stream_properties::seekable : node_stream_properties::forward);
-	stream_properties_ = node_stream_properties(policy, duration);
+	// assume inputs are either all realtime or all non-realtime
+	bool realtime = input_at(0).connected_node().stream_timing().is_real_time();
+
+	if(realtime) {
+		stream_timing_.set_real_time(true);
+	} else {
+		bool has_duration = true;
+		time_unit duration = std::numeric_limits<time_unit>::max();
+
+		for(auto&& in : inputs()) {
+			node& connected_node = in->connected_node();
+			const node_stream_timing& connected_tm = connected_node.stream_timing();	
+		
+			if(connected_tm.has_duration()) duration = std::min(duration, connected_tm.duration());
+			else has_duration = false;
+		}
+		
+		stream_timing_.set_real_time(false);
+		if(has_duration) stream_timing_.set_duration(duration);
+		else stream_timing_.set_no_duration();
+	}
 }
 
 
@@ -162,7 +167,7 @@ void node::propagate_setup_() {
 
 	// setup this node
 	Assert(stage_ == stage::was_pre_setup);
-	if(! is_source()) deduce_stream_properties_();
+	if(! is_source()) deduce_stream_timing_();
 	this->setup();
 	
 	deduce_propagated_parameters_();
@@ -173,11 +178,11 @@ void node::propagate_setup_() {
 
 
 
-void node::define_source_stream_properties(const node_stream_properties& prop) {
+void node::define_source_stream_timing(const node_stream_timing& tm) {
 	Expects(stage_ == stage::construction);
 	Expects(is_source());
 	
-	stream_properties_ = prop;
+	stream_timing_ = tm;
 }
 
 
@@ -216,7 +221,7 @@ void node::set_online() {
 
 
 bool node::is_bounded() const {
-	if(stream_properties_.duration_is_defined() || is_source()) return true;
+	if(stream_timing_.has_duration() || is_source()) return true;
 	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](auto&& in) {
 		return (in->is_activated() && in->connected_node().is_bounded());
 	});
@@ -237,7 +242,7 @@ void node::mark_end_() {
 
 
 time_unit node::end_time() const noexcept {
-	if(stream_properties().duration_is_defined()) return stream_properties().duration();
+	if(stream_timing().has_duration()) return stream_timing().duration();
 	else if(reached_end()) return current_time() + 1;
 	else return -1;
 }

@@ -29,7 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "parameter/node_parameter_value.h"
 #include "parameter/node_parameter_valuation.h"
 #include "parameter/node_parameter_relay.h"
-#include "node_stream_properties.h"
+#include "timing/node_stream_timing.h"
 
 #include <vector>
 #include <map>
@@ -59,9 +59,10 @@ private:
 
 	node_graph& graph_;
 	std::vector<std::unique_ptr<node_output>> outputs_;
-	std::vector<std::unique_ptr<node_input>> inputs_;	
-	node_stream_properties stream_properties_;			
-
+	std::vector<std::unique_ptr<node_input>> inputs_;
+	
+	node_stream_timing stream_timing_;
+	
 	/// Parameters owned by this node.
 	/** Values are stored in `parameter_valuation_`. */
 	std::vector<node_parameter> parameters_;
@@ -103,7 +104,7 @@ private:
 	void propagate_setup_();
 	
 	
-	void deduce_stream_properties_();
+	void deduce_stream_timing_();
 
 
 	void deduce_propagated_parameters_();
@@ -200,8 +201,10 @@ public:
 	virtual time_unit minimal_offset_to(const node&) const = 0;
 	virtual time_unit maximal_offset_to(const node&) const = 0;
 	
-	void define_source_stream_properties(const node_stream_properties&);
-	const node_stream_properties& stream_properties() const noexcept { return stream_properties_; }
+	void define_source_stream_timing(const node_stream_timing&);
+		
+	const node_stream_timing& stream_timing() const { return stream_timing_; }
+	bool is_real_time() const { return stream_timing().is_real_time(); }
 	
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
