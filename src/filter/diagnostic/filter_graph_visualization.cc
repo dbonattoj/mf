@@ -66,10 +66,25 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 
 	if(with_parameters_ && filt.parameters_count() + filt.extern_parameters_count() > 0) {
 		html << R"(<BR/><BR/>)";
-		for(std::ptrdiff_t i = 0; i < filt.parameters_count(); ++i)
+		for(std::ptrdiff_t i = 0; i < filt.parameters_count(); ++i) {
 			html << R"(&#x25A0; <FONT POINT-SIZE="10">)" << filt.parameter_at(i).name() << R"(</FONT><BR/>)";
-		for(std::ptrdiff_t i = 0; i < filt.extern_parameters_count(); ++i)
-			html << R"(&#x25A1; <FONT POINT-SIZE="10">*)" << filt.extern_parameter_at(i).name() << R"(</FONT><BR/>)";
+		}
+		for(std::ptrdiff_t i = 0; i < filt.extern_parameters_count(); ++i) {
+			const auto& ex_param = filt.extern_parameter_at(i);
+			std::string icon;
+			if(ex_param.is_input_parameter()) icon += "&#x25A1;";
+			if(ex_param.is_sent_parameter()) icon += "&#x25B3;";
+			
+			std::string name;
+			if(! ex_param.name().empty()) name = ex_param.name() + " ";
+			name += "&#x2192; ";
+			if(ex_param.is_linked())
+				name += ex_param.linked_parameter().this_filter().name() + "." + ex_param.linked_parameter().name();
+			else
+				name += "?";
+			
+			html << icon << R"( <FONT POINT-SIZE="10">)" << name << R"(</FONT><BR/>)";
+		}
 	}
 		
 	html << R"(</TD>)";

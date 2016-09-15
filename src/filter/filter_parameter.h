@@ -36,6 +36,7 @@ template<typename Value> class filter_extern_parameter;
 class filter_parameter_base {
 public:
 	virtual ~filter_parameter_base() = default;
+	virtual const filter& this_filter() const = 0;
 	virtual const std::string& name() const = 0;
 	virtual void install(filter_graph&, node&) = 0;
 };
@@ -44,10 +45,13 @@ public:
 class filter_extern_parameter_base {
 public:
 	virtual ~filter_extern_parameter_base() = default;
+	virtual const filter& this_filter() const = 0;
 	virtual const std::string& name() const = 0;
 	virtual bool is_linked() const = 0;
 	virtual const filter_parameter_base& linked_parameter() const = 0;
 	virtual void install(filter_graph&, node&) = 0;
+	virtual bool is_input_parameter() const = 0;
+	virtual bool is_sent_parameter() const = 0;
 };
 
 
@@ -77,6 +81,8 @@ private:
 
 public:
 	explicit filter_parameter(filter&);
+	
+	const filter& this_filter() const override { return filter_; }
 	
 	node_parameter_id id() const { return id_; }
 	bool is_deterministic() const;
@@ -129,12 +135,14 @@ private:
 public:
 	filter_extern_parameter(filter&, bool input = true, bool sent = false);
 	
+	const filter& this_filter() const override { return filter_; }
+	
 	void link(parameter_type&);
 	bool is_linked() const override;
 	const parameter_type& linked_parameter() const override;
 	
-	bool is_input_parameter() const { return input_; }
-	bool is_sent_parameter() const { return sent_; }
+	bool is_input_parameter() const override { return input_; }
+	bool is_sent_parameter() const override { return sent_; }
 	
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const override { return name_; }

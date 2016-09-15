@@ -117,12 +117,14 @@ void node_graph_visualization::generate_processing_node_(const processing_node& 
 	}
 	html << R"(</FONT>)";
 	
-	if(with_parameters_ && nd.parameters_count() + nd.input_parameters_count() > 0) {
+	if(with_parameters_ && nd.parameters_count() + nd.input_parameters_count() + nd.sent_parameters_count() > 0) {
 		html << R"(<BR/><BR/>)";
 		for(std::ptrdiff_t i = 0; i < nd.parameters_count(); ++i)
 			html << R"(&#x25A0; <FONT POINT-SIZE="10">)" << nd.parameter_at(i).id() << R"( ()" << nd.parameter_at(i).name() << R"()</FONT><BR/>)";
 		for(std::ptrdiff_t i = 0; i < nd.input_parameters_count(); ++i)
-			html << R"(&#x25A1; <FONT POINT-SIZE="10">*)" << nd.input_parameter_at(i) << R"(</FONT><BR/>)";
+			html << R"(&#x25A1; <FONT POINT-SIZE="10">)" << nd.input_parameter_at(i) << R"(</FONT><BR/>)";
+		for(std::ptrdiff_t i = 0; i < nd.sent_parameters_count(); ++i)
+			html << R"(&#x25B3; <FONT POINT-SIZE="10">)" << nd.sent_parameter_at(i) << R"(</FONT><BR/>)";
 	}
 	
 	if(with_state_) {
