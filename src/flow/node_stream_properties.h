@@ -22,17 +22,21 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_NODE_STREAM_PROPERTIES_H_
 
 #include "../common.h"
+#include "types.h"
 #include <stdexcept>
 
 namespace mf {
 
 class node_stream_properties {
 public:
-	enum policy_type { undefined, seekable, forward };
+	enum policy_type { undefined, seekable, forward, real_time };
 
 private:
 	policy_type policy_ = undefined;
 	time_unit duration_ = -1;
+	
+	clock_duration frame_clock_duration_;
+	time_unit offset_;
 
 public:
 	node_stream_properties() = default;

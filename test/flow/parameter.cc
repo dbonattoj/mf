@@ -55,7 +55,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	
 			pass2.input.connect(pass1.output);
 			pass2.set_name("param dest");
-			auto& e_par = pass2.add_extern_param(false);
+			auto& e_par = pass2.add_input_extern_param(false);
 			e_par.link(par);
 			
 			pass2.set_expected_value(e_par, "value");
@@ -82,7 +82,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	
 			pass2.input.connect(pass1.output);
 			pass2.set_name("param dest");
-			auto& e_par = pass2.add_extern_param(true);
+			auto& e_par = pass2.add_input_extern_param(true);
 			e_par.link(par);
 			
 			sink.input.connect(pass2.output);
@@ -108,7 +108,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	
 			pass2.input.connect(pass1.output);
 			pass2.set_name("param dest");
-			auto& e_par = pass2.add_extern_param(true);
+			auto& e_par = pass2.add_input_extern_param(true);
 			e_par.link(par);
 					
 			sink.input.connect(pass2.output);
@@ -131,7 +131,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	
 			pass2.input.connect(pass1.output);
 			pass2.set_name("param dest");
-			auto& e_par = pass2.add_extern_param(false, true);
+			auto& e_par = pass2.add_sent_extern_param();
 			e_par.link(par);
 					
 			sink.input.connect(pass2.output);
@@ -140,7 +140,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			gr.run();
 		}
 
-		SECTION("3 pass") {
+		SECTION("3 pass, input") {
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 			auto& passA = gr.add_filter<parameter_passthrough_filter>(0, 0);
 			auto& passB = gr.add_filter<parameter_passthrough_filter>(1, 1);
@@ -168,15 +168,52 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			par_w.set_dynamic();
 			par_w.set_name("w");
 			
-			passB.add_extern_param(true).link(par_x);
-			passB.add_extern_param(true).link(par_w);
-			passC.add_extern_param(true).link(par_y);
-			passC.add_extern_param(true).link(par_z);
+			passB.add_input_extern_param(true).link(par_x);
+			passB.add_input_extern_param(true).link(par_w);
+			passC.add_input_extern_param(true).link(par_y);
+			passC.add_input_extern_param(true).link(par_z);
 			
 			gr.setup();
 			gr.run();
 		}
 		
+		SECTION("3 pass, sent") {
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+			auto& passA = gr.add_filter<parameter_passthrough_filter>(0, 0);
+			auto& passB = gr.add_filter<parameter_passthrough_filter>(1, 1);
+			auto& passC = gr.add_filter<parameter_passthrough_filter>(1, 1);
+			auto& sink = gr.add_filter<expected_frames_sink>(seq);
+	
+			passA.input.connect(source.output);
+			passA.set_name("A");
+			passB.input.connect(passA.output);
+			passB.set_name("B");
+			passC.input.connect(passB.output);
+			passC.set_name("C");
+			sink.input.connect(passC.output);
+			
+			auto& par_x = passA.add_param(true);
+			par_x.set_dynamic();
+			par_x.set_name("x");
+			auto& par_y = passA.add_param(true);
+			par_y.set_dynamic();
+			par_y.set_name("y");
+			auto& par_z = passB.add_param(true);
+			par_z.set_dynamic();
+			par_z.set_name("z");
+			auto& par_w = passA.add_param(true);
+			par_w.set_dynamic();
+			par_w.set_name("w");
+			
+			passB.add_sent_extern_param().link(par_x);
+			passB.add_sent_extern_param().link(par_w);
+			passC.add_sent_extern_param().link(par_y);
+			passC.add_sent_extern_param().link(par_z);
+			
+			gr.setup();
+			gr.run();
+		}
+
 		SECTION("multi-out") {
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 			auto& passA = gr.add_filter<parameter_passthrough_filter>(0, 0);
@@ -207,14 +244,14 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			auto& par_z = passC.add_param(true);
 			par_z.set_name("z");
 	
-			passC.add_extern_param(true).link(par_x);
-			passD.add_extern_param(true).link(par_y);
-			passD.add_extern_param(true).link(par_z);
+			passC.add_input_extern_param(true).link(par_x);
+			passD.add_input_extern_param(true).link(par_y);
+			passD.add_input_extern_param(true).link(par_z);
 	
 			gr.setup();
 			gr.run();
 		}
-	return;
+
 		SECTION("one-to-many") {
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
 			auto& passA = gr.add_filter<parameter_passthrough_filter>(1, 1);
@@ -240,13 +277,16 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			auto& par_z = passB.add_param(true);
 			par_z.set_name("z");
 	
-			passB.add_extern_param(true).link(par_x);
-			passD.add_extern_param(true).link(par_y);
-			passD.add_extern_param(true).link(par_z);
+			passB.add_input_extern_param(true).link(par_x);
+			passD.add_input_extern_param(true).link(par_y);
+			passD.add_input_extern_param(true).link(par_z);
+			passD.add_sent_extern_param().link(par_y);
 	
 			gr.setup();
 			gr.run();
 		}
+return;
+
 	}
 }
 

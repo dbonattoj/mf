@@ -58,13 +58,20 @@ public:
 		return param;
 	}
 	
-	extern_param_type& add_extern_param(bool verify_is_t, bool send_t = false) {
-		extern_params_.emplace_back(new extern_param_type(*this, verify_is_t, send_t));
+	extern_param_type& add_input_extern_param(bool verify_is_t) {
+		extern_params_.emplace_back(new extern_param_type(*this, verify_is_t, false));
 		extern_param_type& param = *extern_params_.back();
 		if(verify_is_t) verify_is_t_params_.push_back(&param);
-		if(send_t) sent_t_params_.push_back(&param);
 		return param;
 	}
+	
+	extern_param_type& add_sent_extern_param() {
+		extern_params_.emplace_back(new extern_param_type(*this, false, true));
+		extern_param_type& param = *extern_params_.back();
+		sent_t_params_.push_back(&param);
+		return param;
+	}
+
 	
 	void set_expected_value(const extern_param_type& par, const std::string& val) {
 		expected_values_[&par] = val;

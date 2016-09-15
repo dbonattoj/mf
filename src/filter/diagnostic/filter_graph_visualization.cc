@@ -104,7 +104,7 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 			if(! filt.output_at(i).name().empty()) output_name = filt.output_at(i).name();
 
 
-			html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << output_id << R"(">)";
+			html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << output_id << R"(">)";
 			html << R"(<FONT POINT-SIZE="10">)" << output_name << R"(</FONT>)";
 			html << R"(</TD>)";
 			html << R"(<TD WIDTH="20"></TD>)";

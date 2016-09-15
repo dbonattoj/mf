@@ -53,6 +53,8 @@ private:
 	node_parameter_id last_node_parameter_id_ = 0;
 	
 	std::atomic<bool> was_stopped_ {false};
+	
+	clock_time_point launch_clock_time_;
 
 	diagnostic_handler* diagnostic_handler_ = nullptr;
 
