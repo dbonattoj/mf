@@ -120,7 +120,7 @@ const node_parameter_valuation& processing_node_job::parameters() const {
 }
 
 
-bool processing_node_job::has_input_parameter(node_parameter_id id, time_unit t) {
+bool processing_node_job::has_input_parameter(node_parameter_id id, time_unit t) const {
 	auto possible_inputs = node_.propagated_parameters_inputs(id);
 	for(input_index_type input_index : possible_inputs) {
 		if(! has_input_view(input_index)) continue;
@@ -149,6 +149,17 @@ const node_parameter_value& processing_node_job::input_parameter(node_parameter_
 	}
 	throw std::logic_error("input parameter not present");
 }
+
+
+bool processing_node_job::has_sent_parameter(node_parameter_id id) const {
+	return node_.has_sent_parameter(id);
+}
+
+
+void processing_node_job::send_parameter(node_parameter_id id, const node_parameter_value& new_value) {
+	node_.sent_parameters_relay().send_parameter(id, new_value);
+}
+
 
 
 

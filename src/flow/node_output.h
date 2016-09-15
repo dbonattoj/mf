@@ -26,6 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 class node_input;
+class node_parameter_relay;
 
 /// Output port of node in node graph.
 /** One output port have multiple *channels*. The output is *pulled* as a whole, but data is read from individual
@@ -54,7 +55,7 @@ public:
 	node& this_node() const noexcept { return node_; }
 	
 	bool add_propagated_parameter_if_needed(node_parameter_id);
-	bool add_relayed_parameter_if_needed(node_parameter_id);
+	bool add_relayed_parameter_if_needed(node_parameter_id, const node_parameter_relay& preceding_relay);
 	
 	bool has_propagated_parameter(node_parameter_id) const;
 	std::size_t propagated_parameters_count() const { return propagated_parameters_.size(); }

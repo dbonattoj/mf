@@ -250,14 +250,10 @@ void node::deduce_propagated_parameters_() {
 
 
 void node::deduce_sent_parameters_relay_() {
-	// install relays for parameters owned by this node:
+	node_parameter_relay null_relay;
 	for(const node_parameter& param : parameters_)
-		sent_parameters_relay_.set_handler(
-			param.id(),
-			[id, this](const node_parameter_value& val) { update_parameter_(id, val); }
-		);
-	
-	
+		add_relayed_parameter_if_needed(param.id(), null_relay);
+	Assert(null_relay.handlers_count() == 0);
 }
 
 
@@ -275,17 +271,24 @@ bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
 
 
 
-bool node::add_relayed_parameter_if_needed(node_parameter_id id) {
+bool node::add_relayed_parameter_if_needed(node_parameter_id id, const node_parameter_relay& preceding_relay) {
 	bool needed = false;
 	for(auto&& out : outputs_) {
-		bool needed_by_output = out->add_relayed_parameter_if_needed(id);
+		bool needed_by_output = out->add_relayed_parameter_if_needed(id, sent_parameters_relay_);
 		if(needed_by_output) needed = true;
 	}
-	if(has_sent_parameter(id)) {
+	if(has_parameter(id)) {
 		needed = true;
+		sent_parameters_relay_.set_handler(
+			id,
+			[id, this](const node_parameter_value& val) { update_parameter_(id, val); }
+		);
 	
 	} else if(needed) {
-		
+		sent_parameters_relay_.set_handler(
+			id,
+			[id, &preceding_relay](const node_parameter_value& val) { preceding_relay.send_parameter(id, val); }
+		);
 	}
 	
 	return needed;
@@ -355,7 +358,6 @@ node_parameter_valuation node::current_parameter_valuation_() const {
 	std::lock_guard<std::mutex> lock(parameters_mutex_);
 	return parameter_valuation_;
 }
-
 
 
 

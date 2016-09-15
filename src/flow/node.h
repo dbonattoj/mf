@@ -163,7 +163,10 @@ public:
 	bool has_parameter(node_parameter_id) const;
 	std::size_t parameters_count() const { return parameters_.size(); }
 	const node_parameter& parameter_at(std::ptrdiff_t i) const { return parameters_.at(i); }
+	
+	bool add_propagated_parameter_if_needed(node_parameter_id);
 	///@}
+	
 	
 	/// Input parameters.
 	///@{
@@ -173,21 +176,27 @@ public:
 	node_parameter_id input_parameter_at(std::ptrdiff_t i) const { return input_parameters_.at(i); }
 	///@}
 	
-	/// Output parameters.
+	
+	/// Sent parameters.
 	///@{
 	void add_sent_parameter(node_parameter_id);
 	bool has_sent_parameter(node_parameter_id) const;
 	std::size_t sent_parameters_count() const { return sent_parameters_.size(); }
 	node_parameter_id sent_parameter_at(std::ptrdiff_t i) const { return sent_parameters_.at(i); }
+	
+	bool add_relayed_parameter_if_needed(node_parameter_id, const node_parameter_relay& preceding_relay);
+	const node_parameter_relay& sent_parameters_relay() const { return sent_parameters_relay_; }
 	///@}
 	
-	bool add_propagated_parameter_if_needed(node_parameter_id);
-	bool add_relayed_parameter_if_needed(node_parameter_id);
 	
+	/// Graph algorithms.
+	///@{
 	bool precedes(const node&) const;
 	bool precedes_strict(const node&) const;
 	const node& first_successor() const;
-			
+	///@}
+	
+	
 	virtual time_unit minimal_offset_to(const node&) const = 0;
 	virtual time_unit maximal_offset_to(const node&) const = 0;
 	
@@ -203,7 +212,7 @@ public:
 	void propagate_offline_state();
 	void propagate_reconnecting_state();
 	void set_online();
-			
+	
 	virtual void pre_setup() { }
 	virtual void setup() { }
 	virtual void launch() { }

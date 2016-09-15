@@ -33,9 +33,9 @@ thread_index node_output::reader_thread_index() const {
 }
 
 
-bool node_output::add_relayed_parameter_if_needed(node_parameter_id id) {
+bool node_output::add_relayed_parameter_if_needed(node_parameter_id id, const node_parameter_relay& preceding_relay) {
 	Assert(is_connected());
-	return connected_node().add_relayed_parameter_if_needed(id);
+	return connected_node().add_relayed_parameter_if_needed(id, preceding_relay);
 }
 
 
