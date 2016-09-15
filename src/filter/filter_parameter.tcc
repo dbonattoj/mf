@@ -44,6 +44,13 @@ bool filter_parameter<Value>::is_dynamic() const {
 }
 
 
+
+template<typename Value>
+void filter_parameter<Value>::set_mirror(const filter_parameter& other_par) {
+	value_function_ = [&other_par](time_unit t) -> Value { return other_par.deterministic_value(t); };
+}
+
+
 template<typename Value> template<typename Function>
 void filter_parameter<Value>::set_value_function(Function&& func) {
 	value_function_ = std::forward<Function&&>(func);
@@ -59,14 +66,14 @@ void filter_parameter<Value>::set_constant_value(const Value& val) {
 template<typename Value>
 void filter_parameter<Value>::set_dynamic(const Value& initial_value) {
 	value_function_ = nullptr;
-	initial_value_ = initial_value;
+	dynamic_initial_value_.reset(new Value(initial_value));
 }
 
 
 template<typename Value>
 const Value& filter_parameter<Value>::dynamic_initial_value() const {
 	Assert(is_dynamic());
-	return initial_value_;
+	return *dynamic_initial_value_;
 }
 
 
@@ -81,7 +88,7 @@ void filter_parameter<Value>::install(filter_graph& gr, node& nd) {
 	if(was_installed()) return;
 	id_ = gr.new_node_parameter_id();
 	if(is_dynamic()) {
-		node_parameter& par = nd.add_parameter(id_, initial_value_);
+		node_parameter& par = nd.add_parameter(id_, *dynamic_initial_value_);
 		par.set_name(name_);
 	}
 }

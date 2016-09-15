@@ -72,7 +72,7 @@ private:
 	filter& filter_;
 	node_parameter_id id_ = undefined_node_parameter_id;
 	std::function<deterministic_value_function> value_function_;
-	Value initial_value_;
+	std::unique_ptr<Value> dynamic_initial_value_;
 
 	std::string name_;
 
@@ -91,6 +91,7 @@ public:
 	template<typename Function> void set_value_function(Function&& func);
 	void set_constant_value(const Value&);
 	void set_dynamic(const Value& initial_value = Value());
+	void set_mirror(const filter_parameter&);
 	
 	const Value& dynamic_initial_value() const;
 	

@@ -76,12 +76,14 @@ public:
 	}
 	
 	void set_seekable(bool seekable) {
+		/*
 		node_stream_properties prop;
 		
 		if(seekable) prop = node_stream_properties(node_stream_properties::seekable, importer_.total_duration());
 		else prop = node_stream_properties(node_stream_properties::forward);
 		
 		define_source_stream_properties(prop); 
+		*/
 	}
 	
 	void setup() override {
