@@ -102,13 +102,13 @@ public:
 /// Link to a parameter of type \a Value belonging to another filter.
 /** Must be added to filter if it is going to access the linked parameter of the other filter. Must be linked to a
  ** \ref filter_parameter of the same value type, on a _preceding_ node in the filter graph.
- ** When the linked parameter is deterministic, it can only be used to get/compute its value the same way like directly
+ ** When the linked parameter is deterministic, it can only be used to get/compute its value the same way as directly
  ** from the owning filter.
  ** When the linked parameter is dynamic, two kinds of access are possible:
- ** - Receiving: The filter receives the value of the parameter along with the input frames. The value which the
- **   parameter had when a frame got generated is propagated along with each frame. For inputs with time windows, the
- **   value on each of the past/future frames can be retrieved.
- ** - Send: The filter can send a new value to the parameter. The owning filter will use the last new value that was
+ ** - __Input__: The filter receives the value of the parameter along with the input frames. The value which the
+ **   parameter had when its owning node processed a frame is propagated along with each frame. For inputs with time
+ **   windows, the values for each of the past/future frames can be retrieved.
+ ** - __Sent__: The filter can send a new value to the parameter. The owning filter will use the last new value that was
  **   sent to it when processing the next frame. */
 template<typename Value>
 class filter_extern_parameter : public filter_extern_parameter_base {
@@ -119,22 +119,22 @@ public:
 private:
 	filter& filter_;
 	parameter_type* linked_parameter_ = nullptr;
-	bool receive_;
-	bool send_;
+	bool input_;
+	bool sent_;
 	std::string name_;
 
 	filter_extern_parameter(const filter_extern_parameter&) = delete;
 	filter_extern_parameter& operator=(const filter_extern_parameter&) = delete;
 
 public:
-	filter_extern_parameter(filter&, bool can_receive = true, bool can_send = false);
+	filter_extern_parameter(filter&, bool input = true, bool sent = false);
 	
 	void link(parameter_type&);
 	bool is_linked() const override;
 	const parameter_type& linked_parameter() const override;
 	
-	bool can_receive() const { return receive_; }
-	bool can_send() const { return send_; }
+	bool is_input_parameter() const { return input_; }
+	bool is_sent_parameter() const { return sent_; }
 	
 	void set_name(const std::string& nm) { name_ = nm; }
 	const std::string& name() const override { return name_; }

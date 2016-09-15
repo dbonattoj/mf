@@ -277,6 +277,8 @@ bool node::add_relayed_parameter_if_needed(node_parameter_id id, const node_para
 		bool needed_by_output = out->add_relayed_parameter_if_needed(id, sent_parameters_relay_);
 		if(needed_by_output) needed = true;
 	}
+	if(has_sent_parameter(id)) needed = true;
+	
 	if(has_parameter(id)) {
 		needed = true;
 		sent_parameters_relay_.set_handler(

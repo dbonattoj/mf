@@ -96,14 +96,16 @@ Value filter_job::param(const filter_parameter<Value>& param) {
 template<typename Value>
 void filter_job::set_param(const filter_parameter<Value>& param, const Value& new_value) {
 	Assert(param.is_dynamic());
-	node_parameter_value& value = node_job_.parameter(param.id());
-	value.get<Value>() = new_value;
+	node_parameter_value& val = node_job_.parameter(param.id());
+	val.get<Value>() = new_value;
 }
 
 
 template<typename Value>
 void filter_job::send_param(const filter_extern_parameter<Value>& extern_param, const Value& new_value) {
-	// TODO update extern param
+	node_parameter_id id = extern_param.linked_parameter().id();
+	node_parameter_value new_val(new_value);
+	node_job_.send_parameter(id, new_val);
 }
 
 
