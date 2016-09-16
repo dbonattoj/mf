@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <utility>
 #include "filter.h"
+#include "filter_job.h"
 #include "../io/frame_exporter.h"
 
 namespace mf { namespace flow {

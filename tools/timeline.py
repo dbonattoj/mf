@@ -1,23 +1,3 @@
-/*
-Author : Tim Lenertz
-Date : May 2016
-
-Copyright (c) 2016, Université libre de Bruxelles
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files to deal in the Software without restriction, including the rights to use, copy, modify, merge,
-publish the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 #!/usr/bin/python
 
 import cairo
@@ -37,12 +17,11 @@ if __name__ == '__main__':
 	row_space = 10
 	jobs_offset = 150
 	label_space = 15
+	row_background_pad = 3
 	
 	def node_label(nd):
 		return nd['name'] + ' (' + nd['type'] + ')'
 	
-	
-
 	width = (root['duration'] * point_per_usec) + jobs_offset
 	height = len(root['nodes']) * (row_height + row_space)
 
@@ -62,15 +41,34 @@ if __name__ == '__main__':
 		ctx.show_text(txt)
 
 
+	# compute jobs offset (max width of labels)
+	jobs_offset = 0
+	for nd in root['nodes']:
+		label = node_label(nd)
+		_, _, w, _, _, _ = ctx.text_extents(label)
+		jobs_offset = max(w, jobs_offset)	
+
+
+	# draw jobs for each node
 	y = 0
 	for nd in root['nodes']:
-		label = nd['name'] + ' (' + nd['type'] + ')'
+		label = node_label(nd)
 		draw_text_in_box(label, label_space, y, jobs_offset - 2*label_space, row_height, 'right')
+		
+		ctx.rectangle(jobs_offset, y - row_background_pad, width - jobs_offset, row_height + 2*row_background_pad)
+		ctx.set_source_rgb(0.8, 0.8, 0.8)
+		ctx.fill()
+
 		for jb in nd['jobs']:
 			x0 = jobs_offset + jb['from']*point_per_usec
 			x1 = jobs_offset + jb['to']*point_per_usec
 			ctx.rectangle(x0, y, x1 - x0, row_height)
+			ctx.set_source_rgb(0.0, 0.0, 0.0);
 			ctx.stroke()
+			ctx.rectangle(x0, y, x1 - x0, row_height)
+			ctx.set_source_rgb(1.0, 1.0, 1.0);
+			ctx.fill()
+			ctx.set_source_rgb(0.0, 0.0, 0.0);
 			draw_text_in_box(str(jb['t']), x0, y, x1 - x0, row_height, 'center')
 
 		y += row_height + row_space

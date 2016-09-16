@@ -102,7 +102,9 @@ void processing_node::handler_pre_process_(processing_node_job& job) {
 
 void processing_node::handler_process_(processing_node_job& job) {
 	Expects(handler_ != nullptr);
-	std::cout << name() << " process....................." << std::endl;
+	
+	if(is_sink())
+		std::cout << name() << " process.... " << job.time() << " ................." << std::endl;
 	
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_started(*this, job.time());

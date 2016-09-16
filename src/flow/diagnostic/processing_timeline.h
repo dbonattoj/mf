@@ -26,6 +26,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <vector>
 #include <map>
 #include <mutex>
+#include <memory>
 
 namespace mf { namespace flow {
 
@@ -45,7 +46,7 @@ public:
 	
 private:
 	node_graph& graph_;
-	std::vector<job> jobs_;
+	std::vector<std::unique_ptr<job>> jobs_;
 	std::map<const processing_node*, job*> current_node_jobs_;
 	std::mutex jobs_mutex_;
 	
@@ -61,7 +62,7 @@ public:
 	const node_graph& graph() const { return graph_; }
 	
 	std::size_t jobs_count() const { return jobs_.size(); }
-	const job& job_at(std::ptrdiff_t index) const { return jobs_.at(index); }
+	const job& job_at(std::ptrdiff_t index) const { return *jobs_.at(index); }
 };
 
 }}

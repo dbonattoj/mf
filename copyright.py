@@ -4,8 +4,8 @@ import sys
 import os
 import fnmatch
 
-root_dirs = ('./src', './test', './prog', './tools')
-extensions = ('.cc', '.h', '.tcc', '.icc', 'py')
+root_dirs = ('./src', './test', './prog')
+extensions = ('.cc', '.h', '.tcc', '.icc')
 
 
 def readfile(filename):

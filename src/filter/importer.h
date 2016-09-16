@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <utility>
 #include "filter.h"
+#include "filter_job.h"
 #include "../io/frame_importer.h"
 #include "../io/seekable_frame_importer.h"
 
@@ -76,6 +77,10 @@ public:
 	}
 	
 	void set_seekable(bool seekable) {
+		node_stream_timing tm;
+		tm.set_duration(importer_.total_duration());
+		define_source_stream_timing(tm);
+		
 		/*
 		node_stream_properties prop;
 		

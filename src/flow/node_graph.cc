@@ -85,7 +85,7 @@ void node_graph::launch() {
 void node_graph::stop() {
 	if(! launched_) return;
 	
-	if(has_diagnostic()) diagnostic().stopped(*this);
+//	if(has_diagnostic()) diagnostic().stopped(*this);
 	
 	MF_DEBUG_BACKTRACE("graph::stop");	
 	was_stopped_.store(true);

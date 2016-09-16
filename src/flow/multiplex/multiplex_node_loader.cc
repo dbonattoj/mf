@@ -105,9 +105,9 @@ void multiplex_node::async_loader::thread_main_() {
 			return (successor_time != this_node().successor_time_of_input_view_());
 		});
 		lock.unlock();
+		if(stopped_) break;
 		Assert(successor_time != -1);
 		
-		if(stopped_) break;
 		
 		// acquire exclusive lock on input view mutex --> waits until all readers end
 		// and load the new input view

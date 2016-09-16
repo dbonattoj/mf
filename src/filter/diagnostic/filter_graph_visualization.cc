@@ -78,7 +78,7 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 				if(! param.name().empty()) name = param.name() + " ";
 				name += "&#x2192; " + param.referenced_parameter().this_filter().name() + "." + param.referenced_parameter().name();
 
-				html << R"(&#x25A1;<FONT POINT-SIZE="10"><I>)" << type << R"(</I>: )" << name << R"(</FONT><BR/>)";
+				html << R"(&#x25A1;<FONT POINT-SIZE="10">)" << type << R"(: )" << name << R"(</FONT><BR/>)";
 
 			} else {
 				std::string type;
@@ -86,7 +86,7 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 				else if(param.kind() == filter_parameter_base::dynamic) type = "dyn";
 
 
-				html << R"(&#x25A0;<FONT POINT-SIZE="10"><I>)" << type << R"(</I>: )" << filt.parameter_at(i).name() << R"(</FONT><BR/>)";
+				html << R"(&#x25A0;<FONT POINT-SIZE="10">)" << type << R"(: )" << filt.parameter_at(i).name() << R"(</FONT><BR/>)";
 
 			}
 		}
@@ -107,7 +107,6 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 			std::string output_id = uid_pool_.uid(filt.output_at(i), "out");
 			std::string output_name = "out";
 			if(! filt.output_at(i).name().empty()) output_name = filt.output_at(i).name();
-
 
 			html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << output_id << R"(">)";
 			html << R"(<FONT POINT-SIZE="10">)" << output_name << R"(</FONT>)";
