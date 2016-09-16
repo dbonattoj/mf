@@ -62,6 +62,13 @@ public:
 	// TODO offset
 };
 
+/*
+policies:
+- animation -->  t |--> clocktime
+- realtime
+- still
+*/
+
 }}
 
 #endif
