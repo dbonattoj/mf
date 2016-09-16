@@ -49,14 +49,14 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			
 			pass1.input.connect(source.output);
 			pass1.set_name("param orig");
-			auto& par = pass1.add_param(false);
+			auto& par = pass1.add_param();
 			par.set_constant_value("value");
 			par.set_name("par");
 	
 			pass2.input.connect(pass1.output);
 			pass2.set_name("param dest");
-			auto& e_par = pass2.add_input_extern_param(false);
-			e_par.link(par);
+			auto& e_par = pass2.add_param();
+			e_par.set_reference(par);
 			
 			pass2.set_expected_value(e_par, "value");
 			
@@ -74,7 +74,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			
 			pass1.input.connect(source.output);
 			pass1.set_name("param orig");
-			auto& par = pass1.add_param(false);
+			auto& par = pass1.add_param();
 			par.set_value_function([](time_unit t)->std::string {
 				return std::to_string(t);
 			});
@@ -82,8 +82,8 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 	
 			pass2.input.connect(pass1.output);
 			pass2.set_name("param dest");
-			auto& e_par = pass2.add_input_extern_param(true);
-			e_par.link(par);
+			auto& e_par = pass2.add_param();
+			e_par.set_reference(par);
 			
 			sink.input.connect(pass2.output);
 			
@@ -92,7 +92,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		}
 	}
 
-
+/*
 	SECTION("dynamic") {
 		SECTION("simple input") {
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
@@ -285,9 +285,8 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 			gr.setup();
 			gr.run();
 		}
-return;
-
 	}
+*/
 }
 
 

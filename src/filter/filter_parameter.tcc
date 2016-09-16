@@ -20,130 +20,123 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "filter.h"
 #include "filter_graph.h"
-#include "../flow/node.h"
-#include "../flow/parameter/node_parameter_value.h"
 
 namespace mf { namespace flow {
 
 template<typename Value>
-filter_parameter<Value>::filter_parameter(filter& filt) :
-	filter_(filt)
+filter_parameter<Value>::filter_parameter(filter& filt, const std::string& name) :
+	filter_(filt),
+	name_(name)
 {
 	filter_.register_parameter(*this);
-}
-
-template<typename Value>
-bool filter_parameter<Value>::is_deterministic() const {
-	return value_function_ ? true : false;
+	set_undefined_();
 }
 
 
 template<typename Value>
-bool filter_parameter<Value>::is_dynamic() const {
-	return value_function_ ? false : true;
-}
-
-
-
-template<typename Value>
-void filter_parameter<Value>::set_mirror(const filter_parameter& other_par) {
-	value_function_ = [&other_par](time_unit t) -> Value { return other_par.deterministic_value(t); };
-}
-
-
-template<typename Value> template<typename Function>
-void filter_parameter<Value>::set_value_function(Function&& func) {
-	value_function_ = std::forward<Function&&>(func);
+void filter_parameter<Value>::set_undefined_() {
+	kind_ = undefined;
+	input_reference_ = false;
+	sent_reference_ = false;
+	deterministic_value_function_ = nullptr;
+	dynamic_initial_value_.reset();
+	referenced_parameter_ = nullptr;
 }
 
 
 template<typename Value>
-void filter_parameter<Value>::set_constant_value(const Value& val) {
-	value_function_ = [val](time_unit) -> Value { return val; };
+void filter_parameter<Value>::set_constant_value(const Value& value) {
+	set_undefined_();
+	kind_ = deterministic;
+	deterministic_value_function_ = [value](time_unit) -> Value { return value; };
+}
+
+
+template<typename Value>
+void filter_parameter<Value>::set_value_function(deterministic_value_function func) {
+	set_undefined_();
+	kind_ = deterministic;
+	deterministic_value_function_ = func;
 }
 
 
 template<typename Value>
 void filter_parameter<Value>::set_dynamic(const Value& initial_value) {
-	value_function_ = nullptr;
+	set_undefined_();
+	kind_ = dynamic;
 	dynamic_initial_value_.reset(new Value(initial_value));
 }
 
 
 template<typename Value>
+void filter_parameter<Value>::set_reference(const filter_parameter& ref_param, bool input, bool sent) {
+	set_undefined_();
+	kind_ = reference;
+	referenced_parameter_ = &ref_param; // TODO verify that ref_param.filter precedes this_filter
+	input_reference_ = input;
+	sent_reference_ = sent;
+}
+
+	
+template<typename Value>
 const Value& filter_parameter<Value>::dynamic_initial_value() const {
-	Assert(is_dynamic());
+	Assert(kind() == dynamic);
 	return *dynamic_initial_value_;
 }
 
 
 template<typename Value>
-bool filter_parameter<Value>::was_installed() const {
-	return (id_ != undefined_node_parameter_id);
-}
-
-
-template<typename Value>
-void filter_parameter<Value>::install(filter_graph& gr, node& nd) {
-	if(was_installed()) return;
-	id_ = gr.new_node_parameter_id();
-	if(is_dynamic()) {
-		node_parameter& par = nd.add_parameter(id_, *dynamic_initial_value_);
-		par.set_name(name_);
-	}
-}
-
-
-template<typename Value>
 Value filter_parameter<Value>::deterministic_value(time_unit t) const {
-	Assert(is_deterministic());
-	return value_function_(t);
-}
-
-
-///////////////
-
-
-template<typename Value>
-filter_extern_parameter<Value>::filter_extern_parameter(filter& filt, bool input, bool sent) :
-	filter_(filt),
-	linked_parameter_(nullptr),
-	input_(input),
-	sent_(sent)
-{
-	filter_.register_extern_parameter(*this);
+	Assert(kind() == deterministic);
+	return deterministic_value_function_(t);
 }
 
 
 template<typename Value>
-void filter_extern_parameter<Value>::link(parameter_type& param) {
-	// TODO verify that param.filter_ precedes this->filter_ in the filter graph
-	linked_parameter_ = &param;
+auto filter_parameter<Value>::referenced_parameter() const -> const filter_parameter& {
+	Assert(kind() == reference);
+	return *referenced_parameter_;
 }
 
 
 template<typename Value>
-bool filter_extern_parameter<Value>::is_linked() const {
-	return (linked_parameter_ != nullptr);
+bool filter_parameter<Value>::is_input_reference() const {
+	Assert(kind() == reference);
+	return input_reference_;
 }
 
 
 template<typename Value>
-auto filter_extern_parameter<Value>::linked_parameter() const -> const parameter_type& {
-	Assert(is_linked());
-	return *linked_parameter_;
+bool filter_parameter<Value>::is_sent_reference() const {
+	Assert(kind() == reference);
+	return sent_reference_;
 }
 
 
+
 template<typename Value>
-void filter_extern_parameter<Value>::install(filter_graph& gr, node& nd) {
-	Assert(is_linked());
-	if(! linked_parameter().was_installed()) linked_parameter_->install(gr, nd);
-	if(linked_parameter().is_dynamic()) {
-		node_parameter_id id = linked_parameter().id();
-		if(is_input_parameter()) nd.add_input_parameter(id);
-		if(is_sent_parameter()) nd.add_sent_parameter(id);
+void filter_parameter<Value>::install(filter_graph& fg, node& nd) {
+	Assert(! was_installed());
+	Assert(kind() != undefined);
+	
+	if(kind() == dynamic) {
+		id_ = fg.new_node_parameter_id();
+		node_parameter& par = nd.add_parameter(id_, dynamic_initial_value());
+		par.set_name(name_);
+	} else if(kind() == reference) {
+		Assert(referenced_parameter().was_installed()); // TODO order of installation
+		if(referenced_parameter().kind() == dynamic) {
+			node_parameter_id id = referenced_parameter().id();
+			if(input_reference_) nd.add_input_parameter(id);
+			if(sent_reference_) nd.add_sent_parameter(id);
+		} else if(referenced_parameter().kind() == deterministic) {
+			if(sent_reference_) throw invalid_filter_graph("sent filter parameter reference to deterministic invalid");
+		} else {
+			throw invalid_filter_graph("filter parameter reference must be to dynamic or deterministic parameter");
+		}
 	}
+	
+	was_installed_ = true;
 }
 
 

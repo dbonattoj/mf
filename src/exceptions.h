@@ -52,6 +52,7 @@ public:
 MF_DEFINE_EXCEPTION_(invalid_flow_graph, std::logic_error); // TODO remove
 
 MF_DEFINE_EXCEPTION_(invalid_node_graph, std::logic_error);
+MF_DEFINE_EXCEPTION_(invalid_filter_graph, std::logic_error);
 
 MF_DEFINE_EXCEPTION_(failed_assertion, std::runtime_error);
 

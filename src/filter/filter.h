@@ -26,7 +26,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/processing/processing_node_job.h"
 #include "../queue/frame.h"
 #include "filter_edge.h"
-#include "filter_job.h"
 #include <vector>
 #include <memory>
 #include <string>
@@ -41,9 +40,8 @@ class multiplex_node;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
 class filter_parameter_base;
-class filter_extern_parameter_base;
 template<typename Value> class filter_parameter;
-template<typename Value> class filter_extern_parameter;
+class filter_job;
 
 
 /// Filter which performs concrete processing, base class.
@@ -53,7 +51,6 @@ public:
 	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
 	template<std::size_t Dim, typename Elem> using output_type = filter_output<Dim, Elem>;
 	template<typename Value> using parameter_type = filter_parameter<Value>;
-	template<typename Value> using extern_parameter_type = filter_extern_parameter<Value>;
 	using job_type = filter_job;
 	
 	static const std::string default_filter_name;
@@ -66,7 +63,6 @@ protected:
 	std::vector<filter_input_base*> inputs_;
 	std::vector<filter_output_base*> outputs_;
 	std::vector<filter_parameter_base*> parameters_;
-	std::vector<filter_extern_parameter_base*> extern_parameters_;
 
 	bool asynchronous_ = false;
 	time_unit prefetch_duration_ = 0;
@@ -88,7 +84,6 @@ public:
 	void register_input(filter_input_base&);
 	void register_output(filter_output_base&);
 	void register_parameter(filter_parameter_base&);
-	void register_extern_parameter(filter_extern_parameter_base&);
 	
 	std::size_t inputs_count() const { return inputs_.size(); }
 	const filter_input_base& input_at(std::ptrdiff_t i) const { return *inputs_.at(i); }
@@ -96,8 +91,6 @@ public:
 	const filter_output_base& output_at(std::ptrdiff_t i) const { return *outputs_.at(i); }
 	std::size_t parameters_count() const { return parameters_.size(); }
 	const filter_parameter_base& parameter_at(std::ptrdiff_t i) const { return *parameters_.at(i); }
-	std::size_t extern_parameters_count() const { return extern_parameters_.size(); }
-	const filter_extern_parameter_base& extern_parameter_at(std::ptrdiff_t i) const { return *extern_parameters_.at(i); }
 	
 	void set_asynchonous(bool);
 	bool is_asynchonous() const;

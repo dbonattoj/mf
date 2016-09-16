@@ -28,7 +28,6 @@ SECTION("basic") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
-#if 0
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -40,7 +39,6 @@ SECTION("basic") {
 		gr.run();
 		
 		REQUIRE(sink.check());
-
 	}
 
 	SECTION("source --> passthrough --> sink") {
@@ -563,7 +561,6 @@ SECTION("basic") {
 			REQUIRE(sink.check());
 		}
 	}
-#endif	
 
 	SECTION("complex") {
 		flow::filter_graph gr;
@@ -608,21 +605,13 @@ SECTION("basic") {
 			merge2.input2.connect(passthrough3.output);
 			sink.input.connect(merge2.output);
 	
-			gr.setup();
-			
-			flow::processing_timeline timeline(*gr.node_graph_);
-			//gr.node_graph_->set_diagnostic(timeline);
-			
+			gr.setup();			
 			gr.run();
 
-/*			flow::processing_timeline_json_exporter timeline_export(timeline);
-			std::ofstream json("timeline.json");
-			timeline_export.generate(json);
-*/			
 			REQUIRE(sink.check());
 		}
 		
-return;
+
 		SECTION("graph 2") {
 			INFO(R"(
 			source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2 ------------> merge1' -------------> merge2' --> sink 
@@ -664,7 +653,7 @@ return;
 			passthrough2.input.connect(passthrough1.output);
 			merge1.input1.connect(passthrough2.output);			
 			merge3.input1.connect(source1.output);
-			merge3.input2.connect(multiout.output2);
+			merge3.input2.connect(multiout.output1);
 			merge1.input2.connect(merge3.output);
 			merge2.input1.connect(merge1.output);
 			passthrough3.input.connect(source2.output);

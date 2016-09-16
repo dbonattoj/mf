@@ -35,45 +35,31 @@ class parameter_passthrough_filter : public passthrough_filter {
 	
 public:
 	using param_type = parameter_type<std::string>;
-	using extern_param_type = extern_parameter_type<std::string>;
 
 private:
 	std::vector<std::unique_ptr<param_type>> params_;
-	std::vector<std::unique_ptr<extern_param_type>> extern_params_;
 
 	std::vector<param_type*> set_to_t_params_;
-	std::vector<extern_param_type*> verify_is_t_params_;
-	std::vector<extern_param_type*> sent_t_params_;
+	std::vector<param_type*> verify_is_t_params_;
+	std::vector<param_type*> send_t_params_;
 	
-	std::map<const extern_param_type*, std::string> expected_values_;
+	std::map<param_type*, std::string> expected_values_;
 
 public:
 	parameter_passthrough_filter(time_unit past_window, time_unit future_window) :
 		passthrough_filter(past_window, future_window) { }
 
-	param_type& add_param(bool set_to_t) {
+	param_type& add_param() {
 		params_.emplace_back(new param_type(*this));
 		param_type& param = *params_.back();
-		if(set_to_t) set_to_t_params_.push_back(&param);
 		return param;
 	}
 	
-	extern_param_type& add_input_extern_param(bool verify_is_t) {
-		extern_params_.emplace_back(new extern_param_type(*this, verify_is_t, false));
-		extern_param_type& param = *extern_params_.back();
-		if(verify_is_t) verify_is_t_params_.push_back(&param);
-		return param;
-	}
+	void set_to_t(param_type& param) { set_to_t_params_.push_back(&param); }
+	void verify_is_t(param_type& param) { verify_is_t_params_.push_back(&param); }
+	void send_t(param_type& param) { send_t_params_.push_back(&param); }
 	
-	extern_param_type& add_sent_extern_param() {
-		extern_params_.emplace_back(new extern_param_type(*this, false, true));
-		extern_param_type& param = *extern_params_.back();
-		sent_t_params_.push_back(&param);
-		return param;
-	}
-
-	
-	void set_expected_value(const extern_param_type& par, const std::string& val) {
+	void set_expected_value(param_type& par, const std::string& val) {
 		expected_values_[&par] = val;
 	}
 	
@@ -93,17 +79,17 @@ public:
 		for(param_type* par : set_to_t_params_)
 			job.set_param(*par, t_str);
 
-		for(extern_param_type* par : verify_is_t_params_) {
+		for(param_type* par : verify_is_t_params_) {
 			for(time_unit t = start_t; t < end_t; ++t)
-				REQUIRE(job.in(*par, t) == std::to_string(t));
-			REQUIRE(job.in(*par) == t_str);
+				REQUIRE(job.param(*par, t) == std::to_string(t));
+			REQUIRE(job.param(*par) == t_str);
 		}
 		
-		for(extern_param_type* par : sent_t_params_)
+		for(param_type* par : send_t_params_)
 			job.send_param(*par, t_str);
 			
 		for(auto&& pv : expected_values_)
-			REQUIRE(job.in(*pv.first) == pv.second);
+			REQUIRE(job.param(*pv.first) == pv.second);
 	}
 };
 

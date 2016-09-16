@@ -22,7 +22,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_FILTER_PARAMETER_H_
 
 #include <functional>
-#include "../flow/types.h"
+#include <memory>
+#include <string>
 
 namespace mf { namespace flow {
 
@@ -30,125 +31,94 @@ class filter;
 class filter_graph;
 class node;
 
-template<typename Value> class filter_extern_parameter;
 
-
+/// Parameter attached to a filter, abstract base class.
 class filter_parameter_base {
 public:
+	enum kind_type { undefined, deterministic, dynamic, reference };
+	
 	virtual ~filter_parameter_base() = default;
 	virtual const filter& this_filter() const = 0;
 	virtual const std::string& name() const = 0;
+	virtual kind_type kind() const = 0;
+	virtual const filter_parameter_base& referenced_parameter() const = 0;
+	virtual bool is_input_reference() const = 0;
+	virtual bool is_sent_reference() const = 0;
+
+	virtual bool was_installed() const = 0;
 	virtual void install(filter_graph&, node&) = 0;
 };
 
 
-class filter_extern_parameter_base {
-public:
-	virtual ~filter_extern_parameter_base() = default;
-	virtual const filter& this_filter() const = 0;
-	virtual const std::string& name() const = 0;
-	virtual bool is_linked() const = 0;
-	virtual const filter_parameter_base& linked_parameter() const = 0;
-	virtual void install(filter_graph&, node&) = 0;
-	virtual bool is_input_parameter() const = 0;
-	virtual bool is_sent_parameter() const = 0;
-};
-
-
-/// Parameter of type \a Value belonging to a filter.
-/** The filter that the parameter belongs to is called the _owning_ filter. Can be either _deterministic_ or _dynamic_.
- ** Deterministic parameters have either a constant value, or a be computed in function of the frame index (animation).
- ** Dynamic parameters are updated by the node(s) during execution. They can be updated by the owning filter during
- ** pre-process or process. They can also be updated by a linked \ref filter_extern_parameter from another filter with
- ** send access. */
+/// Parameter attached to a filter.
+/** The parameter carries a value of type \a Value, which may change during the execution of the graph.
+ ** The filter can retrieve the value of its parameters (and set/send the value if applicable) during processing,
+ ** through the \ref filter_job object.
+ ** Must be set (before filter graph is set up) to one of three possible parameter kinds:
+ ** - __Deterministic__: Carries either a constant value set via set_constant_value(), or a value computed in function
+ **                      of the current time `t`, set be passing a function to set_value_function().
+ ** - __Dynamic__: Its value is determined at runtime. The filter can set the values of its dynamic parameters.
+ **                Set using set_dynamic(), with optional initial value.
+ ** - __Reference__: Allows access to another filter's parameter. The referenced filter must _precede_ this filter in
+ **                  the filter graph.
+ **                  If the referenced parameter is deterministic, it simply computes the value the same way as for an
+ **                  own deterministic parameter.
+ **                  If the referenced parameter is dynamic, _input_ and/or _sent_ references are possible.
+ **                  With an input reference, the referenced parameter's value is attached to each frame and propagated
+ **                  down the internal node graph. The filter can access, for each frame, the value which the
+ **                  referenced parameter had at the moment when the frame got processed by its owning filter.
+ **                  With a sent reference, the filter can _send_ a new value to the referenced parameter. The owning
+ **                  filter will then process its next frames with the last value it received for the parameter.
+ **                  It is not specified when this filter starts to receive frames with that sent parameter value on
+ **                  its inputs. */
 template<typename Value>
 class filter_parameter : public filter_parameter_base {
 public:
 	using value_type = Value;
-	using extern_parameter_type = filter_extern_parameter<Value>;
-	using deterministic_value_function = Value(time_unit);
-
+	using deterministic_value_function = std::function<Value(time_unit)>;
+	
 private:
 	filter& filter_;
-	node_parameter_id id_ = undefined_node_parameter_id;
-	std::function<deterministic_value_function> value_function_;
+	kind_type kind_ = undefined;
+	bool input_reference_;
+	bool sent_reference_;
+	deterministic_value_function deterministic_value_function_;
 	std::unique_ptr<Value> dynamic_initial_value_;
-
+	const filter_parameter* referenced_parameter_ = nullptr;
 	std::string name_;
+
+	bool was_installed_ = false;
+	node_parameter_id id_ = undefined_node_parameter_id;
 
 	filter_parameter(const filter_parameter&) = delete;
 	filter_parameter& operator=(const filter_parameter&) = delete;
 
+	void set_undefined_();
+
 public:
-	explicit filter_parameter(filter&);
+	explicit filter_parameter(filter&, const std::string& name = "");
 	
 	const filter& this_filter() const override { return filter_; }
+	
+	void set_name(const std::string& nm) { name_ = nm; }
+	const std::string& name() const override { return name_; }
+	
+	kind_type kind() const override { return kind_; }
+	void set_constant_value(const Value&);
+	void set_value_function(deterministic_value_function);
+	void set_dynamic(const Value& initial_value = Value());
+	void set_reference(const filter_parameter&, bool input = true, bool sent = false);
+		
+	const Value& dynamic_initial_value() const;
+	Value deterministic_value(time_unit t) const;
+	const filter_parameter& referenced_parameter() const override;
+	bool is_input_reference() const override;
+	bool is_sent_reference() const override;
 	
 	node_parameter_id id() const { return id_; }
-	bool is_deterministic() const;
-	bool is_dynamic() const;
-
-	template<typename Function> void set_value_function(Function&& func);
-	void set_constant_value(const Value&);
-	void set_dynamic(const Value& initial_value = Value());
-	void set_mirror(const filter_parameter&);
 	
-	const Value& dynamic_initial_value() const;
-	
-	
-	Value deterministic_value(time_unit t) const;
-	
-	void set_name(const std::string& nm) { name_ = nm; }
-	const std::string& name() const override { return name_; }
-	
-	bool was_installed() const;
-	void install(filter_graph&, node&);
-};
-
-
-/// Link to a parameter of type \a Value belonging to another filter.
-/** Must be added to filter if it is going to access the linked parameter of the other filter. Must be linked to a
- ** \ref filter_parameter of the same value type, on a _preceding_ node in the filter graph.
- ** When the linked parameter is deterministic, it can only be used to get/compute its value the same way as directly
- ** from the owning filter.
- ** When the linked parameter is dynamic, two kinds of access are possible:
- ** - __Input__: The filter receives the value of the parameter along with the input frames. The value which the
- **   parameter had when its owning node processed a frame is propagated along with each frame. For inputs with time
- **   windows, the values for each of the past/future frames can be retrieved.
- ** - __Sent__: The filter can send a new value to the parameter. The owning filter will use the last new value that was
- **   sent to it when processing the next frame. */
-template<typename Value>
-class filter_extern_parameter : public filter_extern_parameter_base {
-public:
-	using value_type = Value;
-	using parameter_type = filter_parameter<Value>;
-
-private:
-	filter& filter_;
-	parameter_type* linked_parameter_ = nullptr;
-	bool input_;
-	bool sent_;
-	std::string name_;
-
-	filter_extern_parameter(const filter_extern_parameter&) = delete;
-	filter_extern_parameter& operator=(const filter_extern_parameter&) = delete;
-
-public:
-	filter_extern_parameter(filter&, bool input = true, bool sent = false);
-	
-	const filter& this_filter() const override { return filter_; }
-	
-	void link(parameter_type&);
-	bool is_linked() const override;
-	const parameter_type& linked_parameter() const override;
-	
-	bool is_input_parameter() const override { return input_; }
-	bool is_sent_parameter() const override { return sent_; }
-	
-	void set_name(const std::string& nm) { name_ = nm; }
-	const std::string& name() const override { return name_; }
-	
-	void install(filter_graph&, node&);
+	bool was_installed() const override { return was_installed_; }
+	void install(filter_graph&, node&) override;
 };
 
 }}

@@ -28,7 +28,6 @@ namespace mf { namespace flow {
 template<std::size_t Dim, typename Elem> class filter_input;
 template<std::size_t Dim, typename Elem> class filter_output;
 template<typename Value> class filter_parameter;
-template<typename Value> class filter_extern_parameter;
 
 class filter_job {
 private:
@@ -60,30 +59,27 @@ public:
 	///@}
 
 	
-	/// Access own parameters.
+	/// Access parameters (own & input reference)
 	///@{
 	template<typename Value>
 	Value param(const filter_parameter<Value>&);
+
+	template<typename Value>
+	Value param(const filter_parameter<Value>&, time_unit t);	
+	///@}
 	
+	
+	/// Set own parameters.
+	///@{
 	template<typename Value>
 	void set_param(const filter_parameter<Value>&, const Value&);
 	///@}
 	
 	
-	/// Receive extern parameters.
+	/// Send reference parameters.
 	///@{
 	template<typename Value>
-	Value in(const filter_extern_parameter<Value>&);
-	
-	template<typename Value>
-	Value in(const filter_extern_parameter<Value>&, time_unit t);
-	///@}
-	
-	
-	/// Send extern parameters.
-	///@{
-	template<typename Value>
-	void send_param(const filter_extern_parameter<Value>&, const Value&);
+	void send_param(const filter_parameter<Value>&, const Value&);
 	///@}
 };
 

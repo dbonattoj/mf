@@ -28,6 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/common.h>
 #include <mf/filter/filter_graph.h>
 #include <mf/filter/filter.h>
+#include <mf/filter/filter_job.h>
 #include <mf/nd/ndcoord.h>
 #include <mf/utility/string.h>
 #include "ndarray.h"

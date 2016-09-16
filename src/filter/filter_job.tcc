@@ -18,6 +18,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include "filter_parameter.h"
+
 namespace mf { namespace flow {
 
 template<std::size_t Dim, typename Elem>
@@ -61,49 +63,48 @@ ndarray_view<Dim, Elem> filter_job::out(filter_output<Dim, Elem>& pt) {
 
 
 template<typename Value>
-Value filter_job::in(const filter_extern_parameter<Value>& extern_param) {
-	return in(extern_param, time());
-}
-
-
-template<typename Value>
-Value filter_job::in(const filter_extern_parameter<Value>& extern_param, time_unit t) {
-	if(extern_param.linked_parameter().is_deterministic()) {
-		return extern_param.linked_parameter().deterministic_value(t);
-	} else {
-		// TODO handle not availble
-		const node_parameter_value& value = node_job_.input_parameter(extern_param.linked_parameter().id(), t);
+Value filter_job::param(const filter_parameter<Value>& par) {
+	if(par.kind() == filter_parameter_base::dynamic) {
+		const node_parameter_value& value = node_job_.parameter(par.id());
 		return value.get<Value>();
+	} else {
+		return param(par, time());
 	}
 }
 
 
-// TODO allow returning deterministic by reference
-
 template<typename Value>
-Value filter_job::param(const filter_parameter<Value>& param) {
-	// read parameter of this node
-	if(param.is_deterministic()) {
-		return param.deterministic_value(time());
-	} else {
-		Assert(node_job_.has_parameter(param.id()));
-		const node_parameter_value& value = node_job_.parameter(param.id());
-		return value.get<Value>();
+Value filter_job::param(const filter_parameter<Value>& param, time_unit t) {
+	if(param.kind() == filter_parameter_base::deterministic) {
+		return param.deterministic_value(t);
+	} else if(param.kind() == filter_parameter_base::reference) {
+		const filter_parameter<Value>& ref_param = param.referenced_parameter();
+		if(ref_param.kind() == filter_parameter_base::deterministic) {
+			return ref_param.deterministic_value(t);
+		} else if(ref_param.kind() == filter_parameter_base::dynamic) {
+			// TODO handle not availble
+			const node_parameter_value& value = node_job_.input_parameter(ref_param.id(), t);
+			return value.get<Value>();
+		}
 	}
+	throw std::logic_error("invalid parameter kind");
 }
 
 
 template<typename Value>
 void filter_job::set_param(const filter_parameter<Value>& param, const Value& new_value) {
-	Assert(param.is_dynamic());
+	Assert(param.kind() == filter_parameter_base::dynamic);
 	node_parameter_value& val = node_job_.parameter(param.id());
 	val.get<Value>() = new_value;
 }
 
 
 template<typename Value>
-void filter_job::send_param(const filter_extern_parameter<Value>& extern_param, const Value& new_value) {
-	node_parameter_id id = extern_param.linked_parameter().id();
+void filter_job::send_param(const filter_parameter<Value>& param, const Value& new_value) {
+	Assert(param.kind() == filter_parameter_base::reference);
+	Assert(param.referenced_parameter().kind() == filter_parameter_base::dynamic);
+
+	node_parameter_id id = param.referenced_parameter().id();
 	node_parameter_value new_val(new_value);
 	node_job_.send_parameter(id, new_val);
 }

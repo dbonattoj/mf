@@ -20,6 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "filter.h"
 #include "filter_parameter.h"
+#include "filter_job.h"
 #include "../flow/node_graph.h"
 #include "../flow/node.h"
 #include "../flow/processing/sink_node.h"
@@ -71,12 +72,6 @@ void filter::register_output(filter_output_base& out) {
 void filter::register_parameter(filter_parameter_base& param) {
 	Assert(! was_installed());
 	parameters_.push_back(&param);
-}
-
-
-void filter::register_extern_parameter(filter_extern_parameter_base& extern_param) {
-	Assert(! was_installed());
-	extern_parameters_.push_back(&extern_param);
 }
 
 
@@ -138,7 +133,6 @@ void filter::install(filter_graph& fg, node_graph& gr) {
 	}
 	
 	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
-	for(filter_extern_parameter_base* extern_param : extern_parameters_) extern_param->install(fg, *node_);
 
 	Assert(was_installed());
 }
@@ -158,7 +152,6 @@ void sink_filter::install(filter_graph& fg, node_graph& gr) {
 	for(filter_input_base* in : inputs_) in->install(*node_);
 	
 	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
-	for(filter_extern_parameter_base* extern_param : extern_parameters_) extern_param->install(fg, *node_);
 	
 	Assert(was_installed());
 }
@@ -205,7 +198,6 @@ void source_filter::install(filter_graph& fg, node_graph& gr) {
 	}
 
 	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
-	for(filter_extern_parameter_base* extern_param : extern_parameters_) extern_param->install(fg, *node_);
 
 	Assert(was_installed());
 }

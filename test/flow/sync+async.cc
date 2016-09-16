@@ -25,11 +25,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../support/ndarray.h"
 #include "../support/flow.h"
 
-#include <mf/flow/diagnostic/node_graph_visualization.h>
-#include <mf/flow/diagnostic/processing_timeline.h>
-#include <mf/flow/diagnostic/processing_timeline_json_exporter.h>
-#include <fstream>
-
 using namespace mf;
 using namespace mf::test;
 
@@ -38,9 +33,9 @@ TEST_CASE("flow graph test: seekable, mixed", "[flow][sync+async]") {
 	constexpr bool async2 = true;
 	constexpr bool seekable = true;
 	
-	#include "flow_tests_basic.icc"
-	#include "flow_tests_activation.icc"
-	#include "flow_tests_seek.icc"
+	#include "basic.icc"
+	#include "activation.icc"
+	#include "seek.icc"
 }
 
 TEST_CASE("flow graph test: seekable, mixed alt.", "[flow][async+sync]") {
@@ -48,8 +43,8 @@ TEST_CASE("flow graph test: seekable, mixed alt.", "[flow][async+sync]") {
 	constexpr bool async2 = false;
 	constexpr bool seekable = true;
 
-	#include "flow_tests_basic.icc"
-//	#include "flow_tests_activation.icc"
-//	#include "flow_tests_seek.icc"
+	#include "basic.icc"
+	#include "activation.icc"
+	#include "seek.icc"
 }
 
