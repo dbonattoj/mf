@@ -103,4 +103,11 @@ void pose::invert_orientation() {
 }
 
 
+pose interpolate(const pose& a, const pose& b, real t) {
+	Eigen_vec3 new_position = (1.0-t)*a.position + t*b.position;
+	Eigen_quaternion new_orientation = a.orientation.slerp(t, b.orientation);
+	return pose(new_position, new_orientation);
+}
+
+
 }

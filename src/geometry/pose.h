@@ -91,6 +91,8 @@ public:
 
 std::ostream& operator<<(std::ostream&, const pose&);
 
+pose interpolate(const pose& a, const pose& b, real t);
+
 }
 
 #endif
