@@ -19,6 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "filter_graph.h"
+#include <algorithm>
 
 #include "diagnostic/filter_graph_visualization.h"
 
@@ -40,13 +41,13 @@ node_parameter_id filter_graph::new_node_parameter_id() {
 
 
 void filter_graph::setup() {
-	Expects(! was_setup());
-	node_graph_.reset(new node_graph);
-	for(auto&& filt : filters_) filt->install(*this, *node_graph_);
-	node_graph_->setup();
-
 	export_filter_graph_visualization(*this, "fg.gv");
 
+	Expects(! was_setup());
+	node_graph_.reset(new node_graph);
+	
+	for(auto&& filt : filters_) filt->sink_install(*this, *node_graph_);
+	node_graph_->setup();
 }
 
 

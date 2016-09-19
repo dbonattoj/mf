@@ -108,6 +108,7 @@ public:
 	void set_value_function(deterministic_value_function);
 	void set_dynamic(const Value& initial_value = Value());
 	void set_reference(const filter_parameter&, bool input = true, bool sent = false);
+	void set_sent_reference(const filter_parameter& par) { set_reference(par, false, true); }
 		
 	const Value& dynamic_initial_value() const;
 	Value deterministic_value(time_unit t) const;

@@ -70,9 +70,10 @@ void filter_parameter<Value>::set_dynamic(const Value& initial_value) {
 
 template<typename Value>
 void filter_parameter<Value>::set_reference(const filter_parameter& ref_param, bool input, bool sent) {
+	Assert(ref_param.this_filter().precedes_strict(this_filter()));
 	set_undefined_();
 	kind_ = reference;
-	referenced_parameter_ = &ref_param; // TODO verify that ref_param.filter precedes this_filter
+	referenced_parameter_ = &ref_param;
 	input_reference_ = input;
 	sent_reference_ = sent;
 }

@@ -64,6 +64,8 @@ protected:
 	std::vector<filter_output_base*> outputs_;
 	std::vector<filter_parameter_base*> parameters_;
 
+	bool was_installed_ = false;
+
 	bool asynchronous_ = false;
 	time_unit prefetch_duration_ = 0;
 	
@@ -72,11 +74,17 @@ protected:
 	
 	bool need_multiplex_node_() const;
 	
+	void propagate_install_(filter_graph& fg, node_graph& gr);
+	virtual void install_(filter_graph&, node_graph&);
+
 public:
 	filter() = default;
 	filter(const filter&) = delete;
 	filter& operator=(const filter&) = delete;
 	virtual ~filter() = default;
+
+	bool precedes(const filter&) const;
+	bool precedes_strict(const filter&) const;
 
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
@@ -98,7 +106,7 @@ public:
 	time_unit prefetch_duration() const;
 	
 	bool was_installed() const { return (node_ != nullptr); }
-	virtual void install(filter_graph&, node_graph&);
+	void sink_install(filter_graph& fg, node_graph& gr);
 	
 	void handler_setup(processing_node&) final override;
 	void handler_pre_process(processing_node&, processing_node_job&) final override;
@@ -114,22 +122,23 @@ public:
 
 
 class sink_filter : public filter {
-public:
-	void install(filter_graph&, node_graph&) override;
+protected:
+	void install_(filter_graph&, node_graph&) override;
 };
 
 
 class source_filter : public filter {
 private:
 	node_stream_timing node_stream_timing_;
+
+protected:
+	void install_(filter_graph&, node_graph&) override;
 	
 public:
 	explicit source_filter(bool seekable = false, time_unit stream_duration = -1); // TODO timing define interface
 
 	void define_source_stream_timing(const node_stream_timing&);
 	const node_stream_timing& stream_timing() const noexcept;
-
-	void install(filter_graph&, node_graph&) override;
 };
 
 
@@ -152,6 +161,7 @@ public:
 	virtual void install(processing_node&) = 0;
 	virtual bool is_connected() const = 0;
 	virtual const filter& connected_filter() const = 0;
+	virtual filter& connected_filter() = 0;
 	virtual const filter_output_base& connected_output() const = 0;
 };
 
@@ -234,6 +244,7 @@ public:
 	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
 
 	bool is_connected() const override { return (edge_ != nullptr); }
+	filter& connected_filter() override { return edge_->origin_filter(); }
 	const filter& connected_filter() const override { return edge_->origin_filter(); }
 	const filter_output_base& connected_output() const override { return edge_->origin(); }
 

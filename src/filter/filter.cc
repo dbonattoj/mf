@@ -35,6 +35,38 @@ const std::string filter::default_filter_input_name = "in";
 const std::string filter::default_filter_output_name = "out";
 
 
+void filter::propagate_install_(filter_graph& fg, node_graph& gr) {
+	if(was_installed_) return;
+	
+	for(filter_input_base* in : inputs_) {
+		filter& direct_predecessor = in->connected_filter();
+		direct_predecessor.propagate_install_(fg, gr);
+	}
+	
+	this->install_(fg, gr);
+	
+	was_installed_ = true;
+}
+
+
+bool filter::precedes(const filter& filt) const {
+	if(&filt == this) return true;
+	for(auto&& out : outputs_) for(std::ptrdiff_t edge = 0; edge < out->edges_count(); ++edge) // TODO verify
+		if(out->connected_filter_at_edge(edge).precedes(filt)) return true;
+	return false;
+}
+
+
+
+bool filter::precedes_strict(const filter& filt) const {
+	if(&filt == this) return false;
+	for(auto&& out : outputs_) for(std::ptrdiff_t edge = 0; edge < out->edges_count(); ++edge)
+		if(out->connected_filter_at_edge(edge).precedes(filt)) return true;
+	return false;
+}
+
+
+
 void filter::handler_setup(processing_node& nd) {
 	Assert(&nd == node_);
 	this->setup();
@@ -109,7 +141,7 @@ bool filter::need_multiplex_node_() const {
 }
 
 
-void filter::install(filter_graph& fg, node_graph& gr) {
+void filter::install_(filter_graph& fg, node_graph& gr) {
 	Assert(! was_installed());
 	if(asynchronous_) {
 		async_node& nd = gr.add_node<async_node>();
@@ -138,7 +170,7 @@ void filter::install(filter_graph& fg, node_graph& gr) {
 }
 
 
-void sink_filter::install(filter_graph& fg, node_graph& gr) {
+void sink_filter::install_(filter_graph& fg, node_graph& gr) {
 	Assert(! was_installed());
 	Assert(outputs_.size() == 0, "sink filter must have no outputs");
 	Assert(! is_asynchonous(), "sink filter cannot be asynchonous");
@@ -173,7 +205,7 @@ const node_stream_timing& source_filter::stream_timing() const noexcept { return
 
 
 
-void source_filter::install(filter_graph& fg, node_graph& gr) {
+void source_filter::install_(filter_graph& fg, node_graph& gr) {
 	Assert(! was_installed());
 	Assert(inputs_.size() == 0, "source filter must have no inputs");
 
@@ -200,6 +232,11 @@ void source_filter::install(filter_graph& fg, node_graph& gr) {
 	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
 
 	Assert(was_installed());
+}
+
+
+void filter::sink_install(filter_graph& fg, node_graph& gr) {
+	propagate_install_(fg, gr);
 }
 
 

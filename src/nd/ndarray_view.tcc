@@ -99,7 +99,7 @@ template<std::size_t Dim, typename T>
 std::ptrdiff_t ndarray_view<Dim, T>::fix_coordinate_(std::ptrdiff_t c, std::ptrdiff_t dimension) const {
 	std::ptrdiff_t n = shape_[dimension];
 	if(c < 0) c = n + c;
-	if(c >= n) throw std::out_of_range("coordinate is out of range");
+	Assert_crit(c < n, "coordinate is out of range");
 	return c;
 }
 

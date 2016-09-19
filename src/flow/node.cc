@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "node_graph.h"
 #include <limits>
 #include <algorithm>
+#include <set>
 
 namespace mf { namespace flow {
 
@@ -51,12 +52,12 @@ const node& node::first_successor() const {
 	
 	if(outputs_.size() == 1) return outputs_.front()->connected_node();
 	
-	using nodes_vector_type = std::vector<const node*>;
+	using nodes_vector_type = std::set<const node*>;
 	
 	// collect_all_successors(nd, vec): adds ptrs to all successor nodes of `nd` (and also `nd` itself) into `vec`
 	std::function<void(const node&, nodes_vector_type&)> collect_all_successors;
 	collect_all_successors = [&](const node& nd, nodes_vector_type& vec) {
-		vec.push_back(&nd);
+		vec.insert(&nd);
 		for(auto&& out : nd.outputs_) {
 			const node& connected_node = out->connected_node();
 			collect_all_successors(connected_node, vec);
@@ -66,23 +67,21 @@ const node& node::first_successor() const {
 	// common_successors := successors of node connected to first output
 	nodes_vector_type common_successors;
 	collect_all_successors(outputs_.front()->connected_node(), common_successors);
-		
+	
 	// for the other outputs...
 	for(auto it = outputs_.cbegin() + 1; it < outputs_.cend(); ++it) {
 		// out_successors := successors of node connected to output `it`
 		const node& connected_node = (*it)->connected_node();
 		nodes_vector_type out_successors;
-		collect_all_successors(connected_node, out_successors);
+		collect_all_successors(connected_node, out_successors);	
 		
 		// common_successors := intersection(common_successors, out_successors)
 		nodes_vector_type old_common_successors = common_successors;
 		common_successors.clear();
-		std::sort(old_common_successors.begin(), old_common_successors.end());
-		std::sort(out_successors.begin(), out_successors.end());
 		std::set_intersection(
 			old_common_successors.cbegin(), old_common_successors.cend(),
 			out_successors.cbegin(), out_successors.cend(),
-			std::back_inserter(common_successors)
+			std::inserter(common_successors, common_successors.begin())
 		);
 	}
 	Assert(common_successors.size() > 0);
