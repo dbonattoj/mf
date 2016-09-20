@@ -73,6 +73,7 @@ template<typename Output, typename Input>
 Output color_convert(const Input&);
 
 template<> rgb_color color_convert(const ycbcr_color&);
+template<> ycbcr_color color_convert(const rgb_color&);
 
 
 /// Color blend.

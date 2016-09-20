@@ -26,9 +26,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "common.h"
 #include "debug.h"
 
-#define MF_DEFINE_EXCEPTION_(__name__, __base__) \
-	class __name__ : public exception_derived<__base__> { \
-		using base = exception_derived<__base__>; \
+#define MF_DEFINE_EXCEPTION(__name__, __base__) \
+	class __name__ : public ::mf::exception_derived<__base__> { \
+		using base = ::mf::exception_derived<__base__>; \
 	public: \
 		__name__(const std::string& what) : \
 			base(std::string(#__name__) + ": " + what) { } \
@@ -49,15 +49,15 @@ public:
 	}
 };
 	
-MF_DEFINE_EXCEPTION_(invalid_flow_graph, std::logic_error); // TODO remove
+MF_DEFINE_EXCEPTION(invalid_flow_graph, std::logic_error); // TODO remove
 
-MF_DEFINE_EXCEPTION_(invalid_node_graph, std::logic_error);
-MF_DEFINE_EXCEPTION_(invalid_filter_graph, std::logic_error);
+MF_DEFINE_EXCEPTION(invalid_node_graph, std::logic_error);
+MF_DEFINE_EXCEPTION(invalid_filter_graph, std::logic_error);
 
-MF_DEFINE_EXCEPTION_(failed_assertion, std::runtime_error);
+MF_DEFINE_EXCEPTION(failed_assertion, std::runtime_error);
 
-MF_DEFINE_EXCEPTION_(sequencing_error, std::runtime_error);
-MF_DEFINE_EXCEPTION_(ply_importer_error, std::runtime_error);
+MF_DEFINE_EXCEPTION(sequencing_error, std::runtime_error);
+MF_DEFINE_EXCEPTION(ply_importer_error, std::runtime_error);
 
 }
 

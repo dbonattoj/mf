@@ -25,7 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <iostream>
 
 namespace mf {
-/*
+
 template<typename Elem>
 auto raw_video_exporter<Elem>::scaled_component_frame_
 (std::ptrdiff_t component, const frame_view_type& vw) const -> image<component_type> {
@@ -36,21 +36,21 @@ auto raw_video_exporter<Elem>::scaled_component_frame_
 	
 	using componentwise_view_type = ndarray_view<3, const component_type>;
 	ndarray_view<2, const component_type> full_image = ndarray_view_cast<componentwise_view_type>(vw).slice(component, 2);
-	
+		
 	cv::Mat_<component_type> full_image_mat;
 	copy_to_opencv(full_image, full_image_mat);
 	image<component_type> scaled_image(scaled_size);
 	cv::resize(
 		full_image_mat,
 		scaled_image.cv_mat(),
-		cv::Size(scaled_size[0], scaled_size[1]),
+		cv::Size(scaled_size[1], scaled_size[0]),
 		0,
 		0,
 		CV_INTER_AREA
 	);
 	return scaled_image;
 }
-*/
+
 
 template<typename Elem> template<typename T>
 void raw_video_exporter<Elem>::write_raw_(const ndarray_view<2, T>& vw) {
@@ -69,9 +69,8 @@ template<typename Elem>
 void raw_video_exporter<Elem>::write_frame_planar_(const frame_view_type& vw) {
 	for(std::ptrdiff_t component = 0; component < format_.num_components; ++component) {
 		if(format_.component_scale_x[component] != 1 || format_.component_scale_y[component] != 1) {
-			throw 0;
-			//auto img = scaled_component_frame_(component, vw);
-			//write_raw_(img.view());
+			auto img = scaled_component_frame_(component, vw);
+			write_raw_(img.array_view());
 		} else {
 			using componentwise_view_type = ndarray_view<3, const component_type>;
 			auto component_view = ndarray_view_cast<componentwise_view_type>(vw).slice(component, 2);

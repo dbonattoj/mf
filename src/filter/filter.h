@@ -147,7 +147,7 @@ class filter_output_base {
 public:
 	virtual const std::string& name() const = 0;
 	virtual std::size_t edges_count() const = 0;
-	virtual const filter& connected_filter_at_edge(std::ptrdiff_t index) const = 0;
+	virtual filter& connected_filter_at_edge(std::ptrdiff_t index) const = 0;
 	virtual void install(processing_node&) = 0;
 	virtual void install(processing_node&, multiplex_node&) = 0;
 	virtual bool frame_shape_is_defined() const = 0;
@@ -160,9 +160,8 @@ public:
 	virtual const std::string& name() const = 0;
 	virtual void install(processing_node&) = 0;
 	virtual bool is_connected() const = 0;
-	virtual const filter& connected_filter() const = 0;
-	virtual filter& connected_filter() = 0;
-	virtual const filter_output_base& connected_output() const = 0;
+	virtual filter& connected_filter() const = 0;
+	virtual filter_output_base& connected_output() const = 0;
 };
 
 
@@ -202,7 +201,7 @@ public:
 	std::ptrdiff_t index() const { return this_node_output_channel().index(); }
 	
 	std::size_t edges_count() const override { return edges_.size(); }
-	const filter& connected_filter_at_edge(std::ptrdiff_t index) const override
+	filter& connected_filter_at_edge(std::ptrdiff_t index) const override
 		{ return edges_.at(index)->destination_filter(); }
 	void edge_has_connected(edge_base_type&);
 		
@@ -244,9 +243,8 @@ public:
 	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
 
 	bool is_connected() const override { return (edge_ != nullptr); }
-	filter& connected_filter() override { return edge_->origin_filter(); }
-	const filter& connected_filter() const override { return edge_->origin_filter(); }
-	const filter_output_base& connected_output() const override { return edge_->origin(); }
+	filter& connected_filter() const override { return edge_->origin_filter(); }
+	filter_output_base& connected_output() const override { return edge_->origin(); }
 
 	filter& this_filter() { return filter_; }
 	const filter& this_filter() const { return filter_; }

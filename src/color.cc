@@ -43,6 +43,20 @@ rgb_color color_convert(const ycbcr_color& in) {
 }
 
 
+template<>
+ycbcr_color color_convert(const rgb_color& in) {
+	real r = static_cast<real>(in.r);
+	real g = static_cast<real>(in.g);
+	real b = static_cast<real>(in.b);
+
+	real y  = clamp( 0.29900 * r + 0.58700 * g + 0.11400 * b        , 0.0, 255.0);
+	real cb = clamp(-0.16874 * r - 0.33126 * g + 0.50000 * b + 128.0, 0.0, 255.0);
+	real cr = clamp( 0.50000 * r - 0.41869 * g - 0.08131 * b + 128.0, 0.0, 255.0);
+
+	return ycbcr_color(static_cast<std::uint8_t>(y), static_cast<std::uint8_t>(cb), static_cast<std::uint8_t>(cr));
+}
+
+
 rgb_color color_blend(const rgb_color& a, const rgb_color& b) {
 	// TODO generalize to similar operations, use SIMD
 	using sum_type = std::int_fast16_t;
