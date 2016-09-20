@@ -71,6 +71,12 @@ public:
 	cv_mask_mat_qualified_type& cv_mask_mat() const { return mask_mat_; }
 };
 
+
+template<typename Pixel, typename Mask>
+masked_image_view<Pixel, Mask> make_masked_image_view(const ndarray_view<2, Pixel>& vw, const ndarray_view<2, Mask>& mask_vw) {
+	return masked_image_view<Pixel, Mask>(vw, mask_vw);
+}
+
 }
 
 #include "masked_image_view.tcc"

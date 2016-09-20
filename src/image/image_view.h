@@ -68,6 +68,12 @@ public:
 };
 
 
+template<typename Pixel>
+image_view<Pixel> make_image_view(const ndarray_view<2, Pixel>& vw) {
+	return image_view<Pixel>(vw);
+}
+
+
 }
 
 #include "image_view.tcc"

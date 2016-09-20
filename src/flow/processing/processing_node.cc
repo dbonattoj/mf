@@ -109,7 +109,14 @@ void processing_node::handler_process_(processing_node_job& job) {
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_started(*this, job.time());
 	
-	handler_->handler_process(*this, job);
+	bool succeeded;
+	try {
+		handler_->handler_process(*this, job);
+		succeeded = true;
+	} catch(...) {
+		succeeded = false;
+		std::cerr << "ERROR IN NODE " << name() << std::endl;
+	}
 
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_finished(*this, job.time());

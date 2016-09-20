@@ -65,4 +65,24 @@ std::string to_upper(const std::string& s_orig) {
 	return s;
 }
 
+
+std::string replace_all(const std::string& subject_orig, const std::string& find, const std::string& replace) {
+	std::string subject = subject_orig;
+	replace_all_inplace(subject, find, replace);
+	return subject;
+}
+
+
+std::size_t replace_all_inplace(std::string& subject, const std::string& find, const std::string& replace) {
+	std::size_t pos = 0;
+	std::size_t count = 0;
+	while( (pos = subject.find(find, pos)) != std::string::npos ) {
+		subject.replace(pos, find.length(), replace);
+		pos += replace.length();
+		++count;
+	}
+	return count;
+}
+
+
 }

@@ -146,7 +146,7 @@ ndarray_view<Dim, const Elem> to_ndarray_view(const cv::Mat_<Elem>& mat) {
 /** \a vw and the memory if points to must have been created beforehand, and \a vw must have the same shape as \a mat.
  ** `Elem` cannot be a `masked_elem` type. */
 template<std::size_t Dim, typename Elem>
-void copy_to_ndarray_view(const cv::Mat_<Elem>& mat, const ndarray_view<Dim, Elem>& vw) {
+void copy_to_ndarray_view(cv::Mat_<Elem>& mat, const ndarray_view<Dim, Elem>& vw) {
 	ndarray_view<Dim, Elem> tmp_vw = to_ndarray_view<Dim>(mat);
 	if(tmp_vw.shape() != vw.shape()) throw std::invalid_argument("vw in copy_to_ndarray_view has incorrect shape");
 	vw.assign(tmp_vw);

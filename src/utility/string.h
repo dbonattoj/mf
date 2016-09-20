@@ -47,6 +47,9 @@ std::string implode_to_string(char separator, const std::vector<T>&);
 std::string to_lower(const std::string&);
 std::string to_upper(const std::string&);
 
+std::string replace_all(const std::string& subject, const std::string& find, const std::string& replace);
+std::size_t replace_all_inplace(std::string& subject, const std::string& find, const std::string& replace);
+
 }
 
 #include "string.tcc"

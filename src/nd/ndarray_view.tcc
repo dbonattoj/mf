@@ -168,7 +168,7 @@ void ndarray_view<Dim, T>::assign(const ndarray_view<Dim, const T>& other) const
 	
 	Assert_crit(shape() == other.shape(), "ndarray_view must have same shape for assignment");
 	if(shape().product() == 0) return;
-	
+		
 	if(std::is_pod<T>::value && strides() == other.strides() && has_default_strides()) {
 		// optimize when possible
 		const ndarray_format& array_format = format(*this);
