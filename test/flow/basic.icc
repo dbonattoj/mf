@@ -27,7 +27,7 @@ SECTION("basic") {
 	std::size_t last = count - 1;
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
-
+/*
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -90,7 +90,7 @@ SECTION("basic") {
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-
+*/
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 3);
@@ -108,7 +108,7 @@ SECTION("basic") {
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink.check());
 	}
-
+return;
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2' --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);

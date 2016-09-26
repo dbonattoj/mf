@@ -34,6 +34,6 @@ constexpr bool seekable = true;
 
 TEST_CASE("flow graph test: seekable, sync", "[flow][sync]") {
 	#include "basic.icc"
-	#include "activation.icc"
-	#include "seek.icc"
+//	#include "activation.icc"
+//	#include "seek.icc"
 }
