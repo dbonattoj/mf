@@ -58,6 +58,16 @@ public:
 	ndarray_view<Dim, Elem> out(filter_output<Dim, Elem>&);
 	///@}
 
+
+	/// De-activate inputs.
+	///@{
+	void set_activated(filter_input_base&, bool activated);
+	bool is_activated(const filter_input_base&);
+	
+	void activate(filter_input_base& in) { set_activated(in, true); }
+	void deactivate(filter_input_base& in) { set_activated(in, false); }
+	///@}
+	
 	
 	/// Access parameters (own & input reference)
 	///@{

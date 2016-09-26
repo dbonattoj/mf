@@ -160,8 +160,7 @@ bool multiplex_node::outputs_on_different_threads_() const {
 	for(std::ptrdiff_t i = 1; i < outputs_count(); ++i)
 		if(output_at(i).reader_thread_index() != first_output_reader_index) return true;
 	
-	if(input().connected_node().name() == "0 image refine") return true;
-	if(input().connected_node().name() == "1 image refine") return true;
+	if(input().connected_node().name().substr(2) == "image refine") return true;
 	
 	return false;
 }

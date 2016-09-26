@@ -78,6 +78,17 @@ void processing_node_job::detach_output_view() {
 }
 
 
+void processing_node_job::set_input_activated(input_index_type index, bool activated) {
+	node_.input_at(index).set_activated(activated);
+}
+
+
+bool processing_node_job::is_input_activated(input_index_type index) {
+	return node_.input_at(index).is_activated();
+}
+
+
+
 bool processing_node_job::has_input_view(input_index_type index) const noexcept {
 	return ! input_views_.at(index).is_null();
 }

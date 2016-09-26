@@ -22,9 +22,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_EXPORTER_FILTER_H_
 
 #include <utility>
-#include "filter.h"
-#include "filter_job.h"
-#include "../io/frame_exporter.h"
+#include "../filter.h"
+#include "../filter_job.h"
+#include "../../io/frame_exporter.h"
 
 namespace mf { namespace flow {
 

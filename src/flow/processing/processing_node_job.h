@@ -86,6 +86,12 @@ public:
 	const node_frame_view& output_view() const;
 	///@}
 	
+	/// De-activate inputs
+	///@{
+	void set_input_activated(input_index_type, bool activated);
+	bool is_input_activated(input_index_type);
+	///@}
+	
 	/// Access to node parameters.
 	///@{
 	bool has_parameter(node_parameter_id) const;

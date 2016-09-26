@@ -37,6 +37,8 @@ class filter_input_base;
 template<std::size_t Output_dim, typename Output_elem> class filter_output;
 template<std::size_t Input_dim, typename Input_elem> class filter_input;
 
+/// Edge in filter graph, base class for input.
+/** Templated for concrete frame type of destination filter's input port. */
 template<std::size_t Input_dim, typename Input_elem>
 class filter_edge_input_base {
 public:
@@ -46,14 +48,17 @@ public:
 
 	virtual filter_output_base& origin() const = 0;
 	virtual filter& origin_filter() const = 0;
-	virtual void set_node_input(node_input&) = 0;
 	virtual const input_frame_shape_type& input_frame_shape() const = 0;
-		
+//	virtual void set_node_input(node_input&) = 0;
+	
+	virtual std::ptrdiff_t node_input_index() const = 0;
+	
 	virtual input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const = 0;
 };
 
 
-
+/// Edge in filter graph, base class for output.
+/** Templated for concrete frame type of source filter's output port. */
 template<std::size_t Output_dim, typename Output_elem>
 class filter_edge_output_base {
 public:
@@ -62,13 +67,24 @@ public:
 	
 	virtual filter_input_base& destination() const = 0;
 	virtual filter& destination_filter() const = 0;
-	virtual void set_node_output(node_output&, std::ptrdiff_t channel_index) = 0;
+//	virtual void set_node_output(node_output&, std::ptrdiff_t channel_index) = 0;
+
 	virtual std::ptrdiff_t node_output_channel_index() const = 0;
 };
 
 
 /// Edge in filter graph.
-/** Connects output of *origin filter* (type Output_elem) to input of *destination filter* (type Input_elem). */
+/** Connects output of *origin filter* (type `Output_elem`) to input of *destination filter* (type `Input_elem`).
+ ** A connected \ref filter_input owns one \ref filter_edge. A connected \ref filter_output references one of multiple
+ ** \ref filter_edge.
+ ** Instantiated as one of its two non-abstract subclasses \ref filter_direct_edge or \ref filter_converting_edge,
+ ** where the latter will insert an additional processing node in the node graph for element-wise conversion.
+ ** The ndarray of element type `Output_elem` from the output is first *casted* to an ndarray of element type
+ ** `Casted_elem`, without copying data. For example `elem_tuple<rgb_color, float>` to `rgb_color`.
+ ** For \ref filter_direct_edge, this casted ndarray is passed to the destination filter input, and
+ ** `Input_elem == Casted_elem`.
+ ** For \ref filter_converting_edge it is converted, to an ndarray of element type `Input_elem`, and this new ndarray
+ ** is passed to the destination filter. */
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem>
 class filter_edge :
 	public filter_edge_input_base<Dim, Input_elem>,
@@ -90,12 +106,15 @@ private:
 	input_type& input_;
 	output_type& output_;
 	
-	node_input* node_input_ = nullptr; // TODO remove reference to nodes (allow filter edge == multiple node edges)
-	node_output* node_output_ = nullptr;
 	std::ptrdiff_t node_output_channel_index_ = -1;
+	std::ptrdiff_t node_input_index_ = -1;
 	
-	bool is_connected_() const noexcept { return (node_input_ != nullptr) && (node_output_ != nullptr); }
+	/*node_input* node_input_ = nullptr; // TODO remove reference to nodes (allow filter edge == multiple node edges)
+	node_output* node_output_ = nullptr;
 	
+	std::ptrdiff_t node_output_channel_index_ = -1;*/
+	
+		
 protected:		
 	filter_edge(input_type& in, output_type& out) :
 		input_(in), output_(out) { }
@@ -104,30 +123,29 @@ protected:
 	
 	casted_full_view_type output_view_to_casted_view_(const timed_frame_array_view& generic_output_view) const;
 	
-	virtual void install_(node_graph&) = 0;
+	virtual void install_(node_graph&, node_input&, node_output&) = 0;
 
 public:	
 	virtual ~filter_edge() = default;
-
-	void set_node_input(node_input& in) override;
-	void set_node_output(node_output& out, std::ptrdiff_t channel_index) override;
 	
 	output_type& origin() const override { return output_; }
 	filter& origin_filter() const override { return output_.this_filter(); }
 	input_type& destination() const override { return input_; }	
 	filter& destination_filter() const override { return input_.this_filter(); }
 	
-	// TODO remove.....
-	node_graph& this_node_graph();
-	node_input& this_node_input() { Assert(node_input_ != nullptr); return *node_input_; }
-	const node_input& this_node_input() const { Assert(node_input_ != nullptr); return *node_input_; }
-	node_output& this_node_output() { Assert(node_output_ != nullptr); return *node_output_; }
-	const node_output& this_node_output() const { Assert(node_output_ != nullptr); return *node_output_; }
-	std::ptrdiff_t node_output_channel_index() const override
-		{ Assert(node_output_ != nullptr); return node_output_channel_index_; }
-
 	const input_frame_shape_type& input_frame_shape() const override { return output_.frame_shape(); }
 	const output_frame_shape_type& output_frame_shape() const { return output_.frame_shape(); }
+
+	
+	std::ptrdiff_t node_output_channel_index_() const override { return node_output_channel_index_; }
+	std::ptrdiff_t node_input_index() const override { return node_input_index_; }
+	
+	
+	// TODO remove.....
+	void set_node_input(node_input& in) override;
+	void set_node_output(node_output& out, std::ptrdiff_t channel_index) override;
+
+
 };
 
 
@@ -156,7 +174,7 @@ public:
 	using typename base::output_frame_shape_type;
 
 protected:
-	void install_(node_graph&) override;
+	void install_(node_graph&, node_input&, node_output&) override;
 
 public:
 	filter_direct_edge(input_type& in, output_type& out) :
@@ -166,9 +184,9 @@ public:
 };
 
 
-// TODO allow one filter edge for multiple node edges
-
 /// Edge in filter graph with conversion.
+/** Inserts intermediary \ref sync_node into the node graph which does element-wise conversion of the ndarray from
+ ** `Casted_elem` to `Input_elem`. The function object of type `Convert_function` is called on each element. */
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 class filter_converting_edge final :
 	public filter_edge<Dim, Output_elem, Casted_elem, Input_elem>,
@@ -201,8 +219,6 @@ public:
 	
 private:
 	Convert_function convert_function_;
-	sync_node* convert_node_ = nullptr;
-	sync_node::output_channel_type* convert_node_output_channel_ = nullptr; 
 
 protected:
 	void install_(node_graph&) override;

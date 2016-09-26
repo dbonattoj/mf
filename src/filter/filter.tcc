@@ -41,20 +41,25 @@ void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& 
 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
+	if(edges_count() == 0) return;
+	
 	Assert(edges_count() == 1, "multiplex node is required because filter output has multiple edges");
 		
-	node_output_channel_ = &nd.add_output_channel();
-	node_output_channel_->set_name(name_.empty() ? filter::default_filter_output_name : name_);
-	std::ptrdiff_t channel_index = node_output_channel_->index();
+	processing_node_output_channel& out_ch = nd.add_output_channel();
+	out_ch.set_name(name_.empty() ? filter::default_filter_output_name : name_);
+	channel_index_ = out_ch.index();
 
 	for(edge_base_type* edge : edges_) {
-		edge->set_node_output(nd.output(), channel_index);
+		edge->set_node_output(nd.output(), channel_index_);
 	}
 }
 
 
 template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multiplex_node& mpx_nd) {
+	if(edges_count() == 0) return;
+	
+	
 	node_output_channel_ = &nd.add_output_channel();
 	node_output_channel_->set_name(name_.empty() ? filter::default_filter_output_name : name_);
 	std::ptrdiff_t channel_index = node_output_channel_->index();
@@ -113,31 +118,32 @@ filter_input<Input_dim, Input_elem>::filter_input(filter& filt, time_unit past_w
 
 
 template<std::size_t Input_dim, typename Input_elem>
+filter_input<Input_dim, Input_elem>::filter_input(filter& filt, const std::string& name) :
+	filter_(filt)
+{
+	filter_.register_input(*this);
+	set_name(name);
+}
+
+
+template<std::size_t Input_dim, typename Input_elem>
 void filter_input<Input_dim, Input_elem>::install(processing_node& nd) {
-	node_input_ = &nd.add_input();
-	node_input_->set_name(name_.empty() ? filter::default_filter_input_name : name_);
-	node_input_->set_past_window(past_window_);
-	node_input_->set_future_window(future_window_);
+	if(is_connected()) {
+		node_input& nd_in = nd.add_input();
+		nd_in.set_name(name_.empty() ? filter::default_filter_input_name : name_);
+		nd_in.set_past_window(past_window_);
+		nd_in.set_future_window(future_window_);
 	
-	edge_->set_node_input(*node_input_);
+		index_ = nd_in.index();
+	
+		edge_->set_node_input(nd_in);
+	}
 }
 
 
 template<std::size_t Input_dim, typename Input_elem>
 auto filter_input<Input_dim, Input_elem>::frame_shape() const -> const frame_shape_type& {
 	return edge_->input_frame_shape();
-}
-
-	
-template<std::size_t Input_dim, typename Input_elem>
-void filter_input<Input_dim, Input_elem>::set_activated(bool act) {
-	node_input_->set_activated(act);
-}
-
-
-template<std::size_t Input_dim, typename Input_elem>
-bool filter_input<Input_dim, Input_elem>::is_activated() {
-	return node_input_->is_activated();
 }
 
 

@@ -69,13 +69,18 @@ protected:
 	bool asynchronous_ = false;
 	time_unit prefetch_duration_ = 0;
 	
-	processing_node* node_ = nullptr;
-	multiplex_node* multiplex_node_ = nullptr;
+	std::size_t parallelization_factor_ = 1; // TODO
+	
+	//processing_node* node_ = nullptr;
+	//multiplex_node* multiplex_node_ = nullptr;
 	
 	bool need_multiplex_node_() const;
 	
 	void propagate_install_(filter_graph& fg, node_graph& gr);
 	virtual void install_(filter_graph&, node_graph&);
+
+	using local_nodes_map = std::map<const filter*, node*>;
+	void propagate_install_(filter_graph& fg, node& succeeding_node);
 
 public:
 	filter() = default;
@@ -83,8 +88,11 @@ public:
 	filter& operator=(const filter&) = delete;
 	virtual ~filter() = default;
 
+	/// Graph algorithms.
+	///@{
 	bool precedes(const filter&) const;
 	bool precedes_strict(const filter&) const;
+	///@}
 
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
@@ -121,6 +129,7 @@ public:
 };
 
 
+/*
 class sink_filter : public filter {
 protected:
 	void install_(filter_graph&, node_graph&) override;
@@ -140,6 +149,7 @@ public:
 	void define_source_stream_timing(const node_stream_timing&);
 	const node_stream_timing& stream_timing() const noexcept;
 };
+*/
 
 
 /// Output port of filter, abstract base class.
@@ -180,8 +190,10 @@ public:
 private:
 	filter& filter_;
 	std::string name_;
+	
 	std::vector<edge_base_type*> edges_;
-	processing_node_output_channel* node_output_channel_ = nullptr;
+	
+	std::ptrdiff_t channel_index_ = -1;
 	
 	frame_shape_type frame_shape_;	
 
@@ -194,18 +206,13 @@ public:
 	const std::string& name() const override { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
 		
-	processing_node_output_channel& this_node_output_channel()
-		{ Expects(node_output_channel_ != nullptr); return *node_output_channel_; }
-	const processing_node_output_channel& this_node_output_channel() const
-		{ Expects(node_output_channel_ != nullptr); return *node_output_channel_; }
-	std::ptrdiff_t index() const { return this_node_output_channel().index(); }
+	std::ptrdiff_t index() const { return channel_index_; }
 	
 	std::size_t edges_count() const override { return edges_.size(); }
 	filter& connected_filter_at_edge(std::ptrdiff_t index) const override
 		{ return edges_.at(index)->destination_filter(); }
 	void edge_has_connected(edge_base_type&);
 		
-	bool was_installed() const { return (node_output_channel_ != nullptr); }
 	void install(processing_node&) override;
 	void install(processing_node&, multiplex_node&) override;
 
@@ -234,17 +241,14 @@ private:
 	std::string name_;
 	std::unique_ptr<edge_base_type> edge_;
 	
-	processing_node_input* node_input_ = nullptr;
+	std::ptrdiff_t index_ = -1;
 	
 	time_unit past_window_ = 0;
 	time_unit future_window_ = 0;
 
 public:
-	explicit filter_input(filter&, time_unit past_window = 0, time_unit future_window = 0);
-
-	bool is_connected() const override { return (edge_ != nullptr); }
-	filter& connected_filter() const override { return edge_->origin_filter(); }
-	filter_output_base& connected_output() const override { return edge_->origin(); }
+	explicit filter_input(filter&, std::string& name = "");
+	filter_input(filter&, time_unit past_window, time_unit future_window);
 
 	filter& this_filter() { return filter_; }
 	const filter& this_filter() const { return filter_; }
@@ -252,9 +256,14 @@ public:
 	const std::string& name() const override { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
 
-	processing_node_input& this_node_input() { Expects(node_input_ != nullptr); return *node_input_; }
-	const processing_node_input& this_node_input() const { Expects(node_input_ != nullptr); return *node_input_; }
-	std::ptrdiff_t index() const { return this_node_input().index(); }
+	void set_past_window(time_unit dur) { past_window_ = dur; }
+	void set_future_window(time_unit dur) { future_window_ = dur; }
+	time_unit past_window_duration() const { return past_window_; }
+	time_unit future_window_duration() const { return future_window_; }
+
+	bool is_connected() const override { return (edge_ != nullptr); }
+	filter& connected_filter() const override { return edge_->origin_filter(); }
+	filter_output_base& connected_output() const override { return edge_->origin(); }
 	
 	template<std::size_t Output_dim, typename Output_elem>
 	void connect(filter_output<Output_dim, Output_elem>&);
@@ -267,15 +276,9 @@ public:
 	
 	const frame_shape_type& frame_shape() const;
 	
-	bool was_installed() const { return (node_input_ != nullptr); }
 	void install(processing_node&) override;
-	
-	void set_activated(bool);
-	bool is_activated();
-	
-	void activate() { set_activated(true); }
-	void deactivate() { set_activated(false); }
-	
+	std::ptrdiff_t index() const { return index_; }	
+
 	full_view_type get_input_view(const timed_frame_array_view& generic_view);
 };
 

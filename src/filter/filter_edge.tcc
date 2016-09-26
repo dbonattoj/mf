@@ -74,8 +74,8 @@ cast_connected_node_output_view(const timed_frame_array_view& opaque_output_view
 
 
 template<std::size_t Dim, typename Output_elem, typename Input_elem>
-void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(node_graph&) {
-	base::this_node_input().connect( base::this_node_output() );
+void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(node_graph&, node_input& in, node_output& out) {
+	in.connect(out);
 }
 
 
@@ -84,44 +84,42 @@ void filter_direct_edge<Dim, Output_elem, Input_elem>::install_(node_graph&) {
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
-void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::install_(node_graph& gr) {	
-	convert_node_ = &gr.add_node<sync_node>();
-	convert_node_->set_name("convert");
-	convert_node_->set_handler(*this);
-	auto& convert_node_input = convert_node_->add_input();
-	auto& convert_node_output = convert_node_->output();
+void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::install_
+(node_graph& gr, node_input& in, node_output& out) {
+	sync_node& convert_node = gr.add_node<sync_node>();
+	convert_node_.set_name("convert");
+	convert_node_.set_handler(*this);
+	auto& convert_node_input = convert_node_.add_input();
+	auto& convert_node_output = convert_node_.output();
 	convert_node_output_channel_ = &convert_node_->add_output_channel();
-	
+
 	convert_node_input.set_name("in");
 	convert_node_output.set_name("out");
 	convert_node_output_channel_->set_name("out");
-	
-	convert_node_input.connect(base::this_node_output());
-	base::this_node_input().connect(convert_node_output);
+
+	convert_node_input.connect(out);
+	in.connect(convert_node_output);
 }
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
-handler_setup(processing_node& nd) {
-	node_input& convert_node_input = *convert_node_->inputs().front();
-	node_output& convert_node_output = convert_node_->output();
-		
+handler_setup(processing_node& convert_node) {
 	std::size_t elem_count = base::output_frame_shape().product();
 	ndarray_format frame_format = make_ndarray_format<Input_elem>(elem_count);
 	
-	convert_node_output_channel_->define_frame_format(frame_format);
+	convert_node.output_channel_at(0).define_frame_format(frame_format);
 }
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
-handler_pre_process(processing_node& nd, processing_node_job& job) { }
+handler_pre_process(processing_node& convert_node, processing_node_job& job) { }
 
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
-handler_process(processing_node& nd, processing_node_job& job) {
+handler_process(processing_node& convert_node, processing_node_job& job) {
 	auto in = job.input_view(0)[0];
 	const auto& out = job.output_view();
 	

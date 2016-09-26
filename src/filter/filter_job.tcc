@@ -24,6 +24,8 @@ namespace mf { namespace flow {
 
 template<std::size_t Dim, typename Elem>
 ndarray_timed_view<Dim + 1, Elem> filter_job::in_full(filter_input<Dim, Elem>& pt) {
+	Assert(pt.is_connected());
+	
 	std::ptrdiff_t index = pt.index();
 	if(! node_job_.has_input_view(index))
 		return ndarray_timed_view<Dim + 1, Elem>();
@@ -60,6 +62,19 @@ ndarray_view<Dim, Elem> filter_job::out(filter_output<Dim, Elem>& pt) {
 		pt.frame_shape()
 	);
 }
+
+
+inline void set_activated(filter_input_base& in, bool activated) {
+	std::ptrdiff_t input_index = in.index();
+	node_job_.set_input_activated(input_index, activated);
+}
+
+
+inline bool is_activated(const filter_input_base& in) {
+	std::ptrdiff_t input_index = in.index();
+	return node_job_.is_input_activated(input_index);
+}
+
 
 
 template<typename Value>
