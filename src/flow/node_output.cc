@@ -66,12 +66,6 @@ void node_output::input_has_disconnected() {
 }
 
 
-bool node_output::is_online() const {
-	if(connected_input_->is_activated() == false) return false;
-	else return (connected_input_->this_node().state() == node::online);
-}
-
-
 node& node_output::connected_node() const noexcept {
 	return connected_input_->this_node();
 }

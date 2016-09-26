@@ -47,7 +47,8 @@ public:
 	
 	void setup() final override;
 			
-	pull_result output_pull_(time_span&, bool reconnected) override;
+	void output_pre_pull_(const time_span&) override;
+	pull_result output_pull_(time_span&) override;
 	node_frame_window_view output_begin_read_(time_unit duration) override;
 	void output_end_read_(time_unit duration) override;
 };

@@ -42,7 +42,9 @@ public:
 	
 	std::size_t channels_count() const noexcept override;
 	std::string channel_name_at(std::ptrdiff_t i) const override;
-	node::pull_result pull(time_span& span, bool reconnect) override;
+	
+	void pre_pull(const time_span&) override;
+	node::pull_result pull(time_span& span) override;
 	node_frame_window_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 };

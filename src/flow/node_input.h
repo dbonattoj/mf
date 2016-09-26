@@ -76,6 +76,7 @@ public:
 	
 	/// \name Read interface, used by node.
 	///@{
+	void pre_pull();
 	node::pull_result pull();
 	const time_span& pulled_span() const noexcept { return pulled_span_; }
 	node_frame_window_view begin_read_frame();

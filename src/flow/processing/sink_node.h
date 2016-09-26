@@ -32,7 +32,8 @@ class node_graph;
 /** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
 class sink_node final : public processing_node {
 protected:
-	pull_result output_pull_(time_span&, bool reconnected) override { throw 0; }
+	void output_pre_pull_(const time_span&) override { throw 0; }
+	pull_result output_pull_(time_span&) override { throw 0; }
 	node_frame_window_view output_begin_read_(time_unit duration) override { throw 0; }
 	void output_end_read_(time_unit duration) override { throw 0; }
 

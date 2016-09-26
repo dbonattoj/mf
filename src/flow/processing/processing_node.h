@@ -87,7 +87,8 @@ public:
 	std::size_t channels_count() const noexcept override;
 	std::string channel_name_at(std::ptrdiff_t i) const override;
 	
-	node::pull_result pull(time_span& span, bool reconnect) override;
+	void pre_pull(const time_span& span) override;
+	node::pull_result pull(time_span& span) override;
 	node_frame_window_view begin_read(time_unit duration) override;
 	void end_read(time_unit duration) override;
 };
@@ -140,7 +141,8 @@ protected:
 	processing_node_job begin_job_();
 	void finish_job_(processing_node_job&);
 	
-	virtual node::pull_result output_pull_(time_span& span, bool reconnect) = 0;
+	virtual void output_pre_pull_(const time_span&) = 0;
+	virtual node::pull_result output_pull_(time_span& span) = 0;
 	virtual node_frame_window_view output_begin_read_(time_unit duration) = 0;
 	virtual void output_end_read_(time_unit duration) = 0;
 

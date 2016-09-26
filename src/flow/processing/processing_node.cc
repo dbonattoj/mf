@@ -37,8 +37,14 @@ std::string processing_node_output::channel_name_at(std::ptrdiff_t i) const {
 }
 
 
-node::pull_result processing_node_output::pull(time_span& span, bool reconnect) {
-	return this_node().output_pull_(span, reconnect);
+void processing_node_output::pre_pull(const time_span& span) {
+	return this_node().output_pre_pull_(span);
+}
+
+
+
+node::pull_result processing_node_output::pull(time_span& span) {
+	return this_node().output_pull_(span);
 }
 
 

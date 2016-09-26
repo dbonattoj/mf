@@ -36,9 +36,9 @@ time_unit sync_node::minimal_offset_to(const node& target_node) const {
 
 
 time_unit sync_node::maximal_offset_to(const node& target_node) const {
-	if(&target_node == this) return 0;
+	if(&target_node == this) return 0;	
 	const node_input& in = output().connected_input();
-	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration();
+	return in.this_node().maximal_offset_to(target_node) + in.future_window_duration();
 }
 
 
@@ -74,6 +74,12 @@ bool sync_node::process_next_frame_() {
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
 		if(! in.is_activated()) continue;
+		in.pre_pull();
+	}
+	
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
 		
 		pull_result res = in.pull();
 		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
@@ -101,7 +107,12 @@ bool sync_node::process_next_frame_() {
 }
 
 
-node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {	
+void sync_node::output_pre_pull_(const time_span& span) {	
+
+}
+
+
+node::pull_result sync_node::output_pull_(time_span& span) {	
 	if(ring_->read_start_time() != span.start_time()) ring_->seek(span.start_time());
 	Assert(ring_->read_start_time() == span.start_time());
 	
@@ -112,12 +123,8 @@ node::pull_result sync_node::output_pull_(time_span& span, bool reconnected) {
 	
 	bool cont = true;
 	if(ring_->readable_time_span().includes(span)) {
-		if(reconnected) set_online();
+
 	} else {
-		if(reconnected) {
-			set_current_time_(ring_->write_start_time());
-			set_online();
-		}
 		do {
 			cont = process_next_frame_();
 		} while(cont && !ring_->readable_time_span().includes(span) && !reached_end());

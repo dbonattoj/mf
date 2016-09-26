@@ -62,6 +62,12 @@ void sink_node::pull(time_unit t) {
 	// preprocess, allow concrete subclass to activate/desactivate inputs
 	handler_pre_process_(job);
 
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+		in.pre_pull();
+	}
+
 	// pull & begin reading from activated inputs
 	bool stopped = false;
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {

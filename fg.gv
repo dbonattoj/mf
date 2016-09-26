@@ -4,13 +4,9 @@ digraph G{
 <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD COLSPAN="1" BORDER="1" CELLPADDING="4">source<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR><TR><TD COLSPAN="1" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out1"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
 >];
 	filter2 [shape=plaintext label=<
-<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in3"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">passthrough<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR><TR><TD COLSPAN="3" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out4"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
->];
-	filter5 [shape=plaintext label=<
-<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in6"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">sink<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR></TABLE>
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in3"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">sink<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR></TABLE>
 >];
 	filter0:out1 -> filter2:in3 [arrowhead="normal", headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, ];
-	filter2:out4 -> filter5:in6 [arrowhead="normal", headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, ];
 	{rank=source; filter0}
-	{rank=sink; filter5}
+	{rank=sink; filter2}
 }

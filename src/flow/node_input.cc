@@ -42,6 +42,18 @@ void node_input::disconnect() {
 }
 
 
+void node_input::pre_pull() {
+	Expects(is_connected());
+	
+	time_unit t = this_node().current_time();
+	time_unit start_time = std::max(time_unit(0), t - past_window_);
+	time_unit end_time = t + future_window_ + 1;
+	
+	connected_output_->pre_pull(time_span(start_time, end_time));
+}
+
+
+
 node::pull_result node_input::pull() {
 	Expects(is_connected());
 	
@@ -49,11 +61,8 @@ node::pull_result node_input::pull() {
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
 	
-	bool reconnect = (this_node().state() == node::online) && (connected_node().state() == node::reconnecting);
-	// TODO check when connected_node().state() can change
-	
 	time_span span = time_span(start_time, end_time);
-	node::pull_result result = connected_output_->pull(span, reconnect);
+	node::pull_result result = connected_output_->pull(span);
 	Assert(span.start_time() == start_time);
 	Assert(span.includes(t));
 	
@@ -97,8 +106,6 @@ void node_input::cancel_read_frame() {
 void node_input::set_activated(bool activated) {
 	if(activated_ != activated) {
 		activated_ = activated;
-		if(activated) connected_node().propagate_reconnecting_state();
-		else connected_node().propagate_offline_state();
 	}
 }
 

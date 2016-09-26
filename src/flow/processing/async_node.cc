@@ -84,8 +84,8 @@ time_unit async_node::minimal_offset_to(const node& target_node) const {
 
 time_unit async_node::maximal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
-	const node_input& in = output().connected_input();
-	return in.this_node().minimal_offset_to(target_node) + in.future_window_duration() + prefetch_duration_;
+	const node_input& in = output().connected_input();	
+	return in.this_node().maximal_offset_to(target_node) + in.future_window_duration() + prefetch_duration_;
 }
 
 
@@ -119,6 +119,8 @@ bool async_node::pause_() {
 
 void async_node::thread_main_() {
 	bool pause = false;
+	
+	//time_limit_ = current_time() + prefetch_duration_ + 1;
 	
 	if(inputs().size() == 1)
 		MF_DEBUG("thread (input: -", inputs().front()->past_window_duration(), ", +", inputs().front()->future_window_duration(), ")");
@@ -172,14 +174,14 @@ async_node::process_result async_node::process_frame_() {
 
 	job.attach_output_view(out_vw[0]);
 	MF_RAND_SLEEP;
-	
-	MF_RAND_SLEEP;
-	if(state() == reconnecting && reconnect_flag_) {
-		set_online();
-		reconnect_flag_ = false;
-	}
-	
+		
 	handler_pre_process_(job);
+	
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
+		in.pre_pull();
+	}
 			
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
@@ -226,30 +228,25 @@ async_node::process_result async_node::process_frame_() {
 }
 
 
-node::pull_result async_node::output_pull_(time_span& pull_span, bool reconnect) {
-	MF_DEBUG("output: pull ", pull_span);
+void async_node::output_pre_pull_(const time_span& pull_span) {	
+	MF_DEBUG("output: pre_pull ", pull_span);
 	{
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
 		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
 		
-		// multi-channel: foreach. first: set next_write_time variable
-		// writer: pause if next_write_time != ring_.write_start_time for any ring
 		//if(stream_ properties().is_seekable()) 
 		ring_->seek(pull_span.start_time());
-		
-		if(reconnect) reconnect_flag_ = true;
-		
+				
 		current_request_id_++;
 	}
 	
 	MF_RAND_SLEEP;
 	continuation_cv_.notify_one();
-	
-	/*if(! stream_ properties().is_seekable()) {
-		throw std::logic_error("forward async currently unsupported");
-	}*/
-	
 
+}
+
+
+node::pull_result async_node::output_pull_(time_span& pull_span) {
 	while(ring_->readable_duration() < pull_span.duration()) {
 		MF_RAND_SLEEP;		
 		Assert(ring_->read_start_time() == pull_span.start_time());

@@ -48,7 +48,6 @@ private:
 	std::condition_variable continuation_cv_;
 	std::atomic<time_unit> time_limit_ {-1};
 	std::atomic<request_id_type> current_request_id_ {-1};
-	std::atomic<bool> reconnect_flag_ {false};
 	
 	request_id_type failed_request_id_ = -1;
 	
@@ -56,7 +55,8 @@ private:
 	process_result process_frame_();
 	void thread_main_();
 
-	pull_result output_pull_(time_span&, bool reconnected) override;
+	void output_pre_pull_(const time_span&) override;
+	pull_result output_pull_(time_span&) override;
 	node_frame_window_view output_begin_read_(time_unit duration) override;
 	void output_end_read_(time_unit duration) override;
 

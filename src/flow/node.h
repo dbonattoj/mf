@@ -49,7 +49,6 @@ class node_input;
 /// Node in flow graph, base class.
 class node {
 public:
-	enum online_state { online, offline, reconnecting };
 	enum pull_result { success, transitory_failure, stopped };
 
 private:
@@ -83,7 +82,6 @@ private:
 
 	/// Dynamic state (varies during execution).
 	///@{
-	std::atomic<online_state> state_ {online};
 	std::atomic<time_unit> current_time_ {-1};
 	std::atomic<bool> reached_end_ {false};
 
@@ -158,6 +156,7 @@ public:
 	bool is_source() const noexcept { return inputs_.empty(); }
 	bool is_sink() const noexcept { return outputs_.empty(); }
 	
+	
 	/// Owned parameters.
 	///@{
 	node_parameter& add_parameter(node_parameter_id, const node_parameter_value& initial_value);
@@ -198,8 +197,18 @@ public:
 	///@}
 	
 	
+	/// Node-specific.
+	///@{
 	virtual time_unit minimal_offset_to(const node&) const = 0;
 	virtual time_unit maximal_offset_to(const node&) const = 0;
+
+	virtual void pre_setup() { }
+	virtual void setup() { }
+	virtual void launch() { }
+	virtual void pre_stop() { }
+	virtual void stop() { }
+	///@}
+	
 	
 	void define_source_stream_timing(const node_stream_timing&);
 		
@@ -210,17 +219,6 @@ public:
 	void set_name(const std::string& nm) { name_ = nm; }
 	
 	void setup_sink();
-
-	online_state state() const { return state_; }
-	void propagate_offline_state();
-	void propagate_reconnecting_state();
-	void set_online();
-	
-	virtual void pre_setup() { }
-	virtual void setup() { }
-	virtual void launch() { }
-	virtual void pre_stop() { }
-	virtual void stop() { }
 
 	bool is_bounded() const;
 	time_unit current_time() const noexcept { return current_time_; }

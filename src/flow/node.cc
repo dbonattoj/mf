@@ -196,29 +196,6 @@ void node::setup_sink() {
 }
 
 
-void node::propagate_offline_state() {
-	if(state_ == offline) return;
-	if(std::none_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_online(); })) {
-		state_ = offline;
-		for(auto&& in : inputs_) in->connected_node().propagate_offline_state();
-	}
-}
-
-
-void node::propagate_reconnecting_state() {
-	if(state_ != offline) return;
-	if(std::any_of(outputs_.begin(), outputs_.end(), [](auto&& out) { return out->is_online(); })) {
-		state_ = reconnecting;
-		for(auto&& in : inputs_) in->connected_node().propagate_reconnecting_state();
-	}
-}
-
-
-void node::set_online() {
-	state_ = online;
-}
-
-
 bool node::is_bounded() const {
 	if(stream_timing_.has_duration() || is_source()) return true;
 	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](auto&& in) {

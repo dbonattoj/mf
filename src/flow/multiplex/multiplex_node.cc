@@ -29,7 +29,9 @@ namespace mf { namespace flow {
 
 multiplex_node::multiplex_node(node_graph& gr) : base(gr) {
 	add_input_(*this);
-	set_name("multiplex");
+	static int i = 0;
+	i++;
+	set_name("multiplex "+std::to_string(i));
 }
 
 
@@ -54,6 +56,7 @@ void multiplex_node::load_input_view_(time_unit successor_time) {
 	
 	unload_input_view_();
 	
+	input().pre_pull();
 	pull_result result = input().pull();
 	if(result == pull_result::success) {
 		timed_frame_array_view vw = input().begin_read_frame();
@@ -77,13 +80,24 @@ time_unit multiplex_node::successor_time_of_input_view_() const {
 
 
 time_unit multiplex_node::minimal_offset_to(const node& target_node) const {
-	return 0; // TODO
+	if(&target_node == this) return 0;
+	if(common_successor_node_->precedes(target_node)) {
+		return common_successor_node_->minimal_offset_to(target_node);
+	} else {
+		std::cout << input().connected_node().name() << "->" << name() << "  to  " << target_node.name() << std::endl;
+		throw 1;
+	}
 }
 
 
 time_unit multiplex_node::maximal_offset_to(const node& target_node) const {
-	return 0; // TODO
-}
+	if(&target_node == this) return 0;
+	if(common_successor_node_->precedes(target_node)) {
+		return common_successor_node_->maximal_offset_to(target_node);
+	} else {
+		std::cout << input().connected_node().name() << "->" << name() << "  to  " << target_node.name() << std::endl;
+		throw 1;
+	}}
 
 
 bool multiplex_node::is_async() const {
@@ -121,14 +135,13 @@ void multiplex_node::pre_setup() {
 		const node_input& in = out->connected_input();
 		time_unit min_offset = in.this_node().minimal_offset_to(*common_successor_node_) - in.past_window_duration();
 		time_unit max_offset = in.this_node().maximal_offset_to(*common_successor_node_) + in.future_window_duration();
-		
-		std::cout << "common succ=" << common_successor_node_->name() << std::endl;
-		
+			
 		Assert(min_offset <= 0);
 		Assert(max_offset >= 0);
 		input_past_window_ = std::max(input_past_window_, -min_offset);
 		input_future_window_ = std::max(input_future_window_, max_offset);		
 	}
+	//std::cout << '-' << input_past_window_ << ", +" <<  input_future_window_ << std::endl;
 	input().set_past_window(input_past_window_);
 	input().set_future_window(input_future_window_);
 
@@ -174,7 +187,12 @@ std::string multiplex_node_output::channel_name_at(std::ptrdiff_t i) const {
 }
 
 
-node::pull_result multiplex_node_output::pull(time_span& span, bool reconnect) {
+void multiplex_node_output::pre_pull(const time_span& span) {
+	
+}
+
+
+node::pull_result multiplex_node_output::pull(time_span& span) {
 	Assert(this_node().loader_);
 
 	time_unit end_time = this_node().end_time();
