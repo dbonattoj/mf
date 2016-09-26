@@ -47,6 +47,11 @@ void multiplex_node::sync_loader::stop() { }
 void multiplex_node::sync_loader::launch() { }
 
 
+void multiplex_node::sync_loader::pre_pull(time_span span) {
+	
+}
+
+
 node::pull_result multiplex_node::sync_loader::pull(time_span span) {
 	// get expected input span, based on current time of the common successor node
 	time_unit successor_time = this_node().capture_successor_time_();
@@ -148,6 +153,14 @@ void multiplex_node::async_loader::launch() {
 }
 
 
+void multiplex_node::async_loader::pre_pull(time_span span) {		
+	if(this_node().current_time() != this_node().capture_successor_time_()) {
+		if(stopped_) return;
+		successor_time_changed_cv_.notify_one();
+	}
+}
+
+
 node::pull_result multiplex_node::async_loader::pull(time_span span) {
 	// TODO prove formally
 		
@@ -178,6 +191,39 @@ node::pull_result multiplex_node::async_loader::pull(time_span span) {
 	if(input_span.includes(span)) return node::pull_result::success;
 	else return node::pull_result::transitory_failure;
 }
+
+
+/*
+	// TODO prove formally
+		
+	// get expected input span, based on current time of the common successor node
+	time_unit successor_time = this_node().capture_successor_time_();
+	time_span expected_input_span = this_node().expected_input_span_(successor_time);
+	if(! expected_input_span.includes(span)) {
+		// tfail if pulled span not in this expected span
+		return node::pull_result::transitory_failure;
+	}
+	
+	// acquire shared lock on input view
+	// shared with other readers calling pull() on different threads
+	// loader can modify the input view when all readers release the shared lock
+	std::shared_lock<std::shared_timed_mutex> lock(input_view_mutex_);
+	
+	// wail until loader updates the input view for the current time of the common successor node
+	while(this_node().current_time() != this_node().capture_successor_time_()) {
+		if(stopped_) return node::pull_result::stopped;
+		successor_time_changed_cv_.notify_one();
+		input_view_updated_cv_.wait(lock);
+	}
+	if(stopped_) return node::pull_result::stopped;
+		
+	// time of the common successor node may have changed in the meantime so that the input view span
+	// no longer includes the requested span. then return tfail 
+	time_span input_span = this_node().input_view_().span();
+	if(input_span.includes(span)) return node::pull_result::success;
+	else return node::pull_result::transitory_failure;
+
+*/
 
 
 node_frame_window_view multiplex_node::async_loader::begin_read(time_span span) {

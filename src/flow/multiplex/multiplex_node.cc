@@ -24,6 +24,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <utility>
 #include <functional>
 
+#include "../processing/async_node.h"
+
 namespace mf { namespace flow {
 
 
@@ -105,6 +107,7 @@ bool multiplex_node::is_async() const {
 	return loader_->is_async();
 }
 
+
 thread_index multiplex_node::loader_thread_index() const {
 	Assert(loader_);
 	return loader_->loader_thread_index();
@@ -152,10 +155,14 @@ void multiplex_node::pre_setup() {
 }
 
 
-bool multiplex_node::outputs_on_different_threads_() const {
+bool multiplex_node::outputs_on_different_threads_() const {	
 	thread_index first_output_reader_index = output_at(0).reader_thread_index();
 	for(std::ptrdiff_t i = 1; i < outputs_count(); ++i)
 		if(output_at(i).reader_thread_index() != first_output_reader_index) return true;
+	
+	if(input().connected_node().name() == "0 image refine") return true;
+	if(input().connected_node().name() == "1 image refine") return true;
+	
 	return false;
 }
 
@@ -188,7 +195,7 @@ std::string multiplex_node_output::channel_name_at(std::ptrdiff_t i) const {
 
 
 void multiplex_node_output::pre_pull(const time_span& span) {
-	
+	this_node().loader_->pre_pull(span);
 }
 
 

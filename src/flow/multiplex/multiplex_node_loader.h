@@ -48,7 +48,8 @@ public:
 	
 	virtual void stop() = 0;
 	virtual void launch() = 0;
-	virtual node::pull_result pull(time_span span) = 0;
+	virtual void pre_pull(time_span) = 0;
+	virtual node::pull_result pull(time_span) = 0;
 	virtual node_frame_window_view begin_read(time_span span) = 0;
 	virtual void end_read(time_unit duration) = 0;
 };
@@ -65,6 +66,7 @@ public:
 
 	void stop() override;
 	void launch() override;
+	void pre_pull(time_span) override;
 	node::pull_result pull(time_span span) override;
 	node_frame_window_view begin_read(time_span span) override;
 	void end_read(time_unit duration) override;
@@ -95,6 +97,7 @@ public:
 
 	void stop() override;
 	void launch() override;
+	void pre_pull(time_span) override;
 	node::pull_result pull(time_span span) override;
 	node_frame_window_view begin_read(time_span span) override;
 	void end_read(time_unit duration) override;

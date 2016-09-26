@@ -119,9 +119,7 @@ bool async_node::pause_() {
 
 void async_node::thread_main_() {
 	bool pause = false;
-	
-	//time_limit_ = current_time() + prefetch_duration_ + 1;
-	
+		
 	if(inputs().size() == 1)
 		MF_DEBUG("thread (input: -", inputs().front()->past_window_duration(), ", +", inputs().front()->future_window_duration(), ")");
 	else
@@ -242,7 +240,6 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 	
 	MF_RAND_SLEEP;
 	continuation_cv_.notify_one();
-
 }
 
 
