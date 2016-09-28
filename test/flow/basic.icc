@@ -33,12 +33,12 @@ SECTION("basic") {
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
 		source.set_asynchonous(async1);
-		sink.input.connect(source.output);
+		sink->input.connect(source->output);
 		
 		gr.setup();
 		gr.run();
 		
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 	SECTION("source --> passthrough --> sink") {
@@ -48,13 +48,13 @@ SECTION("basic") {
 		
 		source.set_asynchonous(async1);
 		passthrough.set_asynchonous(async1);
-		passthrough.input.connect(source.output);
-		sink.input.connect(passthrough.output);
+		passthrough->input.connect(source->output);
+		sink->input.connect(passthrough->output);
 		
 		gr.setup();
 		gr.run();
 		
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
@@ -64,14 +64,14 @@ SECTION("basic") {
 		
 		source1.set_asynchonous(async1);
 		passthrough1.set_asynchonous(async1);
-		passthrough1.input.connect(source1.output);
-		sink.input.connect(passthrough1.output);
+		passthrough1->input.connect(source1->output);
+		sink->input.connect(passthrough1->output);
 		
 		gr.setup();
 		gr.run();
 		
 		REQUIRE(gr.current_time() == seq.size()-1);
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
@@ -81,14 +81,14 @@ SECTION("basic") {
 		
 		source1.set_asynchonous(async1);
 		passthrough1.set_asynchonous(async1);	
-		passthrough1.input.connect(source1.output);
-		sink.input.connect(passthrough1.output);
+		passthrough1->input.connect(source1->output);
+		sink->input.connect(passthrough1->output);
 		
 		gr.setup();
 		gr.run();
 				
 		REQUIRE(gr.current_time() == seq.size()-1);
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
@@ -98,15 +98,15 @@ SECTION("basic") {
 		
 		source1.set_asynchonous(async1);
 		passthrough1.set_asynchonous(async1);
-		passthrough1.input.connect(source1.output);
-		sink.input.connect(passthrough1.output);
+		passthrough1->input.connect(source1->output);
+		sink->input.connect(passthrough1->output);
 		
 		gr.setup();
 	
 		gr.run();
 				
 		REQUIRE(gr.current_time() == seq.size()-1);
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2' --> sink") {
@@ -118,16 +118,16 @@ SECTION("basic") {
 		source1.set_asynchonous(async1);
 		passthrough1.set_asynchonous(async1);
 		passthrough2.set_asynchonous(async2);
-		passthrough1.input.connect(source1.output);
-		passthrough2.input.connect(passthrough1.output);
-		sink.input.connect(passthrough2.output);
+		passthrough1->input.connect(source1->output);
+		passthrough2->input.connect(passthrough1->output);
+		sink->input.connect(passthrough2->output);
 		
 		gr.setup();
 	
 		gr.run();
 		
 		REQUIRE(gr.current_time() == seq.size()-1);
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 	
@@ -142,11 +142,11 @@ SECTION("basic") {
 			auto& node = gr.add_filter<passthrough_filter>(3, 0);
 
 			node.set_asynchonous(async1);	
-			node.input.connect(source.output);
-			sink.input.connect(node.output);
+			node->input.connect(source->output);
+			sink->input.connect(node->output);
 			gr.setup();
 				
-			node.callback = [&](passthrough_filter& self, flow::filter_job& job) {
+			node->callback = [&](passthrough_filter& self, flow::filter_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
 				std::ptrdiff_t center = in_full.time_index(job.time());
@@ -192,18 +192,18 @@ SECTION("basic") {
 	
 			gr.run();
 			
-			REQUIRE(sink.check());	
+			REQUIRE(sink->check());	
 		}
 
 		SECTION("source --> [+3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(0, 3);
 
 			node.set_asynchonous(async1);	
-			node.input.connect(source.output);
-			sink.input.connect(node.output);
+			node->input.connect(source->output);
+			sink->input.connect(node->output);
 			gr.setup();
 			
-			node.callback = [&](passthrough_filter& self, flow::filter_job& job) {
+			node->callback = [&](passthrough_filter& self, flow::filter_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
 				std::ptrdiff_t center = in_full.time_index(job.time());
@@ -249,18 +249,18 @@ SECTION("basic") {
 			
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 
 		SECTION("source --> [-3,+3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(3, 3);
 
 			node.set_asynchonous(async1);	
-			node.input.connect(source.output);
-			sink.input.connect(node.output);
+			node->input.connect(source->output);
+			sink->input.connect(node->output);
 			gr.setup();
 			
-			node.callback = [&](passthrough_filter& self, flow::filter_job& job) {
+			node->callback = [&](passthrough_filter& self, flow::filter_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
 				std::ptrdiff_t center = in_full.time_index(job.time());
@@ -305,7 +305,7 @@ SECTION("basic") {
 			};
 	
 			gr.run();
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 
@@ -330,16 +330,16 @@ SECTION("basic") {
 			auto& passthrough = gr.add_filter<passthrough_filter>(0, 5);
 
 			passthrough.set_asynchonous(async1);		
-			passthrough.input.connect(source1.output);
-			merge.input1.connect(passthrough.output);
-			merge.input2.connect(source2.output);
-			sink.input.connect(merge.output);
+			passthrough->input.connect(source1->output);
+			merge->input1.connect(passthrough->output);
+			merge->input2.connect(source2->output);
+			sink->input.connect(merge->output);
 		
 			gr.setup();
 			gr.run();
 			
 			REQUIRE(gr.current_time() == seq.size()-1);
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	
 		SECTION("graph 2") {
@@ -353,17 +353,17 @@ SECTION("basic") {
 
 			passthrough1.set_asynchonous(async1);
 			passthrough2.set_asynchonous(async2);		
-			passthrough1.input.connect(source1.output);
-			passthrough2.input.connect(source2.output);
-			merge.input1.connect(passthrough1.output);
-			merge.input2.connect(passthrough2.output);
-			sink.input.connect(merge.output);
+			passthrough1->input.connect(source1->output);
+			passthrough2->input.connect(source2->output);
+			merge->input1.connect(passthrough1->output);
+			merge->input2.connect(passthrough2->output);
+			sink->input.connect(merge->output);
 		
 			gr.setup();
 			gr.run();
 			
 			REQUIRE(gr.current_time() == seq.size()-1);
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 		
 		SECTION("graph 3") {
@@ -379,18 +379,18 @@ SECTION("basic") {
 			passthrough1.set_asynchonous(async1);
 			passthrough2.set_asynchonous(async2);
 			passthrough3.set_asynchonous(async1);
-			passthrough1.input.connect(source1.output);
-			passthrough3.input.connect(source2.output);
-			passthrough2.input.connect(passthrough3.output);
-			merge.input1.connect(passthrough1.output);
-			merge.input2.connect(passthrough2.output);
-			sink.input.connect(merge.output);
+			passthrough1->input.connect(source1->output);
+			passthrough3->input.connect(source2->output);
+			passthrough2->input.connect(passthrough3->output);
+			merge->input1.connect(passthrough1->output);
+			merge->input2.connect(passthrough2->output);
+			sink->input.connect(merge->output);
 		
 			gr.setup();			
 			gr.run();
 			
 			REQUIRE(gr.current_time() == seq.size()-1);
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 	
@@ -412,14 +412,14 @@ SECTION("basic") {
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
 			merge.set_asynchonous(async1);
 
-			multiout.input.connect(source.output);
-			merge.input1.connect(multiout.output1);
-			merge.input2.connect(multiout.output2);
-			sink.input.connect(merge.output);
+			multiout->input.connect(source->output);
+			merge->input1.connect(multiout->output1);
+			merge->input2.connect(multiout->output2);
+			sink->input.connect(merge->output);
 			
 			gr.setup();
 			gr.run();
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 		
 		
@@ -438,16 +438,16 @@ SECTION("basic") {
 			passthrough2.set_asynchonous(async2);
 			merge.set_asynchonous(async1);
 
-			multiout.input.connect(source.output);
-			passthrough1.input.connect(multiout.output1);
-			passthrough2.input.connect(multiout.output2);
-			merge.input1.connect(passthrough1.output);
-			merge.input2.connect(passthrough2.output);
-			sink.input.connect(merge.output);
+			multiout->input.connect(source->output);
+			passthrough1->input.connect(multiout->output1);
+			passthrough2->input.connect(multiout->output2);
+			merge->input1.connect(passthrough1->output);
+			merge->input2.connect(passthrough2->output);
+			sink->input.connect(merge->output);
 			
 			gr.setup();
 			gr.run();
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 	
@@ -472,14 +472,14 @@ SECTION("basic") {
 			source.set_asynchonous(async1);
 			merge.set_asynchonous(async1);
 			
-			merge.input1.connect(source.output);
-			merge.input2.connect(source.output);
-			sink.input.connect(merge.output);
+			merge->input1.connect(source->output);
+			merge->input2.connect(source->output);
+			sink->input.connect(merge->output);
 	
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 
 		SECTION("different connected filters") {
@@ -497,15 +497,15 @@ SECTION("basic") {
 			merge.set_asynchonous(async1);
 			passthrough.set_asynchonous(async2);
 			
-			passthrough.input.connect(source.output);
-			merge.input1.connect(passthrough.output);
-			merge.input2.connect(source.output);
-			sink.input.connect(merge.output);
+			passthrough->input.connect(source->output);
+			merge->input1.connect(passthrough->output);
+			merge->input2.connect(source->output);
+			sink->input.connect(merge->output);
 	
 			gr.setup();
 			gr.run();
 
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 
 		SECTION("time windows") {
@@ -525,16 +525,16 @@ SECTION("basic") {
 			passthrough2.set_asynchonous(async2);
 			merge.set_asynchonous(async1);
 			
-			passthrough1.input.connect(source.output);
-			passthrough2.input.connect(source.output);
-			merge.input1.connect(passthrough1.output);
-			merge.input2.connect(passthrough2.output);
-			sink.input.connect(merge.output);
+			passthrough1->input.connect(source->output);
+			passthrough2->input.connect(source->output);
+			merge->input1.connect(passthrough1->output);
+			merge->input2.connect(passthrough2->output);
+			sink->input.connect(merge->output);
 	
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 
@@ -549,8 +549,8 @@ SECTION("basic") {
 			auto& tofloat = gr.add_filter<to_float_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
 			
-			tofloat.input.connect(source.output);
-			sink.input.connect(tofloat.output, to_int);
+			tofloat->input.connect(source->output);
+			sink->input.connect(tofloat->output, to_int);
 			
 			source.set_asynchonous(async1);
 			tofloat.set_asynchonous(async1);
@@ -558,7 +558,7 @@ SECTION("basic") {
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 
@@ -596,19 +596,19 @@ SECTION("basic") {
 			merge1.set_asynchonous(async1);
 			merge2.set_asynchonous(async2);
 			
-			passthrough1.input.connect(source1.output);
-			passthrough2.input.connect(passthrough1.output);
-			merge1.input1.connect(passthrough2.output);
-			merge1.input2.connect(source1.output);
-			passthrough3.input.connect(source2.output);
-			merge2.input1.connect(merge1.output);
-			merge2.input2.connect(passthrough3.output);
-			sink.input.connect(merge2.output);
+			passthrough1->input.connect(source1->output);
+			passthrough2->input.connect(passthrough1->output);
+			merge1->input1.connect(passthrough2->output);
+			merge1->input2.connect(source1->output);
+			passthrough3->input.connect(source2->output);
+			merge2->input1.connect(merge1->output);
+			merge2->input2.connect(passthrough3->output);
+			sink->input.connect(merge2->output);
 	
 			gr.setup();			
 			gr.run();
 
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 		
 
@@ -649,25 +649,25 @@ SECTION("basic") {
 			merge4.set_asynchonous(async2);
 			multiout.set_asynchonous(async1);
 			
-			passthrough1.input.connect(source1.output);
-			passthrough2.input.connect(passthrough1.output);
-			merge1.input1.connect(passthrough2.output);			
-			merge3.input1.connect(source1.output);
-			merge3.input2.connect(multiout.output1);
-			merge1.input2.connect(merge3.output);
-			merge2.input1.connect(merge1.output);
-			passthrough3.input.connect(source2.output);
-			multiout.input.connect(passthrough3.output);
-			passthrough4.input.connect(multiout.output2);
-			merge4.input2.connect(passthrough4.output);	
-			merge4.input1.connect(source1.output);	
-			merge2.input2.connect(merge4.output);
-			sink.input.connect(merge2.output);
+			passthrough1->input.connect(source1->output);
+			passthrough2->input.connect(passthrough1->output);
+			merge1->input1.connect(passthrough2->output);			
+			merge3->input1.connect(source1->output);
+			merge3->input2.connect(multiout->output1);
+			merge1->input2.connect(merge3->output);
+			merge2->input1.connect(merge1->output);
+			passthrough3->input.connect(source2->output);
+			multiout->input.connect(passthrough3->output);
+			passthrough4->input.connect(multiout->output2);
+			merge4->input2.connect(passthrough4->output);	
+			merge4->input1.connect(source1->output);	
+			merge2->input2.connect(merge4->output);
+			sink->input.connect(merge2->output);
 	
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 	

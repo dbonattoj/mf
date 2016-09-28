@@ -111,17 +111,17 @@ const node_frame_view& processing_node_job::output_view() const {
 }
 
 
-bool processing_node_job::has_parameter(node_parameter_id id) const {
+bool processing_node_job::has_parameter(parameter_id id) const {
 	return node_parameters_.has(id);
 }
 
 
-node_parameter_value& processing_node_job::parameter(node_parameter_id id) {
+node_parameter_value& processing_node_job::parameter(parameter_id id) {
 	return node_parameters_(id);
 }
 
 
-const node_parameter_value& processing_node_job::parameter(node_parameter_id id) const {
+const node_parameter_value& processing_node_job::parameter(parameter_id id) const {
 	return node_parameters_(id);
 }
 
@@ -131,7 +131,7 @@ const node_parameter_valuation& processing_node_job::parameters() const {
 }
 
 
-bool processing_node_job::has_input_parameter(node_parameter_id id, time_unit t) const {
+bool processing_node_job::has_input_parameter(parameter_id id, time_unit t) const {
 	auto possible_inputs = node_.propagated_parameters_inputs(id);
 	for(input_index_type input_index : possible_inputs) {
 		if(! has_input_view(input_index)) continue;
@@ -144,7 +144,7 @@ bool processing_node_job::has_input_parameter(node_parameter_id id, time_unit t)
 }
 
 
-const node_parameter_value& processing_node_job::input_parameter(node_parameter_id id, time_unit t) {
+const node_parameter_value& processing_node_job::input_parameter(parameter_id id, time_unit t) {
 	auto possible_inputs = node_.propagated_parameters_inputs(id);
 	
 	std::cout << "input parameter? " << id << " (t=" << t << ")" << std::endl;
@@ -162,12 +162,12 @@ const node_parameter_value& processing_node_job::input_parameter(node_parameter_
 }
 
 
-bool processing_node_job::has_sent_parameter(node_parameter_id id) const {
+bool processing_node_job::has_sent_parameter(parameter_id id) const {
 	return node_.has_sent_parameter(id);
 }
 
 
-void processing_node_job::send_parameter(node_parameter_id id, const node_parameter_value& new_value) {
+void processing_node_job::send_parameter(parameter_id id, const node_parameter_value& new_value) {
 	node_.sent_parameters_relay().send_parameter(id, new_value);
 }
 

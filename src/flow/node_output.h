@@ -42,7 +42,7 @@ private:
 	/** Part of satellite data of frames. Parameter values will be copied from node input(s). Node must ensure that at
 	 ** least these parameters are present in the output frames, except when they are not available (e.g. when an
 	 ** input is disabled). */
-	std::vector<node_parameter_id> propagated_parameters_;
+	std::vector<parameter_id> propagated_parameters_;
 	
 protected:
 	node_output(const node_output&) = delete;
@@ -54,12 +54,12 @@ public:
 
 	node& this_node() const noexcept { return node_; }
 	
-	bool add_propagated_parameter_if_needed(node_parameter_id);
-	bool add_relayed_parameter_if_needed(node_parameter_id, const node_parameter_relay& preceding_relay);
+	bool add_propagated_parameter_if_needed(parameter_id);
+	bool add_relayed_parameter_if_needed(parameter_id, const node_parameter_relay& preceding_relay);
 	
-	bool has_propagated_parameter(node_parameter_id) const;
+	bool has_propagated_parameter(parameter_id) const;
 	std::size_t propagated_parameters_count() const { return propagated_parameters_.size(); }
-	node_parameter_id propagated_parameter_at(std::ptrdiff_t i) const { return propagated_parameters_.at(i); }
+	parameter_id propagated_parameter_at(std::ptrdiff_t i) const { return propagated_parameters_.at(i); }
 
 	thread_index reader_thread_index() const;
 

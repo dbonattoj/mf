@@ -22,15 +22,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_EXPORTER_FILTER_H_
 
 #include <utility>
-#include "../filter.h"
-#include "../filter_job.h"
+#include "../filter_handler.h"
 #include "../../io/frame_exporter.h"
 
 namespace mf { namespace flow {
 
 /// Exporter sink filter, writes frames to associated \ref frame_exporter.
 template<typename Exporter>
-class exporter_filter : public sink_filter {
+class exporter_filter : public filter_handler {
 private:
 	Exporter exporter_;
 

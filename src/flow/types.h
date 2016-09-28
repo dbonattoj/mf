@@ -28,8 +28,9 @@ namespace mf { namespace flow {
 using thread_index = int;
 static constexpr thread_index undefined_thread_index = -1;
 
-using node_parameter_id = int;
-static constexpr node_parameter_id undefined_node_parameter_id = -1;
+using parameter_id = int;
+static constexpr parameter_id undefined_parameter_id = -1;
+
 
 using clock_type = std::chrono::high_resolution_clock;
 using clock_duration = std::chrono::high_resolution_clock::duration;

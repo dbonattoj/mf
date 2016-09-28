@@ -22,22 +22,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf { namespace flow {
 
-void node_parameter_relay::set_handler(node_parameter_id id, const handler_function_type& func) {
+void node_parameter_relay::set_handler(parameter_id id, const handler_function_type& func) {
 	handlers_.emplace(id, func);
 }
 
 
-bool node_parameter_relay::has_handler(node_parameter_id id) const {
+bool node_parameter_relay::has_handler(parameter_id id) const {
 	return (handlers_.find(id) != handlers_.end());
 }
 
 
-auto node_parameter_relay::handler(node_parameter_id id) const -> const handler_function_type& {
+auto node_parameter_relay::handler(parameter_id id) const -> const handler_function_type& {
 	return handlers_.at(id);
 }
 
 
-void node_parameter_relay::send_parameter(node_parameter_id id, const node_parameter_value& new_value) const {
+void node_parameter_relay::send_parameter(parameter_id id, const node_parameter_value& new_value) const {
 	handler(id)(new_value);
 }
 

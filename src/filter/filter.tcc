@@ -26,10 +26,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 template<std::size_t Output_dim, typename Output_elem>
-filter_output<Output_dim, Output_elem>::filter_output(filter& filt) :
+filter_output<Output_dim, Output_elem>::filter_output(filter& filt, const std::string& name) :
 	filter_(filt)
 {
 	filter_.register_output(*this);
+	set_name(name);
 }
 
 
@@ -40,59 +41,28 @@ void filter_output<Output_dim, Output_elem>::edge_has_connected(edge_base_type& 
 
 
 template<std::size_t Output_dim, typename Output_elem>
-void filter_output<Output_dim, Output_elem>::install(processing_node& nd) {
-	if(edges_count() == 0) return;
-	
-	Assert(edges_count() == 1, "multiplex node is required because filter output has multiple edges");
-		
-	processing_node_output_channel& out_ch = nd.add_output_channel();
-	out_ch.set_name(name_.empty() ? filter::default_filter_output_name : name_);
-	channel_index_ = out_ch.index();
-
-	for(edge_base_type* edge : edges_) {
-		edge->set_node_output(nd.output(), channel_index_);
-	}
-}
-
-
-template<std::size_t Output_dim, typename Output_elem>
-void filter_output<Output_dim, Output_elem>::install(processing_node& nd, multiplex_node& mpx_nd) {
-	if(edges_count() == 0) return;
-	
-	
-	node_output_channel_ = &nd.add_output_channel();
-	node_output_channel_->set_name(name_.empty() ? filter::default_filter_output_name : name_);
-	std::ptrdiff_t channel_index = node_output_channel_->index();
-	
-	for(edge_base_type* edge : edges_) {
-		multiplex_node_output& mpx_out = mpx_nd.add_output(channel_index);
-		edge->set_node_output(mpx_out, 0);
-	}
-}
-
-
-template<std::size_t Output_dim, typename Output_elem>
 void filter_output<Output_dim, Output_elem>::define_frame_shape(const frame_shape_type& shp) {
-	Assert(node_output_channel_ != nullptr);
 	frame_shape_ = shp;
-		
-	std::size_t elem_count = frame_shape_.product();
-	ndarray_format frame_format = make_ndarray_format<Output_elem>(elem_count);
-	node_output_channel_->define_frame_format(frame_format);
 }
 
 
 template<std::size_t Output_dim, typename Output_elem>
 auto filter_output<Output_dim, Output_elem>::frame_shape() const -> const frame_shape_type& {
-	Assert(node_output_channel_ != nullptr);
 	return frame_shape_;
 }
 
 
 template<std::size_t Output_dim, typename Output_elem>
+ndarray_format filter_output<Output_dim, Output_elem>::frame_format() const {
+	std::size_t elem_count = frame_shape_.product();
+	return make_ndarray_format<Output_elem>(elem_count);
+}
+
+
+
+template<std::size_t Output_dim, typename Output_elem>
 bool filter_output<Output_dim, Output_elem>::frame_shape_is_defined() const {
-	Assert(node_output_channel_ != nullptr);
-	return node_output_channel_->frame_format().is_defined();
+	return frame_shape_.product() != 0;
 }
 
 
@@ -108,16 +78,6 @@ auto filter_output<Output_dim, Output_elem>::get_output_view
 
 
 template<std::size_t Input_dim, typename Input_elem>
-filter_input<Input_dim, Input_elem>::filter_input(filter& filt, time_unit past_window, time_unit future_window) :
-	filter_(filt),
-	past_window_(past_window),
-	future_window_(future_window)
-{
-	filter_.register_input(*this);
-}
-
-
-template<std::size_t Input_dim, typename Input_elem>
 filter_input<Input_dim, Input_elem>::filter_input(filter& filt, const std::string& name) :
 	filter_(filt)
 {
@@ -125,20 +85,6 @@ filter_input<Input_dim, Input_elem>::filter_input(filter& filt, const std::strin
 	set_name(name);
 }
 
-
-template<std::size_t Input_dim, typename Input_elem>
-void filter_input<Input_dim, Input_elem>::install(processing_node& nd) {
-	if(is_connected()) {
-		node_input& nd_in = nd.add_input();
-		nd_in.set_name(name_.empty() ? filter::default_filter_input_name : name_);
-		nd_in.set_past_window(past_window_);
-		nd_in.set_future_window(future_window_);
-	
-		index_ = nd_in.index();
-	
-		edge_->set_node_input(nd_in);
-	}
-}
 
 
 template<std::size_t Input_dim, typename Input_elem>
@@ -173,6 +119,12 @@ void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Outp
 	edge_type* edge = new edge_type(*this, out, std::forward<Convert_function>(cv));
 	edge_.reset(edge);
 	out.edge_has_connected(*edge);
+}
+
+
+template<std::size_t Input_dim, typename Input_elem>
+void filter_input<Input_dim, Input_elem>::install_edge(node_output& origin_node_output, node_input& destination_node_input) {
+	edge_->install(origin_node_output, destination_node_input);
 }
 
 

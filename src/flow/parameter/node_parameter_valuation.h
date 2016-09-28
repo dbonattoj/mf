@@ -29,7 +29,7 @@ namespace mf { namespace flow {
 
 class node_parameter_valuation {
 private:
-	std::map<node_parameter_id, node_parameter_value> values_;
+	std::map<parameter_id, node_parameter_value> values_;
 
 public:
 	node_parameter_valuation() = default;
@@ -38,13 +38,13 @@ public:
 	node_parameter_valuation& operator=(const node_parameter_valuation&) = default;
 	
 	std::size_t count() const { return values_.size(); }
-	bool has(node_parameter_id) const;
-	const node_parameter_value& operator()(node_parameter_id) const;
-	node_parameter_value& operator()(node_parameter_id);
-	void set(node_parameter_id, const node_parameter_value&);
+	bool has(parameter_id) const;
+	const node_parameter_value& operator()(parameter_id) const;
+	node_parameter_value& operator()(parameter_id);
+	void set(parameter_id, const node_parameter_value&);
 	void set_all(const node_parameter_valuation&);
 	void set_all(node_parameter_valuation&&);
-	void erase(node_parameter_id);
+	void erase(parameter_id);
 	void clear();
 
 	friend node_parameter_valuation combine(const node_parameter_valuation&, const node_parameter_valuation&);

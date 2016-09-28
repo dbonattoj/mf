@@ -50,7 +50,6 @@ private:
 	bool launched_ = false;
 	
 	thread_index last_thread_index_ = 0;
-	node_parameter_id last_node_parameter_id_ = 0;
 	
 	std::atomic<bool> was_stopped_ {false};
 	
@@ -86,7 +85,6 @@ public:
 	
 	thread_index new_thread_index();
 	thread_index root_thread_index() const;
-	node_parameter_id new_parameter_id();
 	bool was_stopped() const { return was_stopped_; }
 	
 	void set_diagnostic(diagnostic_handler& handler) { diagnostic_handler_ = &handler; }

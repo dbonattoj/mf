@@ -64,13 +64,13 @@ ndarray_view<Dim, Elem> filter_job::out(filter_output<Dim, Elem>& pt) {
 }
 
 
-inline void set_activated(filter_input_base& in, bool activated) {
+inline void filter_job::set_activated(filter_input_base& in, bool activated) {
 	std::ptrdiff_t input_index = in.index();
 	node_job_.set_input_activated(input_index, activated);
 }
 
 
-inline bool is_activated(const filter_input_base& in) {
+inline bool filter_job::is_activated(const filter_input_base& in) {
 	std::ptrdiff_t input_index = in.index();
 	return node_job_.is_input_activated(input_index);
 }
@@ -119,7 +119,7 @@ void filter_job::send_param(const filter_parameter<Value>& param, const Value& n
 	Assert(param.kind() == filter_parameter_base::reference);
 	Assert(param.referenced_parameter().kind() == filter_parameter_base::dynamic);
 
-	node_parameter_id id = param.referenced_parameter().id();
+	parameter_id id = param.referenced_parameter().id();
 	node_parameter_value new_val(new_value);
 	node_job_.send_parameter(id, new_val);
 }

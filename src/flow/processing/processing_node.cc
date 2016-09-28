@@ -89,7 +89,7 @@ void processing_node::compute_propagated_parameters_guide_() const {
 	}
 }
 
-
+/*
 void processing_node::handler_setup_() {
 	Expects(handler_ != nullptr);
 	handler_->handler_setup(*this);
@@ -98,6 +98,7 @@ void processing_node::handler_setup_() {
 		if(! chan->frame_format().is_defined())
 			throw invalid_node_graph("processing_node did not define all output channel formats");
 }
+*/
 
 
 void processing_node::handler_pre_process_(processing_node_job& job) {
@@ -129,7 +130,7 @@ void processing_node::handler_process_(processing_node_job& job) {
 
 	if(! has_output()) return;
 	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
-		node_parameter_id id = output().propagated_parameter_at(i);
+		parameter_id id = output().propagated_parameter_at(i);
 		std::cout << "propagating parameter " << id << "................." << std::endl;
 		if(job.has_parameter(id))
 			job.output_view().propagated_parameters().set(id, job.parameter(id));
@@ -213,7 +214,7 @@ node_frame_format processing_node::output_frame_format_() const {
 }
 
 
-auto processing_node::propagated_parameters_inputs(node_parameter_id id) const -> std::vector<input_index_type> {
+auto processing_node::propagated_parameters_inputs(parameter_id id) const -> std::vector<input_index_type> {
 std::cout << name() << " propagated par in (" << id << ")" << std::endl;
 	if(propagated_parameters_guide_.size() == 0)
 		compute_propagated_parameters_guide_();

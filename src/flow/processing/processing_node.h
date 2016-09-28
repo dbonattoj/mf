@@ -40,7 +40,6 @@ class processing_node_job;
 /// Delegate which processes frames of a \ref processing_node, interface.
 class processing_node_handler {
 public:
-	virtual void handler_setup(processing_node&) = 0;
 	virtual void handler_pre_process(processing_node&, processing_node_job&) = 0;
 	virtual void handler_process(processing_node&, processing_node_job&) = 0;
 };
@@ -127,14 +126,13 @@ public:
 private:
 	processing_node_handler* handler_ = nullptr;
 	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
-	mutable std::multimap<node_parameter_id, input_index_type> propagated_parameters_guide_;
+	mutable std::multimap<parameter_id, input_index_type> propagated_parameters_guide_;
 
 	void compute_propagated_parameters_guide_() const;
 
 protected:
 	void verify_connections_validity_() const;
 
-	void handler_setup_();
 	void handler_pre_process_(processing_node_job&);
 	void handler_process_(processing_node_job&);
 	
@@ -167,7 +165,7 @@ public:
 	output_channel_type& output_channel_at(std::ptrdiff_t index);
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
 	
-	std::vector<input_index_type> propagated_parameters_inputs(node_parameter_id) const;
+	std::vector<input_index_type> propagated_parameters_inputs(parameter_id) const;
 };
 
 

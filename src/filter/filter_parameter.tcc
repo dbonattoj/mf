@@ -116,18 +116,14 @@ bool filter_parameter<Value>::is_sent_reference() const {
 
 
 template<typename Value>
-void filter_parameter<Value>::install(filter_graph& fg, node& nd) {
-	Assert(! was_installed());
-	Assert(kind() != undefined);
-	
+void filter_parameter<Value>::install(filter_graph& fg, node& nd) {	
 	if(kind() == dynamic) {
-		id_ = fg.new_node_parameter_id();
+		id_ = fg.new_parameter_id();
 		node_parameter& par = nd.add_parameter(id_, dynamic_initial_value());
 		par.set_name(name_);
 	} else if(kind() == reference) {
-		Assert(referenced_parameter().was_installed()); // TODO order of installation
 		if(referenced_parameter().kind() == dynamic) {
-			node_parameter_id id = referenced_parameter().id();
+			parameter_id id = referenced_parameter().id();
 			if(input_reference_) nd.add_input_parameter(id);
 			if(sent_reference_) nd.add_sent_parameter(id);
 		} else if(referenced_parameter().kind() == deterministic) {
@@ -136,8 +132,6 @@ void filter_parameter<Value>::install(filter_graph& fg, node& nd) {
 			throw invalid_filter_graph("filter parameter reference must be to dynamic or deterministic parameter");
 		}
 	}
-	
-	was_installed_ = true;
 }
 
 

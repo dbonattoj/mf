@@ -68,11 +68,11 @@ private:
 	
 	/// Parameters of preceding nodes whose values this node receives with input frames.
 	/** Propagated parameters on node outputs are set up such that the node receives these parameters. */
-	std::vector<node_parameter_id> input_parameters_;
+	std::vector<parameter_id> input_parameters_;
 	
 	/// Parameters of preceding nodes to which this node can send a new value.
 	/** Parameter relays between owning node and this node are set up to transfer the new value to the owning node. */
-	std::vector<node_parameter_id> sent_parameters_;
+	std::vector<parameter_id> sent_parameters_;
 	
 	/// Relay for sent parameter values from suceeding node to this or preceding node.
 	node_parameter_relay sent_parameters_relay_;
@@ -129,8 +129,8 @@ protected:
 	void set_current_time_(time_unit t) noexcept;
 	void mark_end_();
 	
-	void update_parameter_(node_parameter_id, const node_parameter_value&);
-	void update_parameter_(node_parameter_id, node_parameter_value&&);
+	void update_parameter_(parameter_id, const node_parameter_value&);
+	void update_parameter_(parameter_id, node_parameter_value&&);
 	void update_parameters_(const node_parameter_valuation&);
 	void update_parameters_(node_parameter_valuation&&);
 	node_parameter_valuation current_parameter_valuation_() const;
@@ -159,32 +159,32 @@ public:
 	
 	/// Owned parameters.
 	///@{
-	node_parameter& add_parameter(node_parameter_id, const node_parameter_value& initial_value);
-	bool has_parameter(node_parameter_id) const;
+	node_parameter& add_parameter(parameter_id, const node_parameter_value& initial_value);
+	bool has_parameter(parameter_id) const;
 	std::size_t parameters_count() const { return parameters_.size(); }
 	const node_parameter& parameter_at(std::ptrdiff_t i) const { return parameters_.at(i); }
 	
-	bool add_propagated_parameter_if_needed(node_parameter_id);
+	bool add_propagated_parameter_if_needed(parameter_id);
 	///@}
 	
 	
 	/// Input parameters.
 	///@{
-	void add_input_parameter(node_parameter_id);
-	bool has_input_parameter(node_parameter_id) const;
+	void add_input_parameter(parameter_id);
+	bool has_input_parameter(parameter_id) const;
 	std::size_t input_parameters_count() const { return input_parameters_.size(); }
-	node_parameter_id input_parameter_at(std::ptrdiff_t i) const { return input_parameters_.at(i); }
+	parameter_id input_parameter_at(std::ptrdiff_t i) const { return input_parameters_.at(i); }
 	///@}
 	
 	
 	/// Sent parameters.
 	///@{
-	void add_sent_parameter(node_parameter_id);
-	bool has_sent_parameter(node_parameter_id) const;
+	void add_sent_parameter(parameter_id);
+	bool has_sent_parameter(parameter_id) const;
 	std::size_t sent_parameters_count() const { return sent_parameters_.size(); }
-	node_parameter_id sent_parameter_at(std::ptrdiff_t i) const { return sent_parameters_.at(i); }
+	parameter_id sent_parameter_at(std::ptrdiff_t i) const { return sent_parameters_.at(i); }
 	
-	bool add_relayed_parameter_if_needed(node_parameter_id, const node_parameter_relay& preceding_relay);
+	bool add_relayed_parameter_if_needed(parameter_id, const node_parameter_relay& preceding_relay);
 	const node_parameter_relay& sent_parameters_relay() const { return sent_parameters_relay_; }
 	///@}
 	

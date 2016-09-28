@@ -22,8 +22,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_TEST_FLOW_PARAMETER_H_
 
 #include "flow.h"
+#include <mf/filter/filter_graph.h>
+#include <mf/filter/filter_handler.h>
 #include <mf/filter/filter.h>
 #include <mf/filter/filter_parameter.h>
+#include <mf/filter/filter_job.h>
 #include <string>
 #include <vector>
 #include <memory>

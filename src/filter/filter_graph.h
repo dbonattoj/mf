@@ -24,9 +24,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/node_graph.h"
 #include "../flow/types.h"
 #include "filter.h"
+#include "filter_handler.h"
 #include <vector>
 #include <memory>
 #include <utility>
+
 
 namespace mf { namespace flow {
 
@@ -37,7 +39,9 @@ public:
 	std::vector<std::unique_ptr<filter>> filters_;
 	std::unique_ptr<node_graph> node_graph_;
 	
-	node_parameter_id last_node_parameter_id_ = 0;
+	parameter_id last_parameter_id_ = 0;
+	
+	void add_filter_(filter_handler&);
 	
 public:
 	filter_graph() = default;
@@ -45,13 +49,13 @@ public:
 	filter_graph& operator=(const filter_graph&) = delete;
 	~filter_graph();
 	
-	node_parameter_id new_node_parameter_id();
+	parameter_id new_parameter_id();
 	
-	template<typename Filter, typename... Args>
-	Filter& add_filter(Args&&... args) {
-		static_assert(std::is_base_of<filter, Filter>::value, "filter must be derived class from `filter`");
+	template<typename Handler, typename... Args>
+	filter_derived<Handler>& add_filter(Args&&... args) {
+		static_assert(std::is_base_of<filter_handler, Handler>::value, "Handler must be derived from filter_handler");
 		Expects(! was_setup());
-		Filter* filt = new Filter(std::forward<Args>(args)...);
+		filter_derived<Handler>* filt = new filter_derived<Handler>(std::forward<Args>(args)...);
 		filters_.emplace_back(filt);
 		return *filt;
 	}

@@ -22,8 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_IMPORTER_FILTER_H_
 
 #include <utility>
-#include "../filter.h"
-#include "../filter_job.h"
+#include "../filter_handler.h"
 #include "../../io/frame_importer.h"
 #include "../../io/seekable_frame_importer.h"
 
@@ -31,7 +30,7 @@ namespace mf { namespace flow {
 
 /// Importer source filter, reads frames from associated \ref frame_importer.
 template<typename Importer, typename = void>
-class importer_filter : public source_filter {
+class importer_filter : public filter_handler {
 	static_assert(! Importer::is_seekable, "Importer must not be seekable");
 
 private:
@@ -59,7 +58,7 @@ public:
 
 /// Seekable importer source filter, reads frames from associated \ref seekable_frame_importer.
 template<typename Importer>
-class importer_filter<Importer, std::enable_if_t<Importer::is_seekable>> : public source_filter {
+class importer_filter<Importer, std::enable_if_t<Importer::is_seekable>> : public filter_handler {
 	static_assert(Importer::is_seekable, "Importer must be seekable");
 	
 private:

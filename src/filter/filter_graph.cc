@@ -35,48 +35,59 @@ filter_graph::~filter_graph() {
 }
 
 
-node_parameter_id filter_graph::new_node_parameter_id() {
-	return ++last_node_parameter_id_;
+parameter_id filter_graph::new_parameter_id() {
+	return ++last_parameter_id_;
 }
 
 
 void filter_graph::setup() {
+	Assert(! was_setup());
+
 	export_filter_graph_visualization(*this, "fg.gv");
 
-	Expects(! was_setup());
+	// Setup each filter handler
+	for(auto&& filt : filters_)
+		if(filt->is_sink()) filt->propagate_setup();
+
+	// Create node graph
 	node_graph_.reset(new node_graph);
 	
-	for(auto&& filt : filters_) filt->sink_install(*this, *node_graph_);
+	// Install filters, adding and interconnecting nodes in node graph
+	filter::installation_guide guide { *this, *node_graph_ };
+	for(auto&& filt : filters_)
+		if(filt->is_sink()) filt->propagate_install(guide);
+
+	// Setup the nodes in the node graph
 	node_graph_->setup();
 }
 
 
 time_unit filter_graph::current_time() const {
-	Expects(was_setup());
+	Assert(was_setup());
 	return node_graph_->current_time();
 }
 
 
 void filter_graph::run_until(time_unit last_frame) {
-	Expects(was_setup());
+	Assert(was_setup());
 	node_graph_->run_until(last_frame);
 }
 
 
 void filter_graph::run_for(time_unit duration) {
-	Expects(was_setup());
+	Assert(was_setup());
 	node_graph_->run_for(duration);
 }
 
 
 bool filter_graph::run() {
-	Expects(was_setup());
+	Assert(was_setup());
 	return node_graph_->run();
 }
 
 
 void filter_graph::seek(time_unit target_time) {
-	Expects(was_setup());
+	Assert(was_setup());
 	node_graph_->seek(target_time);
 }
 

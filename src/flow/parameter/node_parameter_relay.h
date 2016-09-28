@@ -34,15 +34,15 @@ public:
 	using handler_function_type = std::function<void(const node_parameter_value&)>;
 
 private:
-	std::map<node_parameter_id, handler_function_type> handlers_;
+	std::map<parameter_id, handler_function_type> handlers_;
 
 public:
-	void set_handler(node_parameter_id, const handler_function_type&);
-	bool has_handler(node_parameter_id) const;
-	const handler_function_type& handler(node_parameter_id) const;
+	void set_handler(parameter_id, const handler_function_type&);
+	bool has_handler(parameter_id) const;
+	const handler_function_type& handler(parameter_id) const;
 	std::size_t handlers_count() const { return handlers_.size(); }
 
-	void send_parameter(node_parameter_id, const node_parameter_value& new_value) const;
+	void send_parameter(parameter_id, const node_parameter_value& new_value) const;
 };
 
 }}

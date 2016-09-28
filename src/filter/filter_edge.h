@@ -49,11 +49,10 @@ public:
 	virtual filter_output_base& origin() const = 0;
 	virtual filter& origin_filter() const = 0;
 	virtual const input_frame_shape_type& input_frame_shape() const = 0;
-//	virtual void set_node_input(node_input&) = 0;
-	
-	virtual std::ptrdiff_t node_input_index() const = 0;
-	
+		
 	virtual input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const = 0;
+	
+	virtual void install(node_output& origin_node_output, node_input& destination_node_input) = 0;
 };
 
 
@@ -67,9 +66,6 @@ public:
 	
 	virtual filter_input_base& destination() const = 0;
 	virtual filter& destination_filter() const = 0;
-//	virtual void set_node_output(node_output&, std::ptrdiff_t channel_index) = 0;
-
-	virtual std::ptrdiff_t node_output_channel_index() const = 0;
 };
 
 
@@ -104,16 +100,7 @@ public:
 
 private:
 	input_type& input_;
-	output_type& output_;
-	
-	std::ptrdiff_t node_output_channel_index_ = -1;
-	std::ptrdiff_t node_input_index_ = -1;
-	
-	/*node_input* node_input_ = nullptr; // TODO remove reference to nodes (allow filter edge == multiple node edges)
-	node_output* node_output_ = nullptr;
-	
-	std::ptrdiff_t node_output_channel_index_ = -1;*/
-	
+	output_type& output_;	
 		
 protected:		
 	filter_edge(input_type& in, output_type& out) :
@@ -123,8 +110,6 @@ protected:
 	
 	casted_full_view_type output_view_to_casted_view_(const timed_frame_array_view& generic_output_view) const;
 	
-	virtual void install_(node_graph&, node_input&, node_output&) = 0;
-
 public:	
 	virtual ~filter_edge() = default;
 	
@@ -134,18 +119,7 @@ public:
 	filter& destination_filter() const override { return input_.this_filter(); }
 	
 	const input_frame_shape_type& input_frame_shape() const override { return output_.frame_shape(); }
-	const output_frame_shape_type& output_frame_shape() const { return output_.frame_shape(); }
-
-	
-	std::ptrdiff_t node_output_channel_index_() const override { return node_output_channel_index_; }
-	std::ptrdiff_t node_input_index() const override { return node_input_index_; }
-	
-	
-	// TODO remove.....
-	void set_node_input(node_input& in) override;
-	void set_node_output(node_output& out, std::ptrdiff_t channel_index) override;
-
-
+	const output_frame_shape_type& output_frame_shape() const { return output_.frame_shape(); }	
 };
 
 
@@ -173,14 +147,13 @@ public:
 	using typename base::output_type;
 	using typename base::output_frame_shape_type;
 
-protected:
-	void install_(node_graph&, node_input&, node_output&) override;
-
 public:
 	filter_direct_edge(input_type& in, output_type& out) :
 		base(in, out) { }
 
 	input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const override;
+	
+	void install(node_output& origin_node_output, node_input& destination_node_input) override;
 };
 
 
@@ -220,18 +193,16 @@ public:
 private:
 	Convert_function convert_function_;
 
-protected:
-	void install_(node_graph&) override;
-
 public:
 	filter_converting_edge(input_type& in, output_type& out, Convert_function&& func) :
 		base(in, out), convert_function_(std::forward<Convert_function>(func)) { }
 
-	void handler_setup(processing_node&) final override;
 	void handler_pre_process(processing_node&, processing_node_job&) final override;
 	void handler_process(processing_node&, processing_node_job&) final override;
 
 	input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const override;
+	
+	void install(node_output& origin_node_output, node_input& destination_node_input) override;
 };
 
 

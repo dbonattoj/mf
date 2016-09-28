@@ -56,13 +56,13 @@ SECTION("activation") {
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 
 		source.set_asynchonous(async1);
-		sink.input.connect(source.output);
-		sink.activation = act;
+		sink->input.connect(source->output);
+		sink->activation = act;
 
 		gr.setup();
 		gr.run_until(last);
 
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 		REQUIRE(gr.current_time() == last);
 	}
 
@@ -72,13 +72,13 @@ SECTION("activation") {
 		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);
 
 		source.set_asynchonous(async1);
-		sink.input.connect(source.output);
-		sink.activation = act_and;
+		sink->input.connect(source->output);
+		sink->activation = act_and;
 
 		gr.setup();
 		gr.run_until(last);
 
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 		REQUIRE(gr.current_time() == last);
 	}
 
@@ -90,24 +90,24 @@ SECTION("activation") {
 
 		source.set_asynchonous(async1);
 		passthrough.set_asynchonous(async1);
-		passthrough.input.connect(source.output);
-		sink.input.connect(passthrough.output);
+		passthrough->input.connect(source->output);
+		sink->input.connect(passthrough->output);
 		
 		SECTION("test 1") {
-			passthrough.activation = act1;
-			sink.activation = act2;
+			passthrough->activation = act1;
+			sink->activation = act2;
 			gr.setup();
 			gr.run_until(last);
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 			REQUIRE(gr.current_time() == last);
 		}
 		
 		SECTION("test 2") {
-			passthrough.activation = act2;
-			sink.activation = act1;
+			passthrough->activation = act2;
+			sink->activation = act1;
 			gr.setup();
 			gr.run_until(last);
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 			REQUIRE(gr.current_time() == last);
 		}
 	}
@@ -120,15 +120,15 @@ SECTION("activation") {
 
 		source.set_asynchonous(async1);
 		passthrough.set_asynchonous(async1);
-		passthrough.input.connect(source.output);
-		sink.input.connect(passthrough.output);
-		passthrough.activation = act1;
-		sink.activation = act2;
+		passthrough->input.connect(source->output);
+		sink->input.connect(passthrough->output);
+		passthrough->activation = act1;
+		sink->activation = act2;
 
 		gr.setup();
 		gr.run_until(last);
 
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 		REQUIRE(gr.current_time() == last);
 	}
 
@@ -151,19 +151,19 @@ SECTION("activation") {
 		passthrough1.set_asynchonous(async1);
 		passthrough2.set_asynchonous(async2);
 		merge.set_asynchonous(async1);
-		passthrough1.input.connect(source1.output);
-		passthrough2.input.connect(source2.output);
-		merge.input1.connect(passthrough1.output);
-		merge.input2.connect(passthrough2.output);
-		sink.input.connect(merge.output);
+		passthrough1->input.connect(source1->output);
+		passthrough2->input.connect(source2->output);
+		merge->input1.connect(passthrough1->output);
+		merge->input2.connect(passthrough2->output);
+		sink->input.connect(merge->output);
 	
-		merge.activation1 = act1;
-		merge.activation2 = act2;
+		merge->activation1 = act1;
+		merge->activation2 = act2;
 	
 		gr.setup();		
 		gr.run_until(last);
 		
-		REQUIRE(sink.check());
+		REQUIRE(sink->check());
 	}
 
 
@@ -181,17 +181,17 @@ SECTION("activation") {
 			source.set_asynchonous(async1);
 			merge.set_asynchonous(async1);
 			
-			merge.input1.connect(source.output);
-			merge.input2.connect(source.output);
-			sink.input.connect(merge.output);
+			merge->input1.connect(source->output);
+			merge->input2.connect(source->output);
+			sink->input.connect(merge->output);
 	
-			merge.activation1 = act1;
-			merge.activation2 = act2;
+			merge->activation1 = act1;
+			merge->activation2 = act2;
 
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 
 
@@ -207,24 +207,24 @@ SECTION("activation") {
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq_or);
 	
-			passthrough1.input.connect(source.output);
-			passthrough2.input.connect(source.output);
-			merge.input1.connect(passthrough1.output);
-			merge.input2.connect(passthrough2.output);
-			sink.input.connect(merge.output);
+			passthrough1->input.connect(source->output);
+			passthrough2->input.connect(source->output);
+			merge->input1.connect(passthrough1->output);
+			merge->input2.connect(passthrough2->output);
+			sink->input.connect(merge->output);
 
 			source.set_asynchonous(async1);
 			passthrough1.set_asynchonous(async2);
 			passthrough2.set_asynchonous(async1);
 			merge.set_asynchonous(async1);
 		
-			merge.activation1 = act1;
-			passthrough2.activation = act2;
+			merge->activation1 = act1;
+			passthrough2->activation = act2;
 		
 			gr.setup();		
 			gr.run_until(last);
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 
 		
@@ -243,17 +243,17 @@ SECTION("activation") {
 			merge.set_asynchonous(async1);
 			passthrough.set_asynchonous(async2);
 			
-			merge.input1.connect(source.output);
-			merge.input2.connect(source.output);
-			passthrough.input.connect(merge.output);
-			sink.input.connect(passthrough.output);
+			merge->input1.connect(source->output);
+			merge->input2.connect(source->output);
+			passthrough->input.connect(merge->output);
+			sink->input.connect(passthrough->output);
 	
-			passthrough.activation = act1;
+			passthrough->activation = act1;
 
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 
 	
@@ -272,18 +272,18 @@ SECTION("activation") {
 			merge.set_asynchonous(async1);
 			passthrough.set_asynchonous(async2);
 			
-			merge.input1.connect(source.output);
-			merge.input2.connect(source.output);
-			passthrough.input.connect(merge.output);
-			sink.input.connect(passthrough.output);
+			merge->input1.connect(source->output);
+			merge->input2.connect(source->output);
+			passthrough->input.connect(merge->output);
+			sink->input.connect(passthrough->output);
 	
-			passthrough.activation = act1;
-			merge.activation2 = act2;
+			passthrough->activation = act1;
+			merge->activation2 = act2;
 
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(sink.check());
+			REQUIRE(sink->check());
 		}
 	}
 }

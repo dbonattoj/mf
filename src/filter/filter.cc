@@ -21,94 +21,137 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "filter.h"
 #include "filter_parameter.h"
 #include "filter_job.h"
+#include "filter_handler.h"
 #include "../flow/node_graph.h"
 #include "../flow/node.h"
+#include "../flow/multiplex/multiplex_node.h"
 #include "../flow/processing/sink_node.h"
 #include "../flow/processing/sync_node.h"
 #include "../flow/processing/async_node.h"
 #include <set>
+#include <algorithm>
 
 namespace mf { namespace flow {
-	
+
+
+bool filter::installation_guide::has_filter(const filter& filt) const {
+	return (local_filter_nodes.find(&filt) != local_filter_nodes.end());
+}
+
+
+bool filter::installation_guide::has_filter_successors(const filter& filt) const {
+	auto direct_suc = filt.direct_successors_();
+	return std::all_of(direct_suc.begin(), direct_suc.end(), [this](const filter* suc_filt) {
+		return has_filter(*suc_filt);
+	});
+}
+
+
+bool filter::installation_guide::has_filter_predecessors(const filter& filt) const {
+	auto direct_pre = filt.direct_predecessors_();
+	return std::all_of(direct_pre.begin(), direct_pre.end(), [this](const filter* pre_filt) {
+		return has_filter(*pre_filt);
+	});
+}
+
+
+///////////////
+
+
 const std::string filter::default_filter_name = "filter";
 const std::string filter::default_filter_input_name = "in";
 const std::string filter::default_filter_output_name = "out";
 
 
-void filter::propagate_install_(filter_graph& fg, node_graph& gr) {
-	if(was_installed_) return;
-	
-	for(filter_input_base* in : inputs_) {
-		filter& direct_predecessor = in->connected_filter();
-		direct_predecessor.propagate_install_(fg, gr);
+filter::filter() { }
+
+auto filter::direct_successors_() -> filter_reference_set {
+	filter_reference_set direct_suc;	
+	for(std::ptrdiff_t i = 0; i < outputs_count(); ++i) {
+		const filter_output_base& out = output_at(i);
+		for(std::ptrdiff_t edge = 0; edge < out.edges_count(); ++edge)
+			direct_suc.emplace(&out.connected_filter_at_edge(edge));
 	}
-	
-	this->install_(fg, gr);
-	
-	was_installed_ = true;
+	return direct_suc;
 }
+auto filter::direct_successors_() const -> const_filter_reference_set {
+	const_filter_reference_set direct_suc;	
+	for(std::ptrdiff_t i = 0; i < outputs_count(); ++i) {
+		const filter_output_base& out = output_at(i);
+		for(std::ptrdiff_t edge = 0; edge < out.edges_count(); ++edge)
+			direct_suc.emplace(&out.connected_filter_at_edge(edge));
+	}
+	return direct_suc;
+}
+
+
+auto filter::direct_predecessors_() -> filter_reference_set {
+	filter_reference_set direct_pre;	
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		const filter_input_base& in = input_at(i);
+		if(! in.is_connected()) continue;
+		direct_pre.emplace(&in.connected_filter());
+	}
+	return direct_pre;
+}
+auto filter::direct_predecessors_() const -> const_filter_reference_set {
+	const_filter_reference_set direct_pre;	
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		const filter_input_base& in = input_at(i);
+		if(! in.is_connected()) continue;
+		direct_pre.emplace(&in.connected_filter());
+	}
+	return direct_pre;
+}
+
+
 
 
 bool filter::precedes(const filter& filt) const {
 	if(&filt == this) return true;
-	for(auto&& out : outputs_) for(std::ptrdiff_t edge = 0; edge < out->edges_count(); ++edge) // TODO verify
-		if(out->connected_filter_at_edge(edge).precedes(filt)) return true;
-	return false;
+	
+	auto direct_suc = direct_successors_();
+	return std::any_of(direct_suc.begin(), direct_suc.end(), [&filt](const filter* suc_filt) {
+		return suc_filt->precedes(filt);
+	});
 }
 
 
 
 bool filter::precedes_strict(const filter& filt) const {
 	if(&filt == this) return false;
-	for(auto&& out : outputs_) for(std::ptrdiff_t edge = 0; edge < out->edges_count(); ++edge)
-		if(out->connected_filter_at_edge(edge).precedes(filt)) return true;
-	return false;
-}
-
-
-
-void filter::handler_setup(processing_node& nd) {
-	Assert(&nd == node_);
-	this->setup();
-	for(filter_output_base* out : outputs_)
-		Assert(out->frame_shape_is_defined());
+	else return precedes(filt);
 }
 
 
 void filter::handler_pre_process(processing_node& nd, processing_node_job& job) {
-	Assert(&nd == node_);
 	filter_job fjob(job);
-	this->pre_process(fjob);
+	handler_->pre_process(fjob);
 }
 
 
 void filter::handler_process(processing_node& nd, processing_node_job& job) {
-	Assert(&nd == node_);
 	filter_job fjob(job);
-	this->process(fjob);
+	handler_->process(fjob);
 }
 
 
 void filter::register_input(filter_input_base& in) {
-	Assert(! was_installed());
 	inputs_.push_back(&in);
 }
 
 
 void filter::register_output(filter_output_base& out) {
-	Assert(! was_installed());
 	outputs_.push_back(&out);
 }
 
 
 void filter::register_parameter(filter_parameter_base& param) {
-	Assert(! was_installed());
 	parameters_.push_back(&param);
 }
 
 
 void filter::set_asynchonous(bool async) {
-	Assert(! was_installed());
 	asynchronous_ = async;
 }
 
@@ -119,7 +162,6 @@ bool filter::is_asynchonous() const {
 
 
 void filter::set_prefetch_duration(time_unit dur) {
-	Assert(! was_installed());
 	prefetch_duration_ = dur;
 }
 
@@ -128,8 +170,10 @@ time_unit filter::prefetch_duration() const {
 	return prefetch_duration_;
 }
 
-bool filter::need_multiplex_node_() const {
-	// multiplex node is needed if there are multiple output edges
+bool filter::needs_multiplex_node_() const {
+	// multiplex node is needed if there are >1 output edges
+	// (does not imply that there are >1 direct successor filters)
+	
 	bool one_output_edge = false;
 	for(auto&& out : outputs_) {
 		std::size_t edges_count = out->edges_count();
@@ -141,114 +185,143 @@ bool filter::need_multiplex_node_() const {
 }
 
 
-void filter::install_(filter_graph& fg, node_graph& gr) {
-	Assert(! was_installed());
+/*
+bool filter::is_parallelization_join_point_() const {
+	if(is_source() && parallelization_factor_ > 1) {
+		return true;
+	} else {
+		auto direct_suc = direct_successors_();
+		return std::any_of(direct_suc.begin(), direct_suc.end(), [parallelization_factor_](const filter& suc_filt) {
+			return (suc_filt.parallelization_factor() != parallelization_factor_);
+		});
+	}
+}
+
+bool filter::is_parallelization_split_point_() const {
+	if(parallelization_factor_ == 1) {
+		return false;
+	} else if(is_sink()) {
+		return true;
+	} else {
+		auto direct_suc = direct_successors_();
+		return std::any_of(direct_suc.begin(), direct_suc.end(), [parallelization_factor_](const filter& suc_filt) {
+			return (suc_filt.parallelization_factor() != parallelization_factor_);
+		});
+	}
+}
+*/
+
+
+void filter::propagate_setup() {
+	if(was_setup_) return;
+	
+	for(filter_input_base* in : inputs_) {
+		if(! in->is_connected()) continue;
+		filter& direct_predecessor = in->connected_filter();
+		direct_predecessor.propagate_setup();
+	}
+	
+	setup_();
+	
+	was_setup_ = true;
+}
+
+
+void filter::propagate_install(installation_guide& guide) {
+	if(guide.has_filter(*this)) return;
+	
+	for(filter_input_base* in : inputs_) {
+		if(! in->is_connected()) continue;
+		filter& direct_predecessor = in->connected_filter();
+		direct_predecessor.propagate_install(guide);
+	}
+	
+	install_(guide);
+}
+
+
+void filter::setup_() {
+	handler_->setup();
+	for(filter_output_base* out : outputs_)
+		Assert(out->frame_shape_is_defined());
+}
+
+
+void filter::install_input_(filter_input_base& in, processing_node& installed_node, const installation_guide& guide) {
+	if(! in.is_connected()) return;
+	
+	// Add input to installed node
+	processing_node_input& node_in = installed_node.add_input();
+	in.set_index(node_in.index());
+	
+	// Get connected filter output
+	const filter_output_base& connected_output = in.connected_output();
+	std::ptrdiff_t connected_output_channel_index  = connected_output.index();
+	const filter& connected_filter = in.connected_filter();
+	Assert(guide.has_filter(connected_filter));
+
+	// Get local node group for connected filter
+	const filter_node_group& connected_node_group = guide.local_filter_nodes.at(&connected_filter);
+	
+	// Connect to connected filter's node (multiplex or processing)
+	node_output* connected_node_out = nullptr;
+	if(connected_node_group.multiplex != nullptr)
+		connected_node_out = &connected_node_group.multiplex->add_output(connected_output_channel_index);
+	else
+		connected_node_out = &connected_node_group.processing->output_at(connected_output_channel_index);
+	
+	// Install through edge
+	in.install_edge(*connected_node_out, node_in);
+}
+
+
+void filter::install_(installation_guide& guide) {
+	// install is called in source-to-sink order
+	// predecessors of this filter have already been installed
+	
+	// Create processing node for this filter
+	processing_node* installed_node = nullptr;
 	if(asynchronous_) {
-		async_node& nd = gr.add_node<async_node>();
+		async_node& nd = guide.node_gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
-		node_ = &nd;
+		installed_node = &nd;
 	} else {
-		sync_node& nd = gr.add_node<sync_node>();
-		node_ = &nd;
+		sync_node& nd = guide.node_gr.add_node<sync_node>();
+		installed_node = &nd;
 	}
-	node_->set_name(name_.empty() ? default_filter_name : name_);
-	node_->set_handler(*this);
+	installed_node->set_name(name_.empty() ? default_filter_name : name_);
+	installed_node->set_handler(*this);
+	
+			if(is_source()) installed_node->define_source_stream_timing(node_stream_timing_);
 
-	for(filter_input_base* in : inputs_) in->install(*node_);
-
-	if(need_multiplex_node_()) {
-		multiplex_node_ = &gr.add_node<multiplex_node>();
-		multiplex_node_->input().connect(node_->output());
-		for(filter_output_base* out : outputs_) out->install(*node_, *multiplex_node_);
-	} else {
-		for(filter_output_base* out : outputs_) out->install(*node_);
+	guide.local_filter_nodes[this].processing = installed_node;
+	
+	// Add node inputs for each connected filter input
+	// and connect them to predecessor outputs (which have already been installed)
+	for(filter_input_base* in : inputs_) {
+		processing_node_input& nd_in = installed_node->add_input();
+		in->set_index(nd_in.index());
 	}
 	
-	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
-
-	Assert(was_installed());
-}
-
-
-void sink_filter::install_(filter_graph& fg, node_graph& gr) {
-	Assert(! was_installed());
-	Assert(outputs_.size() == 0, "sink filter must have no outputs");
-	Assert(! is_asynchonous(), "sink filter cannot be asynchonous");
-	Assert(prefetch_duration() == 0, "sink filter cannot have prefetch");
-	
-	sink_node& nd = gr.add_sink<sink_node>();
-	node_ = &nd;
-	node_->set_name(name_.empty() ? "sink" : name_);
-	node_->set_handler(*this);
-
-	for(filter_input_base* in : inputs_) in->install(*node_);
-	
-	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
-	
-	Assert(was_installed());
-}
-
-
-source_filter::source_filter(bool seekable, time_unit stream_duration) {
-	//auto policy = seekable ? node_stream_ properties::seekable : node_stream_properties::forward;
-	node_stream_timing_.set_duration(stream_duration);
-}
-
-
-void source_filter::define_source_stream_timing(const node_stream_timing& tm) {
-	node_stream_timing_ = tm;
-	// TODO cleanup
-}
-
-
-const node_stream_timing& source_filter::stream_timing() const noexcept { return node_stream_timing_; }
-
-
-
-void source_filter::install_(filter_graph& fg, node_graph& gr) {
-	Assert(! was_installed());
-	Assert(inputs_.size() == 0, "source filter must have no inputs");
-
-	if(asynchronous_) {
-		async_node& nd = gr.add_node<async_node>();
-		nd.set_prefetch_duration(prefetch_duration_);
-		node_ = &nd;
-	} else {
-		sync_node& nd = gr.add_node<sync_node>();
-		node_ = &nd;
+	// Add multiplex node if necessary 
+	if(needs_multiplex_node_()) {
+		multiplex_node& multiplex = guide.node_gr.add_node<multiplex_node>();
+		multiplex.input().connect(installed_node->output());
+		guide.local_filter_nodes[this].multiplex = &multiplex;
 	}
-	node_->set_name(name_.empty() ? "source" : name_);
-	node_->set_handler(*this);
-	node_->define_source_stream_timing(node_stream_timing_);
-
-	if(need_multiplex_node_()) {
-		multiplex_node_ = &gr.add_node<multiplex_node>();
-		multiplex_node_->input().connect(node_->output());
-		for(filter_output_base* out : outputs_) out->install(*node_, *multiplex_node_);
-	} else {
-		for(filter_output_base* out : outputs_) out->install(*node_);
+	
+	// Add channels for outputs
+	for(filter_output_base* out : outputs_) {
+		if(out->edges_count() == 0) continue;
+		processing_node_output_channel& out_ch = installed_node->add_output_channel();
+		out->set_index(out_ch.index());
+		out_ch.define_frame_format(out->frame_format());
 	}
-
-	for(filter_parameter_base* param : parameters_) param->install(fg, *node_);
-
-	Assert(was_installed());
+	
+	// Add node parameters for dynamic filter parameters
+	for(filter_parameter_base* param : parameters_)
+		param->install(guide.filter_gr, *installed_node);
 }
 
-
-void filter::sink_install(filter_graph& fg, node_graph& gr) {
-	propagate_install_(fg, gr);
-}
-
-
-time_unit filter::current_time() const {
-	Assert(was_installed());
-	return node_->current_time();
-}
-
-
-bool filter::reached_end() const {
-	Assert(was_installed());
-	return node_->reached_end();
-}
 
 }}

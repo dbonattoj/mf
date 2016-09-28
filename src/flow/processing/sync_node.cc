@@ -47,9 +47,7 @@ thread_index sync_node::processing_thread_index() const {
 }
 
 
-void sync_node::setup() {
-	handler_setup_();
-		
+void sync_node::setup() {		
 	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 	

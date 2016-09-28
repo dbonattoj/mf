@@ -27,7 +27,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ndarray.h"
 #include <mf/common.h>
 #include <mf/filter/filter_graph.h>
+#include <mf/filter/filter_handler.h>
 #include <mf/filter/filter.h>
+#include <mf/filter/filter_parameter.h>
 #include <mf/filter/filter_job.h>
 #include <mf/nd/ndcoord.h>
 #include <mf/utility/string.h>
@@ -42,7 +44,7 @@ constexpr int noframe = -2;
 constexpr int missingframe = -3;
 
 
-class sequence_frame_source : public flow::source_filter {
+class sequence_frame_source : public flow::filter_handler {
 private:
 	time_unit last_frame_;
 	ndsize<2> frame_shape_;
@@ -53,10 +55,15 @@ private:
 
 public:
 	output_type<2, int> output;
-	
-	explicit sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
-		flow::source_filter(seekable, (bounded || seekable) ? (last_frame + 1) : -1), last_frame_(last_frame), frame_shape_(frame_shape),
-		output(*this) { set_name("source"); }
+			
+	sequence_frame_source(time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
+		frame_shape_(frame_shape),
+		output(*this)
+	{
+		flow::node_stream_timing tm;
+		tm.set_duration((bounded || seekable) ? (last_frame + 1) : -1);
+		this_filter().define_source_stream_timing(tm);
+	}
 	
 	void setup() override {
 		std::cout << "source setup" << std::endl;
@@ -92,7 +99,7 @@ public:
 ///////////////
 
 
-class passthrough_filter : public flow::filter {
+class passthrough_filter : public flow::filter_handler {
 protected:
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
@@ -100,7 +107,7 @@ protected:
 	
 	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
-		if(t < activation.size()) input.set_activated(activation[t]);
+		if(t < activation.size()) job.set_activated(input, activation[t]);
 	}
 	
 	void process(flow::filter_job& job) override {		
@@ -132,15 +139,20 @@ public:
 	std::function<callback_func> callback;
 
 	passthrough_filter(time_unit past_window, time_unit future_window) :
-		input(*this, past_window, future_window),
-		output(*this) { set_name("passthrough"); }
+		input(*this),
+		output(*this)
+	{
+		input.set_past_window(past_window);
+		input.set_future_window(future_window);
+		this_filter().set_name("passthrough");
+	}
 };
 
 
 ///////////////
 
 
-class to_float_filter : public flow::filter {
+class to_float_filter : public flow::filter_handler {
 private:
 	void setup() override {
 		output.define_frame_shape(input.frame_shape());	
@@ -157,8 +169,8 @@ public:
 	output_type<2, float> output;
 	
 	to_float_filter() :
-		input(*this, 0, 0),
-		output(*this) { set_name("to float"); }
+		input(*this),
+		output(*this) { this_filter().set_name("to float"); }
 };
 
 
@@ -169,7 +181,7 @@ inline int to_int(float f) {
 ///////////////
 
 
-class multiple_output_filter : public flow::filter {
+class multiple_output_filter : public flow::filter_handler {
 private:
 	void setup() override {
 		std::cout << "multiout setup" << std::endl;
@@ -195,7 +207,7 @@ public:
 	multiple_output_filter() :
 		input(*this), output1(*this), output2(*this)
 	{
-		set_name("multiout");
+		this_filter().set_name("multiout");
 		output1.set_name("out1");
 		output2.set_name("out2");
 	}
@@ -205,14 +217,14 @@ public:
 ///////////////
 
 
-class simple_sink : public flow::sink_filter {
+class simple_sink : public flow::filter_handler {
 public:
 	input_type<2, int> input;
 	
 	simple_sink() :
 		input(*this) { }
 	
-	void process(flow::filter_job& job) override { set_name("sink"); }
+	void process(flow::filter_job& job) override { this_filter().set_name("sink"); }
 };
 
 
@@ -220,7 +232,7 @@ public:
 
 
 
-class expected_frames_sink : public flow::sink_filter {
+class expected_frames_sink : public flow::filter_handler {
 private:
 	const std::vector<int> expected_frames_;
 	std::vector<int> got_frames_;
@@ -233,12 +245,12 @@ public:
 	explicit expected_frames_sink(const std::vector<int>& seq) :
 		expected_frames_(seq),
 		got_frames_(seq.size(), missingframe),
-		input(*this) { set_name("sink"); }
+		input(*this) { this_filter().set_name("sink"); }
 	
 	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
 		if(t < activation.size())
-			input.set_activated(activation[t]);
+			job.set_activated(input, activation[t]);
 	}
 	
 	void process(flow::filter_job& job) override {		
@@ -272,7 +284,7 @@ public:
 ///////////////
 
 
-class input_synchronize_test_filter : public flow::filter {
+class input_synchronize_test_filter : public flow::filter_handler {
 public:
 	input_type<2, int> input1;
 	input_type<2, int> input2;
@@ -284,7 +296,7 @@ public:
 	input_synchronize_test_filter() :
 		input1(*this), input2(*this), output(*this)
 	{
-		set_name("merge");
+		this_filter().set_name("merge");
 		input1.set_name("in1");
 		input2.set_name("in2");
 	}
@@ -297,8 +309,8 @@ public:
 	
 	void pre_process(flow::filter_job& job) override {
 		time_unit t = job.time();
-		if(t < activation1.size()) input1.set_activated(activation1[t]);
-		if(t < activation2.size()) input2.set_activated(activation2[t]);
+		if(t < activation1.size()) job.set_activated(input1, activation1[t]);
+		if(t < activation2.size()) job.set_activated(input2, activation2[t]);
 	}
 	
 	void process(flow::filter_job& job) override {

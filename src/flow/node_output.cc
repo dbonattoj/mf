@@ -33,13 +33,13 @@ thread_index node_output::reader_thread_index() const {
 }
 
 
-bool node_output::add_relayed_parameter_if_needed(node_parameter_id id, const node_parameter_relay& preceding_relay) {
+bool node_output::add_relayed_parameter_if_needed(parameter_id id, const node_parameter_relay& preceding_relay) {
 	Assert(is_connected());
 	return connected_node().add_relayed_parameter_if_needed(id, preceding_relay);
 }
 
 
-bool node_output::add_propagated_parameter_if_needed(node_parameter_id id) {
+bool node_output::add_propagated_parameter_if_needed(parameter_id id) {
 	std::cout << "node_output(" << this_node().name() << ")::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
 
 	Assert(is_connected());
@@ -50,7 +50,7 @@ bool node_output::add_propagated_parameter_if_needed(node_parameter_id id) {
 }
 
 
-bool node_output::has_propagated_parameter(node_parameter_id id) const {
+bool node_output::has_propagated_parameter(parameter_id id) const {
 	auto it = std::find(propagated_parameters_.cbegin(), propagated_parameters_.cend(), id);
 	return (it != propagated_parameters_.cend());
 }

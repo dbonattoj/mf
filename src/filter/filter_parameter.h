@@ -28,6 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 class filter;
+class filter_handler;
 class filter_graph;
 class node;
 
@@ -45,7 +46,6 @@ public:
 	virtual bool is_input_reference() const = 0;
 	virtual bool is_sent_reference() const = 0;
 
-	virtual bool was_installed() const = 0;
 	virtual void install(filter_graph&, node&) = 0;
 };
 
@@ -87,8 +87,7 @@ private:
 	const filter_parameter* referenced_parameter_ = nullptr;
 	std::string name_;
 
-	bool was_installed_ = false;
-	node_parameter_id id_ = undefined_node_parameter_id;
+	parameter_id id_ = undefined_parameter_id;
 
 	filter_parameter(const filter_parameter&) = delete;
 	filter_parameter& operator=(const filter_parameter&) = delete;
@@ -116,9 +115,8 @@ public:
 	bool is_input_reference() const override;
 	bool is_sent_reference() const override;
 	
-	node_parameter_id id() const { return id_; }
+	parameter_id id() const { return id_; }
 	
-	bool was_installed() const override { return was_installed_; }
 	void install(filter_graph&, node&) override;
 };
 

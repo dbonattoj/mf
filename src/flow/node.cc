@@ -238,7 +238,7 @@ void node::deduce_sent_parameters_relay_() {
 }
 
 
-bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
+bool node::add_propagated_parameter_if_needed(parameter_id id) {
 	std::cout << "node(" << name_ << ")::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
 	
 	bool needed = false;
@@ -252,7 +252,7 @@ bool node::add_propagated_parameter_if_needed(node_parameter_id id) {
 
 
 
-bool node::add_relayed_parameter_if_needed(node_parameter_id id, const node_parameter_relay& preceding_relay) {
+bool node::add_relayed_parameter_if_needed(parameter_id id, const node_parameter_relay& preceding_relay) {
 	bool needed = false;
 	for(auto&& out : outputs_) {
 		bool needed_by_output = out->add_relayed_parameter_if_needed(id, sent_parameters_relay_);
@@ -279,47 +279,47 @@ bool node::add_relayed_parameter_if_needed(node_parameter_id id, const node_para
 
 
 
-node_parameter& node::add_parameter(node_parameter_id id, const node_parameter_value& initial_value) {
+node_parameter& node::add_parameter(parameter_id id, const node_parameter_value& initial_value) {
 	parameters_.emplace_back(id, initial_value);
 	parameter_valuation_.set(id, initial_value);
 	return parameters_.back();
 }
 
 
-bool node::has_parameter(node_parameter_id id) const {
+bool node::has_parameter(parameter_id id) const {
 	return std::any_of(parameters_.cbegin(), parameters_.cend(), [id](const node_parameter& param) {
 		return (param.id() == id);
 	});
 }
 
 
-void node::add_input_parameter(node_parameter_id id) {
+void node::add_input_parameter(parameter_id id) {
 	input_parameters_.push_back(id);
 }
 
 
-bool node::has_input_parameter(node_parameter_id id) const {
+bool node::has_input_parameter(parameter_id id) const {
 	return std::find(input_parameters_.cbegin(), input_parameters_.cend(), id) != input_parameters_.cend();
 }
 
 
-void node::add_sent_parameter(node_parameter_id id) {
+void node::add_sent_parameter(parameter_id id) {
 	sent_parameters_.push_back(id);
 }
 
 
-bool node::has_sent_parameter(node_parameter_id id) const {
+bool node::has_sent_parameter(parameter_id id) const {
 	return std::find(sent_parameters_.cbegin(), sent_parameters_.cend(), id) != sent_parameters_.cend();
 }
 
 
-void node::update_parameter_(node_parameter_id id, const node_parameter_value& val) {
+void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
 	std::lock_guard<std::mutex> lock(parameters_mutex_);
 	parameter_valuation_.set(id, val);
 }
 
 
-void node::update_parameter_(node_parameter_id id, node_parameter_value&& val) {
+void node::update_parameter_(parameter_id id, node_parameter_value&& val) {
 	std::lock_guard<std::mutex> lock(parameters_mutex_);
 	parameter_valuation_.set(id, std::move(val));
 }
