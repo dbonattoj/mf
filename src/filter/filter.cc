@@ -62,8 +62,8 @@ const std::string filter::default_filter_name = "filter";
 const std::string filter::default_filter_input_name = "in";
 const std::string filter::default_filter_output_name = "out";
 
-
-filter::filter() { }
+filter::filter(std::unique_ptr<filter_handler> hnd) :
+	handler_(std::move(hnd)) { }
 
 auto filter::direct_successors_() -> filter_reference_set {
 	filter_reference_set direct_suc;	
@@ -252,7 +252,11 @@ void filter::install_input_(filter_input_base& in, processing_node& installed_no
 	
 	// Add input to installed node
 	processing_node_input& node_in = installed_node.add_input();
+	node_in.set_past_window(in.past_window_duration());
+	node_in.set_future_window(in.future_window_duration());
 	in.set_index(node_in.index());
+	
+	node_in.set_name(in.name().empty() ? default_filter_input_name : in.name());
 	
 	// Get connected filter output
 	const filter_output_base& connected_output = in.connected_output();
@@ -264,14 +268,16 @@ void filter::install_input_(filter_input_base& in, processing_node& installed_no
 	const filter_node_group& connected_node_group = guide.local_filter_nodes.at(&connected_filter);
 	
 	// Connect to connected filter's node (multiplex or processing)
-	node_output* connected_node_out = nullptr;
-	if(connected_node_group.multiplex != nullptr)
-		connected_node_out = &connected_node_group.multiplex->add_output(connected_output_channel_index);
-	else
-		connected_node_out = &connected_node_group.processing->output_at(connected_output_channel_index);
-	
 	// Install through edge
-	in.install_edge(*connected_node_out, node_in);
+	node_output* connected_node_out = nullptr;
+	if(connected_node_group.multiplex != nullptr) {
+		connected_node_out = &connected_node_group.multiplex->add_output(connected_output_channel_index);
+		in.install_edge(*connected_node_out, 0, node_in);
+		connected_node_out->set_name(node_in.name());
+	} else {
+		connected_node_out = &connected_node_group.processing->output();
+		in.install_edge(*connected_node_out, connected_output_channel_index, node_in);
+	}
 }
 
 
@@ -281,16 +287,24 @@ void filter::install_(installation_guide& guide) {
 	
 	// Create processing node for this filter
 	processing_node* installed_node = nullptr;
-	if(asynchronous_) {
+	if(is_sink()) {
+		sink_node& nd = guide.node_gr.add_sink<sink_node>();
+		installed_node = &nd;
+	} else if(asynchronous_) {
 		async_node& nd = guide.node_gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
 		installed_node = &nd;
+		nd.output().set_name("out");
 	} else {
 		sync_node& nd = guide.node_gr.add_node<sync_node>();
 		installed_node = &nd;
+		nd.output().set_name("out");
 	}
 	installed_node->set_name(name_.empty() ? default_filter_name : name_);
+	
 	installed_node->set_handler(*this);
+	
+	std::cout << "NODE::::::::::::::::::" << name_ << std::endl;
 	
 			if(is_source()) installed_node->define_source_stream_timing(node_stream_timing_);
 
@@ -298,16 +312,17 @@ void filter::install_(installation_guide& guide) {
 	
 	// Add node inputs for each connected filter input
 	// and connect them to predecessor outputs (which have already been installed)
-	for(filter_input_base* in : inputs_) {
-		processing_node_input& nd_in = installed_node->add_input();
-		in->set_index(nd_in.index());
-	}
+	for(filter_input_base* in : inputs_)
+		install_input_(*in, *installed_node, guide);
 	
 	// Add multiplex node if necessary 
 	if(needs_multiplex_node_()) {
 		multiplex_node& multiplex = guide.node_gr.add_node<multiplex_node>();
 		multiplex.input().connect(installed_node->output());
 		guide.local_filter_nodes[this].multiplex = &multiplex;
+
+		multiplex.set_name("multiplex");
+		multiplex.input().set_name("in");
 	}
 	
 	// Add channels for outputs
@@ -316,6 +331,7 @@ void filter::install_(installation_guide& guide) {
 		processing_node_output_channel& out_ch = installed_node->add_output_channel();
 		out->set_index(out_ch.index());
 		out_ch.define_frame_format(out->frame_format());
+		out_ch.set_name(out->name().empty() ? default_filter_output_name : out->name());
 	}
 	
 	// Add node parameters for dynamic filter parameters

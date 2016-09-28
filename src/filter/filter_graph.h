@@ -40,9 +40,7 @@ public:
 	std::unique_ptr<node_graph> node_graph_;
 	
 	parameter_id last_parameter_id_ = 0;
-	
-	void add_filter_(filter_handler&);
-	
+		
 public:
 	filter_graph() = default;
 	filter_graph(const filter_graph&) = delete;
@@ -55,7 +53,9 @@ public:
 	filter_derived<Handler>& add_filter(Args&&... args) {
 		static_assert(std::is_base_of<filter_handler, Handler>::value, "Handler must be derived from filter_handler");
 		Expects(! was_setup());
-		filter_derived<Handler>* filt = new filter_derived<Handler>(std::forward<Args>(args)...);
+		
+		using filter_type = filter_derived<Handler>;
+		filter_type* filt = new filter_type(std::forward<Args>(args)...);
 		filters_.emplace_back(filt);
 		return *filt;
 	}

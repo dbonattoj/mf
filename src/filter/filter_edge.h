@@ -52,7 +52,7 @@ public:
 		
 	virtual input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const = 0;
 	
-	virtual void install(node_output& origin_node_output, node_input& destination_node_input) = 0;
+	virtual void install(node_output& origin_node_output, std::ptrdiff_t origin_node_channel_index, node_input& destination_node_input) = 0;
 };
 
 
@@ -101,6 +101,7 @@ public:
 private:
 	input_type& input_;
 	output_type& output_;	
+	std::ptrdiff_t node_output_channel_ = -1;
 		
 protected:		
 	filter_edge(input_type& in, output_type& out) :
@@ -117,6 +118,9 @@ public:
 	filter& origin_filter() const override { return output_.this_filter(); }
 	input_type& destination() const override { return input_; }	
 	filter& destination_filter() const override { return input_.this_filter(); }
+	
+	std::ptrdiff_t node_output_channel() const { return node_output_channel_; }
+	void set_node_output_channel(std::ptrdiff_t ch) { node_output_channel_ = ch; } 
 	
 	const input_frame_shape_type& input_frame_shape() const override { return output_.frame_shape(); }
 	const output_frame_shape_type& output_frame_shape() const { return output_.frame_shape(); }	
@@ -153,7 +157,7 @@ public:
 
 	input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const override;
 	
-	void install(node_output& origin_node_output, node_input& destination_node_input) override;
+	void install(node_output& origin_node_output, std::ptrdiff_t origin_node_channel_index, node_input& destination_node_input) override;
 };
 
 
@@ -202,7 +206,7 @@ public:
 
 	input_full_view_type cast_connected_node_output_view(const timed_frame_array_view&) const override;
 	
-	void install(node_output& origin_node_output, node_input& destination_node_input) override;
+	void install(node_output& origin_node_output, std::ptrdiff_t origin_node_channel_index, node_input& destination_node_input) override;
 };
 
 

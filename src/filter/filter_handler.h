@@ -17,7 +17,7 @@ class filter_job;
  ** TODO: May be called from multiple threads, derived should not have data members. */
 class filter_handler {
 private:
-	filter* filter_ = nullptr;
+	filter& filter_;
 
 public:
 	template<std::size_t Dim, typename Elem> using input_type = filter_input<Dim, Elem>;
@@ -25,7 +25,7 @@ public:
 	template<typename Value> using parameter_type = filter_parameter<Value>;
 	using job_type = filter_job;
 
-	filter_handler() = default;
+	explicit filter_handler(filter& filt) : filter_(filt) { }
 
 	virtual ~filter_handler() = default;
 	filter_handler(const filter_handler&) = delete;
@@ -33,12 +33,8 @@ public:
 	filter_handler& operator=(const filter_handler&) = delete;
 	filter_handler& operator=(filter_handler&&) = delete;
 	
-	void set_this_filter(filter& filt) { filter_ = &filt; }
-	const filter& this_filter() const { return *filter_; }
-	filter& this_filter() { return *filter_; }
-	
-	operator filter& () { return this_filter(); }
-	operator const filter& () const { return this_filter(); }
+	const filter& this_filter() const { return filter_; }
+	filter& this_filter() { return filter_; }
 
 	virtual void setup() { }
 	

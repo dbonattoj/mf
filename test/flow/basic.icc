@@ -129,7 +129,6 @@ SECTION("basic") {
 		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink->check());
 	}
-
 	
 	SECTION("detailled time window test") { 
 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
@@ -195,6 +194,7 @@ SECTION("basic") {
 			REQUIRE(sink->check());	
 		}
 
+
 		SECTION("source --> [+3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(0, 3);
 
@@ -202,7 +202,7 @@ SECTION("basic") {
 			node->input.connect(source->output);
 			sink->input.connect(node->output);
 			gr.setup();
-			
+						
 			node->callback = [&](passthrough_filter& self, flow::filter_job& job) {
 				auto in = job.in(self.input);
 				auto in_full = job.in_full(self.input);
@@ -251,6 +251,7 @@ SECTION("basic") {
 			
 			REQUIRE(sink->check());
 		}
+
 
 		SECTION("source --> [-3,+3]pass --> sink") {
 			auto& node = gr.add_filter<passthrough_filter>(3, 3);
@@ -308,7 +309,31 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-
+	
+	
+	SECTION("implicit conversion") {
+		SECTION("conversion") {
+			INFO(R"(
+			source --> tofloat --[]--> sink
+			)");
+			
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& tofloat = gr.add_filter<to_float_filter>();
+			auto& sink = gr.add_filter<expected_frames_sink>(seq);
+			
+			tofloat->input.connect(source->output);
+			sink->input.connect(tofloat->output, to_int);
+			
+			source.set_asynchonous(async1);
+			tofloat.set_asynchonous(async1);
+			
+			gr.setup();
+			gr.run();
+			
+			REQUIRE(sink->check());
+		}
+	}
+	
 
 
 	SECTION("multiple inputs") {
@@ -341,7 +366,7 @@ SECTION("basic") {
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink->check());
 		}
-	
+
 		SECTION("graph 2") {
 			INFO(R"(
 			source1 --> [-3, +1]passthrough1 ---> merge --> sink
@@ -393,7 +418,8 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-	
+return;
+
 
 	SECTION("multiple outputs") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
@@ -538,29 +564,6 @@ SECTION("basic") {
 		}
 	}
 
-
-	SECTION("implicit conversion") {
-		SECTION("conversion") {
-			INFO(R"(
-			source --> tofloat --[]--> sink
-			)");
-			
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
-			auto& tofloat = gr.add_filter<to_float_filter>();
-			auto& sink = gr.add_filter<expected_frames_sink>(seq);
-			
-			tofloat->input.connect(source->output);
-			sink->input.connect(tofloat->output, to_int);
-			
-			source.set_asynchonous(async1);
-			tofloat.set_asynchonous(async1);
-			
-			gr.setup();
-			gr.run();
-			
-			REQUIRE(sink->check());
-		}
-	}
 
 	SECTION("complex") {
 		flow::filter_graph gr;

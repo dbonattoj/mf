@@ -71,7 +71,8 @@ public:
 	};
 
 private:
-	filter_handler* handler_ = nullptr;
+	std::unique_ptr<filter_handler> handler_;
+	
 	std::string name_;
 
 	std::vector<filter_input_base*> inputs_;
@@ -101,9 +102,11 @@ private:
 
 
 public:
-	filter();
+	explicit filter(std::unique_ptr<filter_handler>);
+	explicit filter() { }
 	
-	void set_handler(filter_handler& hnd) { handler_ = &hnd; }
+	void set_handler(std::unique_ptr<filter_handler> hnd) { handler_ = std::move(hnd); }
+	
 	filter_handler& handler() { return *handler_; }
 	const filter_handler& handler() const { return *handler_; }
 
@@ -145,26 +148,30 @@ public:
 };
 
 
-/// Filter containing filter handler of type `Handler`.
+
+
 template<typename Handler>
 class filter_derived : public filter {
 private:
-	Handler handler_;
+	Handler* handler_;
 
 public:
 	template<typename... Args>
-	explicit filter_derived(Args&&... args) : handler_(std::forward<Args>(args)...) {
-		set_handler(handler_);
+	explicit filter_derived(Args&&... args) :
+		handler_(new Handler(*this, std::forward<Args>(args)...))
+	{
+		set_handler(std::unique_ptr<Handler>(handler_));
 	}
-	
+			
 	Handler& handler() { return handler_; }
 	const Handler& handler() const { return handler_; }
 	
-	Handler& operator*() { return handler_; }
-	const Handler& operator*() const { return handler_; }
-	Handler* operator->() { return &handler_; }
-	const Handler* operator->() const { return &handler_; }
+	Handler& operator*() { return *handler_; }
+	const Handler& operator*() const { return *handler_; }
+	Handler* operator->() { return handler_; }
+	const Handler* operator->() const { return handler_; }
 };
+
 
 
 /// Output port of filter, abstract base class.
@@ -182,6 +189,7 @@ public:
 };
 
 
+
 /// Input port of filter, abstract base class.
 class filter_input_base {
 public:
@@ -190,10 +198,14 @@ public:
 	virtual filter& connected_filter() const = 0;
 	virtual filter_output_base& connected_output() const = 0;
 	
-	virtual void install_edge(node_output& origin_node_output, node_input& destination_node_input) = 0;
+	virtual time_unit past_window_duration() const = 0;
+	virtual time_unit future_window_duration() const = 0;
+	
+	virtual void install_edge(node_output& origin_node_output, std::ptrdiff_t origin_node_channel_index, node_input& destination_node_input) = 0;
 	virtual void set_index(std::ptrdiff_t idx) = 0;
 	virtual std::ptrdiff_t index() const = 0;
 };
+
 
 
 /// Output port of filter.
@@ -244,6 +256,7 @@ public:
 };
 
 
+
 /// Input port of filter.
 /** Has statically defined input frame dimension and element type. */
 template<std::size_t Input_dim, typename Input_elem>
@@ -277,8 +290,8 @@ public:
 
 	void set_past_window(time_unit dur) { past_window_ = dur; }
 	void set_future_window(time_unit dur) { future_window_ = dur; }
-	time_unit past_window_duration() const { return past_window_; }
-	time_unit future_window_duration() const { return future_window_; }
+	time_unit past_window_duration() const override { return past_window_; }
+	time_unit future_window_duration() const override  { return future_window_; }
 
 	bool is_connected() const override { return (edge_ != nullptr); }
 	filter& connected_filter() const override { return edge_->origin_filter(); }
@@ -295,7 +308,7 @@ public:
 	
 	const frame_shape_type& frame_shape() const;
 	
-	void install_edge(node_output& origin_node_output, node_input& destination_node_input) override;
+	void install_edge(node_output& origin_node_output, std::ptrdiff_t origin_node_channel_index, node_input& destination_node_input) override;
 	void set_index(std::ptrdiff_t idx) override { index_ = idx; }
 	std::ptrdiff_t index() const override { return index_; }	
 

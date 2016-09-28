@@ -123,8 +123,8 @@ void filter_input<Input_dim, Input_elem>::connect(filter_output<Output_dim, Outp
 
 
 template<std::size_t Input_dim, typename Input_elem>
-void filter_input<Input_dim, Input_elem>::install_edge(node_output& origin_node_output, node_input& destination_node_input) {
-	edge_->install(origin_node_output, destination_node_input);
+void filter_input<Input_dim, Input_elem>::install_edge(node_output& origin_node_output, std::ptrdiff_t origin_node_channel_index, node_input& destination_node_input) {
+	edge_->install(origin_node_output, origin_node_channel_index, destination_node_input);
 }
 
 

@@ -24,8 +24,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../filter_parameter.h"
 #include <ostream>
 #include <fstream>
+#include <string>
 
 namespace mf { namespace flow {
+
+using namespace std::literals;
 
 filter_graph_visualization::filter_graph_visualization(const filter_graph& gr, std::ostream& output) :
 	output_(output),
@@ -134,13 +137,13 @@ void filter_graph_visualization::generate_filter_input_connections_(const filter
 		const filter& connected_filt = in.connected_filter();
 		
 		std::string label;
-		/*
+		
 		time_unit p = in.past_window_duration();
 		time_unit f = in.future_window_duration();
 		if(p > 0 && f > 0) label = "[-"s + std::to_string(p) + ", +" + std::to_string(f) + "]     ";
 		else if(p > 0) label = "[-"s + std::to_string(p) + "]  ";
 		else if(f > 0) label = "[+" + std::to_string(f) + "]  ";
-		*/
+		
 				
 		output_
 			<< '\t' << uid_pool_.uid(connected_filt, "filter") << ':' << uid_pool_.uid(connected_out, "out")

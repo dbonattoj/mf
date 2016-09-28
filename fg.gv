@@ -4,9 +4,25 @@ digraph G{
 <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD COLSPAN="1" BORDER="1" CELLPADDING="4">source<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR><TR><TD COLSPAN="1" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out1"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
 >];
 	filter2 [shape=plaintext label=<
-<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in3"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">sink<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR></TABLE>
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD COLSPAN="1" BORDER="1" CELLPADDING="4">source<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR><TR><TD COLSPAN="1" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out3"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
 >];
-	filter0:out1 -> filter2:in3 [arrowhead="normal", headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, ];
-	{rank=source; filter0}
-	{rank=sink; filter2}
+	filter4 [shape=plaintext label=<
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in5"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">sink<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR></TABLE>
+>];
+	filter6 [shape=plaintext label=<
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in7"><FONT POINT-SIZE="10">in1</FONT></TD><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in8"><FONT POINT-SIZE="10">in2</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="5" BORDER="1" CELLPADDING="4">merge<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR><TR><TD COLSPAN="5" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out9"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
+>];
+	filter10 [shape=plaintext label=<
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in11"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">passthrough<BR/><FONT POINT-SIZE="10">&nbsp;</FONT></TD></TR><TR><TD COLSPAN="3" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out12"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
+>];
+	filter13 [shape=plaintext label=<
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="in14"><FONT POINT-SIZE="10">in</FONT></TD><TD WIDTH="20"></TD></TR><TR><TD COLSPAN="3" BORDER="1" CELLPADDING="4">passthrough<BR/><FONT POINT-SIZE="10">&nbsp;prefetch = 0</FONT></TD></TR><TR><TD COLSPAN="3" BORDER="0"><TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD WIDTH="20"></TD><TD BORDER="1" CELLPADDING="1" PORT="out15"><FONT POINT-SIZE="10">out</FONT></TD><TD WIDTH="20"></TD></TR></TABLE></TD></TR></TABLE>
+>];
+	filter6:out9 -> filter4:in5 [arrowhead="normal", headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, ];
+	filter10:out12 -> filter6:in7 [arrowhead="normal", headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, ];
+	filter13:out15 -> filter6:in8 [arrowhead="normal", headlabel=<>, fontsize=10, labelangle=45, labeldistance=2.0, ];
+	filter0:out1 -> filter10:in11 [arrowhead="normal", headlabel=<[-3, +1]     >, fontsize=10, labelangle=45, labeldistance=2.0, ];
+	filter2:out3 -> filter13:in14 [arrowhead="normal", headlabel=<[-1, +2]     >, fontsize=10, labelangle=45, labeldistance=2.0, ];
+	{rank=source; filter0 filter2}
+	{rank=sink; filter4}
 }

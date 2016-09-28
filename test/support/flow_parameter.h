@@ -49,11 +49,11 @@ private:
 	std::map<param_type*, std::string> expected_values_;
 
 public:
-	parameter_passthrough_filter(time_unit past_window, time_unit future_window) :
-		passthrough_filter(past_window, future_window) { }
+	parameter_passthrough_filter(flow::filter& filt, time_unit past_window, time_unit future_window) :
+		passthrough_filter(filt, past_window, future_window) { }
 
 	param_type& add_param() {
-		params_.emplace_back(new param_type(*this));
+		params_.emplace_back(new param_type(this_filter()));
 		param_type& param = *params_.back();
 		return param;
 	}

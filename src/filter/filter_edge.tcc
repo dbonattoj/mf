@@ -30,10 +30,8 @@ auto filter_edge<Dim, Output_elem, Casted_elem, Input_elem>::output_view_to_cast
 (const timed_frame_array_view& opaque_output_view) const -> casted_full_view_type {
 	if(opaque_output_view.is_null()) return casted_full_view_type::null();
 
-	std::ptrdiff_t output_channel_index = origin().index();
-
 	auto concrete_output_view = from_opaque<Dim + 1, Output_elem>(
-		extract_part(opaque_output_view, output_channel_index),
+		extract_part(opaque_output_view, node_output_channel()),
 		output_frame_shape()
 	);
 	return ndarray_view_cast<casted_full_view_type>(concrete_output_view);
@@ -53,8 +51,10 @@ cast_connected_node_output_view(const timed_frame_array_view& opaque_output_view
 
 
 template<std::size_t Dim, typename Output_elem, typename Input_elem>
-void filter_direct_edge<Dim, Output_elem, Input_elem>::install(node_output& out, node_input& in) {
+void filter_direct_edge<Dim, Output_elem, Input_elem>::
+install(node_output& out, std::ptrdiff_t out_ch, node_input& in) {
 	in.connect(out);
+	base::set_node_output_channel(out_ch);
 }
 
 
@@ -64,9 +64,9 @@ void filter_direct_edge<Dim, Output_elem, Input_elem>::install(node_output& out,
 
 template<std::size_t Dim, typename Output_elem, typename Casted_elem, typename Input_elem, typename Convert_function>
 void filter_converting_edge<Dim, Output_elem, Casted_elem, Input_elem, Convert_function>::
-install(node_output& out, node_input& in) {
+install(node_output& out, std::ptrdiff_t out_ch, node_input& in) {
 	node_graph& gr = out.this_node().graph();
-	
+		
 	sync_node& convert_node = gr.add_node<sync_node>();
 	convert_node.set_name("convert");
 	convert_node.set_handler(*this);
@@ -84,6 +84,8 @@ install(node_output& out, node_input& in) {
 
 	convert_node_input.connect(out);
 	in.connect(convert_node_output);
+	
+	base::set_node_output_channel(out_ch);
 }
 
 
@@ -99,7 +101,7 @@ handler_process(processing_node& convert_node, processing_node_job& job) {
 	const auto& out = job.output_view();
 	
 	auto concrete_in = from_opaque<Dim, Casted_elem>(
-		extract_part(in, base::origin().index()),
+		extract_part(in, base::node_output_channel()),
 		base::input_frame_shape()
 	);
 	auto concrete_out = from_opaque<Dim, Input_elem>(out, base::input_frame_shape());
