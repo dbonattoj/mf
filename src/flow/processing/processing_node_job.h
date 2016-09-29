@@ -72,7 +72,7 @@ public:
 	bool end_was_marked() const noexcept { return end_marked_; }
 		
 	time_unit time() const noexcept { return node_.current_time(); }
-	void mark_end() noexcept { end_marked_ = true; }
+	void mark_end() noexcept { /*end_marked_ = true;*/ }
 	
 	/// Access to input frame views.
 	///@{

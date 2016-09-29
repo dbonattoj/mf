@@ -50,13 +50,13 @@ thread_index sync_node::processing_thread_index() const {
 void sync_node::setup() {		
 	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
-	
+		
 	auto buffer_frame_format = output_frame_format_();
 	ring_.reset(new timed_ring(buffer_frame_format, required_capacity));
 }
 
 
-bool sync_node::process_next_frame_() {
+bool sync_node::process_next_frame_() {	
 	timed_frame_array_view out_vw = ring_->begin_write(1);
 	time_unit t = out_vw.start_time();
 	
@@ -95,7 +95,7 @@ bool sync_node::process_next_frame_() {
 
 
 	handler_process_(job);
-		
+			
 	job.detach_output_view();
 	ring_->end_write(1);
 
@@ -120,6 +120,11 @@ node::pull_result sync_node::output_pull_(time_span& span) {
 	if(span.duration() == 0) return pull_result::success;
 	
 	bool cont = true;
+	
+	while(cont && !ring_->readable_time_span().includes(span) && !reached_end())
+		cont = process_next_frame_();
+		
+	/*
 	if(ring_->readable_time_span().includes(span)) {
 
 	} else {
@@ -127,15 +132,13 @@ node::pull_result sync_node::output_pull_(time_span& span) {
 			cont = process_next_frame_();
 		} while(cont && !ring_->readable_time_span().includes(span) && !reached_end());
 	}
+	*/
 
 	if(reached_end() && span.end_time() > end_time())
 		span = time_span(span.start_time(), end_time());
 
 	if(cont) {
-		if(not (ring_->readable_duration() >= span.duration())) {
-			MF_DEBUG_EXPR(ring_->readable_time_span(), span);
-		}
-		Ensures(ring_->readable_duration() >= span.duration());
+		Assert(ring_->readable_duration() >= span.duration());
 		return pull_result::success;
 	} else {
 		if(graph().was_stopped()) return pull_result::stopped;

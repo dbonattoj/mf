@@ -28,6 +28,7 @@ SECTION("basic") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
+
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -333,7 +334,6 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-	
 
 
 	SECTION("multiple inputs") {
@@ -345,7 +345,7 @@ SECTION("basic") {
 		source1.set_asynchonous(async1);
 		source2.set_asynchonous(async1);
 		merge.set_asynchonous(async1);
-		
+
 		SECTION("graph 1") {
 			INFO(R"(
 			source1 --> [+5]passthrough --> merge --> sink
@@ -390,7 +390,7 @@ SECTION("basic") {
 			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink->check());
 		}
-		
+
 		SECTION("graph 3") {
 			INFO(R"(
 			source1 --> [-3, +1]passthrough1 ----------------------------> merge --> sink
@@ -418,7 +418,6 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-return;
 
 
 	SECTION("multiple outputs") {
