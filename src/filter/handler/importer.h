@@ -40,9 +40,10 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit importer_filter(Args&&... args) :
+	explicit importer_filter(filter& filt, Args&&... args) :
+		filter_handler(filt),
 		importer_(std::forward<Args>(args)...),
-		output(*this) { }
+		output(filt) { }
 	
 	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());
@@ -68,9 +69,10 @@ public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
 	
 	template<typename... Args>
-	explicit importer_filter(Args&&... args) :
+	explicit importer_filter(filter& filt, Args&&... args) :
+		filter_handler(filt),
 		importer_(std::forward<Args>(args)...),
-		output(*this)
+		output(filt)
 	{
 		set_seekable(true);
 	}
@@ -78,7 +80,7 @@ public:
 	void set_seekable(bool seekable) {
 		node_stream_timing tm;
 		tm.set_duration(importer_.total_duration());
-		define_source_stream_timing(tm);
+		this_filter().define_source_stream_timing(tm);
 		
 		/*
 		node_stream_properties prop;

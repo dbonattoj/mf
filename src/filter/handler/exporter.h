@@ -37,9 +37,10 @@ public:
 	input_type<Exporter::dimension, typename Exporter::elem_type> input;
 	
 	template<typename... Args>
-	explicit exporter_filter(Args&&... args) :
+	explicit exporter_filter(filter& filt, Args&&... args) :
+		filter_handler(filt),
 		exporter_(std::forward<Args>(args)...),
-		input(*this) { }
+		input(filt) { }
 	
 	void setup() override {
 		exporter_.setup(input.frame_shape());

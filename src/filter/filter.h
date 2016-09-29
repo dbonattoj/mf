@@ -163,8 +163,8 @@ public:
 		set_handler(std::unique_ptr<Handler>(handler_));
 	}
 			
-	Handler& handler() { return handler_; }
-	const Handler& handler() const { return handler_; }
+	Handler& handler() { return *handler_; }
+	const Handler& handler() const { return *handler_; }
 	
 	Handler& operator*() { return *handler_; }
 	const Handler& operator*() const { return *handler_; }

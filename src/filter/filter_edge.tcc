@@ -75,7 +75,7 @@ install(node_output& out, std::ptrdiff_t out_ch, node_input& in) {
 	auto& convert_node_output_channel = convert_node.add_output_channel();
 	
 	std::size_t elem_count = base::output_frame_shape().product();
-	ndarray_format convert_node_output_frame_format = make_ndarray_format<Output_elem>(elem_count);
+	ndarray_format convert_node_output_frame_format = make_ndarray_format<Input_elem>(elem_count);
 	convert_node_output_channel.define_frame_format(convert_node_output_frame_format);
 
 	convert_node_input.set_name("in");
