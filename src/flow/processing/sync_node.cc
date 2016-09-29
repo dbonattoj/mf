@@ -121,10 +121,10 @@ node::pull_result sync_node::output_pull_(time_span& span) {
 	
 	bool cont = true;
 	
-	while(cont && !ring_->readable_time_span().includes(span) && !reached_end())
+/*	while(cont && !ring_->readable_time_span().includes(span) && !reached_end())
 		cont = process_next_frame_();
-		
-	/*
+	*/	
+	
 	if(ring_->readable_time_span().includes(span)) {
 
 	} else {
@@ -132,7 +132,7 @@ node::pull_result sync_node::output_pull_(time_span& span) {
 			cont = process_next_frame_();
 		} while(cont && !ring_->readable_time_span().includes(span) && !reached_end());
 	}
-	*/
+	
 
 	if(reached_end() && span.end_time() > end_time())
 		span = time_span(span.start_time(), end_time());
