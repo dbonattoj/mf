@@ -48,22 +48,31 @@ time_unit multiplex_node::capture_successor_time_() const {
 time_span multiplex_node::expected_input_span_(time_unit successor_time) const {
 	return time_span(
 		std::max(successor_time - input_past_window_, time_unit(0)),
-		std::min(successor_time + input_future_window_ + 1, stream_timing().duration()) // TODO undef duration
+		successor_time + input_future_window_ + 1
 	);
 }
 
 
-void multiplex_node::load_input_view_(time_unit successor_time) {
+node::pull_result multiplex_node::load_input_view_(time_unit successor_time) {
+	// current time of multiplex node becomes current time of first common successor node
 	set_current_time_(successor_time);
 	
 	unload_input_view_();
 	
+	// pre-pull and pull (blocking) here
+	// multiplex_node_output.pre_pull starts this, multiplex_node_output.pull waits until it is finished
 	input().pre_pull();
 	pull_result result = input().pull();
+	
+	
 	if(result == pull_result::success) {
 		timed_frame_array_view vw = input().begin_read_frame();
+		// if input node reached end, the future time window may have been truncated
+		// (node_input.pull still returns pull_result::success in that case)
 		loaded_input_view_.reset(vw);
 	}
+	
+	return result;
 }
 
 
@@ -144,14 +153,20 @@ void multiplex_node::pre_setup() {
 		input_past_window_ = std::max(input_past_window_, -min_offset);
 		input_future_window_ = std::max(input_future_window_, max_offset);		
 	}
-	//std::cout << '-' << input_past_window_ << ", +" <<  input_future_window_ << std::endl;
 	input().set_past_window(input_past_window_);
 	input().set_future_window(input_future_window_);
 
 	// set up loader
-	// needs to know thread index of outputs (determined by successor nodes)
-	if(outputs_on_different_threads_()) loader_.reset(new async_loader(*this));
+	// need to know thread indices of outputs (determined by successor nodes)
+	if(need_async_()) loader_.reset(new async_loader(*this));
 	else loader_.reset(new sync_loader(*this));
+}
+
+
+bool multiplex_node::need_async_() const {
+	if(outputs_on_different_threads_()) return true;
+	if(input().connected_node().name().substr(2) == "image refine") return true;
+	return false;
 }
 
 
@@ -159,9 +174,6 @@ bool multiplex_node::outputs_on_different_threads_() const {
 	thread_index first_output_reader_index = output_at(0).reader_thread_index();
 	for(std::ptrdiff_t i = 1; i < outputs_count(); ++i)
 		if(output_at(i).reader_thread_index() != first_output_reader_index) return true;
-	
-	if(input().connected_node().name().substr(2) == "image refine") return true;
-	
 	return false;
 }
 
@@ -200,9 +212,6 @@ void multiplex_node_output::pre_pull(const time_span& span) {
 
 node::pull_result multiplex_node_output::pull(time_span& span) {
 	Assert(this_node().loader_);
-
-	time_unit end_time = this_node().end_time();
-	span = time_span(span.start_time(), std::min(span.end_time(), end_time));
 
 	return this_node().loader_->pull(span);
 }

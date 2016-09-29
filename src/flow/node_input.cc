@@ -42,49 +42,54 @@ void node_input::disconnect() {
 }
 
 
-void node_input::pre_pull() {
-	Expects(is_connected());
-	
+time_span node_input::current_required_time_span_() const {
 	time_unit t = this_node().current_time();
 	time_unit start_time = std::max(time_unit(0), t - past_window_);
 	time_unit end_time = t + future_window_ + 1;
-	
-	connected_output_->pre_pull(time_span(start_time, end_time));
+	return time_span(start_time, end_time);
+}
+
+
+void node_input::pre_pull() {
+	Assert(is_connected());
+	time_span span = current_required_time_span_();
+	connected_output_->pre_pull(span);
 }
 
 
 
 node::pull_result node_input::pull() {
-	Expects(is_connected());
+	Assert(is_connected());
 	
 	time_unit t = this_node().current_time();
-	time_unit start_time = std::max(time_unit(0), t - past_window_);
-	time_unit end_time = t + future_window_ + 1;
+	time_span span = current_required_time_span_();	
 	
-	time_span span = time_span(start_time, end_time);
-	node::pull_result result = connected_output_->pull(span);
-	Assert(span.start_time() == start_time);
-	Assert(span.includes(t));
+	node::pull_result result = connected_output_->pull(span); // span gets modified
+	
+	if(result == node::pull_result::end_of_stream) {
+		// If connected output reached end of stream, return error state only if frame t was not pulled
+		// Future window is allowed to be truncated when nearing end of stream
+		if(! span.includes(t)) return node::pull_result::end_of_stream;
+	} else if(result != node::pull_result::success) {
+		return result;
+	}
 	
 	pulled_span_ = span;
-	return result;
+	return node::pull_result::success;
 }
 
 
 node_frame_window_view node_input::begin_read_frame() {
-	Expects(pulled_span_.duration() > 0);
+	Assert(pulled_span_.duration() > 0);
 
+	// Truncate duration to read (from time window)
 	time_unit t = this_node().current_time();
 	time_unit duration = std::min(t, past_window_) + 1 + future_window_;
 	if(duration > pulled_span_.duration()) duration = pulled_span_.duration();
-	
-	//duration = pulled_span_.duration();
-	
+		
 	timed_frame_array_view view = connected_output_->begin_read(duration);
 	Assert(! view.is_null());
-	
-	if(view.is_null()) return view;
-	
+		
 	Assert(view.span().includes(t));
 	Assert(view.start_time() == pulled_span_.start_time());
 	Assert(view.duration() == duration);
@@ -93,6 +98,13 @@ node_frame_window_view node_input::begin_read_frame() {
 
 
 void node_input::end_read_frame() {
+	// Normal case: mark 1 frame as having been read
+	// When reading sequentially (no seek), the first frame of the pulled span won't be included in the next pulled
+	// span. The next pulled span will start at this pulled span's start time + 1. So it will read sequentially from
+	// the ring buffer in the connected output.
+	
+	// When past window was truncated, the next sequential pulled span will still start at t=0. So don't mark first
+	// frame as having been read, otherwise the connected node will need to seek back.
 	time_unit duration = (this_node().current_time() < past_window_) ? 0 : 1;
 	connected_output_->end_read(duration);
 }

@@ -38,22 +38,33 @@ processing_node_job::processing_node_job(processing_node& nd, node_parameter_val
 processing_node_job::~processing_node_job() {
 	Expects(output_view_.is_null(), "processing_node_job must be detached prior to destruction");
 	cancel_inputs();
+	cancel_output();
 }
 
 
-bool processing_node_job::begin_input(processing_node_input& in) {
+void processing_node_job::begin_input(processing_node_input& in) {
 	std::ptrdiff_t index = in.index();
 	timed_frame_array_view vw = in.begin_read_frame();
-	if(vw.is_null()) return false;
+	Assert(! vw.is_null());
 	input_views_.at(index).reset(vw);
-	return true;
 }
 
 
 void processing_node_job::end_input(processing_node_input& in) {
 	std::ptrdiff_t index = in.index();
-	in.end_read_frame();	
+	in.end_read_frame();
 	input_views_.at(index).reset();
+}
+
+
+void processing_node_job::end_inputs() {
+	for(std::ptrdiff_t index = 0; index < input_views_.size(); ++index) {
+		timed_frame_array_view& vw = input_views_.at(index);
+		if(! vw.is_null()) {
+			node_.input_at(index).end_read_frame();
+			vw.reset();
+		}
+	}
 }
 
 
@@ -68,13 +79,20 @@ void processing_node_job::cancel_inputs() {
 }
 
 
-void processing_node_job::attach_output_view(const frame_view& out_vw) {
+void processing_node_job::attach_output(const frame_view& out_vw, cancel_output_function_type cancel_func) {
 	output_view_.reset(out_vw);
+	cancel_output_function_ = cancel_func;
 }
 
 
-void processing_node_job::detach_output_view() {
+void processing_node_job::detach_output() {
 	output_view_.reset();
+	cancel_output_function_ = nullptr;
+}
+
+
+void processing_node_job::cancel_output() {
+	if(cancel_output_function_) cancel_output_function_();
 }
 
 

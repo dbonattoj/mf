@@ -40,6 +40,8 @@ private:
 	
 	time_span pulled_span_;
 	bool activated_ = true;
+	
+	time_span current_required_time_span_() const;
 			
 public:
 	explicit node_input(node& nd);
@@ -82,7 +84,6 @@ public:
 	node_frame_window_view begin_read_frame();
 	void end_read_frame();
 	void cancel_read_frame();
-	time_unit end_time() const { return connected_output_->end_time(); }
 	///@}
 };
 

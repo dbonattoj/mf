@@ -196,14 +196,6 @@ void node::setup_sink() {
 }
 
 
-bool node::is_bounded() const {
-	if(stream_timing_.has_duration() || is_source()) return true;
-	else return std::any_of(inputs_.cbegin(), inputs_.cend(), [](auto&& in) {
-		return (in->is_activated() && in->connected_node().is_bounded());
-	});
-}
-
-
 void node::set_current_time_(time_unit t) noexcept {
 	time_unit old_t = current_time_;
 	current_time_ = t;
@@ -211,17 +203,6 @@ void node::set_current_time_(time_unit t) noexcept {
 	if(t < old_t) reached_end_ = false;
 }
 
-
-void node::mark_end_() {
-	reached_end_ = true;
-}
-
-
-time_unit node::end_time() const noexcept {
-	if(stream_timing().has_duration()) return stream_timing().duration();
-	else if(reached_end()) return current_time() + 1;
-	else return -1;
-}
 
 
 void node::deduce_propagated_parameters_() {

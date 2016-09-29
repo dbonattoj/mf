@@ -45,15 +45,20 @@ private:
 	coordinates_type start_;
 	coordinates_type end_;
 
+	bool invariant_() const;
+
 public:
 	ndspan() = default;
 	ndspan(const ndspan&) = default;
-	ndspan(const coordinates_type& start, const coordinates_type& end);
+	ndspan(const coordinates_type& start, const coordinates_type& end) :
+		start_(start), end_(end) { Assert_crit(invariant_()); }
 		
 	ndspan& operator=(const ndspan&) noexcept = default;
 	
 	const coordinates_type& start_pos() const noexcept { return start_; }
 	const coordinates_type& end_pos() const noexcept { return end_; }
+	void set_start_pos(const coordinates_type& pos) { start_ = pos; Assert_crit(invariant_()); }
+	void set_end_pos(const coordinates_type& pos) { end_ = pos; Assert_crit(invariant_()); }
 
 	friend bool operator==(const ndspan& a, const ndspan& b) noexcept {
 		return (a.start_ == b.start_) && (a.end_ == b.end_);
@@ -112,6 +117,9 @@ public:
 	time_unit start_time() const { return start_pos().front(); }
 	time_unit end_time() const { return end_pos().front(); }
 	time_unit duration() const { return size(); }
+	
+	void set_start_time(time_unit t) { set_start_pos(t); }
+	void set_end_time(time_unit t) { set_end_pos(t); }
 };
 
 

@@ -17,6 +17,7 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#if 0
 
 #include "async_node.h"
 #include "../node_graph.h"
@@ -274,7 +275,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 }
 
 
-node_frame_window_view async_node::output_begin_read_(time_unit duration)  {
+node_frame_window_view async_node::output_begin_read_(time_unit duration) {
 	return ring_->try_begin_read(duration);
 }
 
@@ -284,3 +285,5 @@ void async_node::output_end_read_(time_unit duration) {
 
 
 }}
+
+#endif

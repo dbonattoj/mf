@@ -26,17 +26,15 @@ namespace mf {
 constexpr time_unit timed_ring::undefined_time;
 	
 
-timed_ring::timed_ring(const format_ptr& frm, std::size_t capacity, time_unit end_time) :
+timed_ring::timed_ring(const format_ptr& frm, std::size_t capacity) :
 	ring(frm, capacity),
-	last_write_time_(-1),
-	end_time_(end_time) { }
+	last_write_time_(-1) { }
 
 
 time_span timed_ring::readable_time_span() const {
 	time_unit start = last_write_time_ + 1 - ring::readable_duration();
 	time_unit end = last_write_time_ + 1;
 	Assert_crit(start <= end);
-	Assert_crit(end_time_ == undefined_time || end <= end_time_);
 	return time_span(start, end);
 }
 
@@ -44,9 +42,7 @@ time_span timed_ring::readable_time_span() const {
 time_span timed_ring::writable_time_span() const {
 	time_unit start = last_write_time_ + 1;
 	time_unit end = last_write_time_ + 1 + ring::writable_duration();
-	if(end_time_ != undefined_time) end = std::min(end, end_time_);
 	Assert_crit(start <= end);
-	Assert_crit(end_time_ == undefined_time || end <= end_time_);
 	return time_span(start, end);
 }
 
@@ -90,11 +86,6 @@ void timed_ring::end_write(time_unit written_duration) {
 }
 
 
-bool timed_ring::writer_reached_end() const {
-	return (end_time_ != undefined_time) && (write_start_time() == end_time_);
-}
-
-
 auto timed_ring::begin_read(time_unit duration) -> section_view_type {
 	if(duration > readable_duration()) throw sequencing_error("read duration is greater than readable duration");
 	auto sec = ring::begin_read(duration);
@@ -129,7 +120,6 @@ void timed_ring::skip(time_unit skip_duration) {
 
 void timed_ring::seek(time_unit t) {
 	Assert_crit(t >= 0);
-	Assert_crit(end_time_ == undefined_time || t < end_time_);
 	time_span readable = readable_time_span();
 	if(t > 0 && readable.includes(t)) {
 		ring::skip(t - readable.start_time());
@@ -137,10 +127,6 @@ void timed_ring::seek(time_unit t) {
 		ring::skip(readable.duration());
 		last_write_time_ = t - 1;
 	}
-}
-
-bool timed_ring::reader_reached_end() const {
-	return (end_time_ != undefined_time) && (read_start_time() == end_time_);
 }
 
 

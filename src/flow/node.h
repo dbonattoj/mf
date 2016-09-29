@@ -49,7 +49,7 @@ class node_input;
 /// Node in flow graph, base class.
 class node {
 public:
-	enum pull_result { success, transitory_failure, stopped };
+	enum class pull_result { success, fatal_failure, transitory_failure, stopped, end_of_stream };
 
 private:
 	enum class stage { construction, was_pre_setup, was_setup };
@@ -83,7 +83,6 @@ private:
 	/// Dynamic state (varies during execution).
 	///@{
 	std::atomic<time_unit> current_time_ {-1};
-	std::atomic<bool> reached_end_ {false};
 
 	node_parameter_valuation parameter_valuation_; ///< Current valuation of node parameters.
 	mutable std::mutex parameters_mutex_; ///< Mutex to protect parameter_valuation_ during concurrent access.
@@ -220,10 +219,7 @@ public:
 	
 	void setup_sink();
 
-	bool is_bounded() const;
 	time_unit current_time() const noexcept { return current_time_; }
-	bool reached_end() const noexcept { return reached_end_; }
-	time_unit end_time() const noexcept;
 };
 
 

@@ -89,84 +89,55 @@ void processing_node::compute_propagated_parameters_guide_() const {
 	}
 }
 
-/*
-void processing_node::handler_setup_() {
-	Expects(handler_ != nullptr);
-	handler_->handler_setup(*this);
-		
-	for(auto&& chan : output_channels_)
-		if(! chan->frame_format().is_defined())
-			throw invalid_node_graph("processing_node did not define all output channel formats");
-}
-*/
 
-
-void processing_node::handler_pre_process_(processing_node_job& job) {
-	Expects(handler_ != nullptr);
-	handler_->handler_pre_process(*this, job);
+handler_result processing_node::handler_pre_process_(processing_node_job& job) {
+	Assert(handler_ != nullptr);
+	try {
+		handler_->handler_pre_process(*this, job);
+		if(job.end_of_stream_was_marked()) return handler_result::end_of_stream;
+		else return handler_result::success;
+	} catch(...) {
+		return handler_result::failure;
+	}
 }
 
 
-void processing_node::handler_process_(processing_node_job& job) {
-	Expects(handler_ != nullptr);
+handler_result processing_node::handler_process_(processing_node_job& job) {
+	Assert(handler_ != nullptr);
 	
-	if(is_sink())
-		std::cout << name() << " process.... " << job.time() << " ................." << std::endl;
+	if(is_sink()) std::cout << name() << " process.... " << job.time() << " ................." << std::endl;
 	
+	// Send job start to diagnostic
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_started(*this, job.time());
 	
-	bool succeeded;
+	bool handler_succeeded;
 	try {
 		handler_->handler_process(*this, job);
-		succeeded = true;
+		handler_succeeded = true;
 	} catch(...) {
-		succeeded = false;
-		std::cerr << "ERROR IN NODE " << name() << std::endl;
+		handler_succeeded = false;
 	}
 
+	// Send job end to diagnostic
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_finished(*this, job.time());
 
-	if(! has_output()) return;
-	for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
+	// Add propagated parameters to output TODO move
+	if(has_output()) for(std::ptrdiff_t i = 0; i < output().propagated_parameters_count(); ++i) {
 		parameter_id id = output().propagated_parameter_at(i);
-		std::cout << "propagating parameter " << id << "................." << std::endl;
 		if(job.has_parameter(id))
 			job.output_view().propagated_parameters().set(id, job.parameter(id));
 		else if(job.has_input_parameter(id, job.time()))
 			job.output_view().propagated_parameters().set(id, job.input_parameter(id, job.time()));
 	}
-}
-
-
-processing_node_job processing_node::begin_job_() {
-	return processing_node_job(*this, std::move(current_parameter_valuation_()));
-}
-
-
-void processing_node::finish_job_(processing_node_job& job) {	
-	bool reached_end = false;
 	
-	
-	
-	if(stream_timing().has_duration() && current_time() == stream_timing().duration() - 1) {
-		reached_end = true;
-	} else if(job.end_was_marked()) {
-		reached_end = true;
+	if(handler_succeeded) {
+		if(job.end_of_stream_was_marked()) return handler_result::end_of_stream;
+		else return handler_result::success;
+	} else {
+		return handler_result::failure;
 	}
-		
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		if(job.has_input_view(i)) {
-			input_type& in = input_at(i);
-			if(current_time() == in.end_time() - 1) reached_end = true;
-			job.end_input(in);
-		}
-	}
-		
-	if(reached_end) mark_end_();
-	
-	update_parameters_(job.parameters()); // TODO move instead of copy
 }
 
 
@@ -220,7 +191,6 @@ node_frame_format processing_node::output_frame_format_() const {
 
 
 auto processing_node::propagated_parameters_inputs(parameter_id id) const -> std::vector<input_index_type> {
-std::cout << name() << " propagated par in (" << id << ")" << std::endl;
 	if(propagated_parameters_guide_.size() == 0)
 		compute_propagated_parameters_guide_();
 

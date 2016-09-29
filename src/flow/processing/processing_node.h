@@ -123,7 +123,7 @@ public:
 	using output_channel_type = processing_node_output_channel;
 	using input_index_type = std::ptrdiff_t;
 
-private:
+private:	
 	processing_node_handler* handler_ = nullptr;
 	std::vector<std::unique_ptr<processing_node_output_channel>> output_channels_;
 	mutable std::multimap<parameter_id, input_index_type> propagated_parameters_guide_;
@@ -131,14 +131,14 @@ private:
 	void compute_propagated_parameters_guide_() const;
 
 protected:
+	enum class handler_result { success, failure, end_of_stream };
+	enum class process_result { success, transitory_failure, handler_failure, end_of_stream };
+
 	void verify_connections_validity_() const;
 
-	void handler_pre_process_(processing_node_job&);
-	void handler_process_(processing_node_job&);
-	
-	processing_node_job begin_job_();
-	void finish_job_(processing_node_job&);
-	
+	handler_result handler_pre_process_(processing_node_job&);
+	handler_result handler_process_(processing_node_job&);
+		
 	virtual void output_pre_pull_(const time_span&) = 0;
 	virtual node::pull_result output_pull_(time_span& span) = 0;
 	virtual node_frame_window_view output_begin_read_(time_unit duration) = 0;

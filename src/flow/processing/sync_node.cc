@@ -56,105 +56,110 @@ void sync_node::setup() {
 }
 
 
-bool sync_node::process_next_frame_() {	
-	timed_frame_array_view out_vw = ring_->begin_write(1);
-	time_unit t = out_vw.start_time();
+bool sync_node::process_next_frame_() {
+	// Begin writing 1 frame to output buffer
+	auto output_write_handle = ring_->write(1); // if error occurs, handle will cancel write during stack unwinding
+	const timed_frame_array_view& out_vw = output_write_handle.view();
 	
-	if(stream_timing().has_duration()) Assert(t < stream_timing().duration());
-	
+	// Start time of the output view determined new current time of this node
+	time_unit t = out_vw.start_time();	
 	set_current_time_(t);
-	processing_node_job job = begin_job_();
 	
-	job.attach_output_view(out_vw[0]);
+	// Create job
+	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
+	auto cancel_output = []() { };
+	job.attach_output_view(out_vw[0], cancel_output);
 	
-	handler_pre_process_(job);
+	// Let handler pre-process frame
+	handler_result handler_res = handler_pre_process_(job);
+	if(handler_res == handler_result::failure) return process_result::failure;
+	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
 	
+	// Pre-pull the activated inputs
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
-		in.pre_pull();
+		if(in.is_activated()) in.pre_pull();
 	}
 	
+	// Pull the activated inputs
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
 		if(! in.is_activated()) continue;
 		
 		pull_result res = in.pull();
-		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
-			job.detach_output_view();
-			return false;
+		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
+		else if(res == pull_result::fatal_failure) return process_result::failure;
+		else if(res == pull_result::stopped) return process_result::failure;
+		else if(res == pull_result::end_of_stream) return process_result::end_of_stream;
+	}
+	
+	// Begin reading from the activated inputs (in job object)
+	// If error occurs, job object will cancel read during stack unwinding
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(in.is_activated()) job.begin_input(in);
+	}
+
+	// Let handler process frame
+	handler_res = handler_process_(job);
+	if(handler_res == handler_result::failure) return process_result::failure;
+	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
+
+	// End reading from the inputs 
+	job.end_inputs();
+	
+	// Detach output from output write handle,
+	// and commit 1 written frame to output buffer
+	job.detach_output();
+	output_write_handle.end(1);
+	
+	// Finish the job
+	update_parameters_(job.parameters()); // TODO move instead of copy
+		
+	// Processing the frame succeeded
+	return process_result::success;
+}
+
+
+void sync_node::output_pre_pull_(const time_span&) {	
+	// Does nothing in sync_node
+}
+
+
+node::pull_result sync_node::output_pull_(time_span& span) {
+	// On non-sequential pull, seek output buffer to new time
+	if(ring_->read_start_time() != span.start_time()) ring_->seek(span.start_time());
+	Assert(ring_->read_start_time() == span.start_time());
+		
+	// Sequentially process frames until span is in buffer
+	process_result process_res = process_result::success;
+	while(! ring_->readable_time_span().includes(span)) {
+		process_res = process_next_frame_();
+		if(process_res != process_result::success) {
+			// Failure when processing: span to pull ends earlier than requested
+			// (current_time() frame was not processed)
+			span.set_end_time(current_time());
+			break;
 		}
 	}
 	
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
-	
-		bool cont = job.begin_input(in);
-	}
-
-
-	handler_process_(job);
-			
-	job.detach_output_view();
-	ring_->end_write(1);
-
-	finish_job_(job);
-		
-	return true;
-}
-
-
-void sync_node::output_pre_pull_(const time_span& span) {	
-
-}
-
-
-node::pull_result sync_node::output_pull_(time_span& span) {	
-	if(ring_->read_start_time() != span.start_time()) ring_->seek(span.start_time());
-	Assert(ring_->read_start_time() == span.start_time());
-	
-	if(reached_end() && span.end_time() > end_time())
-		span = time_span(span.start_time(), end_time());
-
-	if(span.duration() == 0) return pull_result::success;
-	
-	bool cont = true;
-	
-/*	while(cont && !ring_->readable_time_span().includes(span) && !reached_end())
-		cont = process_next_frame_();
-	*/	
-	
-	if(ring_->readable_time_span().includes(span)) {
-
-	} else {
-		do {
-			cont = process_next_frame_();
-		} while(cont && !ring_->readable_time_span().includes(span) && !reached_end());
-	}
-	
-
-	if(reached_end() && span.end_time() > end_time())
-		span = time_span(span.start_time(), end_time());
-
-	if(cont) {
+	// Return pull result
+	if(process_res == process_result::success) {
+		// Success: pulled span must be readable in buffer, ready to be read using output_begin_read_
 		Assert(ring_->readable_duration() >= span.duration());
 		return pull_result::success;
 	} else {
+		// Failure: return error state, and span may have been truncated		
 		if(graph().was_stopped()) return pull_result::stopped;
-		else return pull_result::transitory_failure;
+		else if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
+		else if(process_res == process_result::handler_failure) return pull_result::handler_failure;
+		else if(process_res == process_result::end_of_stream) return pull_result::end_of_stream;
 	}
 }
 
 	
 node_frame_window_view sync_node::output_begin_read_(time_unit duration) {
-	Expects(ring_->readable_duration() >= duration);
-	
-	if(reached_end() && ring_->read_start_time() + duration > current_time())
-		duration = ring_->readable_duration();
-
-	MF_ASSERT(duration <= ring_->readable_duration());
-
+	Assert(ring_->readable_duration() >= duration);
 	return ring_->begin_read(duration);
 }
 

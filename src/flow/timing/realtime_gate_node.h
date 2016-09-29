@@ -34,7 +34,9 @@ class realtime_gate_node : public node_derived<node_input, realtime_gate_node_ou
 
 private:
 	std::thread thread_;
-	ndarray_opaque<0> retained_frame_;
+	ndarray_opaque<0> loaded_frame_;
+	ndarray_opaque<0> outputted_frame_;
+	std::mutex mutex_;
 	
 	void thread_main_();
 	void load_new_frame_();

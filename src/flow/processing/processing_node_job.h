@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../parameter/node_parameter_valuation.h"
 #include "../frame/node_frame_view.h"
 #include <vector>
+#include <functional>
 
 namespace mf { namespace flow {
 
@@ -40,39 +41,44 @@ namespace mf { namespace flow {
 class processing_node_job {
 public:
 	using input_index_type = std::ptrdiff_t;
+	using cancel_output_function_type = std::function<void()>;
 	
 private:
 	processing_node& node_; ///< The processing node.
 	std::vector<node_frame_window_view> input_views_; ///< For each input (index), view to frames with time window.
 	node_frame_view output_view_; ///< View to (multi-channel) output frame.
+	cancel_output_function_type cancel_output_function_;
+	
 	node_parameter_valuation node_parameters_; ///< Copy of the current node parameters valuation.
-
-	bool end_marked_ = false;	
-		
+	
+	bool end_of_stream_ = false;
+	
 public:
 	processing_node_job(processing_node& nd, const node_parameter_valuation& params);
 	processing_node_job(processing_node& nd, node_parameter_valuation&& params);
 	processing_node_job(const processing_node_job&) = delete;
 	processing_node_job(processing_node_job&&) = default;
-	~processing_node_job();
+	~processing_node_job() = default;
 
 	processing_node_job& operator=(const processing_node_job&) = delete;
 	processing_node_job& operator=(processing_node_job&&) = default;
 	
 	/// Set up interface for \ref processing_node.
 	///@{
-	void attach_output_view(const frame_view&);
-	void detach_output_view();
+	void attach_output(const frame_view&, cancel_output_function_type);
+	void detach_output();
+	void cancel_output();
 
-	bool begin_input(processing_node_input&);
+	void begin_input(processing_node_input&);
 	void end_input(processing_node_input&);
+	void end_inputs();
 	void cancel_inputs();
+	
+	bool end_of_stream_was_marked() const { return end_of_stream_; }
 	///@}
 	
-	bool end_was_marked() const noexcept { return end_marked_; }
-		
 	time_unit time() const noexcept { return node_.current_time(); }
-	void mark_end() noexcept { /*end_marked_ = true;*/ }
+	void mark_end_of_stream() { end_of_stream_ = true; }
 	
 	/// Access to input frame views.
 	///@{

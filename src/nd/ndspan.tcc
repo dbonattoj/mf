@@ -25,11 +25,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 template<std::size_t Dim, typename T>
-ndspan<Dim, T>::ndspan(const coordinates_type& start, const coordinates_type& end):
-	start_(start), end_(end)
-{
-	for(std::ptrdiff_t i = 0; i < Dim; ++i) Assert_crit(end_[i] >= start_[i]);
+auto ndspan<Dim, T>::invariant_() const {
+	for(std::ptrdiff_t i = 0; i < Dim; ++i) if(end_[i] >= start_[i]) return false;
+	return true;
 }
+
 
 
 template<std::size_t Dim, typename T>

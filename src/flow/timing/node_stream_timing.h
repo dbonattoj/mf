@@ -33,15 +33,13 @@ namespace mf { namespace flow {
  ** indices of the node to clock times. Two policies exist, _realtime_ and _non-realtime_.
  ** For _realtime_, the clock time of each frame corresponds to the current system clock time at the moment when the
  ** frame is processed (minus the start clock time).
- ** For _non-realtime_, it is computed using as `ct = offset + frame_clock_duration*t`. Duration of the stream in frames
- ** can also be fixed. This is necessary to enable seeking on sink node.
+ ** For _non-realtime_, it is computed using as `ct = offset + frame_clock_duration*t`.
  ** The graph-wide start clock time is set to the current system clock time when the graph is launched. */
 class node_stream_timing {
 private:
 	bool real_time_ = false;
 	clock_duration frame_clock_duration_ = clock_duration();
 	//time_unit offset_ = 0;
-	time_unit duration_ = -1;
 
 public:	
 	bool is_real_time() const { return real_time_; }
@@ -52,11 +50,6 @@ public:
 	void set_duration(time_unit dur) { Assert(!real_time_); duration_ = dur; }
 	void set_no_duration() { Assert(!real_time_); duration_ = -1; }
 	
-	bool has_frame_clock_duration() const { return !real_time_ && (frame_clock_duration_ != clock_duration()); }
-	clock_duration frame_clock_duration() const { Assert(!real_time_); return frame_clock_duration_; }
-	void set_frame_clock_duration(const clock_duration& dur) { frame_clock_duration_ = dur; } 
-	void set_no_frame_clock_duration(const clock_duration& dur) { frame_clock_duration_ = clock_duration(); } 
-
 	//time_unit offset() const { Assert(!real_time_); return offset_; }
 	//void set_offset(time_unit off) { Assert(!real_time_); offset_ = off; }
 	// TODO offset

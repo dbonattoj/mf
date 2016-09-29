@@ -35,7 +35,7 @@ class sync_node final : public processing_node {
 private:
 	std::unique_ptr<timed_ring> ring_;
 
-	bool process_next_frame_();
+	process_result process_next_frame_();
 
 public:
 	explicit sync_node(node_graph&);

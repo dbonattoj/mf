@@ -75,6 +75,7 @@ private:
 	std::unique_ptr<loader> loader_;
 	node_frame_window_view loaded_input_view_;
 	
+	bool need_async_() const;
 	bool outputs_on_different_threads_() const;
 
 	/// \name Loader interface
@@ -84,7 +85,7 @@ private:
 
 	time_span expected_input_span_(time_unit successor_time) const;
 
-	void load_input_view_(time_unit successor_time);
+	pull_result load_input_view_(time_unit successor_time);
 	void unload_input_view_();
 	
 	time_unit successor_time_of_input_view_() const;

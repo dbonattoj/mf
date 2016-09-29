@@ -35,22 +35,21 @@ public:
 	using section_view_type = timed_frame_array_view;
 	using ring::format_base_type;
 	using ring::format_ptr;
-
-	static constexpr time_unit undefined_time = -1;
+	
+	class read_handle;
+	class write_handle;
 
 private:
 	time_unit last_write_time_ = -1;
-	time_unit end_time_ = undefined_time;
 
 public:
 	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
-	timed_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
-		timed_ring(forward_make_shared_const(frm), capacity, end_time) { }
+	timed_ring(Format&& frm, std::size_t capacity) :
+		timed_ring(forward_make_shared_const(frm), capacity) { }
 
-	timed_ring(const format_ptr&, std::size_t capacity, time_unit end_time);
+	timed_ring(const format_ptr&, std::size_t capacity);
 		
 	const format_base_type& frame_format() const { return ring::frame_format(); }	
-	time_unit end_time() const { return end_time_; }
 	
 	time_unit current_time() const;
 	time_unit read_start_time() const;
@@ -63,16 +62,61 @@ public:
 	time_span readable_time_span() const;
 	time_span writable_time_span() const;
 	
+	write_handle write(time_unit duration) { return write_handle(duration); }
 	section_view_type begin_write(time_unit);
 	void end_write(time_unit written_duration);
-	bool writer_reached_end() const;
 	
+	read_handle write(time_unit duration) { return read_handle(duration); }
+	read_handle write_span(time_span span) { return read_handle(span); }
 	section_view_type begin_read(time_unit);
 	section_view_type begin_read_span(time_span);
 	void end_read(time_unit read_duration, bool initialize_frames = true);
 	void skip(time_unit duration);
 	void seek(time_unit);
-	bool reader_reached_end() const;
+};
+
+
+/// Read handle for \ref timed_ring.
+class ring::read_handle : public ring_handle_base {
+private:
+	timed_ring& ring_;
+	
+public:
+	read_handle(timed_ring& rng, time_unit duration) : ring_(rng) {
+		reset_view_(ring_.begin_read(duration));
+	}
+	
+	read_handle(timed_ring& rng, time_span span) : ring_(rng) {
+		reset_view_(ring_.begin_read_span(span));
+	}
+	
+	~read_handle() override {
+		if(! is_null()) end(0);
+	}
+	
+	void end(time_unit duration) override {
+		ring_.end_read(duration);
+	}
+};
+
+
+/// Write handle of \ref timed_ring.
+class ring::write_handle : public ring_handle_base {
+private:
+	timed_ring& ring_;
+	
+public:
+	write_handle(timed_ring& rng, time_unit duration) : ring_(rng) {
+		reset_view_(ring_.begin_write(duration));
+	}
+	
+	~write_handle() override {
+		if(! is_null()) end(0);
+	}
+	
+	void end(time_unit duration) override {
+		ring_.end_write(duration);
+	}
 };
 
 
