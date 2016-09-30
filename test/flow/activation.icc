@@ -63,7 +63,6 @@ SECTION("activation") {
 		gr.run_until(last);
 
 		REQUIRE(sink->check());
-		REQUIRE(gr.current_time() == last);
 	}
 
 
@@ -79,7 +78,6 @@ SECTION("activation") {
 		gr.run_until(last);
 
 		REQUIRE(sink->check());
-		REQUIRE(gr.current_time() == last);
 	}
 
 
@@ -99,7 +97,6 @@ SECTION("activation") {
 			gr.setup();
 			gr.run_until(last);
 			REQUIRE(sink->check());
-			REQUIRE(gr.current_time() == last);
 		}
 		
 		SECTION("test 2") {
@@ -108,7 +105,6 @@ SECTION("activation") {
 			gr.setup();
 			gr.run_until(last);
 			REQUIRE(sink->check());
-			REQUIRE(gr.current_time() == last);
 		}
 	}
 
@@ -129,7 +125,6 @@ SECTION("activation") {
 		gr.run_until(last);
 
 		REQUIRE(sink->check());
-		REQUIRE(gr.current_time() == last);
 	}
 
 

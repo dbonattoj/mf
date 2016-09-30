@@ -30,7 +30,7 @@ namespace mf { namespace flow {
 using namespace std::chrono_literals;
 
 node::pull_result node_graph::pull_next_frame_() {
-	Expects(launched_);
+	Assert(launched_);
 
 			export_node_graph_visualization(*this, "gr.gv");
 
@@ -84,7 +84,6 @@ void node_graph::stop() {
 	
 //	if(has_diagnostic()) diagnostic().stopped(*this);
 	
-	MF_DEBUG_BACKTRACE("graph::stop");	
 	was_stopped_.store(true);
 	for(const auto& nd : nodes_) nd->pre_stop();
 	for(const auto& nd : nodes_) nd->stop();
@@ -93,14 +92,12 @@ void node_graph::stop() {
 
 
 time_unit node_graph::current_time() const {
-	Expects(was_setup_);
+	Assert(was_setup_);
 	return sink_->current_time();
 }
 
 void node_graph::run_until(time_unit last_frame) {
-	Expects(was_setup_);
-
-	MF_DEBUG_BACKTRACE("graph::run_until");
+	Assert(was_setup_);
 		
 	if(! launched_) launch();
 
@@ -117,10 +114,8 @@ void node_graph::run_for(time_unit duration) {
 
 
 void node_graph::run() {
-	Expects(was_setup_);
-
-	MF_DEBUG_BACKTRACE("graph::run");
-
+	Assert(was_setup_);
+	
 	if(! launched_) launch();
 
 	node::pull_result res = node::pull_result::success;
@@ -131,7 +126,7 @@ void node_graph::run() {
 
 
 void node_graph::seek(time_unit target_time) {
-	Expects(was_setup_);
+	Assert(was_setup_);
 	Assert(target_time >= 0);
 	sink_->seek(target_time);
 }

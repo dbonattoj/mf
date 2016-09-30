@@ -19,58 +19,62 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 
+static constexpr int m = missingframe;
+static std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };
+static constexpr time_unit last = 19;
+
+static auto test_run_graph_ = [](flow::filter_graph& gr) {
+	gr.run_for(3);
+	REQUIRE(gr.current_time() == 2);
+	gr.run_until(5);
+	REQUIRE(gr.current_time() == 5);
+
+	// seek forward, skipping frames [6,9]
+	gr.seek(15);
+	gr.run_for(2);
+	REQUIRE(gr.current_time() == 16);
+	
+	// seek backward
+	gr.seek(10);
+	gr.run_for(1);
+	REQUIRE(gr.current_time() == 10);
+	
+	// invalid seek
+	REQUIRE_THROWS(gr.seek(-1));
+	REQUIRE(gr.current_time() == 10);
+	
+	// seek to end
+	gr.seek(19);
+	gr.run();
+
+	// seek backward, after end was already reached
+	gr.seek(7);
+	gr.run_for(2);
+
+	// on graph destruction: stop, when not at end
+};
+
+
 SECTION("seek") {
 	flow::filter_graph gr;
 	auto shp = make_ndsize(10, 10);
 
-	constexpr int m = missingframe;
-	std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };
 
 	SECTION("source -> sink") {			
-		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 
 		source.set_asynchonous(async1);
 		sink->input.connect(source->output);
 		
 		gr.setup();
-		gr.run_for(3);
-		REQUIRE(gr.current_time() == 2);
-		gr.run_until(5);
-		REQUIRE(gr.current_time() == 5);
-
-		// seek forward, skipping frames [6,9]
-		gr.seek(15);
-		gr.run_for(2);
-		REQUIRE(gr.current_time() == 16);
 		
-		// seek backward
-		gr.seek(10);
-		gr.run_for(1);
-		REQUIRE(gr.current_time() == 10);
-		
-		// invalid seek
-		REQUIRE_THROWS(gr.seek(-1));
-		REQUIRE(gr.current_time() == 10);
-		REQUIRE_THROWS(gr.seek(20));
-		REQUIRE(gr.current_time() == 10);	
-		
-		// seek to end
-		gr.seek(19);
-		gr.run();
-//		REQUIRE(sink.reached_end());
-	
-		// seek backward, after end was already reached
-		gr.seek(7);
-		gr.run_for(2);
-			return;
-
-		// stop, when not at end
+		test_run_graph_(gr);
 		REQUIRE(sink->check());
 	}
 
 	SECTION("source -> [-2, +1]passthrough' -> sink") {			
-		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough = gr.add_filter<passthrough_filter>(2, 1);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 
@@ -80,42 +84,13 @@ SECTION("seek") {
 		passthrough->input.connect(source->output);
 		sink->input.connect(passthrough->output);
 		gr.setup();
-		gr.run_for(3);
-		REQUIRE(gr.current_time() == 2);
-		gr.run_until(5);
-		REQUIRE(gr.current_time() == 5);
-
-		// seek forward, skipping frames [6,9]
-		gr.seek(15);
-		gr.run_for(2);
-		REQUIRE(gr.current_time() == 16);
 		
-		// seek backward
-		gr.seek(10);
-		gr.run_for(1);
-		REQUIRE(gr.current_time() == 10);
-
-		// invalid seek
-		REQUIRE_THROWS(gr.seek(-1));
-		REQUIRE(gr.current_time() == 10);
-		REQUIRE_THROWS(gr.seek(20));
-		REQUIRE(gr.current_time() == 10);	
-
-		// seek to end
-		gr.seek(19);
-		gr.run();
-//		REQUIRE(sink.reached_end());
-
-		// seek backward, after end was already reached
-		gr.seek(7);
-		gr.run_for(2);
-
-		// stop, when not at end
+		test_run_graph_(gr);
 		REQUIRE(sink->check());
 	}
 
 	SECTION("source -> [-2, +2]passthrough2 --> [-1, +2]passthrough1' -> sink") {			
-		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough2 = gr.add_filter<passthrough_filter>(2, 2);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(1, 2);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -128,48 +103,20 @@ SECTION("seek") {
 		passthrough1->input.connect(passthrough2->output);
 		sink->input.connect(passthrough1->output);
 		gr.setup();
-		gr.run_for(3);
-		REQUIRE(gr.current_time() == 2);
-		gr.run_until(5);
-		REQUIRE(gr.current_time() == 5);
-
-		// seek forward, skipping frames [6,9]
-		gr.seek(15);
-		gr.run_for(2);
-		REQUIRE(gr.current_time() == 16);
 		
-		// seek backward
-		gr.seek(10);
-		gr.run_for(1);
-		REQUIRE(gr.current_time() == 10);
-		
-		// invalid seek
-		REQUIRE_THROWS(gr.seek(-1));
-		REQUIRE(gr.current_time() == 10);
-		REQUIRE_THROWS(gr.seek(20));
-		REQUIRE(gr.current_time() == 10);	
-
-		// seek to end
-		gr.seek(19);
-		gr.run();
-//		REQUIRE(sink.reached_end());
-		
-		// seek backward, after end was already reached
-		gr.seek(7);
-		gr.run_for(2);
-
-		// stop, when not at end
+		test_run_graph_(gr);
 		REQUIRE(sink->check());
 	}
 
-	SECTION("graph 2") {
+
+	SECTION("multiple inputs") {
 		INFO(R"(
 		source1 --> [-3, +1]passthrough1 ----------------------------> merge --> sink
 		source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2' --> /
 		)");
 
-		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
-		auto& source2 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
+		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		auto& merge = gr.add_filter<input_synchronize_test_filter>();
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
@@ -191,37 +138,99 @@ SECTION("seek") {
 		sink->input.connect(merge->output);
 		gr.setup();
 		
-		gr.run_for(3);
-		REQUIRE(gr.current_time() == 2);
-		gr.run_until(5);
-		REQUIRE(gr.current_time() == 5);
+		test_run_graph_(gr);
+		REQUIRE(sink->check());
+	}
+	
+	
+	SECTION("multiple outputs") {
+		INFO(R"(
+		source --> multiout --> [-3, +1]passthrough1  --> merge --> sink
+		                  | --> [-1, +2]passthrough2' --> /
+		)");
+
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+		auto& multiout = gr.add_filter<multiple_output_filter>();
+		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
+		auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
+		auto& merge = gr.add_filter<input_synchronize_test_filter>();
+
+		source.set_asynchonous(async1);
+		multiout.set_asynchonous(async1);	
+		passthrough1.set_asynchonous(async1);
+		passthrough2.set_asynchonous(async2);
+		merge.set_asynchonous(async1);
+
+		multiout->input.connect(source->output);
+		passthrough1->input.connect(multiout->output1);
+		passthrough2->input.connect(multiout->output2);
+		merge->input1.connect(passthrough1->output);
+		merge->input2.connect(passthrough2->output);
+		sink->input.connect(merge->output);
+			
+		gr.setup();
+
+		test_run_graph_(gr);
+		REQUIRE(sink->check());
+	}
+	
+	
+	SECTION("complex") {
+		INFO(R"(
+		source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2 ------------> merge1' -------------> merge2' --> sink 
+		          |                                             /--> /                / -->
+		          +--------------------------------> merge3' --/                     /
+		          `                            | --> /                              /
+		source2  --> [-1, +2]pass3' --> multiout                                   /
+		          ,                            | --> [-1, +1]pass4' --> merge4' --/
+		          +--------------------------------------------------->                            
+		)");
+
 		
-		// seek forward, skipping frames [6,9]
-		gr.seek(15);
-		gr.run_for(2);
-		REQUIRE(gr.current_time() == 16);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
+		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
+		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
+		auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0);
+		auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2);
+		auto& passthrough4 = gr.add_filter<passthrough_filter>(1, 1);
+		auto& merge1 = gr.add_filter<input_synchronize_test_filter>();
+		auto& merge2 = gr.add_filter<input_synchronize_test_filter>();
+		auto& merge3 = gr.add_filter<input_synchronize_test_filter>();
+		auto& merge4 = gr.add_filter<input_synchronize_test_filter>();
+		auto& multiout = gr.add_filter<multiple_output_filter>();
+		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
-		// seek backward
-		gr.seek(10);
-		gr.run_for(1);
-		REQUIRE(gr.current_time() == 10);
+		source1.set_asynchonous(async2);
+		source2.set_asynchonous(async1);
+		passthrough1.set_asynchonous(async1);
+		passthrough2.set_asynchonous(async1);
+		passthrough3.set_asynchonous(async2);
+		passthrough4.set_asynchonous(async2);
+		merge1.set_asynchonous(async2);
+		merge2.set_asynchonous(async1);
+		merge3.set_asynchonous(async2);
+		merge4.set_asynchonous(async2);
+		multiout.set_asynchonous(async1);
 		
-		// invalid seek
-		REQUIRE_THROWS(gr.seek(-1));
-		REQUIRE(gr.current_time() == 10);
-		REQUIRE_THROWS(gr.seek(20));
-		REQUIRE(gr.current_time() == 10);	
+		passthrough1->input.connect(source1->output);
+		passthrough2->input.connect(passthrough1->output);
+		merge1->input1.connect(passthrough2->output);			
+		merge3->input1.connect(source1->output);
+		merge3->input2.connect(multiout->output1);
+		merge1->input2.connect(merge3->output);
+		merge2->input1.connect(merge1->output);
+		passthrough3->input.connect(source2->output);
+		multiout->input.connect(passthrough3->output);
+		passthrough4->input.connect(multiout->output2);
+		merge4->input2.connect(passthrough4->output);	
+		merge4->input1.connect(source1->output);	
+		merge2->input2.connect(merge4->output);
+		sink->input.connect(merge2->output);
+
+		gr.setup();
 		
-		// seek to end
-		gr.seek(19);
-		gr.run();
-//		REQUIRE(sink.reached_end());
-		
-		// seek backward, after end was already reached
-		gr.seek(7);
-		gr.run_for(2);		
-		
-		// stop, when not at end
+		test_run_graph_(gr);
 		REQUIRE(sink->check());
 	}
 }

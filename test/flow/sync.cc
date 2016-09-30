@@ -33,6 +33,6 @@ constexpr bool async2 = false;
 
 TEST_CASE("flow graph test: sync", "[flow][sync]") {
 	#include "basic.icc"
-	//#include "activation.icc"
-	//#include "seek.icc"
+	#include "activation.icc"
+	#include "seek.icc"
 }
