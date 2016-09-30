@@ -17,7 +17,6 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#if 0
 
 #ifndef MF_FLOW_ASYNC_NODE_H_
 #define MF_FLOW_ASYNC_NODE_H_
@@ -32,7 +31,15 @@ class node_graph;
 
 class async_node final : public processing_node {	
 private:
-	enum class process_result { should_continue, should_pause, failure };
+	enum class process_result {
+		undefined,
+		success,
+		should_pause,
+		transitory_failure,
+		handler_failure,
+		end_of_stream,
+		stopped
+	};
 
 	using request_id_type = int;
 	
@@ -50,8 +57,10 @@ private:
 	std::atomic<request_id_type> current_request_id_ {-1};
 	
 	request_id_type failed_request_id_ = -1;
+	process_result failed_request_process_result_ = process_result::undefined;
 	
-	bool pause_();
+	
+	void pause_();
 	process_result process_frame_();
 	void thread_main_();
 
@@ -85,7 +94,5 @@ inline bool is_async_node(const node& nd) {
 
 
 }}
-
-#endif
 
 #endif

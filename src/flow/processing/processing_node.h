@@ -131,8 +131,12 @@ private:
 	void compute_propagated_parameters_guide_() const;
 
 protected:
-	enum class handler_result { success, failure, end_of_stream };
-	enum class process_result { success, transitory_failure, handler_failure, end_of_stream, stopped };
+	/// Result state of handler processing or pre-processing of frame.
+	enum class handler_result {
+		success, ///< Handler successfully processed frame.
+		failure, ///< Handler failed to process frame. E.g. throwed exception.
+		end_of_stream ///< Handler reported that the requested time is past the end of the stream.
+	};
 
 	void verify_connections_validity_() const;
 

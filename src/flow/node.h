@@ -49,7 +49,14 @@ class node_input;
 /// Node in flow graph, base class.
 class node {
 public:
-	enum class pull_result { success, fatal_failure, transitory_failure, stopped, end_of_stream };
+	/// Result state of pulling a span of frames from the node.
+	enum class pull_result {
+		success, ///< The full span was successfully pulled.
+		fatal_failure, ///< A failure occured which will cause graph execution to stop.
+		transitory_failure, ///< A failure occured which will be handled within graph.
+		stopped, ///< The node graph execution was stopped.
+		end_of_stream ///< The full span was not pulled because it crossed the end of stream.
+	};
 
 private:
 	enum class stage { construction, was_pre_setup, was_setup };

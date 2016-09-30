@@ -33,6 +33,15 @@ namespace mf { namespace flow {
 /** Processes frames synchronously when pulled from output. Can have multiple inputs, but only one output. */
 class sync_node final : public processing_node {
 private:
+	/// Result state of the node processing a frame.
+	enum class process_result {
+		success, ///< Frame was processed successfully.
+		transitory_failure, ///< Transitional failure occured which will be propagated down.
+		handler_failure, ///< Handler failed on this node or on preceding node (propagated).
+		end_of_stream, ///< The requested time is past the end of the stream (for this node or for preceding).
+		stopped ///< The graph was stopped.
+	};
+	
 	std::unique_ptr<timed_ring> ring_;
 
 	process_result process_next_frame_();

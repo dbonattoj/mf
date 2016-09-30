@@ -24,7 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 shared_ring::shared_ring
-(const format_ptr& frm, std::size_t capacity, time_unit end_time) :
+(const format_ptr& frm, std::size_t capacity) :
 	ring_(frm, capacity)
 { 
 	reader_keep_waiting_.test_and_set();
@@ -50,24 +50,13 @@ void shared_ring::break_writer() {
 }
 
 
-auto shared_ring::begin_write(time_unit original_duration) -> section_view_type {
-	Assert(original_duration <= capacity());
+auto shared_ring::begin_write(time_unit duration) -> section_view_type {
+	Assert(duration <= capacity());
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);
-locked:
-
-	// write start position
-	// if writer needs to wait (during which mutex gets unlocked),
-	// then reader may seek to another position and write_start will change again...
-	time_unit write_start = ring_.write_start_time();
-
-	// truncate write span if near end
-	time_unit duration = original_duration;
-	if(ring_.end_time() != undefined_time)
-		if(write_start + duration > end_time()) duration = end_time() - write_start;
-
-	// if duration zero (possibly because at end), return zero-length view
+	
+	// if duration zero, return zero-length view
 	if(duration == 0) return ring_.begin_write(0);
 
 	// prevent deadlock
@@ -92,17 +81,6 @@ locked:
 			writer_state_ = idle;
 			return section_view_type::null();
 		}
-		
-		// reader may now have seeked to other time
-		if(ring_.write_start_time() != write_start) {			
-			// then retry with the new write position
-			// only seek() changes write position (on reader thread), so no risk of repeated recursion
-			
-			// avoid recursive call (or loop),
-			// as it would require brief unlock with incorrect writer_state_
-			writer_state_ = idle;
-			goto locked;
-		}
 	}
 
 	// mutex_ is still locked
@@ -111,17 +89,11 @@ locked:
 }
 
 
-auto shared_ring::try_begin_write(time_unit original_duration) -> section_view_type {
-	Assert(original_duration <= capacity());
+auto shared_ring::try_begin_write(time_unit duration) -> section_view_type {
+	Assert(duration <= capacity());
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);
-
-	time_unit write_start = ring_.write_start_time();
-
-	time_unit duration = original_duration;
-	if(end_time() != -1)
-		if(write_start + duration > end_time()) duration = end_time() - write_start;
 
 	if(ring_.writable_duration() < duration) return section_view_type::null();
 
@@ -175,7 +147,7 @@ auto shared_ring::begin_read_span(time_span span) -> section_view_type {
 	Assert(span.duration() <= capacity());
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
-	// if span does not start immediatly at first readable frame, skip frames, or seek if possible	
+	// if span does not start immediatly at first readable frame, seek to new start time	
 	seek(span.start_time());
 
 	// read_start_time_ is only affected by this reader thread
@@ -185,19 +157,12 @@ auto shared_ring::begin_read_span(time_span span) -> section_view_type {
 }
 
 
-auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
-	Assert(original_duration <= capacity());
+auto shared_ring::begin_read(time_unit duration) -> section_view_type {
+	Assert(duration <= capacity());
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
 	// lock mutex for buffer state
 	std::unique_lock<std::mutex> lock(mutex_);
-
-	// truncate read duration if near end
-	// if end time not defined: buffer is not seekable, and so end can only by marked by writer (end_write).
-	// then if span is not readable yet, will need to recheck after waiting for additional frames
-	time_unit duration = original_duration;
-	if(end_time() != -1)
-		if(read_start_time_ + duration > end_time()) duration = end_time() - read_start_time_;
 
 	// if duration zero (possibly because at end), return zero view
 	if(duration == 0) return ring_.begin_read(0);
@@ -227,17 +192,12 @@ auto shared_ring::begin_read(time_unit original_duration) -> section_view_type {
 
 
 
-auto shared_ring::try_begin_read(time_unit original_duration) -> section_view_type {
-	Assert(original_duration <= capacity());
+auto shared_ring::try_begin_read(time_unit duration) -> section_view_type {
+	Assert(duration <= capacity());
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
 	// lock mutex for buffer state
 	std::unique_lock<std::mutex> lock(mutex_);
-
-	// truncate read duration if near end
-	time_unit duration = original_duration;
-	if(end_time() != -1)
-		if(read_start_time_ + duration > end_time()) duration = end_time() - read_start_time_;
 	
 	if(ring_.readable_duration() < duration) return section_view_type::null();
 	
@@ -285,15 +245,7 @@ void shared_ring::end_read(time_unit read_duration, bool initialize_frames) {
 
 void shared_ring::skip(time_unit skip_duration) {
 	Assert(skip_duration >= 0);
-
-	// truncate to end time
-	time_unit target_time = std::min(read_start_time_ + skip_duration, end_time());
-	seek(target_time);
-}
-
-
-bool shared_ring::can_seek(time_unit target_time) const {
-	return true;
+	seek(read_start_time_ + skip_duration);
 }
 
 
@@ -310,7 +262,7 @@ void shared_ring::seek(time_unit t) {
 	bool already_readable = ring_.readable_time_span().includes(t);
 		
 	if(!already_readable && writer_state_ == accessing) {
-		// target tile span is not in buffer, and writer is currently accessing data:
+		// target time span is not in buffer, and writer is currently accessing data:
 		// need to let the writer finish writing first 
 				
 		// allow writer to write its frames
@@ -358,11 +310,8 @@ time_unit shared_ring::write_start_time() const {
 
 
 time_unit shared_ring::read_start_time() const {
-	std::lock_guard<std::mutex> lock(mutex_);
-	return ring_.read_start_time();
-	
 	// use atomic member, instead of non-atomic ring_.read_start_time()
-	//return read_start_time_;
+	return read_start_time_;
 }
 
 
@@ -375,16 +324,6 @@ time_span shared_ring::writable_time_span() const {
 time_span shared_ring::readable_time_span() const {
 	std::lock_guard<std::mutex> lock(mutex_);
 	return ring_.readable_time_span();
-}
-
-
-bool shared_ring::writer_reached_end() const {
-	return (write_start_time() == ring_.end_time());
-}
-
-
-bool shared_ring::reader_reached_end() const {
-	return (read_start_time() == ring_.end_time());
 }
 
 

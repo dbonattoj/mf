@@ -17,7 +17,6 @@ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEM
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#if 0
 
 #include "async_node.h"
 #include "../node_graph.h"
@@ -47,7 +46,7 @@ void async_node::setup() {
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 	
 	auto buffer_frame_format = output_frame_format_();
-	ring_.reset(new shared_ring(buffer_frame_format, required_capacity, stream_timing().duration()));
+	ring_.reset(new shared_ring(buffer_frame_format, required_capacity));
 }
 
 void async_node::launch() {
@@ -88,154 +87,137 @@ time_unit async_node::maximal_offset_to(const node& target_node) const {
 }
 
 
-bool async_node::pause_() {
+void async_node::pause_() {
 	// pause as long as either:
 	// - next write time (determined by shared_ring, and reader may seek) is beyond time limit (set by reader)
-	// - next write time is beyond end of stream (marked in shared_ring)
-	// - received temporary failure from input and reader has not made new request since
-	// not pause when graph stopped and return false instead then
-	// conditions are rechecked when continuation_cv_ is notified
-	// = when reader pulls new frame (after setting request_id)
-	//   or when graph is stopped
-	
-	auto may_continue = [&]()->bool {
+	// - current request had failed, not yet received new request from reader
+	// conditions are checked when continuation_cv_ gets notified
+
+	std::unique_lock<std::mutex> lock(continuation_mutex_);
+	continuation_cv_.wait(lock, [&] {
 		time_unit next_write_time = ring_->write_start_time();
-		MF_DEBUG_EXPR(next_write_time, failed_request_id_, current_request_id_.load(), time_limit_.load(), ring_->end_time(), graph().was_stopped());
-		if(graph().was_stopped()) return true;
+		if(graph().was_stopped()) return true; // thread_main() will exit
 		else if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
 		else if(next_write_time >= time_limit_) return false;
-		else if(ring_->end_time() != -1 && next_write_time >= ring_->end_time()) return false;
-		else return true;
-	};
-
-	MF_DEBUG("pause..locking");
-	std::unique_lock<std::mutex> lock(continuation_mutex_);
-	MF_DEBUG("pause..waiting");
-	continuation_cv_.wait(lock, may_continue);
-	return ! graph().was_stopped();
+		return true;
+	});
 }
 
 
 void async_node::thread_main_() {
 	bool pause = false;
-		
-	if(inputs().size() == 1)
-		MF_DEBUG("thread (input: -", inputs().front()->past_window_duration(), ", +", inputs().front()->future_window_duration(), ")");
-	else
-		MF_DEBUG("thread (source)");
-		
+	
 	for(;;) {
 		if(pause) {
-			MF_DEBUG("pause...");
-			bool cont = pause_();
-			if(! cont) break;
+			pause_();
+			if(graph().was_stopped()) break;
 			pause = false;
 		}
+
+		request_id_type processing_request_id = current_request_id_.load();
 		
-		MF_DEBUG("continuation...");
-		
-		request_id_type request_id = current_request_id_.load();	
-		process_result result = process_frame_();
-		if(result == process_result::failure) {
-			failed_request_id_ = request_id;
-			ring_->break_reader();
+		process_result process_res = process_frame_();
+		if(process_res == process_result::should_pause) {
 			pause = true;
-		} else if(result == process_result::should_pause) {
+		} else if(process_res != process_result::success) {
+			failed_request_id_ = processing_request_id;
+			failed_request_process_result_ = process_res;
+			ring_->break_reader();
 			pause = true;
 		}
 	}
-	MF_DEBUG("thread end.");
 }
 
 
 async_node::process_result async_node::process_frame_() {
-	MF_RAND_SLEEP;
-	auto out_vw = ring_->try_begin_write(1);
-	if(out_vw.is_null()) { MF_DEBUG("process: out_vw=null  --> should_pause"); return process_result::should_pause; }
-	if(out_vw.duration() == 0) { MF_DEBUG("process: out_vw=()  --> should_pause"); return process_result::should_pause; }
-
-	time_unit request_time = out_vw.start_time();
-	MF_DEBUG("process frame... request_time=", request_time, " limit=", time_limit_);
-
-	MF_RAND_SLEEP;
-	if(request_time >= time_limit_) {
-		ring_->end_write(0);
-		MF_DEBUG("process: t=", request_time, " > limit ", time_limit_.load(), " --> failure"); 
-		return process_result::failure;
-	}
+	// Begin writing 1 frame to output buffer
+	// If currently no space in buffer, go to pause state (don't block here instead)
+	auto output_write_handle = ring_->try_write(1);
+	if(output_write_handle.view().is_null()) return process_result::should_pause;
+	const timed_frame_array_view& out_vw = output_write_handle.view();
 	
-	time_unit t = out_vw.start_time();
+	// t = time of frame to process here
+	time_unit t = output_write_handle.view().start_time();
 
+	// as long as output_write_handle is open, ring cannot seek to another time (reader will wait instead)
+	// but in output_pre_pull_, reader sets time limit before seeking
+	// writer may notice here that reader wants to seek
+	if(t > time_limit_) return process_result::should_pause;
+	
+	// Set current time, create job
 	set_current_time_(t);
-	processing_node_job job = begin_job_();
+	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
+	job.attach_output(out_vw[0], nullptr);
 
-	job.attach_output_view(out_vw[0]);
-	MF_RAND_SLEEP;
-		
-	handler_pre_process_(job);
-	
+	// Let handler pre-process frame
+	handler_result handler_res = handler_pre_process_(job);
+	if(handler_res == handler_result::failure) return process_result::handler_failure;
+	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
+
+	// Pre-pull the activated inputs
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
-		in.pre_pull();
+		if(in.is_activated()) in.pre_pull();
 	}
-			
+
+	// Pull the activated inputs
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
 		if(! in.is_activated()) continue;
 		
 		pull_result res = in.pull();
-		if(res == pull_result::stopped || res == pull_result::transitory_failure) {
-			job.detach_output_view();
-			ring_->end_write(0);
-			MF_DEBUG("process frame... t=", request_time, " in fail --> failure");
-			return process_result::failure;
-		}
+		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
+		else if(res == pull_result::fatal_failure) return process_result::handler_failure;
+		else if(res == pull_result::stopped) return process_result::stopped;
+		else if(res == pull_result::end_of_stream) return process_result::end_of_stream;
 	}
-	
+
+	// Begin reading from the activated inputs (in job object)
+	// If error occurs, job object will cancel read during stack unwinding
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
+		if(in.is_activated()) job.begin_input(in);
+	}
 
-		bool cont = job.begin_input(in);
-		if(! cont) {
-			job.detach_output_view();
-			ring_->end_write(0);
-			MF_DEBUG("process frame... t=", request_time, " in broke --> failure");
-			return process_result::failure;
-		}
-	}
-	
-	MF_DEBUG("process ", t);
-	handler_process_(job);
-	
-	finish_job_(job);
-	
-	job.detach_output_view();
-	
-	if(reached_end()) {
-		ring_->end_write(1);
-		MF_DEBUG("process frame... t=", request_time, " --> should_pause");	
-		return process_result::should_pause;
-	} else {
-		ring_->end_write(1);
-		MF_DEBUG("process frame... t=", request_time, " --> should_continue");	
-		return process_result::should_continue;
-	}
+	// Let handler process frame
+	handler_res = handler_process_(job);
+	if(handler_res == handler_result::failure) return process_result::handler_failure;
+	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
+
+	// Detach output from output write handle,
+	// and commit 1 written frame to output buffer
+	job.detach_output();
+	output_write_handle.end(1);
+
+	// Finish the job
+	update_parameters_(job.parameters()); // TODO move instead of copy
+		
+	// Processing the frame succeeded
+	return process_result::success;
 }
 
 
-void async_node::output_pre_pull_(const time_span& pull_span) {	
-	MF_DEBUG("output: pre_pull ", pull_span);
+void async_node::output_pre_pull_(const time_span& pull_span) {
 	{
+		// if writer currently paused, it won't continue until this lock is released again
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
+	
+		// set new time limit for writer
 		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
-		
-		//if(stream_ properties().is_seekable()) 
-		ring_->seek(pull_span.start_time());
 				
-		current_request_id_++;
+		// seek shared_ring to new start time
+		// if writer is currently processing a frame, this waits until it has written that frame (or failed on it)
+		ring_->seek(pull_span.start_time());
+		
+		// set unique request id for the upcoming pull
+		// necessary to determine if a failure in the writer concerned the request that reader was waiting for in
+		// output_pull_().
+		// failure could also occur during prefetch following the previous request, and then without a unique id reader
+		// might be notified about the failure only after having started a new request (if the flag gets set too late)
+		// then transitional failure could be propagated incorrectly, instead of just pausing the prefetch in this node
+		current_request_id_++; // will overflow at maximal value
 	}
+	
 	
 	MF_RAND_SLEEP;
 	continuation_cv_.notify_one();
@@ -244,33 +226,32 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 
 node::pull_result async_node::output_pull_(time_span& pull_span) {
 	while(ring_->readable_duration() < pull_span.duration()) {
-		MF_RAND_SLEEP;		
+																			MF_RAND_SLEEP;
 		Assert(ring_->read_start_time() == pull_span.start_time());
-		
+
 		if(graph().was_stopped()) return pull_result::stopped;
 		
-		MF_DEBUG("output: pull ", pull_span, " : wait_readable...");
-		ring_->wait_readable();
-		MF_RAND_SLEEP;
-		MF_DEBUG("output: pull ", pull_span, " : wait_readable. readable=", ring_->readable_duration());
-	
-		bool this_request_failed = (failed_request_id_ == current_request_id_);
-		if(ring_->writer_reached_end()) {
-			pull_span = span_intersection(pull_span, ring_->readable_time_span());
-		}
-		if(ring_->readable_duration() >= pull_span.duration()) {
-			MF_DEBUG("output: pull -> success");
-			return pull_result::success;
-		} else if(graph().was_stopped()) {
-			MF_DEBUG("output: pull -> stopped");
-			return pull_result::stopped;
-		} else if(this_request_failed) {
-			MF_DEBUG("output: pull -> tfail");
-			return pull_result::transitory_failure;
-		}
+		// let the writer process frames
+		// wait until pull_span.duration() frames have become readable in shared_ring,
+		// or writer failure occured, and shared_ring reader break event got sent
+		bool frame_became_readable = ring_->wait_readable(); 				MF_RAND_SLEEP;
+		if(frame_became_readable) continue;
+																			MF_RAND_SLEEP;	
+		// wait_readable got interrupted by reader break event
+		// may be from process failure for this request,
+		// or from the previous request (break coming in late)
+		if(failed_request_id_ != current_request_id_) continue;
+		// in latter case, continue waiting - writer will continue with this request
+																			MF_RAND_SLEEP;
+		// this request has failed...
+		process_result process_res = failed_request_process_result_;
+		if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
+		else if(process_res == process_result::handler_failure) return pull_result::fatal_failure;
+		else if(process_res == process_result::end_of_stream) return pull_result::end_of_stream;
+		else if(process_res == process_result::stopped) return pull_result::stopped;
+		else throw std::logic_error("invalid process_result state in failed_request_process_result_");
 	}
-
-	MF_DEBUG("output: pull -> success");
+	
 	return pull_result::success;
 }
 
@@ -285,5 +266,3 @@ void async_node::output_end_read_(time_unit duration) {
 
 
 }}
-
-#endif

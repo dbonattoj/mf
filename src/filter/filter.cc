@@ -290,12 +290,12 @@ void filter::install_(installation_guide& guide) {
 	if(is_sink()) {
 		sink_node& nd = guide.node_gr.add_sink<sink_node>();
 		installed_node = &nd;
-	} /*else if(asynchronous_) {
+	} else if(asynchronous_) {
 		async_node& nd = guide.node_gr.add_node<async_node>();
 		nd.set_prefetch_duration(prefetch_duration_);
 		installed_node = &nd;
 		nd.output().set_name("out");
-	}*/ else {
+	} else {
 		sync_node& nd = guide.node_gr.add_node<sync_node>();
 		installed_node = &nd;
 		nd.output().set_name("out");

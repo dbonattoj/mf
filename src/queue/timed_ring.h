@@ -82,11 +82,11 @@ public:
 
 
 
-/// Read handle of \ref ring.
+/// Read handle of \ref timed_ring.
 class timed_ring::read_handle : public ring_handle_base {
 private:
 	timed_ring& ring_;
-	timed_frame_array_view view_;
+	section_view_type view_;
 	
 public:
 	read_handle(read_handle&& hnd) :
@@ -99,14 +99,9 @@ public:
 		return *this;
 	}
 
-	read_handle(timed_ring& rng, time_unit duration) :
-		ring_(rng),
-		view_(ring_.begin_read(duration)) { }
-	
-	read_handle(timed_ring& rng, time_span span) :
-		ring_(rng),
-		view_(ring_.begin_read_span(span)) { }
-	
+	read_handle(timed_ring& rng, const section_view_type& vw) :
+		ring_(rng), view_(vw) { }
+		
 	~read_handle() override {
 		if(! view_.is_null()) end(0);
 	}
@@ -115,15 +110,15 @@ public:
 		ring_.end_read(duration);
 	}
 
-	const timed_frame_array_view& view() const { return view_; }
+	const section_view_type& view() const { return view_; }
 };
 
 
-/// Write handle of \ref ring.
+/// Write handle of \ref timed_ring.
 class timed_ring::write_handle : public ring_handle_base {
 private:
 	timed_ring& ring_;
-	timed_frame_array_view view_;
+	section_view_type view_;
 	
 public:
 	write_handle(write_handle&& hnd) :
@@ -136,9 +131,8 @@ public:
 		return *this;
 	}
 
-	write_handle(timed_ring& rng, time_unit duration) :
-		ring_(rng),
-		view_(ring_.begin_write(duration)) { }
+	write_handle(timed_ring& rng, const section_view_type& vw) :
+		ring_(rng), view_(vw) { }
 	
 	~write_handle() override {
 		if(! view_.is_null()) end(0);
@@ -148,21 +142,21 @@ public:
 		ring_.end_write(duration);
 	}
 
-	const timed_frame_array_view& view() const { return view_; }
+	const section_view_type& view() const { return view_; }
 };
 
 
 
 inline timed_ring::write_handle timed_ring::write(time_unit duration) {
-	return write_handle(*this, duration);
+	return write_handle(*this, begin_write(duration));
 }
 
 inline timed_ring::read_handle timed_ring::read(time_unit duration) {
-	return read_handle(*this, duration);
+	return read_handle(*this, begin_read(duration));
 }
 
 inline timed_ring::read_handle timed_ring::read_span(time_span span) {
-	return read_handle(*this, span);
+	return read_handle(*this, begin_read_span(span));
 }
 
 

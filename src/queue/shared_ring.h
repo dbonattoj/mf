@@ -35,15 +35,16 @@ namespace mf {
 
 /// Timed ring buffer with changed semantics, for dual-thread use.
 /** Meant to be accessed from two threads, one reader and one writer.
- ** Changed semantics:
- ** - When trying to read/write more than readable/writable duration, will block until the frames become available
- **   from the other thread. Deadlocks are prevented.
- ** - If span to read, write, skip crosses end time, it gets truncated. */
+ ** When trying to read/write more than readable/writable duration, will block until the frames become available
+ ** from the other thread. Deadlocks are prevented. */
 class shared_ring {
 public:
 	using section_view_type = timed_ring::section_view_type;
 	using format_base_type = timed_ring::format_base_type;
 	using format_ptr = timed_ring::format_ptr;
+	
+	class read_handle;
+	class write_handle;
 
 private:
 	/// Indicates current state of reader and writer.
@@ -70,12 +71,12 @@ private:
 	time_unit frames_reader_waits_for_() const { return std::max<time_unit>(reader_state_.load(), 0); }
 	time_unit frames_writer_waits_for_() const { return std::max<time_unit>(writer_state_.load(), 0); }
 
-	shared_ring(const format_ptr& frm, std::size_t capacity, time_unit end_time);
+	shared_ring(const format_ptr& frm, std::size_t capacity);
 
 public:
 	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
-	shared_ring(Format&& frm, std::size_t capacity, time_unit end_time = undefined_time) :
-		shared_ring(forward_make_shared_const(frm), capacity, end_time) { }
+	shared_ring(Format&& frm, std::size_t capacity) :
+		shared_ring(forward_make_shared_const(frm), capacity) { }
 			
 	void break_reader();
 	void break_writer();
@@ -88,14 +89,12 @@ public:
 
 	/// \name Write interface.
 
-	/// Must be called by the writer thread only.
+	/// Must be called on the writer thread only.
 	///@{
 	
 	/// Wait until a frame become writable, or writer break event occurs.
-	/** If no frame is writable (either because reader has not read enough frames yet or write start time is at end),
-	 ** waits until at least one frame becomes available, or break_writer() was called, triggering writer break event.
-	 ** If \a break_event occured, returns `false`. Otherwise returns `true`.
-	 ** Also waits if write start position is at end time, until seek occurs or writer break event occurs. */
+	/** If no frame is writable, waits until at least one frame becomes available, or break_writer() was called,
+	 ** triggering writer break event. If \a break_event occured, returns `false`. Otherwise returns `true`. */
 	bool wait_writable();
 	
 	/// Begin writing \a write_duration frames at current write start time, if they are available.
@@ -103,33 +102,34 @@ public:
 	section_view_type try_begin_write(time_unit write_duration);
 
 	/// Begin writing \a write_duration frames at current write start time.
-	/** If span to write crosses end of buffer, it is truncated.
-	 ** Waits until \a write_duration (after truncation) frames become writable.
-	 ** When at end, zero-length section is returned, and start time of returned time span equals `end_time()`.
-	 ** Then end_write() need not be called.
-	 ** Otherwise, returns section for writer to write into, with the correct start time.
+	/** Waits until \a write_duration (after truncation) frames become writable.
+	 ** Returns section for writer to write into, with the correct start time.
 	 ** Returned section may have start time different to `writable_time_span().start_time()` called just before,
 	 ** when reader seeked to another time in-between the calls.
-	 ** Must be followed by call to end_write(). */
+	 ** Must be followed by call to end_write().
+	 ** If writer break event occured while waiting, returns null view. The end_write() must not be called. */
 	section_view_type begin_write(time_unit write_duration);
 		
 	/// End writing \a did_write_duration frames.
 	/** Must be called after begin_write(). \a did_write_duration must be lower of equal to duration of section returned
 	 ** by begin_write(). */
 	void end_write(time_unit did_write_duration);
+	
+	
+	write_handle try_write(time_unit);
+	write_handle write(time_unit);
+
 
 	///@}
 
 
 	/// \name Read interface.
-	/// Must be called by the reader thread only.
+	/// Must be called on the reader thread only.
 	///@{
 
 	/// Wait until a frame become readable, or reader break event occurs.
-	/** If no frame is readable (either because writer has not written enough frames yet or read start time is at end), 
-	 ** waits until at least one frame becomes available, or break_reader() was called, triggering reader break event.
-	 ** If reader break event occured, returns `false`. Otherwise returns `true`.
-	 ** Also waits if write start position is at end time, until reader break event occurs. */
+	/** If no frame is readable, waits until at least one frame becomes available, or break_reader() was called,
+	 ** triggering reader break event. If reader break event occured, returns `false`. Otherwise returns `true`. */
 	bool wait_readable();
 
 	/// Begin reading frames at time span \a span.
@@ -138,11 +138,9 @@ public:
 	section_view_type begin_read_span(time_span span);
 	
 	/// Begin reading \a read_duration frames at current read start time.
-	/** If span to read crosses end of buffer, it is truncated. When already at end, zero-length section is returned.
-	 ** Then end_read() must not be called.
-	 ** Waits until \a read_duration (after truncation) frames become readable.
-	 ** Returns section for writer to read from.
-	 ** Must be followed by call to end_read(). */
+	/** Waits until \a read_duration (after truncation) frames become readable.
+	 ** Returns section for writer to read from. Must be followed by call to end_read().
+	 ** If reader break event occured while waiting, returns null view. The end_read() must not be called. */
 	section_view_type begin_read(time_unit read_duration);
 
 	/// Begin reading \a read_duration frames at current read start time, if they are available.
@@ -155,8 +153,7 @@ public:
 	void end_read(time_unit did_read_duration, bool initialize_frames = true);	
 	
 	/// Skips \a skip_duration frames.
-	/** Equivalent to `seek(read_start_time() + skip_duration)`, except that \a skip_duration gets truncated if it
-	 ** crosses the to end time. */
+	/** Equivalent to `seek(read_start_time() + skip_duration)`. */
 	void skip(time_unit skip_duration);
 	
 	/// Seeks to read time \a target_time.
@@ -165,8 +162,9 @@ public:
 	 ** and writer will react by writing frames for that time. */
 	void seek(time_unit target_time);
 	
-	/// Verifies if is is possible to seek to read time \a target_time.
-	bool can_seek(time_unit target_time) const;
+	read_handle read(time_unit);
+	read_handle try_read(time_unit);
+	read_handle read_span(time_span);
 	
 	///@}
 	
@@ -181,29 +179,104 @@ public:
 	time_unit read_start_time() const;
 		
 	time_span writable_time_span() const;
+	time_unit writable_duration() const { return writable_time_span().duration(); }
 	
 	time_span readable_time_span() const;
-	
-	time_unit writable_duration() const { return writable_time_span().duration(); }
-
 	time_unit readable_duration() const { return readable_time_span().duration(); }
-
-	/// End of file time. */
-	time_unit end_time() const { return 0;/*ring_.end_time();*/ }
-		
-	/// True if writer has written last frame.
-	/** For non-seekable buffer, true after end_write() call with mark end. begin_write() returns empty view if called
-	 ** after this returned true. (Except if seek occured inbetween). */
-	bool writer_reached_end() const;
-
-	/// True if reader has read last frame.
-	/** Unlike end_time(), the result cannot change between reader_reached_end() and begin_read() call: for non-seekable
-	 ** buffer, the writer can only mark end after writing at least one frame, and hence cannot retroactively mark
-	 ** current read start position as being the end. */
-	bool reader_reached_end() const;
-	
+				
 	time_unit current_time() const { return ring_.current_time(); }
 };
+
+
+
+/// Read handle of \ref shared_ring.
+class shared_ring::read_handle : public ring_handle_base {
+private:
+	shared_ring& ring_;
+	section_view_type view_;
+	
+public:
+	read_handle(read_handle&& hnd) :
+		ring_(hnd.ring_),
+		view_(std::move(hnd.view_)) { }
+	
+	read_handle& operator=(read_handle&& hnd) {
+		Assert(&ring_ == &hnd.ring_);
+		view_.reset(std::move(hnd.view_));
+		return *this;
+	}
+
+	read_handle(shared_ring& rng, const section_view_type& vw) :
+		ring_(rng), view_(vw) { }
+	
+	~read_handle() override {
+		if(! view_.is_null()) end(0);
+	}
+	
+	void end(time_unit duration) override {
+		ring_.end_read(duration);
+	}
+
+	const section_view_type& view() const { return view_; }
+};
+
+
+/// Write handle of \ref shared_ring.
+class shared_ring::write_handle : public ring_handle_base {
+private:
+	shared_ring& ring_;
+	section_view_type view_;
+	
+public:
+	write_handle(write_handle&& hnd) :
+		ring_(hnd.ring_),
+		view_(std::move(hnd.view_)) { }
+	
+	write_handle& operator=(write_handle&& hnd) {
+		Assert(&ring_ == &hnd.ring_);
+		view_.reset(std::move(hnd.view_));
+		return *this;
+	}
+
+	write_handle(shared_ring& rng, const section_view_type& vw) :
+		ring_(rng), view_(vw) { }
+	
+	~write_handle() override {
+		if(! view_.is_null()) end(0);
+	}
+	
+	void end(time_unit duration) override {
+		ring_.end_write(duration);
+	}
+
+	const section_view_type& view() const { return view_; }
+};
+
+
+inline shared_ring::write_handle shared_ring::try_write(time_unit dur) {
+	return write_handle(*this, try_begin_write(dur));
+}
+
+
+inline shared_ring::write_handle shared_ring::write(time_unit dur) {
+	return write_handle(*this, begin_write(dur));
+}
+
+
+inline shared_ring::read_handle shared_ring::read(time_unit dur) {
+	return read_handle(*this, begin_read(dur));
+}
+
+
+inline shared_ring::read_handle shared_ring::try_read(time_unit dur) {
+	return read_handle(*this, try_begin_read(dur));
+}
+
+
+inline shared_ring::read_handle shared_ring::read_span(time_span span) {
+	return read_handle(*this, begin_read_span(span));
+}
+
 
 
 }

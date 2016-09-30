@@ -104,7 +104,7 @@ public:
 class ring::read_handle : public ring_handle_base {
 private:
 	ring& ring_;
-	frame_array_view view_;
+	section_view_type view_;
 	
 public:
 	read_handle(read_handle&& hnd) :
@@ -117,9 +117,8 @@ public:
 		return *this;
 	}
 
-	read_handle(ring& rng, time_unit duration) :
-		ring_(rng),
-		view_(ring_.begin_read(duration)) { }
+	read_handle(ring& rng, const section_view_type& vw) :
+		ring_(rng), view_(vw) { }
 	
 	~read_handle() override {
 		if(! view_.is_null()) end(0);
@@ -129,7 +128,7 @@ public:
 		ring_.end_read(duration);
 	}
 
-	const frame_array_view& view() const { return view_; }
+	const section_view_type& view() const { return view_; }
 };
 
 
@@ -137,7 +136,7 @@ public:
 class ring::write_handle : public ring_handle_base {
 private:
 	ring& ring_;
-	frame_array_view view_;
+	section_view_type view_;
 	
 public:
 	write_handle(write_handle&& hnd) :
@@ -150,9 +149,8 @@ public:
 		return *this;
 	}
 
-	write_handle(ring& rng, time_unit duration) :
-		ring_(rng),
-		view_(ring_.begin_write(duration)) { }
+	write_handle(ring& rng, const section_view_type& vw) :
+		ring_(rng), view_(vw) { }
 	
 	~write_handle() override {
 		if(! view_.is_null()) end(0);
@@ -162,17 +160,17 @@ public:
 		ring_.end_write(duration);
 	}
 
-	const frame_array_view& view() const { return view_; }
+	const section_view_type& view() const { return view_; }
 };
 
 
 inline ring::write_handle ring::write(time_unit duration) {
-	return write_handle(*this, duration);
+	return write_handle(*this, begin_write(duration));
 }
 
 	
 inline ring::read_handle ring::read(time_unit duration) {
-	return read_handle(*this, duration);
+	return read_handle(*this, begin_read(duration));
 }
 
 

@@ -166,7 +166,7 @@ void multiplex_node::pre_setup() {
 
 bool multiplex_node::need_async_() const {
 	if(outputs_on_different_threads_()) return true;
-	if(input().connected_node().name().substr(2) == "image refine") return true;
+	if(input().connected_node().name().substr(2) == "image refine") return true; // TODO replace, when async mpx?
 	return false;
 }
 
