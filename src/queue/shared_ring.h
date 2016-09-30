@@ -215,6 +215,7 @@ public:
 	
 	void end(time_unit duration) override {
 		ring_.end_read(duration);
+		view_.reset();
 	}
 
 	const section_view_type& view() const { return view_; }
@@ -247,6 +248,7 @@ public:
 	
 	void end(time_unit duration) override {
 		ring_.end_write(duration);
+		view_.reset();
 	}
 
 	const section_view_type& view() const { return view_; }

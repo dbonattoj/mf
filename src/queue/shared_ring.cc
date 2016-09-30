@@ -52,13 +52,11 @@ void shared_ring::break_writer() {
 
 auto shared_ring::begin_write(time_unit duration) -> section_view_type {
 	Assert(duration <= capacity());
+	Assert(duration > 0);
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);
 	
-	// if duration zero, return zero-length view
-	if(duration == 0) return ring_.begin_write(0);
-
 	// prevent deadlock
 	// c.f. begin_read_span
 	time_unit readable = ring_.readable_duration();
@@ -91,6 +89,7 @@ auto shared_ring::begin_write(time_unit duration) -> section_view_type {
 
 auto shared_ring::try_begin_write(time_unit duration) -> section_view_type {
 	Assert(duration <= capacity());
+	Assert(duration > 0);
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);
@@ -145,6 +144,7 @@ void shared_ring::end_write(time_unit written_duration) {
 
 auto shared_ring::begin_read_span(time_span span) -> section_view_type {
 	Assert(span.duration() <= capacity());
+	Assert(span.duration() > 0);
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
 	// if span does not start immediatly at first readable frame, seek to new start time	
@@ -159,13 +159,11 @@ auto shared_ring::begin_read_span(time_span span) -> section_view_type {
 
 auto shared_ring::begin_read(time_unit duration) -> section_view_type {
 	Assert(duration <= capacity());
+	Assert(duration > 0);
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
 	// lock mutex for buffer state
 	std::unique_lock<std::mutex> lock(mutex_);
-
-	// if duration zero (possibly because at end), return zero view
-	if(duration == 0) return ring_.begin_read(0);
 	
 	// prevent deadlock
 	// it is not sufficient to have a single writer_state_ == waiting state:
@@ -194,6 +192,7 @@ auto shared_ring::begin_read(time_unit duration) -> section_view_type {
 
 auto shared_ring::try_begin_read(time_unit duration) -> section_view_type {
 	Assert(duration <= capacity());
+	Assert(duration > 0);
 	if(reader_state_ != idle) throw sequencing_error("reader not idle");
 
 	// lock mutex for buffer state
@@ -250,8 +249,6 @@ void shared_ring::skip(time_unit skip_duration) {
 
 
 void shared_ring::seek(time_unit t) {	
-	Assert(t <= ring_.end_time());
-
 	// no need to do anything if already at time t
 	if(t == read_start_time_) return;
 

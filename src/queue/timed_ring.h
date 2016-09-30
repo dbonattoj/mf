@@ -73,8 +73,6 @@ public:
 	void end_read(time_unit read_duration, bool initialize_frames = true);
 	void skip(time_unit duration);
 	void seek(time_unit);
-	
-	time_unit end_time() const { throw 1; }
 };
 
 
@@ -108,6 +106,7 @@ public:
 	
 	void end(time_unit duration) override {
 		ring_.end_read(duration);
+		view_.reset();
 	}
 
 	const section_view_type& view() const { return view_; }
@@ -140,6 +139,7 @@ public:
 	
 	void end(time_unit duration) override {
 		ring_.end_write(duration);
+		view_.reset();
 	}
 
 	const section_view_type& view() const { return view_; }

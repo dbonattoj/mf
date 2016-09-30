@@ -21,6 +21,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "async_node.h"
 #include "../node_graph.h"
 
+#include <iostream>
+
 namespace mf { namespace flow {
 	
 async_node::async_node(node_graph& gr) :
@@ -113,6 +115,7 @@ void async_node::thread_main_() {
 			if(graph().was_stopped()) break;
 			pause = false;
 		}
+		MF_DEBUG_T("async", name(), " continuation");
 
 		request_id_type processing_request_id = current_request_id_.load();
 		
@@ -125,17 +128,21 @@ void async_node::thread_main_() {
 			ring_->break_reader();
 			pause = true;
 		}
+		
+		MF_DEBUG_T("async", name(), " proccess_result not success/should_pause");
 	}
+	
+	MF_DEBUG_T("async", name(), " END");
 }
 
 
-async_node::process_result async_node::process_frame_() {
+async_node::process_result async_node::process_frame_() {	
 	// Begin writing 1 frame to output buffer
 	// If currently no space in buffer, go to pause state (don't block here instead)
-	auto output_write_handle = ring_->try_write(1);
+	auto output_write_handle = ring_->try_write(1);	
 	if(output_write_handle.view().is_null()) return process_result::should_pause;
 	const timed_frame_array_view& out_vw = output_write_handle.view();
-	
+		
 	// t = time of frame to process here
 	time_unit t = output_write_handle.view().start_time();
 
@@ -166,6 +173,7 @@ async_node::process_result async_node::process_frame_() {
 		if(! in.is_activated()) continue;
 		
 		pull_result res = in.pull();
+				
 		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
 		else if(res == pull_result::fatal_failure) return process_result::handler_failure;
 		else if(res == pull_result::stopped) return process_result::stopped;
@@ -178,6 +186,9 @@ async_node::process_result async_node::process_frame_() {
 		input_type& in = input_at(i);
 		if(in.is_activated()) job.begin_input(in);
 	}
+	
+	MF_DEBUG_T("async", name(), " process... handler_proc");
+
 
 	// Let handler process frame
 	handler_res = handler_process_(job);
@@ -240,11 +251,18 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		// wait_readable got interrupted by reader break event
 		// may be from process failure for this request,
 		// or from the previous request (break coming in late)
+		
+		MF_DEBUG_T("async", name(), " pull -> fail", failed_request_id_, " <?> curr", current_request_id_.load());
+		
 		if(failed_request_id_ != current_request_id_) continue;
 		// in latter case, continue waiting - writer will continue with this request
 																			MF_RAND_SLEEP;
 		// this request has failed...
 		process_result process_res = failed_request_process_result_;
+		pull_span.set_end_time(current_time());
+		
+		MF_DEBUG_T("async", name(), " pull -> fail ", pull_span);
+		
 		if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
 		else if(process_res == process_result::handler_failure) return pull_result::fatal_failure;
 		else if(process_res == process_result::end_of_stream) return pull_result::end_of_stream;
@@ -252,12 +270,14 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		else throw std::logic_error("invalid process_result state in failed_request_process_result_");
 	}
 	
+	MF_DEBUG_T("async", name(), " pull -> ok ", pull_span);
 	return pull_result::success;
 }
 
 
 node_frame_window_view async_node::output_begin_read_(time_unit duration) {
-	return ring_->try_begin_read(duration);
+	Assert(ring_->readable_duration() >= duration);
+	return ring_->begin_read(duration);
 }
 
 void async_node::output_end_read_(time_unit duration) {
