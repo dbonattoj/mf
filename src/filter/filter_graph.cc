@@ -80,9 +80,9 @@ void filter_graph::run_for(time_unit duration) {
 }
 
 
-bool filter_graph::run() {
+void filter_graph::run() {
 	Assert(was_setup());
-	return node_graph_->run();
+	node_graph_->run();
 }
 
 

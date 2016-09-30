@@ -246,10 +246,10 @@ auto ndarray_view<Dim, T>::section_(std::ptrdiff_t i, std::ptrdiff_t start, std:
 	if(start < 0) start = shape_[i] + start;
 	if(end < 0) end = shape_[i] + end;
 	
-	if(start < 0 || start >= shape_[i]) throw std::out_of_range("section start out of range");
-	if(end < 0 || end > shape_[i]) throw std::out_of_range("section end out of range");
-	if(start >= end) throw std::invalid_argument("section start must be lower than end");
-	if(step == 0) throw std::invalid_argument("section step must not be zero");	
+	Assert_crit(start >= 0 && start <= shape_[i], "section start range");
+	Assert_crit(end >= 0 && end <= shape_[i], "section end range");
+	Assert_crit(start < end, "section start must be lower than end");
+	Assert_crit(step != 0, "section step must not be zero");
 	
 	pointer new_start = advance_raw_ptr(start_, strides_[i] * start);
 	shape_type new_shape = shape_;

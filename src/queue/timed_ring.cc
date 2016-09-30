@@ -21,9 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "timed_ring.h"
 
 namespace mf {
-
-
-constexpr time_unit timed_ring::undefined_time;
 	
 
 timed_ring::timed_ring(const format_ptr& frm, std::size_t capacity) :

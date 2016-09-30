@@ -56,15 +56,13 @@ private:
 public:
 	output_type<2, int> output;
 			
-	sequence_frame_source(flow::filter& filt, time_unit last_frame, const ndsize<2>& frame_shape, bool seekable, bool bounded = false) :
+	sequence_frame_source(flow::filter& filt, time_unit last_frame, const ndsize<2>& frame_shape) :
 		filter_handler(filt),
+		last_frame_(last_frame),
 		frame_shape_(frame_shape),
 		output(filt)
 	{
 		filt.set_name("source");
-		flow::node_stream_timing tm;
-		tm.set_duration((bounded || seekable) ? (last_frame + 1) : -1);
-		this_filter().define_source_stream_timing(tm);
 	}
 	
 	void setup() override {
@@ -74,6 +72,11 @@ public:
 	}
 	
 	void process(flow::filter_job& job) override {
+		if(job.time() > last_frame_) {
+			job.mark_end();
+			return;
+		}
+		
 		time_unit t = job.time();
 
 		if(previous_frame_ != -1 && t < previous_frame_)
@@ -81,7 +84,6 @@ public:
 
 		produced_frames_.emplace(t);
 		job.out(output) = make_frame(frame_shape_, t);
-		if(t == last_frame_) job.mark_end();
 		
 		previous_frame_ = t;
 				

@@ -89,7 +89,12 @@ public:
 	/// \name Indexing
 	///@{
 	decltype(auto) at_time(time_unit t) const { return base::operator[](time_to_index(t)); }
-	decltype(auto) at_time(time_unit t) { return base::operator[](time_to_index(t)); }
+	
+	auto time_section(time_span span) {
+		std::ptrdiff_t start = time_to_index(span.start_time());
+		std::ptrdiff_t end = time_to_index(span.end_time());
+		return operator()(start, end);
+	}
 
 	auto section
 	(const coordinates_type& start, const coordinates_type& end, const strides_type& steps = strides_type(1)) const {

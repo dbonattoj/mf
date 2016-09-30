@@ -29,7 +29,7 @@ namespace mf { namespace flow {
 class node_graph;
 
 /// Sink node base class.
-/** Has one of multiple inputs and no outputs. There is one sink node per graph. Controls time flow of graph. */
+/** Has one of multiple inputs and no outputs. There is one sink node in the graph. Controls time flow of graph. */
 class sink_node final : public processing_node {
 protected:
 	void output_pre_pull_(const time_span&) override { throw 0; }
@@ -49,9 +49,8 @@ public:
 	
 	void setup_graph();
 	
-	bool process_next_frame();
-	void pull(time_unit t);
-	void pull_next_frame() { process_next_frame(); }
+	pull_result pull(time_unit t);
+	pull_result pull_next_frame();
 	
 	void seek(time_unit t);
 };

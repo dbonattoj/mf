@@ -37,7 +37,7 @@ public:
 	explicit filter_job(processing_node_job& job) : node_job_(job) { }
 	
 	time_unit time() const noexcept { return node_job_.time(); }
-	void mark_end() noexcept { node_job_.mark_end(); }
+	void mark_end() noexcept { node_job_.mark_end_of_stream(); }
 
 	/// Input view.
 	///@{

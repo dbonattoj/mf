@@ -42,7 +42,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 
 	SECTION("deterministic") {
 		SECTION("constant") {
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
 			auto& pass2 = gr.add_filter<parameter_passthrough_filter>(1, 1);
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -67,7 +67,7 @@ TEST_CASE("flow graph with parameters", "[flow][parameter]") {
 		}
 		
 		SECTION("value function") {
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, true);
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& pass1 = gr.add_filter<parameter_passthrough_filter>(0, 0);
 			auto& pass2 = gr.add_filter<parameter_passthrough_filter>(1, 1);
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);

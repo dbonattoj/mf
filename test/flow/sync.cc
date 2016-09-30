@@ -30,10 +30,9 @@ using namespace mf::test;
 
 constexpr bool async1 = false;
 constexpr bool async2 = false;
-constexpr bool seekable = true;
 
-TEST_CASE("flow graph test: seekable, sync", "[flow][sync]") {
+TEST_CASE("flow graph test: sync", "[flow][sync]") {
 	#include "basic.icc"
-	#include "activation.icc"
-	#include "seek.icc"
+	//#include "activation.icc"
+	//#include "seek.icc"
 }

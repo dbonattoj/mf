@@ -90,7 +90,7 @@ void processing_node::compute_propagated_parameters_guide_() const {
 }
 
 
-handler_result processing_node::handler_pre_process_(processing_node_job& job) {
+processing_node::handler_result processing_node::handler_pre_process_(processing_node_job& job) {
 	Assert(handler_ != nullptr);
 	try {
 		handler_->handler_pre_process(*this, job);
@@ -102,7 +102,7 @@ handler_result processing_node::handler_pre_process_(processing_node_job& job) {
 }
 
 
-handler_result processing_node::handler_process_(processing_node_job& job) {
+processing_node::handler_result processing_node::handler_process_(processing_node_job& job) {
 	Assert(handler_ != nullptr);
 	
 	if(is_sink()) std::cout << name() << " process.... " << job.time() << " ................." << std::endl;

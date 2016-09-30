@@ -31,29 +31,20 @@ namespace mf {
 /** Read and write handles derived from this are implemented by the different ring classes.
  ** Instance represents the temporary read/write access to a part of the ring buffer, which cannot be overwritten/read
  ** during its lifetime. Destructor ends read/write. */
-class ring_handle_base {
-private:
-	frame_array_view view_;
-	
-	ring_read_handle_base(const ring_read_handle_base&) = delete;
-	ring_read_handle_base& operator=(const ring_read_handle_base&) = delete;
-
-	ring_read_handle_base(ring_read_handle_base&& hnd) : view_(std::move(hnd.view_)) { }
-	ring_read_handle_base& operator=(ring_read_handle_base&&) = delete;
-	
+class ring_handle_base {	
 protected:
-	void reset_view_() { view_.reset(); }
-	void reset_view_(const frame_array_view& vw) { view_.reset(vw); }
+	ring_handle_base(const ring_handle_base&) = delete;
+	ring_handle_base& operator=(const ring_handle_base&) = delete;
+
+	ring_handle_base() = default;
+	ring_handle_base(ring_handle_base&&) = default;
+	ring_handle_base& operator=(ring_handle_base&&) = default;
 		
 public:
-	virtual ~ring_read_handle_base() = default;
+	virtual ~ring_handle_base() = default;
 	
 	virtual void end(time_unit duration) = 0;
 	void cancel() { this->end(0); }
-	
-	frame_array_view view() const { return view_; }
-	bool is_null() const { return view().is_null() }
-	explicit operator bool () const { return !is_null(); }
 };
 
 
@@ -97,11 +88,11 @@ public:
 	time_unit writable_duration() const;
 	time_unit readable_duration() const;
 	
-	write_handle write(time_unit duration) { return write_handle(*this, duration); }
+	write_handle write(time_unit duration);
 	section_view_type begin_write(time_unit duration);
 	void end_write(time_unit written_duration);
 	
-	read_handle read(time_unit duration) { return read_handle(*this, duration); }
+	read_handle read(time_unit duration);
 	section_view_type begin_read(time_unit duration);
 	void end_read(time_unit read_duration, bool initialize_frames = true);
 		
@@ -113,19 +104,32 @@ public:
 class ring::read_handle : public ring_handle_base {
 private:
 	ring& ring_;
+	frame_array_view view_;
 	
 public:
-	read_handle(ring& rng, time_unit duration) : ring_(rng) {
-		reset_view_(ring_.begin_read(duration));
+	read_handle(read_handle&& hnd) :
+		ring_(hnd.ring_),
+		view_(std::move(hnd.view_)) { }
+	
+	read_handle& operator=(read_handle&& hnd) {
+		Assert(&ring_ == &hnd.ring_);
+		view_.reset(std::move(hnd.view_));
+		return *this;
 	}
+
+	read_handle(ring& rng, time_unit duration) :
+		ring_(rng),
+		view_(ring_.begin_read(duration)) { }
 	
 	~read_handle() override {
-		if(! is_null()) end(0);
+		if(! view_.is_null()) end(0);
 	}
 	
 	void end(time_unit duration) override {
 		ring_.end_read(duration);
 	}
+
+	const frame_array_view& view() const { return view_; }
 };
 
 
@@ -133,20 +137,44 @@ public:
 class ring::write_handle : public ring_handle_base {
 private:
 	ring& ring_;
+	frame_array_view view_;
 	
 public:
-	write_handle(ring& rng, time_unit duration) : ring_(rng) {
-		reset_view_(ring_.begin_write(duration));
+	write_handle(write_handle&& hnd) :
+		ring_(hnd.ring_),
+		view_(std::move(hnd.view_)) { }
+	
+	write_handle& operator=(write_handle&& hnd) {
+		Assert(&ring_ == &hnd.ring_);
+		view_.reset(std::move(hnd.view_));
+		return *this;
 	}
+
+	write_handle(ring& rng, time_unit duration) :
+		ring_(rng),
+		view_(ring_.begin_write(duration)) { }
 	
 	~write_handle() override {
-		if(! is_null()) end(0);
+		if(! view_.is_null()) end(0);
 	}
 	
 	void end(time_unit duration) override {
 		ring_.end_write(duration);
 	}
+
+	const frame_array_view& view() const { return view_; }
 };
+
+
+inline ring::write_handle ring::write(time_unit duration) {
+	return write_handle(*this, duration);
+}
+
+	
+inline ring::read_handle ring::read(time_unit duration) {
+	return read_handle(*this, duration);
+}
+
 
 
 }

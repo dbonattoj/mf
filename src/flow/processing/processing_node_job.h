@@ -58,7 +58,7 @@ public:
 	processing_node_job(processing_node& nd, node_parameter_valuation&& params);
 	processing_node_job(const processing_node_job&) = delete;
 	processing_node_job(processing_node_job&&) = default;
-	~processing_node_job() = default;
+	~processing_node_job();
 
 	processing_node_job& operator=(const processing_node_job&) = delete;
 	processing_node_job& operator=(processing_node_job&&) = default;

@@ -25,7 +25,7 @@ namespace mf {
 
 shared_ring::shared_ring
 (const format_ptr& frm, std::size_t capacity, time_unit end_time) :
-	ring_(frm, capacity, end_time)
+	ring_(frm, capacity)
 { 
 	reader_keep_waiting_.test_and_set();
 	writer_keep_waiting_.test_and_set();

@@ -35,6 +35,12 @@ class importer_filter : public filter_handler {
 
 private:
 	Importer importer_;
+	
+	void skip_to_(time_unit t) {
+		ndarray<Importer::dimension, typename Importer::elem_type> buffer;
+		while(importer_.current_time() < t && ! importer_.reached_end())
+			importer_.read_frame(buffer);
+	}
 
 public:
 	output_type<Importer::dimension, typename Importer::elem_type> output;
@@ -49,10 +55,18 @@ public:
 		output.define_frame_shape(importer_.frame_shape());
 	}
 	
-	void process(job_type& job) override {
-		auto out = job.out(output);
-		return importer_.read_frame(out);
+	void pre_process(job_type& job) override {
+		time_unit t = job.time();
+		if(importer_.current_time() < t) skip_to_(t);
+		else if(importer_.current_time() > t) throw std::runtime_error("cannot seek back (importer is not seekable)");
+		
 		if(importer_.reached_end()) job.mark_end();
+	}
+	
+	void process(job_type& job) override {
+		Assert(! importer_.reached_end());
+		auto out = job.out(output);
+		importer_.read_frame(out);
 	}
 };
 
@@ -72,25 +86,7 @@ public:
 	explicit importer_filter(filter& filt, Args&&... args) :
 		filter_handler(filt),
 		importer_(std::forward<Args>(args)...),
-		output(filt)
-	{
-		set_seekable(true);
-	}
-	
-	void set_seekable(bool seekable) {
-		node_stream_timing tm;
-		tm.set_duration(importer_.total_duration());
-		this_filter().define_source_stream_timing(tm);
-		
-		/*
-		node_stream_properties prop;
-		
-		if(seekable) prop = node_stream_properties(node_stream_properties::seekable, importer_.total_duration());
-		else prop = node_stream_properties(node_stream_properties::forward);
-		
-		define_source_stream_properties(prop); 
-		*/
-	}
+		output(filt) { }
 	
 	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());
@@ -99,12 +95,15 @@ public:
 	void pre_process(job_type& job) override {
 		time_unit t = job.time();
 		if(importer_.current_time() != t) importer_.seek(t);
+		
+		if(importer_.reached_end()) job.mark_end();
 	}
 	
 	void process(job_type& job) override {
-		MF_ASSERT(importer_.current_time() == job.time());
+		Assert(! importer_.reached_end());
+		Assert(importer_.current_time() == job.time());
 		auto out = job.out(output);
-		return importer_.read_frame(out);
+		importer_.read_frame(out);
 	}
 };
 

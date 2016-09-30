@@ -30,7 +30,7 @@ SECTION("basic") {
 
 
 	SECTION("source -> sink") {
-		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
 		source.set_asynchonous(async1);
@@ -43,7 +43,7 @@ SECTION("basic") {
 	}
 
 	SECTION("source --> passthrough --> sink") {
-		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough = gr.add_filter<passthrough_filter>(0, 0);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
@@ -59,7 +59,7 @@ SECTION("basic") {
 	}
 
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
-		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(0, 3);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
@@ -71,12 +71,11 @@ SECTION("basic") {
 		gr.setup();
 		gr.run();
 		
-		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
-		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 0);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
@@ -88,12 +87,11 @@ SECTION("basic") {
 		gr.setup();
 		gr.run();
 				
-		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [-3,+3]passthrough1 --> sink") {
-		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 3);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		
@@ -106,12 +104,11 @@ SECTION("basic") {
 	
 		gr.run();
 				
-		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink->check());
 	}
 
 	SECTION("source1 --> [-3,+1]passthrough1 --> [-2,+2]passthrough2' --> sink") {
-		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 		auto& passthrough2 = gr.add_filter<passthrough_filter>(2, 2);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -127,13 +124,12 @@ SECTION("basic") {
 	
 		gr.run();
 		
-		REQUIRE(gr.current_time() == seq.size()-1);
 		REQUIRE(sink->check());
 	}
-	
+
 	SECTION("detailled time window test") { 
 		const std::vector<int>& seq { 0, 1, 2, 3, 4, 5 };
-		auto& source = gr.add_filter<sequence_frame_source>(5, shp, seekable);
+		auto& source = gr.add_filter<sequence_frame_source>(5, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 
 		source.set_asynchonous(async1);	
@@ -310,7 +306,7 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-	
+
 	
 	SECTION("implicit conversion") {
 		SECTION("conversion") {
@@ -318,7 +314,7 @@ SECTION("basic") {
 			source --> tofloat --[]--> sink
 			)");
 			
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& tofloat = gr.add_filter<to_float_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
 			
@@ -334,11 +330,11 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-
+	
 
 	SECTION("multiple inputs") {
-		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
-		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
+		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		auto& merge = gr.add_filter<input_synchronize_test_filter>();
 
@@ -363,7 +359,6 @@ SECTION("basic") {
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink->check());
 		}
 
@@ -387,7 +382,6 @@ SECTION("basic") {
 			gr.setup();
 			gr.run();
 			
-			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink->check());
 		}
 
@@ -414,14 +408,13 @@ SECTION("basic") {
 			gr.setup();			
 			gr.run();
 			
-			REQUIRE(gr.current_time() == seq.size()-1);
 			REQUIRE(sink->check());
 		}
 	}
-
+	
 
 	SECTION("multiple outputs") {
-		auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		auto& multiout = gr.add_filter<multiple_output_filter>();
 
@@ -446,8 +439,7 @@ SECTION("basic") {
 			gr.run();
 			REQUIRE(sink->check());
 		}
-		
-		
+
 		SECTION("graph 2") {
 			INFO(R"(
 			source --> multiout --> [-3, +1]passthrough1  --> merge --> sink
@@ -477,7 +469,6 @@ SECTION("basic") {
 	}
 	
 	
-	
 	SECTION("one-to-many") {	
 		std::size_t count = 50;
 		std::size_t last = count - 1;
@@ -490,7 +481,7 @@ SECTION("basic") {
 			        +--> /
 			)");
 			
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
 			
@@ -513,7 +504,7 @@ SECTION("basic") {
 			        +------------------ > /
 			)");
 			
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& passthrough = gr.add_filter<passthrough_filter>(0, 0);
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -539,7 +530,7 @@ SECTION("basic") {
 			        +--> [-1, +2]passthrough2' --> /
 			)");
 			
-			auto& source = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
@@ -581,8 +572,8 @@ SECTION("basic") {
 			source2  --> [-1, +2]passthrough3' -----------------------------------/
 			)");
 			
-			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
-			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
+			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0);
 			auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2);
@@ -612,7 +603,7 @@ SECTION("basic") {
 
 			REQUIRE(sink->check());
 		}
-		
+
 
 		SECTION("graph 2") {
 			INFO(R"(
@@ -626,8 +617,8 @@ SECTION("basic") {
 			)");
 
 			
-			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
-			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp, seekable);
+			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
+			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
 			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0);
 			auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2);

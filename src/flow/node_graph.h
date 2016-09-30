@@ -57,7 +57,7 @@ private:
 
 	diagnostic_handler* diagnostic_handler_ = nullptr;
 
-	void pull_next_frame_();
+	node::pull_result pull_next_frame_();
 
 public:
 	std::function<frame_callback_function_type> callback_function;
@@ -112,7 +112,7 @@ public:
 	
 	void run_until(time_unit last_frame);
 	void run_for(time_unit duration);
-	bool run();
+	void run();
 
 	void seek(time_unit target_time);
 };

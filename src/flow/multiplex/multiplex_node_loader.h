@@ -49,8 +49,8 @@ public:
 	virtual void stop() = 0;
 	virtual void launch() = 0;
 	virtual void pre_pull(time_span) = 0;
-	virtual node::pull_result pull(time_span) = 0;
-	virtual node_frame_window_view begin_read(time_span span) = 0;
+	virtual node::pull_result pull(time_span&) = 0;
+	virtual node_frame_window_view begin_read(time_span) = 0;
 	virtual void end_read(time_unit duration) = 0;
 };
 
@@ -59,6 +59,9 @@ public:
 
 
 class multiplex_node::sync_loader : public multiplex_node::loader {
+private:
+	node::pull_result input_pull_result_;
+
 public:
 	explicit sync_loader(multiplex_node&);
 
@@ -67,8 +70,8 @@ public:
 	void stop() override;
 	void launch() override;
 	void pre_pull(time_span) override;
-	node::pull_result pull(time_span span) override;
-	node_frame_window_view begin_read(time_span span) override;
+	node::pull_result pull(time_span&) override;
+	node_frame_window_view begin_read(time_span) override;
 	void end_read(time_unit duration) override;
 };
 
@@ -85,6 +88,7 @@ private:
 	std::condition_variable successor_time_changed_cv_;
 
 	std::shared_timed_mutex input_view_mutex_;
+	node::pull_result input_pull_result_;
 	std::condition_variable_any input_view_updated_cv_;
 
 	void thread_main_();
@@ -98,8 +102,8 @@ public:
 	void stop() override;
 	void launch() override;
 	void pre_pull(time_span) override;
-	node::pull_result pull(time_span span) override;
-	node_frame_window_view begin_read(time_span span) override;
+	node::pull_result pull(time_span&) override;
+	node_frame_window_view begin_read(time_span) override;
 	void end_read(time_unit duration) override;
 };
 

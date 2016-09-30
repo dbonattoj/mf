@@ -62,62 +62,108 @@ public:
 	time_span readable_time_span() const;
 	time_span writable_time_span() const;
 	
-	write_handle write(time_unit duration) { return write_handle(duration); }
+	write_handle write(time_unit duration);
 	section_view_type begin_write(time_unit);
 	void end_write(time_unit written_duration);
 	
-	read_handle write(time_unit duration) { return read_handle(duration); }
-	read_handle write_span(time_span span) { return read_handle(span); }
+	read_handle read(time_unit duration);
+	read_handle read_span(time_span span);
 	section_view_type begin_read(time_unit);
 	section_view_type begin_read_span(time_span);
 	void end_read(time_unit read_duration, bool initialize_frames = true);
 	void skip(time_unit duration);
 	void seek(time_unit);
+	
+	time_unit end_time() const { throw 1; }
 };
 
 
-/// Read handle for \ref timed_ring.
-class ring::read_handle : public ring_handle_base {
+
+
+
+
+/// Read handle of \ref ring.
+class timed_ring::read_handle : public ring_handle_base {
 private:
 	timed_ring& ring_;
+	timed_frame_array_view view_;
 	
 public:
-	read_handle(timed_ring& rng, time_unit duration) : ring_(rng) {
-		reset_view_(ring_.begin_read(duration));
-	}
+	read_handle(read_handle&& hnd) :
+		ring_(hnd.ring_),
+		view_(std::move(hnd.view_)) { }
 	
-	read_handle(timed_ring& rng, time_span span) : ring_(rng) {
-		reset_view_(ring_.begin_read_span(span));
+	read_handle& operator=(read_handle&& hnd) {
+		Assert(&ring_ == &hnd.ring_);
+		view_.reset(std::move(hnd.view_));
+		return *this;
 	}
+
+	read_handle(timed_ring& rng, time_unit duration) :
+		ring_(rng),
+		view_(ring_.begin_read(duration)) { }
+	
+	read_handle(timed_ring& rng, time_span span) :
+		ring_(rng),
+		view_(ring_.begin_read_span(span)) { }
 	
 	~read_handle() override {
-		if(! is_null()) end(0);
+		if(! view_.is_null()) end(0);
 	}
 	
 	void end(time_unit duration) override {
 		ring_.end_read(duration);
 	}
+
+	const timed_frame_array_view& view() const { return view_; }
 };
 
 
-/// Write handle of \ref timed_ring.
-class ring::write_handle : public ring_handle_base {
+/// Write handle of \ref ring.
+class timed_ring::write_handle : public ring_handle_base {
 private:
 	timed_ring& ring_;
+	timed_frame_array_view view_;
 	
 public:
-	write_handle(timed_ring& rng, time_unit duration) : ring_(rng) {
-		reset_view_(ring_.begin_write(duration));
+	write_handle(write_handle&& hnd) :
+		ring_(hnd.ring_),
+		view_(std::move(hnd.view_)) { }
+	
+	write_handle& operator=(write_handle&& hnd) {
+		Assert(&ring_ == &hnd.ring_);
+		view_.reset(std::move(hnd.view_));
+		return *this;
 	}
+
+	write_handle(timed_ring& rng, time_unit duration) :
+		ring_(rng),
+		view_(ring_.begin_write(duration)) { }
 	
 	~write_handle() override {
-		if(! is_null()) end(0);
+		if(! view_.is_null()) end(0);
 	}
 	
 	void end(time_unit duration) override {
 		ring_.end_write(duration);
 	}
+
+	const timed_frame_array_view& view() const { return view_; }
 };
+
+
+
+inline timed_ring::write_handle timed_ring::write(time_unit duration) {
+	return write_handle(*this, duration);
+}
+
+inline timed_ring::read_handle timed_ring::read(time_unit duration) {
+	return read_handle(*this, duration);
+}
+
+inline timed_ring::read_handle timed_ring::read_span(time_span span) {
+	return read_handle(*this, span);
+}
 
 
 }

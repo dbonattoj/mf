@@ -112,20 +112,12 @@ void node::deduce_stream_timing_() {
 	if(realtime) {
 		stream_timing_.set_real_time(true);
 	} else {
-		bool has_duration = true;
-		time_unit duration = std::numeric_limits<time_unit>::max();
-
 		for(auto&& in : inputs()) {
 			node& connected_node = in->connected_node();
 			const node_stream_timing& connected_tm = connected_node.stream_timing();	
-		
-			if(connected_tm.has_duration()) duration = std::min(duration, connected_tm.duration());
-			else has_duration = false;
 		}
 		
 		stream_timing_.set_real_time(false);
-		if(has_duration) stream_timing_.set_duration(duration);
-		else stream_timing_.set_no_duration();
 	}
 }
 
@@ -199,8 +191,6 @@ void node::setup_sink() {
 void node::set_current_time_(time_unit t) noexcept {
 	time_unit old_t = current_time_;
 	current_time_ = t;
-		
-	if(t < old_t) reached_end_ = false;
 }
 
 

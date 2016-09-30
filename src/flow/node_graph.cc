@@ -29,13 +29,15 @@ namespace mf { namespace flow {
 
 using namespace std::chrono_literals;
 
-void node_graph::pull_next_frame_() {
+node::pull_result node_graph::pull_next_frame_() {
 	Expects(launched_);
 
-	export_node_graph_visualization(*this, "gr.gv");
+			export_node_graph_visualization(*this, "gr.gv");
 
-	sink_->pull_next_frame();	
+	node::pull_result res = sink_->pull_next_frame();	
 	if(callback_function) callback_function(sink_->current_time());
+	
+	return res;
 	
 	//std::this_thread::sleep_for(100ms);
 }
@@ -101,9 +103,11 @@ void node_graph::run_until(time_unit last_frame) {
 	MF_DEBUG_BACKTRACE("graph::run_until");
 		
 	if(! launched_) launch();
-	
-	while(sink_->current_time() < last_frame && !sink_->reached_end())
-		pull_next_frame_();
+
+	node::pull_result res = node::pull_result::success;
+	while(sink_->current_time() < last_frame && res == node::pull_result::success) {
+		res = pull_next_frame_();
+	}
 }
 
 
@@ -112,21 +116,23 @@ void node_graph::run_for(time_unit duration) {
 }
 
 
-bool node_graph::run() {
+void node_graph::run() {
 	Expects(was_setup_);
-	Expects(sink_->is_bounded());
 
 	MF_DEBUG_BACKTRACE("graph::run");
 
 	if(! launched_) launch();
 
-	while(sink_->is_bounded() && !sink_->reached_end()) pull_next_frame_();
-	return sink_->is_bounded();
+	node::pull_result res = node::pull_result::success;
+	while(res == node::pull_result::success) {
+		res = pull_next_frame_();
+	}
 }
 
 
 void node_graph::seek(time_unit target_time) {
 	Expects(was_setup_);
+	Assert(target_time >= 0);
 	sink_->seek(target_time);
 }
 

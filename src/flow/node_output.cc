@@ -71,8 +71,4 @@ node& node_output::connected_node() const noexcept {
 }
 
 
-time_unit node_output::end_time() const noexcept {
-	return this_node().end_time();
-}
-
 }}

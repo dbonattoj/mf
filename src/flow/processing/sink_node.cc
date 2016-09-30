@@ -43,82 +43,60 @@ void sink_node::setup() {
 }
 
 
-void sink_node::pull(time_unit t) {
-	//usleep(1000);
-	//MF_DEBUG(t);
-	
-	// fail if reading past current_time, but end already reached
-	if(t > current_time() && reached_end())
-		throw std::invalid_argument("cannot pull frame beyond end");
-
-	//if(stream_duration_is_defined()) MF_ASSERT(t < stream_duration());
-	
+node::pull_result sink_node::pull(time_unit t) {
+	// Set time and create job
 	set_current_time_(t);
-	processing_node_job job = begin_job_();
+	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
+
+	// Let handler pre-process frame
+	handler_result handler_res = handler_pre_process_(job);
+	if(handler_res == handler_result::failure) return pull_result::fatal_failure;
+	else if(handler_res == handler_result::end_of_stream) return pull_result::end_of_stream;
+
+	// Pre-pull the activated inputs
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(in.is_activated()) in.pre_pull();
+	}
+	
+	// Pull the activated inputs
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		input_type& in = input_at(i);
+		if(! in.is_activated()) continue;
 		
-	// set pull = current time as requested
-			
-	// preprocess, allow concrete subclass to activate/desactivate inputs
-	handler_pre_process_(job);
+		pull_result res = in.pull();
+		if(res == pull_result::transitory_failure) throw sequencing_error("sink received transitional failure");
+		else if(res != pull_result::success) return res;
+	}
 
+	// Begin reading from the activated inputs (in job object)
+	// If error occurs, job object will cancel read during stack unwinding
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
-		in.pre_pull();
+		if(in.is_activated()) job.begin_input(in);
 	}
 
-	// pull & begin reading from activated inputs
-	bool stopped = false;
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
+	// Let handler process frame
+	handler_res = handler_process_(job);
+	if(handler_res == handler_result::failure) return pull_result::fatal_failure;
+	else if(handler_res == handler_result::end_of_stream) return pull_result::end_of_stream;
 
-		time_unit res = in.pull();
-		if(res == pull_result::stopped) {
-			stopped = true;
-			return;
-		} else if(res == pull_result::transitory_failure) {
-			MF_DEBUG("sink received temp failure");
-			throw sequencing_error("stf");
-			return;
-		}
-	}
-	
-	if(stopped) {
-		return;
-	}
-	
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
+	// End reading from the inputs 
+	job.end_inputs();
 
-		bool cont = job.begin_input(in);
-		if(! cont) {
-			job.cancel_inputs();
-			stopped = true;
-			break;
-		}
-	}
+	// Finish the job
+	update_parameters_(job.parameters()); // TODO move instead of copy
 
-	// process frame in concrete subclass
-	handler_process_(job);
-	
-	finish_job_(job);
+	return pull_result::success;
 }
 
-
-// TODO (all nodes): handle cross over end when ended input desactivated
-
 	
-bool sink_node::process_next_frame() {
-	pull(current_time() + 1);
-	return true;
+node::pull_result sink_node::pull_next_frame() {
+	return pull(current_time() + 1);
 }
 
 void sink_node::seek(time_unit t) {
-	if(t < 0 || t >= stream_timing().duration()) throw std::invalid_argument("seek target time out of bounds");
 	set_current_time_(t - 1);
-	
 }
 
 

@@ -132,7 +132,7 @@ private:
 
 protected:
 	enum class handler_result { success, failure, end_of_stream };
-	enum class process_result { success, transitory_failure, handler_failure, end_of_stream };
+	enum class process_result { success, transitory_failure, handler_failure, end_of_stream, stopped };
 
 	void verify_connections_validity_() const;
 

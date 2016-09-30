@@ -73,8 +73,6 @@ public:
 	void input_has_connected(node_input&);
 	void input_has_disconnected();
 	
-	time_unit end_time() const noexcept;
-
 	virtual std::size_t channels_count() const noexcept = 0;
 	virtual std::string channel_name_at(std::ptrdiff_t i) const = 0;
 	virtual void pre_pull(const time_span& span) = 0;

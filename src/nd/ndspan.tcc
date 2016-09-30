@@ -25,8 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 template<std::size_t Dim, typename T>
-auto ndspan<Dim, T>::invariant_() const {
-	for(std::ptrdiff_t i = 0; i < Dim; ++i) if(end_[i] >= start_[i]) return false;
+bool ndspan<Dim, T>::invariant_() const {
+	for(std::ptrdiff_t i = 0; i < Dim; ++i) if(end_[i] < start_[i]) return false;
 	return true;
 }
 
@@ -77,6 +77,8 @@ ndspan<Dim, T> span_intersection(const ndspan<Dim, T>& a, const ndspan<Dim, T>& 
 	for(std::ptrdiff_t i = 0; i < Dim; ++i) {
 		new_start[i] = std::max(a.start_pos()[i], b.start_pos()[i]);
 		new_end[i] = std::min(a.end_pos()[i], b.end_pos()[i]);
+		if(new_end[i] < new_start[i])
+			new_start[i] = new_end[i] = 0;
 	}
 	return ndspan<Dim, T>(new_start, new_end);
 

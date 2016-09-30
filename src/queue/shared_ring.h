@@ -45,8 +45,6 @@ public:
 	using format_base_type = timed_ring::format_base_type;
 	using format_ptr = timed_ring::format_ptr;
 
-	static constexpr time_unit undefined_time = timed_ring::undefined_time;
-
 private:
 	/// Indicates current state of reader and writer.
 	/** May be `idle` or `accessing`, or a positive integer if thread is waiting for that number of frames. */
@@ -191,7 +189,7 @@ public:
 	time_unit readable_duration() const { return readable_time_span().duration(); }
 
 	/// End of file time. */
-	time_unit end_time() const { return ring_.end_time(); }
+	time_unit end_time() const { return 0;/*ring_.end_time();*/ }
 		
 	/// True if writer has written last frame.
 	/** For non-seekable buffer, true after end_write() call with mark end. begin_write() returns empty view if called

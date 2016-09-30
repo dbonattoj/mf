@@ -56,7 +56,7 @@ void sync_node::setup() {
 }
 
 
-bool sync_node::process_next_frame_() {
+sync_node::process_result sync_node::process_next_frame_() {
 	// Begin writing 1 frame to output buffer
 	auto output_write_handle = ring_->write(1); // if error occurs, handle will cancel write during stack unwinding
 	const timed_frame_array_view& out_vw = output_write_handle.view();
@@ -67,12 +67,11 @@ bool sync_node::process_next_frame_() {
 	
 	// Create job
 	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
-	auto cancel_output = []() { };
-	job.attach_output_view(out_vw[0], cancel_output);
+	job.attach_output(out_vw[0], nullptr);
 	
 	// Let handler pre-process frame
 	handler_result handler_res = handler_pre_process_(job);
-	if(handler_res == handler_result::failure) return process_result::failure;
+	if(handler_res == handler_result::failure) return process_result::handler_failure;
 	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
 	
 	// Pre-pull the activated inputs
@@ -88,8 +87,8 @@ bool sync_node::process_next_frame_() {
 		
 		pull_result res = in.pull();
 		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
-		else if(res == pull_result::fatal_failure) return process_result::failure;
-		else if(res == pull_result::stopped) return process_result::failure;
+		else if(res == pull_result::fatal_failure) return process_result::handler_failure;
+		else if(res == pull_result::stopped) return process_result::stopped;
 		else if(res == pull_result::end_of_stream) return process_result::end_of_stream;
 	}
 	
@@ -102,7 +101,7 @@ bool sync_node::process_next_frame_() {
 
 	// Let handler process frame
 	handler_res = handler_process_(job);
-	if(handler_res == handler_result::failure) return process_result::failure;
+	if(handler_res == handler_result::failure) return process_result::handler_failure;
 	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
 
 	// End reading from the inputs 
@@ -150,14 +149,14 @@ node::pull_result sync_node::output_pull_(time_span& span) {
 		return pull_result::success;
 	} else {
 		// Failure: return error state, and span may have been truncated		
-		if(graph().was_stopped()) return pull_result::stopped;
-		else if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
-		else if(process_res == process_result::handler_failure) return pull_result::handler_failure;
+		if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
+		else if(process_res == process_result::handler_failure) return pull_result::fatal_failure;
 		else if(process_res == process_result::end_of_stream) return pull_result::end_of_stream;
+		else if(process_res == process_result::stopped) return pull_result::stopped;
 	}
+	return pull_result::fatal_failure; // never reached
 }
 
-	
 node_frame_window_view sync_node::output_begin_read_(time_unit duration) {
 	Assert(ring_->readable_duration() >= duration);
 	return ring_->begin_read(duration);

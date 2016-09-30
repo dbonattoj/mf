@@ -45,10 +45,10 @@ public:
 	bool is_real_time() const { return real_time_; }
 	void set_real_time(bool rt) { real_time_ = rt; }
 	
-	bool has_duration() const { return !real_time_ && (duration_ != -1); }
-	time_unit duration() const { Assert(!real_time_); return duration_; }
-	void set_duration(time_unit dur) { Assert(!real_time_); duration_ = dur; }
-	void set_no_duration() { Assert(!real_time_); duration_ = -1; }
+	bool has_frame_clock_duration() const { return !real_time_ && (frame_clock_duration_ != clock_duration()); }
+	clock_duration frame_clock_duration() const { Assert(!real_time_); return frame_clock_duration_; }
+	void set_frame_clock_duration(const clock_duration& dur) { frame_clock_duration_ = dur; } 
+	void set_no_frame_clock_duration(const clock_duration& dur) { frame_clock_duration_ = clock_duration(); } 
 	
 	//time_unit offset() const { Assert(!real_time_); return offset_; }
 	//void set_offset(time_unit off) { Assert(!real_time_); offset_ = off; }

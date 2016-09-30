@@ -95,6 +95,7 @@ using real = double;
 
 /// Discrete time unit type.
 using time_unit = std::ptrdiff_t;
+constexpr static time_unit undefined_time = -1;
 
 
 /// Single byte type.

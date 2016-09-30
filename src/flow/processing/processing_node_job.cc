@@ -36,7 +36,6 @@ processing_node_job::processing_node_job(processing_node& nd, node_parameter_val
 
 
 processing_node_job::~processing_node_job() {
-	Expects(output_view_.is_null(), "processing_node_job must be detached prior to destruction");
 	cancel_inputs();
 	cancel_output();
 }

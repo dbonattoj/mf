@@ -27,7 +27,7 @@ SECTION("seek") {
 	std::vector<int> seq { 0, 1, 2, 3, 4, 5, m, 7, 8, m, 10, m, m, m, m, 15, 16, m, m, 19 };
 
 	SECTION("source -> sink") {			
-		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 
 		source.set_asynchonous(async1);
@@ -70,7 +70,7 @@ SECTION("seek") {
 	}
 
 	SECTION("source -> [-2, +1]passthrough' -> sink") {			
-		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough = gr.add_filter<passthrough_filter>(2, 1);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 
@@ -115,7 +115,7 @@ SECTION("seek") {
 	}
 
 	SECTION("source -> [-2, +2]passthrough2 --> [-1, +2]passthrough1' -> sink") {			
-		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
 		auto& passthrough2 = gr.add_filter<passthrough_filter>(2, 2);
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(1, 2);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -168,8 +168,8 @@ SECTION("seek") {
 		source2 --> [-2, +2]passthrough3 --> [-1, +2]passthrough2' --> /
 		)");
 
-		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
-		auto& source2 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp, true);
+		auto& source1 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
+		auto& source2 = gr.add_filter<sequence_frame_source>(seq.size()-1, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
 		auto& merge = gr.add_filter<input_synchronize_test_filter>();
 		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);

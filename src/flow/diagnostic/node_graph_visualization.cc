@@ -69,8 +69,8 @@ std::string node_graph_visualization::thread_index_color_(thread_index tid) cons
 void node_graph_visualization::generate_node_dispatch_(const node& nd) {	
 	if(typeid(nd) == typeid(sync_node))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, false);
-	else if(typeid(nd) == typeid(async_node))
-		generate_processing_node_(static_cast<const processing_node&>(nd), true, false);
+	//else if(typeid(nd) == typeid(async_node))
+	//	generate_processing_node_(static_cast<const processing_node&>(nd), true, false);
 	else if(typeid(nd) == typeid(sink_node))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, true);
 	else if(typeid(nd) == typeid(multiplex_node))
@@ -111,10 +111,10 @@ void node_graph_visualization::generate_processing_node_(const processing_node& 
 	if(sink) html << "sink node";
 	else if(async) html << "async node";
 	else html << "sync node";
-	if(async) {
+	/*if(async) {
 		html << R"(<BR/>)";
 		html << "prefetch = " << static_cast<const async_node&>(nd).prefetch_duration();
-	}
+	}*/
 	html << R"(</FONT>)";
 	
 	if(with_parameters_ && nd.parameters_count() + nd.input_parameters_count() + nd.sent_parameters_count() > 0) {
