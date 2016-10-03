@@ -18,8 +18,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_MULTIPLEX_NODE_LOADER_H_
-#define MF_FLOW_MULTIPLEX_NODE_LOADER_H_
+#ifndef MF_FLOW_MULTIPLEX_NODE_LOADER_ASYNC_H_
+#define MF_FLOW_MULTIPLEX_NODE_LOADER_ASYNC_H_
 
 #include "multiplex_node.h"
 #include <thread>
@@ -29,55 +29,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <atomic>
 
 namespace mf { namespace flow {
-
-class multiplex_node::loader {
-private:
-	multiplex_node& node_;
-	thread_index thread_index_ = undefined_thread_index;
-
-protected:
-	multiplex_node& this_node() { return node_; }
-	const multiplex_node& this_node() const { return node_; }
-
-public:
-	loader(multiplex_node&, thread_index);
-	virtual ~loader() = default;
-	
-	thread_index loader_thread_index() const { return thread_index_; }
-	virtual bool is_async() const = 0;
-	
-	virtual void stop() = 0;
-	virtual void launch() = 0;
-	virtual void pre_pull(time_span) = 0;
-	virtual node::pull_result pull(time_span&) = 0;
-	virtual node_frame_window_view begin_read(time_span) = 0;
-	virtual void end_read(time_unit duration) = 0;
-};
-
-
-///////////////
-
-
-class multiplex_node::sync_loader : public multiplex_node::loader {
-private:
-	pull_result input_pull_result_ = pull_result::undefined;
-
-public:
-	explicit sync_loader(multiplex_node&);
-
-	bool is_async() const override { return false; }
-
-	void stop() override;
-	void launch() override;
-	void pre_pull(time_span) override;
-	node::pull_result pull(time_span&) override;
-	node_frame_window_view begin_read(time_span) override;
-	void end_read(time_unit duration) override;
-};
-
-
-///////////////
-
 
 class multiplex_node::async_loader : public multiplex_node::loader {
 private:

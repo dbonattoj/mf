@@ -135,6 +135,35 @@ inline bool is_multiplex_node(const node& nd) {
 
 
 
+class multiplex_node::loader {
+private:
+	multiplex_node& node_;
+	thread_index thread_index_ = undefined_thread_index;
+
+protected:
+	multiplex_node& this_node() { return node_; }
+	const multiplex_node& this_node() const { return node_; }
+
+public:
+	loader(multiplex_node&, thread_index) :
+		node_(nd),
+		thread_index_(tind) { }
+	
+	virtual ~loader() = default;
+	
+	thread_index loader_thread_index() const { return thread_index_; }
+	virtual bool is_async() const = 0;
+	
+	virtual void stop() = 0;
+	virtual void launch() = 0;
+	virtual void pre_pull(time_span) = 0;
+	virtual node::pull_result pull(time_span&) = 0;
+	virtual node_frame_window_view begin_read(time_span) = 0;
+	virtual void end_read(time_unit duration) = 0;
+};
+
+
+
 }}
 
 #endif

@@ -19,7 +19,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "multiplex_node.h"
-#include "multiplex_node_loader.h"
+#include "multiplex_node_loader_sync.h"
+#include "multiplex_node_loader_async.h"
 #include "../node_graph.h"
 #include <utility>
 #include <functional>
