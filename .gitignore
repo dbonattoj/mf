@@ -10,3 +10,4 @@ debug.txt
 mf.geany
 paper/
 *.gv
+.DS_Store

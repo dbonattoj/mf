@@ -5,12 +5,6 @@ new (august/september)
 
 
 
-DETAILS
-- elem_tuple constructor
-- ring buffer: 0 length r/w test
-- view, time_span, etc: 0 length test
-
-- error handling conventions (assert, assert_crit, exceptions, errors, etc)
 
 
 FLOW
@@ -25,3 +19,17 @@ FLOW
   - parse graph+node+filter params from file
   - sub-graph (-> composite node)
 
+
+
+GENERAL
+- better debugging/output
+
+
+
+
+DETAILS
+- elem_tuple constructor
+- ring buffer: 0 length r/w test
+- view, time_span, etc: 0 length test
+
+- error handling conventions (assert, assert_crit, exceptions, errors, etc)

@@ -60,7 +60,7 @@ public:
 
 class multiplex_node::sync_loader : public multiplex_node::loader {
 private:
-	node::pull_result input_pull_result_;
+	pull_result input_pull_result_ = pull_result::undefined;
 
 public:
 	explicit sync_loader(multiplex_node&);
@@ -88,7 +88,8 @@ private:
 	std::condition_variable successor_time_changed_cv_;
 
 	std::shared_timed_mutex input_view_mutex_;
-	node::pull_result input_pull_result_;
+	node::pull_result input_pull_result_ = pull_result::undefined;
+	time_unit input_successor_time_ = -1;
 	std::condition_variable_any input_view_updated_cv_;
 
 	void thread_main_();

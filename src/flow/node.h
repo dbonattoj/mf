@@ -40,6 +40,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <type_traits>
 #include <mutex>
 
+#define NodeDebug(...) MF_DEBUG_T("node", "node '", name(), "' t=", current_time(), ":\n", __VA_ARGS__)
+
 namespace mf { namespace flow {
 
 class node_graph;
@@ -51,6 +53,7 @@ class node {
 public:
 	/// Result state of pulling a span of frames from the node.
 	enum class pull_result {
+		undefined,
 		success, ///< The full span was successfully pulled.
 		fatal_failure, ///< A failure occured which will cause graph execution to stop.
 		transitory_failure, ///< A failure occured which will be handled within graph.

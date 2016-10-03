@@ -60,18 +60,18 @@ void async_node::launch() {
 }
 
 void async_node::pre_stop() {
+	Expects(running_);
 	MF_RAND_SLEEP;
+	MF_DEBUG("ring_->break_reader()");
 	ring_->break_reader();
 	MF_RAND_SLEEP;
-		NodeDebug("STOP");
-
-	std::lock_guard<std::mutex> lock(continuation_mutex_);
-	running_ = false;
 	continuation_cv_.notify_one();
 }
 
 void async_node::stop() {
+	Expects(running_);
 	thread_.join();
+	running_ = false;
 }
 
 
@@ -96,15 +96,13 @@ void async_node::pause_() {
 	// conditions are checked when continuation_cv_ gets notified
 
 	std::unique_lock<std::mutex> lock(continuation_mutex_);
-	
-	bool keep_waiting = false;
-	while(running_) {
-		continuation_cv_.wait(lock);
-	
-		if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) continue;
-		else if(ring_->write_start_time() >= time_limit_) continue;
-		else break;
-	}
+	continuation_cv_.wait(lock, [&] {
+		time_unit next_write_time = ring_->write_start_time();
+		if(graph().was_stopped()) return true; // thread_main() will exit
+		else if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) return false;
+		else if(next_write_time >= time_limit_) return false;
+		return true;
+	});
 }
 
 
@@ -113,33 +111,29 @@ void async_node::thread_main_() {
 	
 	for(;;) {
 		if(pause) {
-			NodeDebug("pause");
 			pause_();
 			if(graph().was_stopped()) break;
 			pause = false;
 		}
-		
 		NodeDebug("continuation");
-
 
 		request_id_type processing_request_id = current_request_id_.load();
 		
 		process_result process_res = process_frame_();
 		NodeDebug("process_res=", (int)process_res);
-		
-		
 		if(process_res == process_result::should_pause) {
 			pause = true;
-			continue;
 		} else if(process_res != process_result::success) {
 			failed_request_id_ = processing_request_id;
-			failed_request_process_result_ = process_res;			
-			
+			failed_request_process_result_ = process_res;
+			ring_->break_reader();
 			pause = true;
 		}
+		
+		NodeDebug("proccess_result not success/should_pause");
 	}
 	
-	//NodeDebug("END");
+	NodeDebug("END");
 }
 
 
@@ -147,15 +141,8 @@ async_node::process_result async_node::process_frame_() {
 	// Begin writing 1 frame to output buffer
 	// If currently no space in buffer, go to pause state (don't block here instead)
 	auto output_write_handle = ring_->try_write(1);	
-	output_write_handle.set_fail_on_cancel(true);
-	
-	//NodeDebug("p1");
-	
-	
 	if(output_write_handle.view().is_null()) return process_result::should_pause;
 	const timed_frame_array_view& out_vw = output_write_handle.view();
-		
-	//NodeDebug("p2");
 		
 	// t = time of frame to process here
 	time_unit t = output_write_handle.view().start_time();
@@ -164,8 +151,6 @@ async_node::process_result async_node::process_frame_() {
 	// but in output_pre_pull_, reader sets time limit before seeking
 	// writer may notice here that reader wants to seek
 	if(t > time_limit_) return process_result::should_pause;
-	
-	//NodeDebug("p3");
 	
 	// Set current time, create job
 	set_current_time_(t);
@@ -189,8 +174,8 @@ async_node::process_result async_node::process_frame_() {
 		if(! in.is_activated()) continue;
 		
 		NodeDebug("pull from input...");
+		
 		pull_result res = in.pull();
-		NodeDebug("/pull from input...");
 				
 		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
 		else if(res == pull_result::fatal_failure) return process_result::handler_failure;
@@ -205,7 +190,7 @@ async_node::process_result async_node::process_frame_() {
 		if(in.is_activated()) job.begin_input(in);
 	}
 	
-	//NodeDebug("process... handler_proc");
+	NodeDebug("process... handler_proc");
 
 
 	// Let handler process frame
@@ -246,13 +231,9 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 		// then transitional failure could be propagated incorrectly, instead of just pausing the prefetch in this node
 		current_request_id_++; // will overflow at maximal value
 	}
-
-
-		//NodeDebug("new req: ", current_request_id_);
 	
 	
 	MF_RAND_SLEEP;
-	//NodeDebug("continuation notify");
 	continuation_cv_.notify_one();
 }
 
@@ -260,7 +241,7 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 node::pull_result async_node::output_pull_(time_span& pull_span) {
 	NodeDebug("pull ", pull_span);
 	while(ring_->readable_duration() < pull_span.duration()) {
-		//NodeDebug("pull:", ring_->readable_duration(), " < ", pull_span.duration());
+		NodeDebug("pull:", ring_->readable_duration(), " < ", pull_span.duration());
 		
 																			MF_RAND_SLEEP;
 		Assert(ring_->read_start_time() == pull_span.start_time());
@@ -273,10 +254,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		// let the writer process frames
 		// wait until pull_span.duration() frames have become readable in shared_ring,
 		// or writer failure occured, and shared_ring reader break event got sent
-		
-		//NodeDebug("XXX wait_readable");
 		ring_->wait_readable(); 				MF_RAND_SLEEP;
-		//NodeDebug("XXX /wait_readable");
 		if(ring_->readable_duration() >= pull_span.duration()) break;
 		
 																				MF_RAND_SLEEP;	
@@ -284,7 +262,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		// may be from process failure for this request,
 		// or from the previous request (break coming in late)
 		
-		//NodeDebug("pull -> fail", failed_request_id_, " <?> curr", current_request_id_.load());
+		NodeDebug("pull -> fail", failed_request_id_, " <?> curr", current_request_id_.load());
 		
 		if(failed_request_id_ != current_request_id_) {
 			NodeDebug("failed request");
@@ -296,7 +274,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		process_result process_res = failed_request_process_result_;
 		pull_span.set_end_time(current_time());
 		
-		//NodeDebug("pull -> fail ", pull_span);
+		NodeDebug("pull -> fail ", pull_span);
 		
 		if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
 		else if(process_res == process_result::handler_failure) return pull_result::fatal_failure;
@@ -305,7 +283,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		else throw std::logic_error("invalid process_result state in failed_request_process_result_");
 	}
 	
-	//NodeDebug("pull -> ok ", pull_span);
+	NodeDebug("pull -> ok ", pull_span);
 	
 	Assert(ring_->readable_time_span().includes(pull_span));
 	

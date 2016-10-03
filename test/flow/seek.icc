@@ -188,18 +188,18 @@ SECTION("seek") {
 		)");
 
 		
-		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
-		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
-		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
-		auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0);
-		auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2);
-		auto& passthrough4 = gr.add_filter<passthrough_filter>(1, 1);
-		auto& merge1 = gr.add_filter<input_synchronize_test_filter>();
-		auto& merge2 = gr.add_filter<input_synchronize_test_filter>();
-		auto& merge3 = gr.add_filter<input_synchronize_test_filter>();
-		auto& merge4 = gr.add_filter<input_synchronize_test_filter>();
-		auto& multiout = gr.add_filter<multiple_output_filter>();
-		auto& sink = gr.add_filter<expected_frames_sink>(seq);
+		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp); source1.set_name("source1");
+		auto& source2 = gr.add_filter<sequence_frame_source>(last, shp); source2.set_name("source2");
+		auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1); passthrough1.set_name("passthrough1");
+		auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0); passthrough2.set_name("passthrough2");
+		auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2); passthrough3.set_name("passthrough3");
+		auto& passthrough4 = gr.add_filter<passthrough_filter>(1, 1); passthrough4.set_name("passthrough4");
+		auto& merge1 = gr.add_filter<input_synchronize_test_filter>(); merge1.set_name("merge1");
+		auto& merge2 = gr.add_filter<input_synchronize_test_filter>(); merge2.set_name("merge2");
+		auto& merge3 = gr.add_filter<input_synchronize_test_filter>(); merge3.set_name("merge3");
+		auto& merge4 = gr.add_filter<input_synchronize_test_filter>(); merge4.set_name("merge4");
+		auto& multiout = gr.add_filter<multiple_output_filter>(); multiout.set_name("multiout");
+		auto& sink = gr.add_filter<expected_frames_sink>(seq); sink.set_name("sink");
 		
 		source1.set_asynchonous(async2);
 		source2.set_asynchonous(async1);

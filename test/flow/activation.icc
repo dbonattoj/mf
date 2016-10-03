@@ -65,7 +65,6 @@ SECTION("activation") {
 		REQUIRE(sink->check());
 	}
 
-
 	SECTION("source -> *1 sink 2") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq_and);

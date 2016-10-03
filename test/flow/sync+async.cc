@@ -37,13 +37,13 @@ TEST_CASE("flow graph test: mixed", "[flow][sync+async]") {
 	//#include "seek.icc"
 }
 
-/*
+
 TEST_CASE("flow graph test: mixed alt.", "[flow][async+sync]") {
 	constexpr bool async1 = true;
 	constexpr bool async2 = false;
 
-	#include "basic.icc"
-	#include "activation.icc"
+	//#include "basic.icc"
+	//#include "activation.icc"
 	#include "seek.icc"
 }
-*/
+

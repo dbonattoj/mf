@@ -64,6 +64,8 @@ node::pull_result multiplex_node::load_input_view_(time_unit successor_time) {
 	input().pre_pull();
 	pull_result result = input().pull();
 	
+	NodeDebug("mpx: load input, res=", (int)result);
+	
 	if(result == pull_result::success) {
 		timed_frame_array_view vw = input().begin_read_frame();
 		// if input node reached end, the future time window may have been truncated
@@ -213,9 +215,15 @@ void multiplex_node_output::pre_pull(const time_span& span) {
 
 node::pull_result multiplex_node_output::pull(time_span& span) {
 	Assert(this_node().loader_);
+	
+	auto current_time=[]{return 0;};
+
+	NodeDebug("mpull ", span, "...");
 
 	auto res = this_node().loader_->pull(span);
-	std::cout << "mpull " << span << " --> " << (int)res << std::endl;
+	
+	NodeDebug("mpull ", span, " --> ", (int)res);
+	
 	return res;
 
 //	return this_node().loader_->pull(span);

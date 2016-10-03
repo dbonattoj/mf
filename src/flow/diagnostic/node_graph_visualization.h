@@ -44,7 +44,7 @@ private:
 	std::string graph_id_ = "G";
 	std::map<std::uintptr_t, std::string> uids_;
 
-	bool thread_index_colors_ = true;
+	bool thread_index_colors_ = false;
 	bool with_state_ = true;
 	bool with_parameters_ = true;
 	

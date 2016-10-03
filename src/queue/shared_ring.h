@@ -65,6 +65,8 @@ private:
 	std::atomic<thread_state> writer_state_{idle}; ///< Current state of writer thread. Used to prevent deadlocks.
 	
 	std::atomic<time_unit> read_start_time_{0}; ///< Absolute time corresponding to current read start time.
+
+	time_unit write_failure_time_ = -1;
 		
 	bool reader_is_waiting_() const { return (reader_state_ > 0); }
 	bool writer_is_waiting_() const { return (writer_state_ > 0); }
@@ -94,7 +96,8 @@ public:
 	
 	/// Wait until a frame become writable, or writer break event occurs.
 	/** If no frame is writable, waits until at least one frame becomes available, or break_writer() was called,
-	 ** triggering writer break event. If \a break_event occured, returns `false`. Otherwise returns `true`. */
+	 ** triggering writer break event. Returns `true` if at least 1 frame is or became writable. If 0 was returned, then
+	 ** writer break event occured while waiting. */
 	bool wait_writable();
 	
 	/// Begin writing \a write_duration frames at current write start time, if they are available.
@@ -115,6 +118,8 @@ public:
 	 ** by begin_write(). */
 	void end_write(time_unit did_write_duration);
 	
+	void end_write_fail();
+	
 	
 	write_handle try_write(time_unit);
 	write_handle write(time_unit);
@@ -129,7 +134,8 @@ public:
 
 	/// Wait until a frame become readable, or reader break event occurs.
 	/** If no frame is readable, waits until at least one frame becomes available, or break_reader() was called,
-	 ** triggering reader break event. If reader break event occured, returns `false`. Otherwise returns `true`. */
+	 ** triggering reader break event. Returns `true` if at least 1 frame is or became readable. If 0 was returned, then
+	 ** reader break event occured while waiting. */
 	bool wait_readable();
 
 	/// Begin reading frames at time span \a span.
@@ -227,6 +233,7 @@ class shared_ring::write_handle : public ring_handle_base {
 private:
 	shared_ring& ring_;
 	section_view_type view_;
+	bool fail_on_cancel_ = false;
 	
 public:
 	write_handle(write_handle&& hnd) :
@@ -243,8 +250,13 @@ public:
 		ring_(rng), view_(vw) { }
 	
 	~write_handle() override {
-		if(! view_.is_null()) end(0);
+		if(! view_.is_null()) {
+			if(fail_on_cancel_) ring_.end_write_fail();
+			else ring_.end_write(0);
+		}
 	}
+	
+	void set_fail_on_cancel(bool b) { fail_on_cancel_ = b; }
 	
 	void end(time_unit duration) override {
 		ring_.end_write(duration);

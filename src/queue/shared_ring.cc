@@ -57,6 +57,8 @@ auto shared_ring::begin_write(time_unit duration) -> section_view_type {
 
 	std::unique_lock<std::mutex> lock(mutex_);
 	
+	write_failure_time_ = -1;
+	
 	// prevent deadlock
 	// c.f. begin_read_span
 	time_unit readable = ring_.readable_duration();
@@ -71,7 +73,7 @@ auto shared_ring::begin_write(time_unit duration) -> section_view_type {
 		// writable_cv_ woke up: either:
 		// - 1+ frame was read
 		// - reader seeked
-		// - break event occured
+		// - writer break event occured
 		// - spurious wakeup
 		
 		// test if writer break event occured
@@ -93,6 +95,8 @@ auto shared_ring::try_begin_write(time_unit duration) -> section_view_type {
 	if(writer_state_ != idle) throw sequencing_error("writer not idle");
 
 	std::unique_lock<std::mutex> lock(mutex_);
+	
+	write_failure_time_ = -1;
 
 	if(ring_.writable_duration() < duration) return section_view_type::null();
 
@@ -115,14 +119,11 @@ bool shared_ring::wait_writable() {
 		writer_state_ = 1;
 		writable_cv_.wait(lock);
 		
-		if(! writer_keep_waiting_.test_and_set()) {
-			writer_state_ = idle;
-			return false;		
-		}
+		if(! writer_keep_waiting_.test_and_set()) break;
 	}
 	
 	writer_state_ = idle;
-	return true;
+	return (ring_.writable_duration() > 0);
 }
 
 
@@ -139,6 +140,21 @@ void shared_ring::end_write(time_unit written_duration) {
 	readable_cv_.notify_one();	
 	// notify even if no frame was written:
 	// seek() waits for writer to finish
+}
+
+
+void shared_ring::end_write_fail() {
+	if(writer_state_ == idle) throw sequencing_error("was not writing");
+	
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		ring_.end_write(0);
+		write_failure_time_ = ring_.write_start_time();
+	}
+	
+	writer_state_ = idle;
+	
+	readable_cv_.notify_one();	 /////// 
 }
 
 
@@ -175,6 +191,11 @@ auto shared_ring::begin_read(time_unit duration) -> section_view_type {
 	while(ring_.readable_duration() < duration) {
 		reader_state_ = duration;
 		// wait until more frames written (mutex unlocked during wait, and relocked after)
+		
+		if(ring_.write_start_time() == write_failure_time_) {
+			reader_state_ = idle;
+			return section_view_type::null();
+		}
 		
 		readable_cv_.wait(lock);
 		
@@ -217,6 +238,8 @@ bool shared_ring::wait_readable() {
 
 	while(ring_.readable_duration() == 0) {
 		reader_state_ = 1;
+		
+		if(ring_.write_start_time() == write_failure_time_) break;
 		
 		readable_cv_.wait(lock);
 		if(! reader_keep_waiting_.test_and_set()) break;

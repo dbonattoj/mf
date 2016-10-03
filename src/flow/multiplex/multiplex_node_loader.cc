@@ -61,19 +61,19 @@ node::pull_result multiplex_node::sync_loader::pull(time_span& span) {
 		return pull_result::transitory_failure;
 	}
 	
-	
-	if(successor_time != this_node().successor_time_of_input_view_()) {
+	if((successor_time != this_node().successor_time_of_input_view_()) || (input_pull_result_ != pull_result::success)) {
 		// reload input view if successor_time has changed since last time
+		// with successor_time as captured before
 		input_pull_result_ = this_node().load_input_view_(successor_time);
 		Assert(this_node().current_time() == successor_time);
 	}
 
+	// get portion of the requested span that is not loaded
 	time_span loaded_input_span = this_node().input_view_().span();
 	span = span_intersection(span, loaded_input_span);
 
-	// TODO verify
+
 	if(input_pull_result_ != pull_result::success) return input_pull_result_;
-	else if(loaded_input_span.start_time() != expected_input_span.start_time()) return pull_result::transitory_failure;
 	else if(loaded_input_span.includes(span)) return pull_result::success;
 	else return pull_result::end_of_stream;
 }
@@ -110,34 +110,31 @@ multiplex_node::async_loader::~async_loader() {
 
 void multiplex_node::async_loader::thread_main_() {
 	for(;;) {
-		// will hold time of common successor node for which new input is loaded
 		time_unit successor_time = -1;
 		
-		// wait until current successor_time no longer equal to the successor time for which input view was loaded
-		// needs to be awakened by reader by notifying successor_time_changed_cv_
-		std::unique_lock<std::mutex> lock(successor_time_mutex_);
-		successor_time_changed_cv_.wait(lock, [&] {
-			if(stopped_) return true;
-			successor_time = this_node().capture_successor_time_();
-			return (successor_time != this_node().successor_time_of_input_view_());
-		});
-		lock.unlock();
-		if(stopped_) break;
+		{
+			std::unique_lock<std::mutex> lock(successor_time_mutex_);
+		
+			do {
+				successor_time_changed_cv_.wait(lock);
+				successor_time = input_successor_time_;
+			} while(successor_time == input_successor_time_ && !stopped_);
+			
+			if(stopped_) break;
+		}
+
+
 		Assert(successor_time != -1);
 		
-		// acquire exclusive lock on input view mutex --> waits until all readers end
-		// and load the new input view, and keep response from input pull
 		{
 			std::lock_guard<std::shared_timed_mutex> view_lock(input_view_mutex_);
 			input_pull_result_ = this_node().load_input_view_(successor_time);
+			input_successor_time_ = successor_time;
 		}
 		
-		// notify waiting readers that input view + input pull response has changed
 		input_view_updated_cv_.notify_all();
 	}
 	
-	// loader was stopped:
-	// need to unload input view (so as to end reading from input)
 	{
 		std::lock_guard<std::shared_timed_mutex> view_lock(input_view_mutex_);
 		this_node().unload_input_view_();
@@ -179,46 +176,46 @@ void multiplex_node::async_loader::pre_pull(time_span span) {
 
 
 node::pull_result multiplex_node::async_loader::pull(time_span& span) {
-	// TODO prove formally
-		
-	// get expected input span, based on current time of the common successor node
 	time_unit successor_time = this_node().capture_successor_time_();
 	time_span expected_input_span = this_node().expected_input_span_(successor_time);
-	if(! expected_input_span.includes(span)) {
-		// tfail if pulled span not in this expected span
-		return node::pull_result::transitory_failure;
-	}
+	if(! expected_input_span.includes(span)) return node::pull_result::transitory_failure;
 	
 	{
-		// acquire shared lock on input view
-		// shared with other readers calling pull() on different threads
-		// loader can modify the input view when all readers release the shared lock
 		std::shared_lock<std::shared_timed_mutex> lock(input_view_mutex_);
-		
-		// wail until loader updates the input view for the current time of the common successor node
-		while(this_node().current_time() != this_node().capture_successor_time_()) {
-			if(stopped_) return node::pull_result::stopped;
-			successor_time_changed_cv_.notify_one();
+
+		auto receive_new_input_view = [&]() {
+			{
+				std::lock_guard<std::mutex> lock(successor_time_mutex_);
+				input_successor_time_ = this_node().capture_successor_time_();
+			}
 			input_view_updated_cv_.wait(lock);
-		}
-		if(stopped_) return node::pull_result::stopped;
+		};
 	
+		if(input_pull_result_ != pull_result::success) {
+			receive_new_input_view();
+		}
+		
+		while(input_pull_result_ == pull_result::success && input_successor_time_ != this_node().capture_successor_time_()) {
+			receive_new_input_view();
+		}
+		
 		pull_result load_res = input_pull_result_;
 		time_span loaded_input_span = this_node().input_view_().span();
-		Assert(this_node().current_time() == successor_time);
-	
+		span = span_intersection(span, loaded_input_span);
+		Assert(input_successor_time_ == this_node().capture_successor_time_());
+
+
 		if(load_res != pull_result::success) return load_res;
-		else if(loaded_input_span.start_time() != expected_input_span.start_time()) return pull_result::transitory_failure;
 		else if(loaded_input_span.includes(span)) return pull_result::success;
+		else if(loaded_input_span.start_time() != expected_input_span.start_time()) return pull_result::transitory_failure;
 		else return pull_result::end_of_stream;
 	}
 }
 
 
 
-
-node_frame_window_view multiplex_node::async_loader::begin_read(time_span span) {
-	std::shared_lock<std::shared_timed_mutex> lock(input_view_mutex_);
+node_frame_window_view multiplex_node::async_loader::begin_read(time_span span) {	
+	input_view_mutex_.lock_shared();
 	
 	timed_frame_array_view input_view = this_node().input_view_();
 	return input_view.time_section(span);

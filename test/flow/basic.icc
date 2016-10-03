@@ -28,7 +28,7 @@ SECTION("basic") {
 	std::vector<int> seq(count);
 	for(int i = 0; i < count; ++i) seq[i] = i;
 
-/*
+
 	SECTION("source -> sink") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -57,7 +57,7 @@ SECTION("basic") {
 		
 		REQUIRE(sink->check());
 	}
-*/
+
 
 	SECTION("source1 --> [+3]passthrough1 --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
@@ -74,7 +74,6 @@ SECTION("basic") {
 		
 		REQUIRE(sink->check());
 	}
-	return;
 
 	SECTION("source1 --> [-3]passthrough1 --> sink") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
@@ -332,7 +331,7 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-	
+
 
 	SECTION("multiple inputs") {
 		auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
@@ -413,7 +412,8 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-	
+
+
 
 	SECTION("multiple outputs") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
@@ -453,8 +453,8 @@ SECTION("basic") {
 			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
 			
-			passthrough1.set_asynchonous(async1);
-			passthrough2.set_asynchonous(async2);
+			passthrough1.set_asynchonous(async1); passthrough1.set_name("passthrough1");
+			passthrough2.set_asynchonous(async2); passthrough2.set_name("passthrough2");
 			merge.set_asynchonous(async1);
 
 			multiout->input.connect(source->output);
@@ -469,8 +469,8 @@ SECTION("basic") {
 			REQUIRE(sink->check());
 		}
 	}
-	
-	
+
+
 	SECTION("one-to-many") {	
 		std::size_t count = 50;
 		std::size_t last = count - 1;
@@ -533,8 +533,8 @@ SECTION("basic") {
 			)");
 			
 			auto& source = gr.add_filter<sequence_frame_source>(last, shp);
-			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
-			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2);
+			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1); passthrough1.set_name("passthrough1");
+			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 2); passthrough2.set_name("passthrough2");
 			auto& merge = gr.add_filter<input_synchronize_test_filter>();
 			auto& sink = gr.add_filter<expected_frames_sink>(seq);
 			
@@ -619,18 +619,18 @@ SECTION("basic") {
 			)");
 
 			
-			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp);
-			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp);
-			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1);
-			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0);
-			auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2);
-			auto& passthrough4 = gr.add_filter<passthrough_filter>(1, 1);
-			auto& merge1 = gr.add_filter<input_synchronize_test_filter>();
-			auto& merge2 = gr.add_filter<input_synchronize_test_filter>();
-			auto& merge3 = gr.add_filter<input_synchronize_test_filter>();
-			auto& merge4 = gr.add_filter<input_synchronize_test_filter>();
-			auto& multiout = gr.add_filter<multiple_output_filter>();
-			auto& sink = gr.add_filter<expected_frames_sink>(seq);
+			auto& source1 = gr.add_filter<sequence_frame_source>(last, shp); source1.set_name("source1");
+			auto& source2 = gr.add_filter<sequence_frame_source>(last, shp); source2.set_name("source2");
+			auto& passthrough1 = gr.add_filter<passthrough_filter>(3, 1); passthrough1.set_name("passthrough1");
+			auto& passthrough2 = gr.add_filter<passthrough_filter>(1, 0); passthrough2.set_name("passthrough2");
+			auto& passthrough3 = gr.add_filter<passthrough_filter>(1, 2); passthrough3.set_name("passthrough3");
+			auto& passthrough4 = gr.add_filter<passthrough_filter>(1, 1); passthrough4.set_name("passthrough4");
+			auto& merge1 = gr.add_filter<input_synchronize_test_filter>(); merge1.set_name("merge1");
+			auto& merge2 = gr.add_filter<input_synchronize_test_filter>(); merge2.set_name("merge2");
+			auto& merge3 = gr.add_filter<input_synchronize_test_filter>(); merge3.set_name("merge3");
+			auto& merge4 = gr.add_filter<input_synchronize_test_filter>(); merge4.set_name("merge4");
+			auto& multiout = gr.add_filter<multiple_output_filter>(); multiout.set_name("multiout");
+			auto& sink = gr.add_filter<expected_frames_sink>(seq); sink.set_name("sink");
 			
 			source1.set_asynchonous(async2);
 			source2.set_asynchonous(async1);
