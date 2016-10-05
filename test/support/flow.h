@@ -35,6 +35,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/utility/string.h>
 #include "ndarray.h"
 #include "thread.h"
+#include "flow_activation.h"
 
 #include <chrono>
 
@@ -139,7 +140,7 @@ public:
 	input_type<2, int> input;
 	output_type<2, int> output;
 	
-	std::vector<bool> activation;
+	activation_sequence_type activation;
 	std::function<callback_func> callback;
 
 	passthrough_filter(flow::filter& filt, time_unit past_window, time_unit future_window) :
@@ -246,7 +247,7 @@ private:
 public:
 	input_type<2, int> input;
 
-	std::vector<bool> activation;
+	activation_sequence_type activation;
 	
 	explicit expected_frames_sink(flow::filter& filt, const std::vector<int>& seq) :
 		filter_handler(filt),
@@ -260,7 +261,7 @@ public:
 			job.set_activated(input, activation[t]);
 	}
 	
-	void process(flow::filter_job& job) override {		
+	void process(flow::filter_job& job) override {
 		auto in = job.in(input);
 		
 		int index;
@@ -268,6 +269,11 @@ public:
 		else index = noframe;
 		
 		time_unit t = job.time();
+		if(t >= expected_frames_.size()) {
+			job.mark_end();
+			return;
+		}
+		
 		while(t >= got_frames_.size()) got_frames_.push_back(missingframe);
 		
 		got_frames_[t] = index;
@@ -297,8 +303,8 @@ public:
 	input_type<2, int> input2;
 	output_type<2, int> output;
 	
-	std::vector<bool> activation1;
-	std::vector<bool> activation2;
+	activation_sequence_type activation1;
+	activation_sequence_type activation2;
 	
 	explicit input_synchronize_test_filter(flow::filter& filt) :
 		filter_handler(filt),

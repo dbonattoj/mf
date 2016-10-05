@@ -41,7 +41,7 @@ namespace detail {
 	
 	std::string debug_thread_color();	
 	std::mutex& debug_mutex();
-	std::FILE* debug_stream();
+	std::FILE* debug_stream(const std::string& tag);
 
 	inline void debug_print_part(std::ostream& str, const std::string& sep) { }	
 	
@@ -75,7 +75,7 @@ namespace detail {
 	void debug_print(const std::string& tag, const debug_header& header, const Args&... args) {
 		if(! debug_test_filter(tag)) return;
 		
-		std::FILE* output = debug_stream();
+		std::FILE* output = debug_stream(tag);
 		if(! output) return;
 		
 		std::string head = debug_head(header);

@@ -209,9 +209,7 @@ void node::deduce_sent_parameters_relay_() {
 }
 
 
-bool node::add_propagated_parameter_if_needed(parameter_id id) {
-	std::cout << "node(" << name_ << ")::add_propagated_parameter_if_needed(" << id << ")" << std::endl;
-	
+bool node::add_propagated_parameter_if_needed(parameter_id id) {	
 	bool needed = false;
 	for(auto&& out : outputs_) {
 		bool needed_by_output = out->add_propagated_parameter_if_needed(id);

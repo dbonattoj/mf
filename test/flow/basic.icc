@@ -414,7 +414,6 @@ SECTION("basic") {
 	}
 
 
-
 	SECTION("multiple outputs") {
 		auto& source = gr.add_filter<sequence_frame_source>(last, shp);
 		auto& sink = gr.add_filter<expected_frames_sink>(seq);
@@ -422,8 +421,8 @@ SECTION("basic") {
 
 		source.set_asynchonous(async1);
 		multiout.set_asynchonous(async1);
-
-		SECTION("graph 1") {
+	
+		SECTION("simple") {
 			INFO(R"(
 			source --> multiout --> merge --> sink
 			                  | --> /
@@ -441,8 +440,30 @@ SECTION("basic") {
 			gr.run();
 			REQUIRE(sink->check());
 		}
+	
+		
+		SECTION("time windows") {
+			INFO(R"(
+			source --> multiout --> [-3, +1]merge --> sink
+			                  | --> [-1, +2]/
+			)");
+			
+			auto& merge = gr.add_filter<input_synchronize_test_filter>();
+			merge.set_asynchonous(async1);
+			merge->input1.set_past_window(3); merge->input1.set_future_window(1);
+			merge->input2.set_past_window(1); merge->input2.set_future_window(2);
 
-		SECTION("graph 2") {
+			multiout->input.connect(source->output);
+			merge->input1.connect(multiout->output1);
+			merge->input2.connect(multiout->output2);
+			sink->input.connect(merge->output);
+			
+			gr.setup();
+			gr.run();
+			REQUIRE(sink->check());
+		}
+
+		SECTION("passthroughs") {
 			INFO(R"(
 			source --> multiout --> [-3, +1]passthrough1  --> merge --> sink
 			                  | --> [-1, +2]passthrough2' --> /

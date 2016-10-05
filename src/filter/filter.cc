@@ -303,9 +303,7 @@ void filter::install_(installation_guide& guide) {
 	installed_node->set_name(name_.empty() ? default_filter_name : name_);
 	
 	installed_node->set_handler(*this);
-	
-	std::cout << "NODE::::::::::::::::::" << name_ << std::endl;
-	
+		
 			if(is_source()) installed_node->define_source_stream_timing(node_stream_timing_);
 
 	guide.local_filter_nodes[this].processing = installed_node;

@@ -18,7 +18,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "multiplex_node_loader.h"
+#include "multiplex_node_loader_sync.h"
 #include "../node_graph.h"
 #include <utility>
 #include <functional>
@@ -33,6 +33,9 @@ multiplex_node::sync_loader::sync_loader(multiplex_node& nd) :
 }
 
 
+void multiplex_node::sync_loader::pre_stop() { }
+
+
 void multiplex_node::sync_loader::stop() { }
 
 
@@ -44,7 +47,7 @@ void multiplex_node::sync_loader::pre_pull(time_span span) { }
 
 node::pull_result multiplex_node::sync_loader::pull(time_span& span) {
 	// get expected input span, based on current time of the common successor node
-	time_unit successor_time = this_node().capture_successor_time_();
+	time_unit successor_time = this_node().capture_fcs_time_();
 	time_span expected_input_span = this_node().expected_input_span_(successor_time);
 	
 	if(! expected_input_span.includes(span)) {
@@ -53,7 +56,7 @@ node::pull_result multiplex_node::sync_loader::pull(time_span& span) {
 		return pull_result::transitory_failure;
 	}
 	
-	if((successor_time != this_node().successor_time_of_input_view_()) || (input_pull_result_ != pull_result::success)) {
+	if((successor_time != this_node().current_time()) || (input_pull_result_ != pull_result::success)) {
 		// reload input view if successor_time has changed since last time
 		// with successor_time as captured before
 		input_pull_result_ = this_node().load_input_view_(successor_time);
@@ -61,7 +64,7 @@ node::pull_result multiplex_node::sync_loader::pull(time_span& span) {
 	}
 
 	// get portion of the requested span that is not loaded
-	time_span loaded_input_span = this_node().input_view_().span();
+	time_span loaded_input_span = this_node().loaded_input_span_();
 	span = span_intersection(span, loaded_input_span);
 
 
@@ -72,12 +75,9 @@ node::pull_result multiplex_node::sync_loader::pull(time_span& span) {
 
 
 node_frame_window_view multiplex_node::sync_loader::begin_read(time_span span) {
-	std::cout << "loaded span: " << this_node().input_view_().span() << std::endl;
-	std::cout << "reques span: " << span << std::endl;
-	
-	
-	timed_frame_array_view input_view = this_node().input_view_();
-	return input_view.time_section(span);
+	timed_frame_array_view input_view = this_node().loaded_input_view_();
+	if(input_view.span().includes(span)) return input_view.time_section(span);
+	else return node_frame_window_view::null();
 }
 
 

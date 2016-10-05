@@ -69,7 +69,7 @@ public:
 	void detach_output();
 	void cancel_output();
 
-	void begin_input(processing_node_input&);
+	bool begin_input(processing_node_input&);
 	void end_input(processing_node_input&);
 	void end_inputs();
 	void cancel_inputs();

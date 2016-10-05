@@ -80,7 +80,7 @@ private:
 	std::vector<filter_parameter_base*> parameters_;
 
 	bool asynchronous_ = false;
-	time_unit prefetch_duration_ = 0;
+	time_unit prefetch_duration_ = 5;
 	//int parallelization_factor_ = 1; // TODO
 	
 	bool was_setup_ = false;

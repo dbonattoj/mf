@@ -25,6 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../node_input.h"
 #include "../node_output.h"
 
+#define MpxDebug(...) MF_DEBUG_T("mpx", __VA_ARGS__)
+
 namespace mf { namespace flow {
 
 class node_graph;
@@ -68,30 +70,24 @@ private:
 	class sync_loader;
 	class async_loader;
 
-	const node* common_successor_node_ = nullptr;
+	const node* fcs_node_ = nullptr; ///< First common successor node.
 	time_unit input_past_window_ = -1;
 	time_unit input_future_window_ = -1;
 	
+	timed_frame_array_view input_view_;
+	
 	std::unique_ptr<loader> loader_;
-	node_frame_window_view loaded_input_view_;
 	
 	bool need_async_() const;
 	bool outputs_on_different_threads_() const;
 
-	/// \name Loader interface
-	/// Called by loader, possibly from different threads.
-	///@{
-	time_unit capture_successor_time_() const;
-
+	time_unit capture_fcs_time_() const;
 	time_span expected_input_span_(time_unit successor_time) const;
-
+	
 	pull_result load_input_view_(time_unit successor_time);
 	void unload_input_view_();
-	
-	time_unit successor_time_of_input_view_() const;
-	const node_frame_window_view& input_view_() const { return loaded_input_view_; }
-	node_frame_window_view& input_view_() { return loaded_input_view_; }
-	///@}
+	const timed_frame_array_view& loaded_input_view_() const { return input_view_; }
+	time_span loaded_input_span_() const { return input_view_.span(); }
 	
 public:
 	explicit multiplex_node(node_graph&);
@@ -103,9 +99,10 @@ public:
 	bool is_async() const;
 	thread_index loader_thread_index() const;
 	
-	const node& common_successor_node() const { return *common_successor_node_; }
+	const node& fcs_node() const { return *fcs_node_; }
 	
 	void launch() override;
+	void pre_stop() override;
 	void stop() override;
 	void pre_setup() override;
 	void setup() override;
@@ -145,7 +142,7 @@ protected:
 	const multiplex_node& this_node() const { return node_; }
 
 public:
-	loader(multiplex_node&, thread_index) :
+	loader(multiplex_node& nd, thread_index tind) :
 		node_(nd),
 		thread_index_(tind) { }
 	
@@ -154,6 +151,7 @@ public:
 	thread_index loader_thread_index() const { return thread_index_; }
 	virtual bool is_async() const = 0;
 	
+	virtual void pre_stop() = 0;
 	virtual void stop() = 0;
 	virtual void launch() = 0;
 	virtual void pre_pull(time_span) = 0;

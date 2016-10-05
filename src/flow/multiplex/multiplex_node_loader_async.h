@@ -33,16 +33,17 @@ namespace mf { namespace flow {
 class multiplex_node::async_loader : public multiplex_node::loader {
 private:
 	std::thread thread_;
-	std::atomic<bool> stopped_ {false};
+	std::atomic<bool> stop_;
 	
-	std::mutex successor_time_mutex_;	
-	std::condition_variable successor_time_changed_cv_;
-
-	std::shared_timed_mutex input_view_mutex_;
-	node::pull_result input_pull_result_ = pull_result::undefined;
-	time_unit input_successor_time_ = -1;
-	std::condition_variable_any input_view_updated_cv_;
-
+	std::shared_timed_mutex input_mutex_;
+	std::condition_variable_any input_cv_;
+	time_unit input_fcs_time_ = -1;
+	pull_result input_pull_result_ = pull_result::undefined;
+	
+	std::mutex request_mutex_;
+	std::condition_variable request_cv_;
+	time_unit request_fcs_time_ = -1;
+	
 	void thread_main_();
 
 public:
@@ -51,6 +52,7 @@ public:
 
 	bool is_async() const override { return true; }
 
+	void pre_stop() override;
 	void stop() override;
 	void launch() override;
 	void pre_pull(time_span) override;

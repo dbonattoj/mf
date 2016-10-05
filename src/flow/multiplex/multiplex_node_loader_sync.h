@@ -34,6 +34,7 @@ public:
 
 	bool is_async() const override { return false; }
 
+	void pre_stop() override;
 	void stop() override;
 	void launch() override;
 	void pre_pull(time_span) override;

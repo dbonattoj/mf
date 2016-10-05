@@ -62,20 +62,24 @@ node::pull_result node_input::pull() {
 	Assert(is_connected());
 	
 	time_unit t = this_node().current_time();
-	time_span span = current_required_time_span_();	
+	time_span expected_span = current_required_time_span_();
+	time_span span = expected_span;
+				//MF_DEBUG_EXPR_T("node", t, span, past_window_, future_window_);
 	
 	node::pull_result result = connected_output_->pull(span); // span gets modified
+	pulled_span_ = span;
+
+	MF_DEBUG_T("node", "in.pull.  pulling ", expected_span, "  got  ", span, "   t=", t, "   result=", (int)result);
+
 	
 	if(result == node::pull_result::end_of_stream) {
 		// If connected output reached end of stream, return error state only if frame t was not pulled
 		// Future window is allowed to be truncated when nearing end of stream
 		if(! span.includes(t)) return node::pull_result::end_of_stream;
-	} else if(result != node::pull_result::success) {
-		return result;
+		else return node::pull_result::success;
 	}
 	
-	pulled_span_ = span;
-	return node::pull_result::success;
+	return result;
 }
 
 
@@ -88,8 +92,10 @@ node_frame_window_view node_input::begin_read_frame() {
 	if(duration > pulled_span_.duration()) duration = pulled_span_.duration();
 		
 	timed_frame_array_view view = connected_output_->begin_read(duration);
-	Assert(! view.is_null());
-		
+	if(view.is_null()) return view;
+	
+	MF_DEBUG_T("node", "in.begin_read_frame.  pulled ", pulled_span_, "   t=", t, "  got_span: ", view.span(), "  view.span().includes(t)=", view.span().includes(t));
+	
 	Assert(view.span().includes(t));
 	Assert(view.start_time() == pulled_span_.start_time());
 	Assert(view.duration() == duration);

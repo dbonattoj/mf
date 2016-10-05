@@ -96,7 +96,9 @@ sync_node::process_result sync_node::process_next_frame_() {
 	// If error occurs, job object will cancel read during stack unwinding
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(in.is_activated()) job.begin_input(in);
+		if(! in.is_activated()) continue;
+		bool began = job.begin_input(in);
+		if(! began) return process_result::transitory_failure;
 	}
 
 	// Let handler process frame

@@ -24,6 +24,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <mf/utility/misc.h>
 #include "../support/ndarray.h"
 #include "../support/flow.h"
+#include "../support/flow_activation.h"
 
 using namespace mf;
 using namespace mf::test;
@@ -33,7 +34,7 @@ constexpr bool async2 = true;
 
 TEST_CASE("flow graph test: async", "[flow][async]") {
 	//#include "basic.icc"
-	//#include "activation.icc"
-	#include "seek.icc"
+	#include "activation.icc"
+	//#include "seek.icc"
 }
 

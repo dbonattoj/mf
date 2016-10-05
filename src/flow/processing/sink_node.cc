@@ -73,7 +73,9 @@ node::pull_result sink_node::pull(time_unit t) {
 	// If error occurs, job object will cancel read during stack unwinding
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(in.is_activated()) job.begin_input(in);
+		if(! in.is_activated()) continue;
+		bool began = job.begin_input(in);
+		if(! began) throw sequencing_error("sink received transitional failure");
 	}
 
 	// Let handler process frame

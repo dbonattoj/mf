@@ -42,8 +42,6 @@ namespace {
 	std::mutex mutex_;
 	debug_mode mode_ = debug_mode::cerr;
 	std::set<std::string> tags_;
-	
-	std::string filename_ = "debug.txt";
 }
 
 
@@ -89,11 +87,17 @@ namespace detail {
 		
 	std::mutex& debug_mutex() { return mutex_; }
 	
-	std::FILE* debug_stream() {
+	std::FILE* debug_stream(const std::string& tag) {
 		if(mode_ == debug_mode::file) {
-			static std::FILE* file = nullptr;
-			if(! file) file = std::fopen(filename_.c_str(), "w");
-			return file;
+			std::lock_guard<std::mutex> lock(debug_mutex());
+			static std::map<std::string, std::FILE*> files = {};
+			if(files.find(tag) == files.end()) {
+				std::string filename = "debug_" + tag + ".txt";
+				files[tag] = std::fopen(filename.c_str(), "w");
+				std::string sep(50, '#');
+				std::fprintf(files[tag], "%s\n%s\n%s\n", sep.c_str(), sep.c_str(), sep.c_str());
+			}
+			return files.at(tag);
 		} else if(mode_ == debug_mode::cerr) {
 			return stderr;
 		} else {
@@ -108,7 +112,7 @@ namespace detail {
 	}
 		
 	void debug_print_backtrace(const debug_header& header, const std::string& bt) {
-		std::FILE* output = debug_stream();
+		std::FILE* output = debug_stream("");
 		if(! output) return;
 		
 		std::string head = debug_head(header);

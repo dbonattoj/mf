@@ -41,11 +41,11 @@ processing_node_job::~processing_node_job() {
 }
 
 
-void processing_node_job::begin_input(processing_node_input& in) {
+bool processing_node_job::begin_input(processing_node_input& in) {
 	std::ptrdiff_t index = in.index();
 	timed_frame_array_view vw = in.begin_read_frame();
-	Assert(! vw.is_null());
 	input_views_.at(index).reset(vw);
+	return ! vw.is_null();
 }
 
 

@@ -35,14 +35,15 @@ multiplex_node::multiplex_node(node_graph& gr) : base(gr) {
 	static int i = 0;
 	i++;
 	set_name("multiplex "+std::to_string(i));
+	MpxDebug("cons");
 }
 
 
 multiplex_node::~multiplex_node() { }
 
 
-time_unit multiplex_node::capture_successor_time_() const {
-	return common_successor_node().current_time();
+time_unit multiplex_node::capture_fcs_time_() const {
+	return fcs_node().current_time();
 }
 
 
@@ -52,6 +53,7 @@ time_span multiplex_node::expected_input_span_(time_unit successor_time) const {
 		successor_time + input_future_window_ + 1
 	);
 }
+
 
 
 node::pull_result multiplex_node::load_input_view_(time_unit successor_time) {
@@ -65,15 +67,14 @@ node::pull_result multiplex_node::load_input_view_(time_unit successor_time) {
 	input().pre_pull();
 	pull_result result = input().pull();
 	
-	NodeDebug("mpx: load input, res=", (int)result);
+	MpxDebug("mpx: load input, res=", (int)result);
 	
 	if(result == pull_result::success) {
 		timed_frame_array_view vw = input().begin_read_frame();
-		// if input node reached end, the future time window may have been truncated
-		// (node_input.pull still returns pull_result::success in that case)
-		loaded_input_view_.reset(vw);
+		if(vw.is_null()) result = pull_result::transitory_failure;
+		input_view_.reset(vw);
 	} else {
-		loaded_input_view_.reset();
+		input_view_.reset();
 	}
 	
 	return result;
@@ -81,23 +82,18 @@ node::pull_result multiplex_node::load_input_view_(time_unit successor_time) {
 
 
 void multiplex_node::unload_input_view_() {
-	if(! loaded_input_view_.is_null()) {
+	if(! input_view_.is_null()) {
 		input().end_read_frame();
-		loaded_input_view_.reset();
+		input_view_.reset();
 	}
 }
 
-	
-time_unit multiplex_node::successor_time_of_input_view_() const {
-	if(! loaded_input_view_.is_null()) return current_time();
-	else return -1;
-}
 
 
 time_unit multiplex_node::minimal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
-	if(common_successor_node_->precedes(target_node)) {
-		return common_successor_node_->minimal_offset_to(target_node);
+	if(fcs_node_->precedes(target_node)) {
+		return fcs_node_->minimal_offset_to(target_node);
 	} else {
 		std::cout << input().connected_node().name() << "->" << name() << "  to  " << target_node.name() << std::endl;
 		throw 1;
@@ -107,8 +103,8 @@ time_unit multiplex_node::minimal_offset_to(const node& target_node) const {
 
 time_unit multiplex_node::maximal_offset_to(const node& target_node) const {
 	if(&target_node == this) return 0;
-	if(common_successor_node_->precedes(target_node)) {
-		return common_successor_node_->maximal_offset_to(target_node);
+	if(fcs_node_->precedes(target_node)) {
+		return fcs_node_->maximal_offset_to(target_node);
 	} else {
 		std::cout << input().connected_node().name() << "->" << name() << "  to  " << target_node.name() << std::endl;
 		throw 1;
@@ -139,18 +135,24 @@ void multiplex_node::stop() {
 }
 
 
+void multiplex_node::pre_stop() {
+	Assert(loader_);
+	loader_->pre_stop();
+}
+
+
 void multiplex_node::pre_setup() {
 	// successors have already been pre-setup
 	
 	// find common successor node
-	common_successor_node_ = &first_successor();
+	fcs_node_ = &first_successor();
 
 	// calculate input time window
 	input_past_window_ = input_future_window_ = 0;
 	for(auto&& out : outputs()) {
 		const node_input& in = out->connected_input();
-		time_unit min_offset = in.this_node().minimal_offset_to(*common_successor_node_) - in.past_window_duration();
-		time_unit max_offset = in.this_node().maximal_offset_to(*common_successor_node_) + in.future_window_duration();
+		time_unit min_offset = in.this_node().minimal_offset_to(*fcs_node_) - in.past_window_duration();
+		time_unit max_offset = in.this_node().maximal_offset_to(*fcs_node_) + in.future_window_duration();
 			
 		Assert(min_offset <= 0);
 		Assert(max_offset >= 0);
@@ -216,18 +218,7 @@ void multiplex_node_output::pre_pull(const time_span& span) {
 
 node::pull_result multiplex_node_output::pull(time_span& span) {
 	Assert(this_node().loader_);
-	
-	auto current_time=[]{return 0;};
-
-	NodeDebug("mpull ", span, "...");
-
-	auto res = this_node().loader_->pull(span);
-	
-	NodeDebug("mpull ", span, " --> ", (int)res);
-	
-	return res;
-
-//	return this_node().loader_->pull(span);
+	return this_node().loader_->pull(span);
 }
 
 
@@ -238,7 +229,8 @@ node_frame_window_view multiplex_node_output::begin_read(time_unit duration) {
 	Assert(duration == pulled_span.duration()); // can duration be smaller? (node interface contract)
 
 	node_frame_window_view vw = this_node().loader_->begin_read(pulled_span);
-	Assert(! vw.is_null());
+	if(vw.is_null()) return node_frame_window_view::null();
+	
 	Assert(vw.span().includes(pulled_span), "multiplex input view span does not include span to read");
 
 	return extract_channel(vw, input_channel_index_);

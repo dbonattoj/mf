@@ -30,7 +30,7 @@ async_node::async_node(node_graph& gr) :
 {
 	thread_index_ = graph().new_thread_index();
 }
-	
+
 
 async_node::~async_node() {
 	Assert(! running_);
@@ -65,9 +65,11 @@ void async_node::pre_stop() {
 	MF_RAND_SLEEP;
 		NodeDebug("STOP");
 
-	std::lock_guard<std::mutex> lock(continuation_mutex_);
+	//std::lock_guard<std::mutex> lock(continuation_mutex_);
 	running_ = false;
 	continuation_cv_.notify_one();
+	
+	ring_->break_reader();
 }
 
 void async_node::stop() {
@@ -90,21 +92,6 @@ time_unit async_node::maximal_offset_to(const node& target_node) const {
 
 
 void async_node::pause_() {
-	// pause as long as either:
-	// - next write time (determined by shared_ring, and reader may seek) is beyond time limit (set by reader)
-	// - current request had failed, not yet received new request from reader
-	// conditions are checked when continuation_cv_ gets notified
-
-	std::unique_lock<std::mutex> lock(continuation_mutex_);
-	
-	bool keep_waiting = false;
-	while(running_) {
-		continuation_cv_.wait(lock);
-	
-		if(failed_request_id_ != -1 && current_request_id_ == failed_request_id_) continue;
-		else if(ring_->write_start_time() >= time_limit_) continue;
-		else break;
-	}
 }
 
 
@@ -112,10 +99,16 @@ void async_node::thread_main_() {
 	bool pause = false;
 	
 	for(;;) {
+				MF_RAND_SLEEP;
 		if(pause) {
-			NodeDebug("pause");
-			pause_();
-			if(graph().was_stopped()) break;
+			std::unique_lock<std::mutex> lock(continuation_mutex_);
+			
+			continuation_cv_.wait(lock, [&] {
+				if(! running_) return true;
+				return (current_request_id_ != failed_request_id_) && (ring_->write_start_time() < time_limit_);
+			});
+									MF_RAND_SLEEP;
+			if(! running_) break;
 			pause = false;
 		}
 		
@@ -127,13 +120,16 @@ void async_node::thread_main_() {
 		process_result process_res = process_frame_();
 		NodeDebug("process_res=", (int)process_res);
 		
+								MF_RAND_SLEEP;
+		
 		
 		if(process_res == process_result::should_pause) {
 			pause = true;
 			continue;
 		} else if(process_res != process_result::success) {
-			failed_request_id_ = processing_request_id;
 			failed_request_process_result_ = process_res;			
+									MF_RAND_SLEEP;
+			failed_request_id_ = processing_request_id;
 			
 			pause = true;
 		}
@@ -150,7 +146,7 @@ async_node::process_result async_node::process_frame_() {
 	output_write_handle.set_fail_on_cancel(true);
 	
 	//NodeDebug("p1");
-	
+							MF_RAND_SLEEP;
 	
 	if(output_write_handle.view().is_null()) return process_result::should_pause;
 	const timed_frame_array_view& out_vw = output_write_handle.view();
@@ -159,6 +155,8 @@ async_node::process_result async_node::process_frame_() {
 		
 	// t = time of frame to process here
 	time_unit t = output_write_handle.view().start_time();
+
+						MF_RAND_SLEEP;
 
 	// as long as output_write_handle is open, ring cannot seek to another time (reader will wait instead)
 	// but in output_pre_pull_, reader sets time limit before seeking
@@ -190,7 +188,7 @@ async_node::process_result async_node::process_frame_() {
 		
 		NodeDebug("pull from input...");
 		pull_result res = in.pull();
-		NodeDebug("/pull from input...");
+		NodeDebug("/pull from input...   pulled ", in.pulled_span(), "  t=", t, "  res=", (int)res);
 				
 		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
 		else if(res == pull_result::fatal_failure) return process_result::handler_failure;
@@ -202,8 +200,11 @@ async_node::process_result async_node::process_frame_() {
 	// If error occurs, job object will cancel read during stack unwinding
 	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
 		input_type& in = input_at(i);
-		if(in.is_activated()) job.begin_input(in);
+		if(! in.is_activated()) continue;
+		bool began = job.begin_input(in);
+		if(! began) return process_result::transitory_failure;
 	}
+	
 	
 	//NodeDebug("process... handler_proc");
 
@@ -230,14 +231,14 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 	{
 		// if writer currently paused, it won't continue until this lock is released again
 		std::lock_guard<std::mutex> lock(continuation_mutex_);
-	
+							MF_RAND_SLEEP;
 		// set new time limit for writer
 		time_limit_.store(pull_span.end_time() + prefetch_duration_ + 1);
-				
+										MF_RAND_SLEEP;
 		// seek shared_ring to new start time
 		// if writer is currently processing a frame, this waits until it has written that frame (or failed on it)
 		ring_->seek(pull_span.start_time());
-		
+								MF_RAND_SLEEP;
 		// set unique request id for the upcoming pull
 		// necessary to determine if a failure in the writer concerned the request that reader was waiting for in
 		// output_pull_().
@@ -252,7 +253,7 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 	
 	
 	MF_RAND_SLEEP;
-	//NodeDebug("continuation notify");
+	NodeDebug("continuation notify");
 	continuation_cv_.notify_one();
 }
 
@@ -269,40 +270,36 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 			pull_span.set_end_time(pull_span.start_time());
 			return pull_result::stopped;
 		}
-		
-		// let the writer process frames
-		// wait until pull_span.duration() frames have become readable in shared_ring,
-		// or writer failure occured, and shared_ring reader break event got sent
+					MF_RAND_SLEEP;
 		
 		//NodeDebug("XXX wait_readable");
+		
+		if(! running_) return pull_result::stopped;
+		
 		ring_->wait_readable(); 				MF_RAND_SLEEP;
+		
+		
+		if(! running_) return pull_result::stopped;
+		
 		//NodeDebug("XXX /wait_readable");
-		if(ring_->readable_duration() >= pull_span.duration()) break;
-		
+		if(ring_->readable_duration() >= pull_span.duration()) break;		
 																				MF_RAND_SLEEP;	
-		// wait_readable got interrupted by reader break event
-		// may be from process failure for this request,
-		// or from the previous request (break coming in late)
+		request_id_type failed_req = failed_request_id_;
 		
-		//NodeDebug("pull -> fail", failed_request_id_, " <?> curr", current_request_id_.load());
-		
-		if(failed_request_id_ != current_request_id_) {
-			NodeDebug("failed request");
-			continue;
+		if(failed_req != -1 && failed_req == current_request_id_) {
+			NodeDebug("failed req: ", (int)failed_request_process_result_);
+			
+				MF_RAND_SLEEP;	
+			
+			process_result process_res = failed_request_process_result_;
+			pull_span.set_end_time(current_time());
+				
+			if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
+			else if(process_res == process_result::handler_failure) return pull_result::fatal_failure;
+			else if(process_res == process_result::end_of_stream) return pull_result::end_of_stream;
+			else if(process_res == process_result::stopped) return pull_result::stopped;
+			else throw std::logic_error("invalid process_result state in failed_request_process_result_");
 		}
-		// in latter case, continue waiting - writer will continue with this request
-																			MF_RAND_SLEEP;
-		// this request has failed...
-		process_result process_res = failed_request_process_result_;
-		pull_span.set_end_time(current_time());
-		
-		//NodeDebug("pull -> fail ", pull_span);
-		
-		if(process_res == process_result::transitory_failure) return pull_result::transitory_failure;
-		else if(process_res == process_result::handler_failure) return pull_result::fatal_failure;
-		else if(process_res == process_result::end_of_stream) return pull_result::end_of_stream;
-		else if(process_res == process_result::stopped) return pull_result::stopped;
-		else throw std::logic_error("invalid process_result state in failed_request_process_result_");
 	}
 	
 	//NodeDebug("pull -> ok ", pull_span);
