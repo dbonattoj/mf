@@ -99,9 +99,10 @@ void async_node::pause_() {
 
 void async_node::thread_main_() {
 	bool pause = false;
+	bool pause_till_notification = false;
 	
 	for(;;) {
-		bool pause_till_notification = false;
+		
 		
 				MF_RAND_SLEEP;
 		if(pause) {
@@ -115,13 +116,13 @@ void async_node::thread_main_() {
 			continuation_cv_.wait(lock, [&] {
 				NodeDebug("continuation waiting");
 MF_DEBUG_EXPR_T("node", (int)current_request_id_, (int)failed_request_id_, ring_->write_start_time(), time_limit_.load());
+				if(! running_) return true;
 
 				if(pause_till_notification) {
 					pause_till_notification = false;
 					return false;
 				}
 
-				if(! running_) return true;
 				return (current_request_id_ != failed_request_id_) && (ring_->write_start_time() < time_limit_);
 			});
 									MF_RAND_SLEEP;
@@ -142,9 +143,9 @@ MF_DEBUG_EXPR_T("node", (int)current_request_id_, (int)failed_request_id_, ring_
 		
 		if(process_res == process_result::should_pause) {
 			pause = true;
-			std::lock_guard<std::mutex> lock(continuation_mutex_);
-			pause_till_notification = true;
-
+		//	pause_till_notification = true;
+			continue;
+			
 		} else if(process_res != process_result::success) {
 			failed_request_process_result_ = process_res;			
 									MF_RAND_SLEEP;
@@ -152,6 +153,8 @@ MF_DEBUG_EXPR_T("node", (int)current_request_id_, (int)failed_request_id_, ring_
 			
 			pause = true;
 		}
+		
+		pause_till_notification = false;
 	}
 	
 	NodeDebug("END");

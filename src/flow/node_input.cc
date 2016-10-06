@@ -19,7 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "node_input.h"
-#include "node_input.h"
+#include "node_graph.h"
 
 namespace mf { namespace flow {
 
@@ -60,6 +60,8 @@ void node_input::pre_pull() {
 
 node::pull_result node_input::pull() {
 	Assert(is_connected());
+	
+	if(this_node().graph().was_stopped()) return node::pull_result::stopped;
 	
 	time_unit t = this_node().current_time();
 	time_span expected_span = current_required_time_span_();

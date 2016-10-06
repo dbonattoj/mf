@@ -175,9 +175,7 @@ SECTION("seek") {
 		REQUIRE(sink->check());
 	}
 	
-	
-	return;
-	
+		
 	SECTION("complex") {
 		INFO(R"(
 		source1' -+--> [-3, +1]pass1 --> [-1, +0]pass2 ------------> merge1' -------------> merge2' --> sink 

@@ -113,8 +113,8 @@ processing_node::handler_result processing_node::handler_process_(processing_nod
 	
 	static std::mutex mut;
 	{
-		std::lock_guard<std::mutex> lock(mut);
-		export_node_graph_visualization(graph(), "gr.gv");
+	//	std::lock_guard<std::mutex> lock(mut);
+	//	export_node_graph_visualization(graph(), "gr.gv");
 	}
 	
 	// Send job start to diagnostic

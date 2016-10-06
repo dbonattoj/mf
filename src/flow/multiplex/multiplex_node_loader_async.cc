@@ -56,7 +56,7 @@ void multiplex_node::async_loader::thread_main_() {
 	}
 	
 	{
-		std::lock_guard<std::shared_timed_mutex> in_lock(input_mutex_);
+	//	std::lock_guard<std::shared_timed_mutex> in_lock(input_mutex_);
 		this_node().unload_input_view_();
 	}
 }
@@ -65,9 +65,11 @@ void multiplex_node::async_loader::thread_main_() {
 void multiplex_node::async_loader::pre_stop() {
 	Assert(this_node().graph().was_stopped());
 	
-	stop_ = true;
+	{
+		std::lock_guard<std::mutex> req_lock(request_mutex_);
+		stop_ = true;
+	}
 	request_cv_.notify_one();
-	input_cv_.notify_all();
 }
 
 
@@ -116,8 +118,10 @@ node::pull_result multiplex_node::async_loader::pull(time_span& span) {
 	}
 	request_cv_.notify_one();
 	
-	input_cv_.wait(in_lock, [&] { return stop_ || ((input_fcs_time_ != -1) && (input_fcs_time_ == request_fcs_time_)); });
+	input_cv_.wait(in_lock, [&] { return (input_pull_result_ == pull_result::stopped) || ((input_fcs_time_ != -1) && (input_fcs_time_ == request_fcs_time_)); });
 	MpxDebug("inwaited req=", request_fcs_time_, "  in=", input_fcs_time_);
+	
+	if(input_pull_result_ == pull_result::stopped) return pull_result::stopped;
 	
 	Assert(input_pull_result_ != pull_result::undefined);
 	

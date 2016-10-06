@@ -4,525 +4,732 @@
 [34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
 [0m[34mcons[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:84, launch]: 
-[0m[34mmpx launch[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [0, 3[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=0  in=-1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [0, 2[[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=0  in=-1 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=0  in=0[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [0, 8[   input: [0, 8[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [0, 3[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [0, 2[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [0, 4[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [0, 4[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [0, 3[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [0, 3[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [1, 5[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [1, 5[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [0, 4[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [2, 6[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [2, 6[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [0, 4[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [3, 7[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [3, 7[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [4, 8[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [4, 8[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [0, 5[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [0, 5[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [5, 9[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=1  in=0[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=1  in=0 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=1  in=1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [0, 9[   input: [0, 9[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [1, 6[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [1, 6[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [5, 9[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [6, 10[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=2  in=1[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=2  in=1 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=2  in=2[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [0, 10[   input: [0, 10[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [6, 10[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [2, 7[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [2, 7[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [7, 11[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=3  in=2[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [3, 8[[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=3  in=2 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=3  in=3[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [0, 11[   input: [0, 11[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [7, 11[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [8, 12[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=6  in=3[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [3, 8[ -> 1[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=6  in=3 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=6  in=6[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [3, 14[   input: [3, 14[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [8, 12[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [4, 9[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [4, 9[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [9, 13[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [9, 13[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [5, 10[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [5, 10[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [6, 11[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [6, 11[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [10, 14[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [10, 14[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [7, 12[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [7, 12[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [11, 15[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=8  in=6[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [8, 13[[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=8  in=6 -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [8, 13[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=8  in=8[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [5, 16[   input: [5, 16[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [11, 15[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [9, 14[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [9, 14[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [10, 15[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [10, 15[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [11, 16[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [11, 16[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [12, 17[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=11  in=8[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=11  in=8 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [12, 16[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [12, 16[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [13, 17[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [13, 17[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [14, 18[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [14, 18[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[35minwaited req=11  in=11[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[35mexpected: [8, 19[   input: [8, 19[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [12, 17[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [13, 18[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [13, 18[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [15, 19[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [15, 19[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [14, 19[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [14, 19[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [16, 20[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=13  in=11[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [15, 20[[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=13  in=11 -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [15, 20[ -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=13  in=13[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [10, 21[   input: [10, 20[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [16, 20[ -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [16, 21[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=17  in=13[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [17, 21[[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=17  in=13 -> 1[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[35minwaited req=17  in=17[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[35mexpected: [14, 25[   input: [14, 20[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [16, 20[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [17, 22[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=18  in=17[0m
-
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=18  in=17 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=18  in=18[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[35minwaited req=18  in=18[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [15, 26[   input: [15, 20[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[35mexpected: [15, 26[   input: [15, 20[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [17, 20[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [17, 20[ -> 5[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [18, 22[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=18  in=18[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [15, 26[   input: [15, 20[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [18, 20[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [17, 22[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=19  in=18[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [19, 23[[0m
-
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=1[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=19  in=18 -> 1[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=19  in=19[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[35minwaited req=19  in=19[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [16, 27[   input: [16, 20[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [19, 20[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[35mexpected: [16, 27[   input: [16, 20[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [17, 20[ -> 5[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [19, 23[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=19  in=19[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [16, 27[   input: [16, 20[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [19, 20[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [17, 22[[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=20  in=19[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [19, 23[[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
 [0m[34mmpx: load input, res=5[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=20  in=19 -> 5[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=20  in=20[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[35minwaited req=20  in=20[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [17, 28[   input: [-1, -1[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [0, 0[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[35mexpected: [17, 28[   input: [-1, -1[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [0, 0[ -> 5[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[35mmpx pull [17, 22[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:102, operator()]: 
-[0m[36mmpx pull [19, 23[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[35minwaited req=20  in=20[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:120, operator()]: 
-[0m[36minwaited req=20  in=20[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[35mexpected: [17, 28[   input: [-1, -1[[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:128, operator()]: 
-[0m[36mexpected: [17, 28[   input: [-1, -1[[0m
-
-[35;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[35mmpx pull [0, 0[ -> 5[0m
-
-[36;1m[src/flow/multiplex/multiplex_node_loader_async.cc:140, pull]: 
-[0m[36mmpx pull [0, 0[ -> 5[0m
-
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:48, thread_main_]: 
-[0m[34minpull req=20  in=20[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
+[0m[34mcons[0m
 
 [34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
-[0m[34mmpx: load input, res=4[0m
+[0m[34mmpx: load input, res=1[0m
 
-[34;1m[src/flow/multiplex/multiplex_node_loader_async.cc:50, thread_main_]: 
-[0m[34minpull req=20  in=20 -> 4[0m
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=5[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
+[0m[34mcons[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=5[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
+[0m[34mcons[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=5[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
+[0m[34mcons[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=5[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
+[0m[34mcons[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=5[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:38, multiplex_node]: 
+[0m[34mcons[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
+
+[34;1m[src/flow/multiplex/multiplex_node.cc:70, load_input_view_]: 
+[0m[34mmpx: load input, res=1[0m
 
