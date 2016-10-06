@@ -24,6 +24,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../node_graph.h"
 #include <utility>
 
+#include "../diagnostic/node_graph_visualization.h"
+#include <mutex>
+
+
 namespace mf { namespace flow {
 
 
@@ -106,6 +110,12 @@ processing_node::handler_result processing_node::handler_process_(processing_nod
 	Assert(handler_ != nullptr);
 	
 	if(is_sink()) std::cout << name() << " process.... " << job.time() << " ................." << std::endl;
+	
+	static std::mutex mut;
+	{
+		std::lock_guard<std::mutex> lock(mut);
+		export_node_graph_visualization(graph(), "gr.gv");
+	}
 	
 	// Send job start to diagnostic
 	if(graph().has_diagnostic())

@@ -18,16 +18,25 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-#include <mf/debug.h>
+#include "os.h"
+#ifndef NDEBUG
+#ifdef MF_OS_LINUX
 
-using namespace mf;
+#include "thread.h"
+#include <pthread.h>
 
-int main(int argc, const char* argv[]) {
-	set_debug_mode(debug_mode::file);
-	set_debug_filter({"node", "mpx", "seek"});
-	set_random_sleep_enabled(false);
+namespace mf {
 
-	return Catch::Session().run(argc, argv);
+void set_thread_name(std::thread& thread, const std::string& name) {
+	std::string truncated_name = name;
+	if(truncated_name.size() > 15)
+		truncated_name = name.substr(0, 15);
+	
+	::pthread_t pthread = thread.native_handle();
+	::pthread_setname_np(pthread, truncated_name.c_str());
 }
+
+}
+
+#endif
+#endif

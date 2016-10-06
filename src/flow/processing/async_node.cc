@@ -20,6 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "async_node.h"
 #include "../node_graph.h"
+#include "../../os/thread.h"
 
 #include <iostream>
 
@@ -53,10 +54,11 @@ void async_node::setup() {
 
 void async_node::launch() {
 	Assert(! running_);
+	running_ = true;
 	thread_ = std::move(std::thread(
 		std::bind(&async_node::thread_main_, this)
 	));
-	running_ = true;
+	set_thread_name(thread_, name() + " writer");
 }
 
 void async_node::pre_stop() {
@@ -99,11 +101,26 @@ void async_node::thread_main_() {
 	bool pause = false;
 	
 	for(;;) {
+		bool pause_till_notification = false;
+		
 				MF_RAND_SLEEP;
 		if(pause) {
 			std::unique_lock<std::mutex> lock(continuation_mutex_);
 			
+			/*while(running_ && !( (current_request_id_ != failed_request_id_) && (ring_->write_start_time() < time_limit_) )) {
+				continuation_cv_.wait(lock);
+			}*/
+			
+			NodeDebug("continuation wait");
 			continuation_cv_.wait(lock, [&] {
+				NodeDebug("continuation waiting");
+MF_DEBUG_EXPR_T("node", (int)current_request_id_, (int)failed_request_id_, ring_->write_start_time(), time_limit_.load());
+
+				if(pause_till_notification) {
+					pause_till_notification = false;
+					return false;
+				}
+
 				if(! running_) return true;
 				return (current_request_id_ != failed_request_id_) && (ring_->write_start_time() < time_limit_);
 			});
@@ -125,7 +142,9 @@ void async_node::thread_main_() {
 		
 		if(process_res == process_result::should_pause) {
 			pause = true;
-			continue;
+			std::lock_guard<std::mutex> lock(continuation_mutex_);
+			pause_till_notification = true;
+
 		} else if(process_res != process_result::success) {
 			failed_request_process_result_ = process_res;			
 									MF_RAND_SLEEP;
@@ -135,15 +154,15 @@ void async_node::thread_main_() {
 		}
 	}
 	
-	//NodeDebug("END");
+	NodeDebug("END");
 }
 
 
 async_node::process_result async_node::process_frame_() {	
 	// Begin writing 1 frame to output buffer
 	// If currently no space in buffer, go to pause state (don't block here instead)
+		
 	auto output_write_handle = ring_->try_write(1);	
-	output_write_handle.set_fail_on_cancel(true);
 	
 	//NodeDebug("p1");
 							MF_RAND_SLEEP;
@@ -162,6 +181,8 @@ async_node::process_result async_node::process_frame_() {
 	// but in output_pre_pull_, reader sets time limit before seeking
 	// writer may notice here that reader wants to seek
 	if(t > time_limit_) return process_result::should_pause;
+	
+	output_write_handle.set_fail_on_cancel(true);
 	
 	//NodeDebug("p3");
 	
@@ -237,7 +258,9 @@ void async_node::output_pre_pull_(const time_span& pull_span) {
 										MF_RAND_SLEEP;
 		// seek shared_ring to new start time
 		// if writer is currently processing a frame, this waits until it has written that frame (or failed on it)
-		ring_->seek(pull_span.start_time());
+		MF_DEBUG_T("seek", "prepull ", pull_span);
+
+		if(pull_span.start_time() != ring_->read_start_time()) ring_->seek(pull_span.start_time());
 								MF_RAND_SLEEP;
 		// set unique request id for the upcoming pull
 		// necessary to determine if a failure in the writer concerned the request that reader was waiting for in
@@ -277,7 +300,7 @@ node::pull_result async_node::output_pull_(time_span& pull_span) {
 		if(! running_) return pull_result::stopped;
 		
 		ring_->wait_readable(); 				MF_RAND_SLEEP;
-		
+	
 		
 		if(! running_) return pull_result::stopped;
 		

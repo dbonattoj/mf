@@ -195,6 +195,12 @@ void node_graph_visualization::generate_multiplex_node_(const multiplex_node& nd
 	html << nd.name();
 	if(nd.is_async()) html << " (async)";
 	else html << " (sync)";
+	
+	html << R"(<BR/><BR/><FONT POINT-SIZE="10">)";
+	time_unit t = nd.current_time();
+	html << "t = " << t;
+	html << R"(</FONT>)";
+	
 	html << R"(</TD>)";
 	html << R"(</TR>)";
 	

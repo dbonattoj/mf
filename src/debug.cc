@@ -121,6 +121,7 @@ namespace detail {
 		std::lock_guard<std::mutex> lock(debug_mutex());	
 			
 		std::fprintf(output, "%sCall Stack Backtrace:\n%s%s", head.c_str(), bt.c_str(), tail.c_str());
+		std::fflush(output);
 	}
 }
 
@@ -154,8 +155,8 @@ void random_sleep() {
 	int r = randint<int>(0, std::numeric_limits<int>::max());
 	int r1 = r % 10;	
 	if(r1 < 4) return;
-	else if(r1 < 6) ::usleep(r % 500);
-	else ::usleep(10000 + r%2000);
+	else if(r1 < 6) ::usleep(r % 50);
+	else ::usleep(1000 + r%200);
 }
 
 

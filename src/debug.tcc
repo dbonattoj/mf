@@ -86,6 +86,7 @@ namespace detail {
 
 		std::lock_guard<std::mutex> lock(debug_mutex());
 		std::fprintf(output, "%s%s%s\n", head.c_str(), str.str().c_str(), tail.c_str());
+		std::fflush(output);
 	}
 	
 	void debug_print_backtrace(const debug_header&, const std::string& bt);

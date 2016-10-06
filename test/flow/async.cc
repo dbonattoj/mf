@@ -33,8 +33,8 @@ constexpr bool async1 = true;
 constexpr bool async2 = true;
 
 TEST_CASE("flow graph test: async", "[flow][async]") {
-	//#include "basic.icc"
-	#include "activation.icc"
-	//#include "seek.icc"
+	#include "basic.icc"
+//	#include "activation.icc"
+//	#include "seek.icc"
 }
 

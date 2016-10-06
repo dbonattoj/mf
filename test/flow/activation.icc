@@ -33,7 +33,7 @@ SECTION("activation") {
 	auto seq_and = expected_frame_index_sequence(act1 && act2);
 	auto seq_or = expected_frame_index_sequence(act1 || act2);
 
-	/*
+
 	SECTION("source -> * sink (on-off...off-on)") {
 		std::vector<int> seq(10, noframe);
 		activation_sequence_type act(false, 10);
@@ -157,10 +157,9 @@ SECTION("activation") {
 		
 		REQUIRE(sink->check());
 	}
-	*/
+
 
 	SECTION("multiplex") {
-		/*
 		SECTION("1") {
 			INFO(R"(
 			source ----> *1 [-3, +1]merge --> sink
@@ -188,7 +187,6 @@ SECTION("activation") {
 			
 			REQUIRE(sink->check());
 		}
-		*/
 
 		SECTION("2") {
 			INFO(R"(
@@ -221,7 +219,7 @@ SECTION("activation") {
 			
 			REQUIRE(sink->check());
 		}
-		return;
+
 		
 		SECTION("3") {
 			INFO(R"(

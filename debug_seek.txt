@@ -1,0 +1,378 @@
+##################################################
+##################################################
+##################################################
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [0, 1[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [0, 1[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [0, 1[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [0, 8[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [0, 1[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [1, 2[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [2, 3[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [3, 4[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [4, 5[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [5, 6[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [6, 7[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [7, 8[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [8, 9[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [1, 2[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [1, 2[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [1, 2[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [0, 9[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [2, 3[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [2, 3[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [9, 10[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [10, 11[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [11, 12[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [2, 3[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [0, 10[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [3, 4[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [3, 4[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [0, 11[[0m
+
+[34;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[34mseeking readable_span=[1, 12[  new_t=0 wait till writer ends[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [4, 5[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [4, 5[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [5, 6[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [5, 6[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [12, 13[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [6, 7[[0m
+
+[33;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[33mseeking readable_span=[5, 6[  new_t=6 wait till writer ends[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [0, 1[[0m
+
+[32;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[32mseeking readable_span=[12, 17[  new_t=0 wait till writer ends[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [3, 4[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [4, 5[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [5, 6[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [6, 7[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [1, 2[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [2, 3[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [3, 4[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [4, 5[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [5, 6[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [6, 7[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [7, 8[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [8, 9[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [9, 10[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [10, 11[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [11, 12[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [12, 13[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [13, 14[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [3, 14[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [14, 15[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [6, 7[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [15, 16[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [7, 8[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [7, 8[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [8, 9[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [8, 9[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [7, 8[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [16, 17[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [9, 10[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [9, 10[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [17, 18[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [8, 9[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [18, 19[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [9, 10[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [19, 20[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [5, 16[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [10, 11[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [10, 11[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [11, 12[[0m
+
+[33;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[33mseeking readable_span=[10, 11[  new_t=11 wait till writer ends[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [10, 11[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [11, 12[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [8, 19[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [11, 12[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [12, 13[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [12, 13[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [12, 13[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [13, 14[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [10, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [13, 14[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [13, 14[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [14, 15[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [14, 15[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [14, 15[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [15, 16[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [15, 16[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [15, 16[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [16, 17[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [16, 17[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [16, 17[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [17, 18[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [17, 18[[0m
+
+[33;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[33mseeking readable_span=[16, 17[  new_t=17 wait till writer ends[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [17, 18[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [14, 25[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [18, 19[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [18, 19[[0m
+
+[33;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[33mseeking readable_span=[17, 18[  new_t=18 wait till writer ends[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [15, 26[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [18, 19[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [19, 20[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [19, 20[[0m
+
+[33;1m[src/queue/shared_ring.cc:291, seek]: 
+[0m[33mseeking readable_span=[18, 19[  new_t=19 wait till writer ends[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [16, 27[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [19, 20[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [20, 21[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [17, 28[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [20, 21[[0m
+
+[32;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[32mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [20, 21[[0m
+
+[33;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[33mprepull [20, 21[[0m
+
+[34;1m[src/flow/processing/async_node.cc:261, output_pre_pull_]: 
+[0m[34mprepull [17, 28[[0m
+

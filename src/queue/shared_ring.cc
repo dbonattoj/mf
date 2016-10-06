@@ -288,6 +288,8 @@ void shared_ring::seek(time_unit t) {
 		// allow writer to write its frames
 		// works because end_write sets writer_state_ before notifying readable_cv_
 				
+		MF_DEBUG_T("seek", "seeking readable_span=",ring_.readable_time_span(),"  new_t=",t," wait till writer ends" );
+
 		while(writer_state_ == accessing) readable_cv_.wait(lock);
 		// mutex is now locked again
 		// writer now idle, or waiting if it started another begin_write() in meantime
@@ -331,6 +333,10 @@ time_unit shared_ring::write_start_time() const {
 
 time_unit shared_ring::read_start_time() const {
 	// use atomic member, instead of non-atomic ring_.read_start_time()
+	
+	std::lock_guard<std::mutex> lock(mutex_);
+	return ring_.read_start_time();
+	
 	return read_start_time_;
 }
 

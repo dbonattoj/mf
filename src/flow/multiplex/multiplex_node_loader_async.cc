@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../node_graph.h"
 #include <utility>
 #include <functional>
+#include "../../os/thread.h"
 
 namespace mf { namespace flow {
 
@@ -37,9 +38,10 @@ multiplex_node::async_loader::~async_loader() {
 
 void multiplex_node::async_loader::thread_main_() {
 	for(;;) {
-		std::unique_lock<std::mutex> lock(request_mutex_);
-	
-		request_cv_.wait(lock, [&] { return stop_ || (input_fcs_time_ != request_fcs_time_); });
+		{
+			std::unique_lock<std::mutex> lock(request_mutex_);
+			request_cv_.wait(lock, [&] { return stop_ || (input_fcs_time_ != request_fcs_time_); });
+		}
 		
 		{
 			std::lock_guard<std::shared_timed_mutex> in_lock(input_mutex_);
@@ -83,6 +85,7 @@ void multiplex_node::async_loader::launch() {
 	thread_ = std::move(std::thread(
 		std::bind(&multiplex_node::async_loader::thread_main_, this)
 	));
+	set_thread_name(thread_, "mpx writer");
 }
 
 
