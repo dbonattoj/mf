@@ -28,6 +28,8 @@ namespace mf {
 
 void set_thread_name(std::thread&, const std::string& name);
 
+std::string get_thread_name(std::thread&);
+
 }
 
 #endif

@@ -111,12 +111,6 @@ processing_node::handler_result processing_node::handler_process_(processing_nod
 	
 	if(is_sink()) std::cout << name() << " process.... " << job.time() << " ................." << std::endl;
 	
-	static std::mutex mut;
-	{
-	//	std::lock_guard<std::mutex> lock(mut);
-	//	export_node_graph_visualization(graph(), "gr.gv");
-	}
-	
 	// Send job start to diagnostic
 	if(graph().has_diagnostic())
 		graph().diagnostic().processing_node_job_started(*this, job.time());

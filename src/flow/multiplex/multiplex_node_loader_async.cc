@@ -45,9 +45,7 @@ void multiplex_node::async_loader::thread_main_() {
 		
 		{
 			std::lock_guard<std::shared_timed_mutex> in_lock(input_mutex_);
-			MpxDebug("inpull req=", request_fcs_time_, "  in=", input_fcs_time_);
 			input_pull_result_ = this_node().load_input_view_(request_fcs_time_);
-			MpxDebug("inpull req=", request_fcs_time_, "  in=", input_fcs_time_, " -> ", (int)input_pull_result_);
 			input_fcs_time_ = request_fcs_time_;
 		}
 		input_cv_.notify_all();
@@ -83,7 +81,6 @@ void multiplex_node::async_loader::stop() {
 
 
 void multiplex_node::async_loader::launch() {
-	MpxDebug("mpx launch");
 	thread_ = std::move(std::thread(
 		std::bind(&multiplex_node::async_loader::thread_main_, this)
 	));
@@ -99,10 +96,6 @@ void multiplex_node::async_loader::pre_pull(time_span span) {
 
 
 node::pull_result multiplex_node::async_loader::pull(time_span& span) {	
-	auto func=[&]{
-		
-	MpxDebug("mpx pull ", span);
-	
 	std::shared_lock<std::shared_timed_mutex> in_lock(input_mutex_);
 	
 	if(input_pull_result_ == pull_result::success || input_pull_result_ == pull_result::end_of_stream)
@@ -118,8 +111,10 @@ node::pull_result multiplex_node::async_loader::pull(time_span& span) {
 	}
 	request_cv_.notify_one();
 	
-	input_cv_.wait(in_lock, [&] { return (input_pull_result_ == pull_result::stopped) || ((input_fcs_time_ != -1) && (input_fcs_time_ == request_fcs_time_)); });
-	MpxDebug("inwaited req=", request_fcs_time_, "  in=", input_fcs_time_);
+	input_cv_.wait(in_lock, [&] {
+		if(input_pull_result_ == pull_result::stopped) return true;
+		else return ((input_fcs_time_ != -1) && (input_fcs_time_ == request_fcs_time_));
+	});
 	
 	if(input_pull_result_ == pull_result::stopped) return pull_result::stopped;
 	
@@ -129,7 +124,6 @@ node::pull_result multiplex_node::async_loader::pull(time_span& span) {
 	expected_input_span = this_node().expected_input_span_(input_fcs_time_);
 
 	if(input_pull_result_ == pull_result::success || input_pull_result_ == pull_result::end_of_stream) {
-		MpxDebug("expected: ", expected_input_span, "   input: ", input_span);
 		//Assert(expected_input_span.start_time() == input_span.start_time());
 		time_span requested_span = span;
 		span = span_intersection(input_span, span);
@@ -140,8 +134,6 @@ node::pull_result multiplex_node::async_loader::pull(time_span& span) {
 		span.set_end_time(span.start_time());
 		return input_pull_result_;
 	}
-	
-	};auto res=func();MpxDebug("mpx pull ", span, " -> ", (int)res);return res;
 }
 
 

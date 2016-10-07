@@ -35,7 +35,6 @@ multiplex_node::multiplex_node(node_graph& gr) : base(gr) {
 	static int i = 0;
 	i++;
 	set_name("multiplex "+std::to_string(i));
-	MpxDebug("cons");
 }
 
 
@@ -66,9 +65,7 @@ node::pull_result multiplex_node::load_input_view_(time_unit successor_time) {
 	// multiplex_node_output.pre_pull starts this, multiplex_node_output.pull waits until it is finished
 	input().pre_pull();
 	pull_result result = input().pull();
-	
-	MpxDebug("mpx: load input, res=", (int)result);
-	
+		
 	if(result == pull_result::success) {
 		timed_frame_array_view vw = input().begin_read_frame();
 		if(vw.is_null()) result = pull_result::transitory_failure;

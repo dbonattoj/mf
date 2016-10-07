@@ -1,3 +1,4 @@
+#if 0
 #ifndef MF_FLOW_REALTIME_GATE_NODE_H_
 #define MF_FLOW_REALTIME_GATE_NODE_H_
 
@@ -33,10 +34,14 @@ class realtime_gate_node : public node_derived<node_input, realtime_gate_node_ou
 	// realtime
 
 private:
+	using frame_buffer_type = ndarray_opaque<0>;
+
 	std::thread thread_;
-	ndarray_opaque<0> loaded_frame_;
-	ndarray_opaque<0> outputted_frame_;
+	frame_buffer_type loaded_frame_;
+	frame_buffer_type outputted_frame_;
 	std::mutex mutex_;
+	
+	clock_time_point launch_clock_time_;
 	
 	void thread_main_();
 	void load_new_frame_();
@@ -51,18 +56,24 @@ private:
 public:
 	explicit realtime_gate_node(node_graph&);
 
-	time_unit minimal_offset_to(const node&) const override;
-	time_unit maximal_offset_to(const node&) const override;
+	time_unit minimal_offset_to(const node&) const override { throw 1; }
+	time_unit maximal_offset_to(const node&) const override { throw 1; }
 	
-	node_input& input();
-	const node_input& input() const;
-	realtime_gate_node_output& output();
-	const realtime_gate_node_output& output() const;
+	input_type& input() { return input_at(0); }
+	const input_type& input() const { return input_at(0); }
+	output_type& output() { return output_at(0); }
+	const output_type& output() const { return output_at(0); }
 
 	void launch() override;
+	void pre_stop() override;
 	void stop() override;
 	void pre_setup() override;
 	void setup() override;
+	
+	void output_pre_pull_(const time_span&);
+	node::pull_result output_pull_(time_span& span);
+	node_frame_window_view output_begin_read_(time_unit duration);
+	void output_end_read_(time_unit duration);
 };
 
 
@@ -76,4 +87,5 @@ inline const realtime_gate_node& realtime_gate_node_output::this_node() const {
 
 }}
 
+#endif
 #endif

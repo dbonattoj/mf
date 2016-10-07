@@ -8,16 +8,19 @@ new (august/september)
 
 
 FLOW
-- opencl node?
+GPU memory buffers,
+opencl, opengl interface
+(opencl = context setup, kernel compilation, etc handled by fw)
 
+formal model of async
+
+stop: not global state, instead propagate from sink to sources (like pull)
+
+real-time gate =
 - real time, push from source
 - index --> actual time units (seconds)
 - nodes not 1:1 (skip frames / add frames)
-- shared object (=> also in GPU memory)
 
-- high level graph class with:
-  - parse graph+node+filter params from file
-  - sub-graph (-> composite node)
 
 
 
@@ -33,3 +36,13 @@ DETAILS
 - view, time_span, etc: 0 length test
 
 - error handling conventions (assert, assert_crit, exceptions, errors, etc)
+
+
+
+MAYBE
+- shared object (=> also in GPU memory)
+- high level graph class with:
+  - parse graph+node+filter params from file
+  - sub-graph (-> composite node)
+- JSON configuration reader integrated in fw
+

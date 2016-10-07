@@ -81,7 +81,8 @@ public:
 		Eigen_vec3 p(c[0], c[1], depth);
 		return (image_to_world_ * p.homogeneous()).eval().hnormalized();
 	}
-	
+
+
 	Eigen_mat3 intrinsic_matrix() const;
 	const Eigen_mat4& intrinsic_matrix_with_depth() const { return view_to_image_.matrix(); }
 	

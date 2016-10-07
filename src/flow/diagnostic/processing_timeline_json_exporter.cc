@@ -80,7 +80,7 @@ void processing_timeline_json_exporter::generate(std::ostream& out) {
 		
 		std::string node_type;
 		if(is_sync_node(nd)) node_type = "sync";
-		//else if(is_async_node(nd)) node_type = "async";
+		else if(is_async_node(nd)) node_type = "async";
 		else if(is_sink_node(nd)) node_type = "sink";
 		Assert(! node_type.empty());
 		

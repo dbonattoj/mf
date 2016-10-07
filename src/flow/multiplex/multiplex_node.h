@@ -25,8 +25,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../node_input.h"
 #include "../node_output.h"
 
-#define MpxDebug(...) MF_DEBUG_T("mpx", __VA_ARGS__)
-
 namespace mf { namespace flow {
 
 class node_graph;
@@ -43,7 +41,7 @@ public:
 	multiplex_node_output(node& nd, std::ptrdiff_t input_channel_index);
 	
 	std::size_t channels_count() const noexcept override;
-	std::string channel_name_at(std::ptrdiff_t i) const override;
+	std::string channel_name_at(std::ptrdiff_t index) const override;
 	
 	void pre_pull(const time_span&) override;
 	node::pull_result pull(time_span& span) override;

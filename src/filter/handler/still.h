@@ -18,31 +18,37 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "os.h"
-#ifdef MF_OS_LINUX
+#ifndef MF_STILL_FILTER_H_
+#define MF_STILL_FILTER_H_
 
-#include "thread.h"
-#include <pthread.h>
+#include <utility>
+#include "../filter_handler.h"
 
-namespace mf {
+namespace mf { namespace flow {
 
-void set_thread_name(std::thread& thread, const std::string& name) {
-	std::string truncated_name = name;
-	if(truncated_name.size() > 15)
-		truncated_name = name.substr(0, 15);
+template<std::size_t Dim, typename Elem>
+class still_source : public filter_handler {
+private:
+	ndarray<Dim, Elem> frame_;
+
+public:
+	output_type<Dim, typename Elem> output;
 	
-	::pthread_t pthread = thread.native_handle();
-	::pthread_setname_np(pthread, truncated_name.c_str());
-}
+	explicit still_source(filter& filt, const ndarray_view<Dim, Elem>& vw) :
+		filter_handler(filt),
+		frame_(vw) { }
+	
+	void setup() override {
+		output.define_frame_shape(frame_.shape());
+	}
+		
+	void process(job_type& job) override {
+		job.out(output) = frame_;
+	}
+};
 
 
-std::string get_thread_name(std::thread& thread) {
-	::pthread_t pthread = thread.native_handle();
-	char buffer[16];
-	::pthread_getname_np(pthread, buffer, sizeof(buffer));
-	return std::string(buffer);
-}
 
-}
+}}
 
 #endif
