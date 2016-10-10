@@ -23,33 +23,32 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 	
-view_frustum::view_frustum(const Eigen_mat4& mat, const depth_projection_parameters& dparam) :
-	view_projection_transformation_(mat),
-	depth_parameters_(dparam)
-{
-	if(! dparam.valid()) throw std::invalid_argument("depth projection parameters not valid");
-}
+view_frustum::view_frustum(const pose& ps, const Eigen_mat4& proj_mat) :
+	matrix_(proj_mat * ps.transformation_from_world().matrix()) { }
+
+
+view_frustum::view_frustum(const Eigen_mat4& mat) :
+	matrix_(mat) { }
 
 
 Eigen_hyperplane3 view_frustum::near_plane() const {
-	const Eigen_mat4& m = matrix_();
+	const Eigen_mat4& m = matrix_;
 	real a = m(2, 0);
 	real b = m(2, 1);
 	real c = m(2, 2);
 	real d = m(2, 3);
-	if(depth_parameters_.range == depth_projection_parameters::signed_normalized) {
-		a += m(3, 0);
-		b += m(3, 1);
-		c += m(3, 2);
-		d += m(3, 3);
-	}
-	// TODO orientation of plane
+
+	a += m(3, 0);
+	b += m(3, 1);
+	c += m(3, 2);
+	d += m(3, 3);
+
 	return Eigen_hyperplane3(Eigen_vec3(a, b, c), d);
 }
 
 
 Eigen_hyperplane3 view_frustum::far_plane() const {
-	const Eigen_mat4& m = matrix_();
+	const Eigen_mat4& m = matrix_;
 	real a = m(3, 0) - m(2, 0);
 	real b = m(3, 1) - m(2, 1);
 	real c = m(3, 2) - m(2, 2);
@@ -59,7 +58,7 @@ Eigen_hyperplane3 view_frustum::far_plane() const {
 
 
 Eigen_hyperplane3 view_frustum::left_plane() const {
-	const Eigen_mat4& m = matrix_();
+	const Eigen_mat4& m = matrix_;
 	real a = m(3, 0) + m(0, 0);
 	real b = m(3, 1) + m(0, 1);
 	real c = m(3, 2) + m(0, 2);
@@ -69,7 +68,7 @@ Eigen_hyperplane3 view_frustum::left_plane() const {
 
 
 Eigen_hyperplane3 view_frustum::right_plane() const {
-	const Eigen_mat4& m = matrix_();
+	const Eigen_mat4& m = matrix_;
 	real a = m(3, 0) - m(0, 0);
 	real b = m(3, 1) - m(0, 1);
 	real c = m(3, 2) - m(0, 2);
@@ -79,7 +78,7 @@ Eigen_hyperplane3 view_frustum::right_plane() const {
 
 
 Eigen_hyperplane3 view_frustum::bottom_plane() const {
-	const Eigen_mat4& m = matrix_();
+	const Eigen_mat4& m = matrix_;
 	real a = m(3, 0) + m(1, 0);
 	real b = m(3, 1) + m(1, 1);
 	real c = m(3, 2) + m(1, 2);
@@ -89,7 +88,7 @@ Eigen_hyperplane3 view_frustum::bottom_plane() const {
 
 
 Eigen_hyperplane3 view_frustum::top_plane() const {
-	const Eigen_mat4& m = matrix_();
+	const Eigen_mat4& m = matrix_;
 	real a = m(3, 0) - m(1, 0);
 	real b = m(3, 1) - m(1, 1);
 	real c = m(3, 2) - m(1, 2);
@@ -111,19 +110,17 @@ auto view_frustum::planes() const -> planes_array {
 
 
 auto view_frustum::corners() const -> corners_array {
-	Eigen_projective3 view_projection_inv = view_projection_transformation_.inverse();
-	
-	real n = (depth_parameters_.range == depth_projection_parameters::signed_normalized ? -1.0 : 0.0);
+	Eigen_mat4 view_projection_inv = matrix_.inverse();
 	
 	std::array<Eigen_vec3, 8> corn {
-		Eigen_vec3(-1.0, -1.0, n),
-		Eigen_vec3(-1.0, +1.0, n),
-		Eigen_vec3(-1.0, +1.0, 1.0),
-		Eigen_vec3(-1.0, -1.0, 1.0),
-		Eigen_vec3(+1.0, -1.0, n),
-		Eigen_vec3(+1.0, +1.0, n),
-		Eigen_vec3(+1.0, +1.0, 1.0),
-		Eigen_vec3(+1.0, -1.0, 1.0),
+		Eigen_vec3(-1, -1, -1),
+		Eigen_vec3(-1, +1, -1),
+		Eigen_vec3(-1, +1, +1),
+		Eigen_vec3(-1, -1, +1),
+		Eigen_vec3(+1, -1, -1),
+		Eigen_vec3(+1, +1, -1),
+		Eigen_vec3(+1, +1, +1),
+		Eigen_vec3(+1, -1, +1),
 	};
 	
 	for(Eigen_vec3& p : corn)
@@ -159,7 +156,7 @@ auto view_frustum::edges() const -> edges_array {
 
 
 bool view_frustum::contains(const Eigen_vec3& world_point, bool consider_z_planes) const {
-	Eigen_vec3 projected_point = (view_projection_transformation_ * world_point.homogeneous()).eval().hnormalized();
+	Eigen_vec3 projected_point = (matrix_ * world_point.homogeneous()).eval().hnormalized();
 	if(projected_point[0] < -1.0 || projected_point[0] > 1.0) return false;
 	if(projected_point[1] < -1.0 || projected_point[1] > 1.0) return false;
 	if(consider_z_planes && (projected_point[2] < 0.0 || projected_point[2] > 1.0)) return false;
@@ -194,7 +191,7 @@ auto view_frustum::contains(const planes_array& fr_planes, const bounding_box& b
 
 
 view_frustum view_frustum::transform(const Eigen_affine3& trans) const{
-	return view_frustum((view_projection_transformation_ * trans).matrix(), depth_parameters_);
+	return view_frustum(Eigen_mat4(matrix_ * trans.matrix()));
 }
 
 

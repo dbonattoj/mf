@@ -28,4 +28,50 @@ bool depth_projection_parameters::valid() const {
 	return true;
 }
 
+
+real depth_projection_parameters::offset() const {
+	real divident = (d_far * z_far) - (d_near * z_near);
+	return divident / (z_far - z_near);
+}
+
+
+real depth_projection_parameters::factor() const {
+	real divident = (d_near - d_far) * z_near * z_far;
+	return divident / (z_far - z_near);
+}
+
+
+real depth_projection_parameters::depth(orthogonal_distance_type z) const {
+	if(flip_z) z = -z;
+	return offset() + factor()/z;
+}
+
+
+real depth_projection_parameters::orthogonal_distance(depth_type d) const {
+	real z = factor() / (d - offset());
+	return (flip_z ? -z : z);
+}
+
+
+///////////////
+
+depth_projection_parameters depth_projection_parameters::unsigned_normalized_disparity
+(orthogonal_distance_type z_near, orthogonal_distance_type z_far) {
+	depth_projection_parameters dparam;
+	dparam.d_near = 1.0;
+	dparam.d_far = 0.0;
+	if(z_near > 0.0) {
+		dparam.z_near = z_near;
+		dparam.z_far = z_far;
+		dparam.flip_z = false;
+	} else {
+		dparam.z_near = -z_near;
+		dparam.z_far = -z_far;
+		dparam.flip_z = true;
+	}
+	Assert(dparam.valid());
+	return dparam;
+}
+
+
 }

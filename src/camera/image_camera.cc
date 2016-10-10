@@ -26,22 +26,22 @@ image_camera::image_camera(const ndsize<2>& sz) :
 	image_size_(sz) { }
 
 
+void image_camera::set_image_size_(ndsize<2> sz) {
+	image_size_ = sz;
+}
+
+
+ndsize<2> image_camera::scaled_image_size(ndsize<2> shape, real factor) {
+	return make_ndsize(
+		factor * shape[0],
+		factor * shape[1]
+	);
+}
+
+
 real image_camera::image_aspect_ratio() const {
 	return static_cast<real>(image_size_[0]) / static_cast<real>(image_size_[1]);
 }
-
-
-void image_camera::set_image_width(std::size_t imw) {
-	image_size_[1] = imw / image_aspect_ratio();
-	image_size_[0] = imw;
-}
-
-
-void image_camera::set_image_height(std::size_t imh) {
-	image_size_[0] = image_aspect_ratio() * imh;
-	image_size_[1] = imh;
-}
-
 
 void image_camera::flip_pixel_coordinates() {
 	image_size_ = flip(image_size_);

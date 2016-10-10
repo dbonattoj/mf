@@ -23,18 +23,44 @@ namespace mf {
 template<typename Depth>
 projection_image_camera<Depth>::projection_image_camera(const projection_camera& cam, ndsize<2> image_size) :
 	projection_camera(cam),
-	depth_image_camera<Depth>(
+	depth_image_camera_base(
 		image_size,
-		cam.depth_parameters().depth_min(),
-		cam.depth_parameters().depth_max() - cam.depth_parameters().depth_min()
+		cam.depth_parameters().d_near,
+		cam.depth_parameters().d_far - cam.depth_parameters().d_near
 	) { }
 
 
 template<typename Depth>
-projection_image_camera<Depth>::projection_image_camera
-(const pose& ps, const Eigen_mat3& intr, const depth_projection_parameters& dproj, const ndsize<2>& sz) :
-	projection_camera(ps, intr, dproj, sz),
-	depth_image_camera<Depth>(sz, dproj.depth_min(), dproj.depth_max() - dproj.depth_min()) { }
+void projection_image_camera<Depth>::scale(real factor) {
+	const ndsize<2>& image_size = depth_image_camera_base::image_size();
+	ndsize<2> scaled_image_size = make_ndsize(factor * image_size[0], factor * image_size[1]);
+
+	projection_camera::scale(factor);
+	depth_image_camera_base::set_image_size_(scaled_image_size);
+}
+
+
+template<typename Depth>
+void projection_image_camera<Depth>::set_image_width(std::size_t imw) {
+	const ndsize<2>& image_size = depth_image_camera_base::image_size();
+	real factor = static_cast<real>(imw) / image_size[0];
+	ndsize<2> scaled_image_size = image_camera::scaled_image_size(image_size, factor);
+
+
+	projection_camera::scale(factor);
+	depth_image_camera_base::set_image_size_(scaled_image_size);
+}
+
+
+template<typename Depth>
+void projection_image_camera<Depth>::set_image_height(std::size_t imh) {
+	const ndsize<2>& image_size = depth_image_camera_base::image_size();
+	real factor = static_cast<real>(imh) / image_size[1];
+	ndsize<2> scaled_image_size = image_camera::scaled_image_size(image_size, factor);
+	
+	projection_camera::scale(factor);
+	depth_image_camera_base::set_image_size_(scaled_image_size);
+}
 
 
 }

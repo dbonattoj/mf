@@ -28,17 +28,17 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <array>
 
 namespace mf {
-
+	
+class depth_projection_parameters;
 
 /// View frustum of a perspective camera, without pose.
-/** Frustum apex is at origin, axis-aligned, and pointing in -Z or +Z direction depending on depth projection parameter.
- ** Can be creates for perspective projection. */
+/** Frustum apex is at camera center, axis-aligned, and pointing in +Z or -Z direction.
+ ** Can be created for perspective projection. */
 class projection_view_frustum : public view_frustum {
 private:
-	projection_view_frustum(const Eigen_mat4& mat, const depth_projection_parameters& conv) :
-		view_frustum(mat, conv) { }
+	projection_view_frustum(const Eigen_mat4& mat) : view_frustum(pose(), mat) { }
 
-	static std::array<real, 3> depth_components_(const depth_projection_parameters&);
+	static depth_projection_parameters depth_projection_(real z_near, real z_far);
 
 public:
 	using distance_pair = std::pair<real, real>;
@@ -46,30 +46,30 @@ public:
 	
 	/// Create with symmetric perspective, given width and height of near clipping plane.
 	static projection_view_frustum symmetric_perspective
-		(real near_width, real near_height, const depth_projection_parameters&);
+		(real near_width, real near_height, real z_near, real z_far);
 		
 	/// Create with symmetric perspective, given horizontal and vertical field of view angles.
 	static projection_view_frustum symmetric_perspective_fov
-		(angle near_width, angle near_height, const depth_projection_parameters&);
+		(angle near_width, angle near_height, real z_near, real z_far);
 	
 	/// Create with symmetric perspective, given horizontal field of view and image aspect ratio.
 	static projection_view_frustum symmetric_perspective_fov_x
-		(angle near_width, real aspect_ratio, const depth_projection_parameters&);
+		(angle near_width, real aspect_ratio, real z_near, real z_far);
 
 	/// Create with symmetric perspective, given vertical field of view and image aspect ratio.		
 	static projection_view_frustum symmetric_perspective_fov_y
-		(angle near_height, real aspect_ratio, const depth_projection_parameters&);
+		(angle near_height, real aspect_ratio, real z_near, real z_far);
 	
 	/// Create with asymmetric perspective, given horizontal and vertical ranges of near clipping plane.		
 	static projection_view_frustum asymmetric_perspective
-		(distance_pair near_x, distance_pair near_y, const depth_projection_parameters&);
+		(distance_pair near_x, distance_pair near_y, real z_near, real z_far);
 
 	/// Create with asymmetric perspective, given horizontal and vertical limit angles of field of view.		
 	static projection_view_frustum asymmetric_perspective_fov
-		(angle_pair near_x, angle_pair near_y, const depth_projection_parameters&);	
+		(angle_pair near_x, angle_pair near_y, real z_near, real z_far);	
 	
-	const Eigen_projective3& projection_transformation() const {
-		return view_frustum::view_projection_transformation();
+	const Eigen_mat4& projection_matrix() const {
+		return view_frustum::view_projection_matrix();
 	}
 	
 	real aspect_ratio() const;
@@ -80,7 +80,6 @@ public:
 	void adjust_fov_x_to_aspect_ratio(real aspect_ratio);
 	void adjust_fov_y_to_aspect_ratio(real aspect_ratio);
 };
-// TODO add orthogonal projection if needed
 
 }
 

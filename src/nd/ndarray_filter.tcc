@@ -29,7 +29,7 @@ kernel_placement<Dim, Elem, Kernel_elem> place_kernel_at(
 	const ndarray_view<Dim, Kernel_elem> kernel,
 	const ndptrdiff<Dim>& pos
 ) {
-	for(std::ptrdiff_t i = 0; i < Dim; ++i) MF_EXPECTS(is_odd(kernel.shape()[i]));
+	for(std::ptrdiff_t i = 0; i < Dim; ++i) Assert_crit(is_odd(kernel.shape()[i]));
 	
 	kernel_placement<Dim, Elem, Kernel_elem> placement;
 	placement.absolute_position = pos;
@@ -62,7 +62,7 @@ void apply_kernel(
 	const ndarray_view<Dim, Out_elem>& out_view,
 	const ndarray_view<Dim, Kernel_elem> kernel
 ) {
-	Expects_crit(in_view.shape() == out_view.shape());
+	Assert_crit(in_view.shape() == out_view.shape());
 	
 	for(auto it = out_view.begin(); it != out_view.end(); ++it) {
 		auto pos = it.coordinates();

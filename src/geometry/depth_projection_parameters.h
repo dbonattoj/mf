@@ -25,26 +25,36 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Parameters of Z to depth projection.
-/** Defines how the Z coordinates in view space are mapped to depth values in image space. For points in the direction
- ** of camera depth is always positive, and increases with distance to camera. When view space coordinate system is
- ** right-handed (camera looks at -Z), `flip_z` needs to be set. */
+/// Parameters of depth projection for projection camera.
+/** Defines bijective mapping between orthogonal distance `z` of point (e.g. Z coordinate in camera view space), and
+ ** projected depth `d`, of the form: `d = offset + factor/z`, or `d = -(offset - factor/z)` if `flip_z` is set.
+ ** `offset` and `factor` are constants, and set such that `depth(z_near) == d_near` and `depth(z_far) == d_far`. */
 struct depth_projection_parameters {
-	enum depth_range {
-		signed_normalized,   ///< Depths of points within frustum are in [-1, +1] (OpenGL convention).
-		unsigned_normalized, ///< Depths of points within frustum are in [0, 1] (DirectX convention).
-		unsigned_normalized_disparity
-	};
+	using depth_type = real;
+	using orthogonal_distance_type = real;
+	
+	depth_type d_near = 0.0; ///< Depth value to which z_near should be mapped.
+	depth_type d_far = 1.0; ///< Depth value to which z_far should be mapped.
 
-	real z_near; ///< Unsigned Z distance of near clipping plane to camera.
-	real z_far;	///< Unsigned Z distance of far clipping plane to camera.
-	depth_range range = unsigned_normalized; ///< Specifies range of depth values for points in frustum.
+	orthogonal_distance_type z_near = 0.0; ///< Unsigned orthogonal distance of near clipping plane to camera.
+	orthogonal_distance_type z_far = 0.0;	///< Unsigned orthogonal distance of far clipping plane to camera.
+
 	bool flip_z = true; ///< Whether Z axis needs to be reversed, i.e. -Z direction maps to positive depth.
 	
-	bool valid() const;
+	/////
 	
-	real depth_min() const { return (range == signed_normalized ? -1.0 : 0.0); }
-	real depth_max() const { return 1.0; }
+	bool valid() const;
+		
+	real offset() const;
+	real factor() const;
+	
+	real depth(orthogonal_distance_type) const;
+	real orthogonal_distance(depth_type) const;
+	
+	/////
+	
+	static depth_projection_parameters unsigned_normalized_disparity
+		(orthogonal_distance_type z_near, orthogonal_distance_type z_far);
 };
 
 }

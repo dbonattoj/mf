@@ -19,6 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "projection_view_frustum.h"
+#include "depth_projection_parameters.h"
 #include <array>
 #include <cmath>
 #include <stdexcept>
@@ -27,142 +28,126 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../eigen.h"
 
 namespace mf {
-
-
-std::array<real, 3> projection_view_frustum::depth_components_(const depth_projection_parameters& dparam) {
-	std::array<real, 3> components;
-	real z_diff = dparam.z_far - dparam.z_near;
 	
-	switch(dparam.range) {
-	case depth_projection_parameters::signed_normalized:
-		components[0] = (dparam.z_far + dparam.z_near)/z_diff;
-		components[1] = -(2.0 * dparam.z_far * dparam.z_near)/z_diff;
-		break;
-	case depth_projection_parameters::unsigned_normalized:
-		components[0] = dparam.z_far/z_diff;
-		components[1] = -(dparam.z_far * dparam.z_near)/z_diff;
-		break;
-	case depth_projection_parameters::unsigned_normalized_disparity:
-		components[0] = -dparam.z_near/z_diff;
-		components[1] = (dparam.z_far * dparam.z_near)/z_diff;
+	
+depth_projection_parameters projection_view_frustum::depth_projection_(real z_near, real z_far) {
+	depth_projection_parameters dparam;
+	dparam.d_near = 0.0;
+	dparam.d_far = 1.0;
+	if(z_near > 0.0) {
+		dparam.z_near = z_near;
+		dparam.z_far = z_far;
+		dparam.flip_z = false;
+	} else {
+		dparam.z_near = -z_near;
+		dparam.z_far = -z_far;
+		dparam.flip_z = true;
 	}
-	
-	components[2] = 1.0;	
-	if(dparam.flip_z) {
-		components[0] = -components[0];
-		components[2] = -components[2];
-	}
-	
-	return components;
-}	
+	return dparam;
+}
 
 
 projection_view_frustum projection_view_frustum::symmetric_perspective
-(real near_width, real near_height, const depth_projection_parameters& dparam) {
+(real near_width, real near_height, real z_near, real z_far) {
+	depth_projection_parameters dparam = depth_projection_(z_near, z_far);
 	real two_nz = 2.0 * dparam.z_near;
-	real x_diff = near_width;
-	real y_diff = near_height;
-
-	auto dcomp = depth_components_(dparam);
 
 	Eigen_mat4 mat; mat <<
 		two_nz / near_width, 0.0, 0.0, 0.0,
 		0.0, two_nz / near_height, 0.0, 0.0,
-		0.0, 0.0, dcomp[0], dcomp[1],
-		0.0, 0.0, dcomp[2], 0.0;
+		0.0, 0.0, dparam.offset(), dparam.factor(),
+		0.0, 0.0, (dparam.flip_z ? -1.0 : 1.0), 0.0;
 				
-	return projection_view_frustum(mat, dparam);
+	return projection_view_frustum(mat);
 }
 
 
 projection_view_frustum projection_view_frustum::symmetric_perspective_fov
-(angle near_width, angle near_height, const depth_projection_parameters& dparam) {
-	real z_diff = dparam.z_far - dparam.z_near;
-	auto dcomp = depth_components_(dparam);
+(angle near_width, angle near_height, real z_near, real z_far) {
+	depth_projection_parameters dparam = depth_projection_(z_near, z_far);
 
 	Eigen_mat4 mat; mat <<
 		std::tan(half_pi - near_width), 0.0, 0.0, 0.0,
 		0.0, std::tan(half_pi - near_height), 0.0, 0.0,
-		0.0, 0.0, dcomp[0], dcomp[1],
-		0.0, 0.0, dcomp[2], 0.0;
+		0.0, 0.0, dparam.offset(), dparam.factor(),
+		0.0, 0.0, (dparam.flip_z ? -1.0 : 1.0), 0.0;
 				
-	return projection_view_frustum(mat, dparam);
+	return projection_view_frustum(mat);
 }
 
 
 projection_view_frustum projection_view_frustum::symmetric_perspective_fov_x
-(angle near_width, real aspect_ratio, const depth_projection_parameters& dparam) {
+(angle near_width, real aspect_ratio, real z_near, real z_far) {
+	depth_projection_parameters dparam = depth_projection_(z_near, z_far);
 	real w = std::tan(half_pi - near_width);
 	real h = w / aspect_ratio;
-	auto dcomp = depth_components_(dparam);
 
 	Eigen_mat4 mat; mat <<
 		w, 0.0, 0.0, 0.0,
 		0.0, h, 0.0, 0.0,
-		0.0, 0.0, dcomp[0], dcomp[1],
-		0.0, 0.0, dcomp[2], 0.0;
+		0.0, 0.0, dparam.offset(), dparam.factor(),
+		0.0, 0.0, (dparam.flip_z ? -1.0 : 1.0), 0.0;
 				
-	return projection_view_frustum(mat, dparam);
+	return projection_view_frustum(mat);
 }
 
 
 
 projection_view_frustum projection_view_frustum::symmetric_perspective_fov_y
-(angle near_height, real aspect_ratio, const depth_projection_parameters& dparam) {
+(angle near_height, real aspect_ratio, real z_near, real z_far) {
+	depth_projection_parameters dparam = depth_projection_(z_near, z_far);
 	real h = std::tan(half_pi - near_height);
 	real w = h * aspect_ratio;
-	auto dcomp = depth_components_(dparam);
 
 	Eigen_mat4 mat; mat <<
 		w, 0.0, 0.0, 0.0,
 		0.0, h, 0.0, 0.0,
-		0.0, 0.0, dcomp[0], dcomp[1],
-		0.0, 0.0, dcomp[2], 0.0;
+		0.0, 0.0, dparam.offset(), dparam.factor(),
+		0.0, 0.0, (dparam.flip_z ? -1.0 : 1.0), 0.0;
 				
-	return projection_view_frustum(mat, dparam);
+	return projection_view_frustum(mat);
 }
 
 
 
 projection_view_frustum projection_view_frustum::asymmetric_perspective
-(distance_pair near_x, distance_pair near_y, const depth_projection_parameters& dparam) {
+(distance_pair near_x, distance_pair near_y, real z_near, real z_far) {
+	depth_projection_parameters dparam = depth_projection_(z_near, z_far);
 	real two_nz = 2.0 * dparam.z_near;
 	real x_diff = near_x.second - near_x.first;
 	real y_diff = near_y.second - near_y.first;
-	real z_diff = dparam.z_far - dparam.z_near;
-	auto dcomp = depth_components_(dparam);
 
 	Eigen_mat4 mat; mat <<
 		two_nz / x_diff, 0.0, (near_x.first + near_x.second)/x_diff, 0.0,
 		0.0, two_nz / y_diff, (near_y.first + near_y.second)/y_diff, 0.0,
-		0.0, 0.0, dcomp[0], dcomp[1],
-		0.0, 0.0, dcomp[2], 0.0;
+		0.0, 0.0, dparam.offset(), dparam.factor(),
+		0.0, 0.0, (dparam.flip_z ? -1.0 : 1.0), 0.0;
 				
-	return projection_view_frustum(mat, dparam);
+	return projection_view_frustum(mat);
 }
 
 
 projection_view_frustum projection_view_frustum::asymmetric_perspective_fov
-(angle_pair near_x, angle_pair near_y, const depth_projection_parameters& dparam) {
-	angle_pair near_x_proj { std::tan(near_x.first) * dparam.z_near, std::tan(near_x.second) * dparam.z_near };
-	angle_pair near_y_proj { std::tan(near_y.first) * dparam.z_near, std::tan(near_y.second) * dparam.z_near };
-	return asymmetric_perspective(near_x_proj, near_y_proj, dparam);
+(angle_pair near_x, angle_pair near_y, real z_near, real z_far) {
+	angle_pair near_x_proj { std::tan(near_x.first) * z_near, std::tan(near_x.second) * z_near };
+	angle_pair near_y_proj { std::tan(near_y.first) * z_near, std::tan(near_y.second) * z_near };
+	return asymmetric_perspective(near_x_proj, near_y_proj, z_near, z_far);
 }
 
 
 
 real projection_view_frustum::aspect_ratio() const {
-	return matrix_()(1, 1) / matrix_()(0, 0);
+	return view_projection_matrix()(1, 1) / view_projection_matrix()(0, 0);
 }
 
 
 bool projection_view_frustum::is_symmetric_x() const {
-	return (matrix_()(0, 2) == 0.0);
+	return (view_projection_matrix()(0, 2) == 0.0);
 }
 
 
 bool projection_view_frustum::is_symmetric_y() const {
-	return (matrix_()(1, 2) == 0.0);
+	return (view_projection_matrix()(1, 2) == 0.0);
 }
 
 
@@ -173,12 +158,12 @@ bool projection_view_frustum::is_symmetric() const {
 
 void projection_view_frustum::adjust_fov_x_to_aspect_ratio(real aspect_ratio) {
 	if(! is_symmetric()) throw std::logic_error("cannot adjust frustum to image size when it is not symmetric");
-	matrix_()(0, 0) = matrix_()(1, 1) / aspect_ratio;
+	view_projection_matrix()(0, 0) = view_projection_matrix()(1, 1) / aspect_ratio;
 }
 
 void projection_view_frustum::adjust_fov_y_to_aspect_ratio(real aspect_ratio) {
 	if(! is_symmetric()) throw std::logic_error("cannot adjust frustum to image size when it is not symmetric");
-	matrix_()(1, 1) = matrix_()(0, 0) * aspect_ratio;
+	view_projection_matrix()(1, 1) = view_projection_matrix()(0, 0) * aspect_ratio;
 }
 
 

@@ -41,6 +41,8 @@ private:
 protected:
 	explicit image_camera(const ndsize<2>&);
 	
+	void set_image_size_(ndsize<2>);
+	
 public:
 	using pixel_coordinates_type = ndptrdiff<2>;
 	using image_coordinates_type = typename camera::image_coordinates_type;
@@ -54,12 +56,13 @@ public:
 	bool pixel_coordinates_flipped() const { return flipped_; }
 	void flip_pixel_coordinates();
 
+	static ndsize<2> scaled_image_size(ndsize<2> shape, real factor);
 	
 	/// Set image width, and adjust height to keep same aspect ratio.
-	void set_image_width(std::size_t);
+	virtual void set_image_width(std::size_t) = 0;
 	
 	/// Set image height, and adjust width to keep same aspect ratio.
-	void set_image_height(std::size_t);
+	virtual void set_image_height(std::size_t) = 0;
 		
 	ndspan<2> image_span() const {
 		return ndspan<2>( make_ndptrdiff(0, 0), image_size_ );

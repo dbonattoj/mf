@@ -27,14 +27,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../eigen.h"
 #include "depth_projection_parameters.h"
 #include "bounding_box.h"
+#include "pose.h"
 // TODO bounding_box -> Eigen_alignedbox
 
 namespace mf {
 
 /// View frustum of a perspective camera.
-/** Represented using 4x4 view-projection matrix, with additional information about convention used. Includes the affine
- ** world to view transformation. Can be constructed only as `projection_view_frustum` (which does not include
- ** this view transformation), and can then be transformed using transform().  */
 class view_frustum {
 public:	
 	enum intersection {
@@ -48,20 +46,18 @@ public:
 	using edges_array = std::array<edge, 12>;
 	using planes_array = std::array<Eigen_hyperplane3, 6>;
 
+	explicit view_frustum(const Eigen_mat4& mat);
+
 protected:
-	view_frustum(const Eigen_mat4& mat, const depth_projection_parameters& dparam);
+	view_frustum(const pose& ps, const Eigen_mat4& proj_mat);
 	view_frustum() = delete;
 
-	Eigen_mat4& matrix_() { return view_projection_transformation_.matrix(); }
-	const Eigen_mat4& matrix_() const { return view_projection_transformation_.matrix(); }
-
 private:
-	Eigen_projective3 view_projection_transformation_;
-	depth_projection_parameters depth_parameters_;
+	Eigen_mat4 matrix_;
 
 public:
-	const Eigen_projective3& view_projection_transformation() const { return view_projection_transformation_; }	
-	const depth_projection_parameters& depth_parameters() const { return depth_parameters_; }
+	const Eigen_mat4& view_projection_matrix() const { return matrix_; }	
+	Eigen_mat4& view_projection_matrix() { return matrix_; }	
 	
 	Eigen_hyperplane3 near_plane() const;
 	Eigen_hyperplane3 far_plane() const;

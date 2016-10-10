@@ -25,19 +25,29 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Camera which maps 3D coordinates of point to depth value in addition to the 2D image coordinates.
+/// Camera which maps 3D coordinates of point to depth value in addition to the 2D image coordinates, base class.
 class depth_camera : public camera {
-protected:
-	using camera::camera;
-	
 public:
-	virtual real depth(const Eigen_vec3& p) const = 0;
+	using depth_type = real;
+	using depth_image_coordinates_type = Eigen_vec3;
+
+	using camera::camera;
+
+	virtual Eigen_vec3 point(const depth_image_coordinates_type&) const = 0;
+
+	virtual orthogonal_distance_type orthogonal_distance(depth_type) const = 0;
+
+	virtual depth_type depth(orthogonal_distance_type) const = 0;
+
+	virtual depth_type depth(const Eigen_vec3& p) const {
+		return this->depth(camera::orthogonal_distance(p));
+	}
 	
-	virtual real depth(const spherical_coordinates& sp) const {
+	virtual depth_type depth(const spherical_coordinates& sp) const {
 		return this->depth(camera::point(sp));
 	}
 
-	virtual Eigen_vec3 point(const image_coordinates_type& c, real depth) const = 0;
+	virtual depth_image_coordinates_type depth_project(const Eigen_vec3& p) const = 0;
 };
 	
 }
