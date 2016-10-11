@@ -1,4 +1,3 @@
-#if 0
 #ifndef MF_FLOW_REALTIME_GATE_NODE_H_
 #define MF_FLOW_REALTIME_GATE_NODE_H_
 
@@ -42,7 +41,7 @@ private:
 	std::mutex mutex_;
 	
 	clock_time_point launch_clock_time_;
-	
+		
 	void thread_main_();
 	void load_new_frame_();
 
@@ -52,6 +51,10 @@ private:
 	// frame index of new frame to load:
 	//   calculated from pull clock times
 	//   --> expected next clock time --> frame time to pull
+
+
+protected:
+	stream_timing deduce_output_stream_timing_() const override;
 
 public:
 	explicit realtime_gate_node(node_graph&);
@@ -87,5 +90,4 @@ inline const realtime_gate_node& realtime_gate_node_output::this_node() const {
 
 }}
 
-#endif
 #endif

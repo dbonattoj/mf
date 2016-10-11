@@ -83,6 +83,9 @@ private:
 	time_unit prefetch_duration_ = 5;
 	//int parallelization_factor_ = 1; // TODO
 	
+	bool has_own_stream_timing_ = false;
+	stream_timing own_stream_timing_;
+	
 	bool was_setup_ = false;
 	
 	bool needs_multiplex_node_() const;
@@ -135,6 +138,11 @@ public:
 	void set_prefetch_duration(time_unit);
 	time_unit prefetch_duration() const;
 	
+	bool has_own_stream_timing() const;
+	void set_own_stream_timing(const stream_timing&);
+	void unset_own_stream_timing();
+	const stream_timing& own_stream_timing() const;
+	
 	//int parallelization_factor() const { return parallelization_factor_; } 
 	
 	void propagate_setup();
@@ -142,9 +150,6 @@ public:
 	
 	void handler_pre_process(processing_node&, processing_node_job&) final override;
 	void handler_process(processing_node&, processing_node_job&) final override;
-
-	node_stream_timing node_stream_timing_;
-	void define_source_stream_timing(const node_stream_timing& tm) { node_stream_timing_ = tm; }
 };
 
 
@@ -181,7 +186,7 @@ public:
 		not_needed,
 		null_buffer_sufficient,
 		buffer_needed
-	};
+	}; // TODO implement in node
 
 	virtual const std::string& name() const = 0;
 	virtual std::size_t edges_count() const = 0;

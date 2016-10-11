@@ -211,6 +211,28 @@ bool filter::is_parallelization_split_point_() const {
 }
 */
 
+bool filter::has_own_stream_timing() const {
+	return has_own_stream_timing_;
+}
+
+
+void filter::set_own_stream_timing(const stream_timing& timing) {
+	has_own_stream_timing_ = true;
+	own_stream_timing_ = timing;
+}
+
+
+void filter::unset_own_stream_timing() {
+	has_own_stream_timing_ = false;
+}
+
+
+const stream_timing& filter::own_stream_timing() const {
+	Assert(has_own_stream_timing_);
+	return own_stream_timing_;
+}
+
+
 
 void filter::propagate_setup() {
 	if(was_setup_) return;

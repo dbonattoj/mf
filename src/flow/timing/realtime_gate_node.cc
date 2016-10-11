@@ -1,35 +1,41 @@
 #include "realtime_gate_node.h"
-#if 0
+
 namespace mf { namespace flow {
 
 
 std::size_t realtime_gate_node_output::channels_count() const noexcept override {
-	
+	return this_node().input().channels_count();
 }
 
 
 std::string realtime_gate_node_output::channel_name_at(std::ptrdiff_t i) const override {
-	
+	return this_node().input().channel_name_at(i);
 }
 
 
 node::pull_result realtime_gate_node_output::pull(time_span& span, bool reconnect) override {
-	
+	return this_node().output_pull(span, reconnect);
 }
 
 
 node_frame_window_view realtime_gate_node_output::begin_read(time_unit duration) override {
-	
+	return this_node().output_begin_read(duration);
 }
 
 
 void realtime_gate_node_output::end_read(time_unit duration) override {
-	
+	return this_node().output_end_read(duration);
 }
 
 
 ///////////////
 
+
+stream_timing realtime_gate_node::deduce_output_stream_timing_() const {
+	stream_timing timing;
+	timing.set_real_time(true);
+	return timing;
+}
 
 
 void realtime_gate_node::thread_main_() {
@@ -55,73 +61,6 @@ void realtime_gate_node::thread_main_() {
 	}
 }
 
-
-/*
-sync_node::process_result sync_node::process_next_frame_() {
-	// Begin writing 1 frame to output buffer
-	auto output_write_handle = ring_->write(1); // if error occurs, handle will cancel write during stack unwinding
-	const timed_frame_array_view& out_vw = output_write_handle.view();
-	
-	// Start time of the output view determined new current time of this node
-	time_unit t = out_vw.start_time();	
-	set_current_time_(t);
-	
-	// Create job
-	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
-	job.attach_output(out_vw[0], nullptr);
-	
-	// Let handler pre-process frame
-	handler_result handler_res = handler_pre_process_(job);
-	if(handler_res == handler_result::failure) return process_result::handler_failure;
-	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
-	
-	// Pre-pull the activated inputs
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		if(in.is_activated()) in.pre_pull();
-	}
-	
-	// Pull the activated inputs
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
-		
-		pull_result res = in.pull();
-		if(res == pull_result::transitory_failure) return process_result::transitory_failure;
-		else if(res == pull_result::fatal_failure) return process_result::handler_failure;
-		else if(res == pull_result::stopped) return process_result::stopped;
-		else if(res == pull_result::end_of_stream) return process_result::end_of_stream;
-	}
-	
-	// Begin reading from the activated inputs (in job object)
-	// If error occurs, job object will cancel read during stack unwinding
-	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
-		input_type& in = input_at(i);
-		if(! in.is_activated()) continue;
-		bool began = job.begin_input(in);
-		if(! began) return process_result::transitory_failure;
-	}
-
-	// Let handler process frame
-	handler_res = handler_process_(job);
-	if(handler_res == handler_result::failure) return process_result::handler_failure;
-	else if(handler_res == handler_result::end_of_stream) return process_result::end_of_stream;
-
-	// End reading from the inputs 
-	job.end_inputs();
-	
-	// Detach output from output write handle,
-	// and commit 1 written frame to output buffer
-	job.detach_output();
-	output_write_handle.end(1);
-	
-	// Finish the job
-	update_parameters_(job.parameters()); // TODO move instead of copy
-		
-	// Processing the frame succeeded
-	return process_result::success;
-}
-*/
 
 void realtime_gate_node::load_new_frame_() {
 	
@@ -174,15 +113,15 @@ node::pull_result realtime_gate_node::output_pull_(time_span& span) {
 
 
 node_frame_window_view realtime_gate_node::output_begin_read_(time_unit duration) {
-	//std::lock_guard<std::mutex> lock(mutex_);
+	Assert(duration == 1);
+	mutex_.lock();
 	return outputted_frame_.view();
 }
 
 
 void realtime_gate_node::output_end_read_(time_unit duration) {
-	
+	mutex_.unlock();
 }
 
 
 }}
-#endif

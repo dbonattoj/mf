@@ -18,8 +18,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_NODE_STREAM_TIMING_H_
-#define MF_FLOW_NODE_STREAM_TIMING_H_
+#ifndef MF_FLOW_STREAM_TIMING_H_
+#define MF_FLOW_STREAM_TIMING_H_
 
 #include "../../common.h"
 #include "../types.h"
@@ -35,11 +35,10 @@ namespace mf { namespace flow {
  ** frame is processed (minus the start clock time).
  ** For _non-realtime_, it is computed using as `ct = offset + frame_clock_duration*t`.
  ** The graph-wide start clock time is set to the current system clock time when the graph is launched. */
-class node_stream_timing {
+class stream_timing {
 private:
 	bool real_time_ = false;
 	clock_duration frame_clock_duration_ = clock_duration();
-	//time_unit offset_ = 0;
 
 public:	
 	bool is_real_time() const { return real_time_; }
@@ -50,17 +49,13 @@ public:
 	void set_frame_clock_duration(const clock_duration& dur) { frame_clock_duration_ = dur; } 
 	void set_no_frame_clock_duration(const clock_duration& dur) { frame_clock_duration_ = clock_duration(); } 
 	
-	//time_unit offset() const { Assert(!real_time_); return offset_; }
-	//void set_offset(time_unit off) { Assert(!real_time_); offset_ = off; }
 	// TODO offset
+	// TODO policies (realtime, animation, still)
 };
 
-/*
-policies:
-- animation -->  t |--> clocktime
-- realtime
-- still
-*/
+
+bool operator==(const stream_timing&, const stream_timing&);
+bool operator!=(const stream_timing&, const stream_timing&);
 
 }}
 

@@ -65,13 +65,11 @@ public:
 	void connect(node_output& out);
 	void disconnect();
 	bool is_connected() const noexcept { return (connected_output_ != nullptr); }
-	node_output& connected_output() const
-		{ Assert(is_connected()); return *connected_output_; }
-	node& connected_node() const
-		{ Assert(is_connected()); return connected_output().this_node(); }
+	node_output& connected_output() const { Assert(is_connected()); return *connected_output_; }
+	node& connected_node() const { return connected_output().this_node(); }
 
-	std::size_t channels_count() const
-		{ Assert(is_connected()); return connected_output().channels_count(); }
+	std::size_t channels_count() const { return connected_output().channels_count(); }
+	std::string channel_name_at(std::ptrdiff_t i) const { return connected_output().channel_name_at(i); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);

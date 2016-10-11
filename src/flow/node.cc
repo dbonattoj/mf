@@ -102,23 +102,26 @@ const node& node::first_successor() const {
 }
 
 
-void node::deduce_stream_timing_() {
-	Expects(stage_ == stage::was_pre_setup);
-	Expects(! is_source());
+stream_timing node::deduce_output_stream_timing_() const {
+	// default implementation:
+	// input nodes must have same stream timings; set this node's stream timing to same
+	// overriden by gate nodes
 	
-	// assume inputs are either all realtime or all non-realtime
-	bool realtime = input_at(0).connected_node().stream_timing().is_real_time();
+	Assert(stage_ == stage::was_pre_setup);
+	Assert(! is_source());
 
-	if(realtime) {
-		stream_timing_.set_real_time(true);
+	const stream_timing& first_input_timing = input_at(0).connected_node().output_stream_timing();
+	for(std::ptrdiff_t i = 1; i < inputs_count(); ++i)
+		Assert(input_at(i).connected_node().output_stream_timing() == first_input_timing);
+	
+	stream_timing timing;
+	if(first_input_timing.is_real_time()) {
+		timing.set_real_time(true);
 	} else {
-		for(auto&& in : inputs()) {
-			node& connected_node = in->connected_node();
-			const node_stream_timing& connected_tm = connected_node.stream_timing();	
-		}
-		
-		stream_timing_.set_real_time(false);
+		timing.set_real_time(false);
+		timing.set_frame_clock_duration(first_input_timing.frame_clock_duration());
 	}
+	return timing;
 }
 
 
@@ -158,7 +161,8 @@ void node::propagate_setup_() {
 
 	// setup this node
 	Assert(stage_ == stage::was_pre_setup);
-	if(! is_source()) deduce_stream_timing_();
+	if(! is_source())
+		output_stream_timing_ = this->deduce_output_stream_timing_();
 	this->setup();
 	
 	deduce_propagated_parameters_();
@@ -169,11 +173,11 @@ void node::propagate_setup_() {
 
 
 
-void node::define_source_stream_timing(const node_stream_timing& tm) {
-	Expects(stage_ == stage::construction);
-	Expects(is_source());
+void node::define_source_stream_timing(const stream_timing& tm) {
+	Assert(stage_ == stage::construction);
+	Assert(is_source());
 	
-	stream_timing_ = tm;
+	output_stream_timing_ = tm;
 }
 
 

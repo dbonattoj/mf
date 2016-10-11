@@ -70,7 +70,9 @@ private:
 	std::vector<std::unique_ptr<node_output>> outputs_;
 	std::vector<std::unique_ptr<node_input>> inputs_;
 	
-	node_stream_timing stream_timing_;
+	/// Timing of the frames pulled out of this node.
+	/** Defines correspondence of frame index (called "time") and real clock time.  */
+	stream_timing output_stream_timing_;
 	
 	/// Parameters owned by this node.
 	/** Values are stored in `parameter_valuation_`. */
@@ -109,9 +111,8 @@ private:
 	/** Must be called on sink node. Calls setup() once on each node in graph, in an order such that when one node
 	 ** is setup, its predecessors have already been setup */
 	void propagate_setup_();
-	
-	
-	void deduce_stream_timing_();
+
+	virtual stream_timing deduce_output_stream_timing_() const;
 
 
 	void deduce_propagated_parameters_();
@@ -207,7 +208,7 @@ public:
 	
 	
 	/// Node-specific.
-	///@{
+	///@{	
 	virtual time_unit minimal_offset_to(const node&) const = 0;
 	virtual time_unit maximal_offset_to(const node&) const = 0;
 
@@ -219,10 +220,9 @@ public:
 	///@}
 	
 	
-	void define_source_stream_timing(const node_stream_timing&);
+	void define_source_stream_timing(const stream_timing&);
 		
-	const node_stream_timing& stream_timing() const { return stream_timing_; }
-	bool is_real_time() const { return stream_timing().is_real_time(); }
+	const stream_timing& output_stream_timing() const { return output_stream_timing_; }
 	
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
