@@ -38,6 +38,7 @@ public:
 	Eigen_quaternion orientation; ///< Orientation quaternion. Must be kept normalized.
 	// TODO make private, enforce normalization, change to matrix?
 
+public:
 	/// Create identity pose.
 	pose();
 		
@@ -88,10 +89,12 @@ public:
 	void invert_orientation();
 };
 
+/// Interpolate between two poses for `t = 0..1`
+/** Linearily interpolated positions such that `pos = (1-t)*a.pos + t*b.pos`. Slerp interpolation of orientation. */
+pose interpolate(const pose& a, const pose& b, real t);
+
 
 std::ostream& operator<<(std::ostream&, const pose&);
-
-pose interpolate(const pose& a, const pose& b, real t);
 
 }
 

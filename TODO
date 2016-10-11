@@ -21,6 +21,7 @@ real-time gate =
 - index --> actual time units (seconds)
 - nodes not 1:1 (skip frames / add frames)
 
+buffer in unused output? (none, null, temp)
 
 
 

@@ -173,10 +173,16 @@ public:
 };
 
 
-
 /// Output port of filter, abstract base class.
 class filter_output_base {
 public:
+	/// What buffer the handler needs for outputs that are not connected.
+	enum unused_buffer_requirement {
+		not_needed,
+		null_buffer_sufficient,
+		buffer_needed
+	};
+
 	virtual const std::string& name() const = 0;
 	virtual std::size_t edges_count() const = 0;
 	virtual filter& connected_filter_at_edge(std::ptrdiff_t index) const = 0;
@@ -223,6 +229,7 @@ public:
 private:
 	filter& filter_;
 	std::string name_;
+	unused_buffer_requirement disconnected_buffer_requirement_ = not_needed;
 	
 	std::vector<edge_base_type*> edges_;
 	
@@ -238,6 +245,9 @@ public:
 
 	const std::string& name() const override { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
+	
+	unused_buffer_requirement disconnected_buffer_requirement() { return disconnected_buffer_requirement_; }
+	void set_disconnected_buffer_requirement(unused_buffer_requirement req) { disconnected_buffer_requirement_ = req; }
 			
 	std::size_t edges_count() const override { return edges_.size(); }
 	filter& connected_filter_at_edge(std::ptrdiff_t index) const override

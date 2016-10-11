@@ -29,15 +29,15 @@ bool depth_projection_parameters::valid() const {
 }
 
 
-real depth_projection_parameters::offset() const {
-	real divident = (d_far * z_far) - (d_near * z_near);
-	return divident / (z_far - z_near);
+real depth_projection_parameters::offset() const {	
+	real dividend = (d_far * z_far) - (d_near * z_near);
+	return dividend / (z_far - z_near);
 }
 
 
 real depth_projection_parameters::factor() const {
-	real divident = (d_near - d_far) * z_near * z_far;
-	return divident / (z_far - z_near);
+	real dividend = (d_near - d_far) * z_near * z_far;
+	return dividend / (z_far - z_near);
 }
 
 
@@ -70,6 +70,7 @@ depth_projection_parameters depth_projection_parameters::unsigned_normalized_dis
 		dparam.flip_z = true;
 	}
 	Assert(dparam.valid());
+	
 	return dparam;
 }
 

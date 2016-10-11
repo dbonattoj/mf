@@ -39,19 +39,19 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 std::size_t system_page_size() {
-	return sysconf(_SC_PAGESIZE);
+	return ::sysconf(_SC_PAGESIZE);
 }
 
 void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv) {
 	switch(adv) {
 	case memory_usage_advice::normal:
-		madvise(buf, len, MADV_NORMAL);
+		::madvise(buf, len, MADV_NORMAL);
 		break;
 	case memory_usage_advice::sequential:
-		madvise(buf, len, MADV_SEQUENTIAL);
+		::madvise(buf, len, MADV_SEQUENTIAL);
 		break;
 	case memory_usage_advice::random:
-		madvise(buf, len, MADV_RANDOM);
+		::madvise(buf, len, MADV_RANDOM);
 		break;
 	return;	
 	}

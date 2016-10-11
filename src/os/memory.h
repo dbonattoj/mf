@@ -64,7 +64,7 @@ public:
 
 
 /// Ring allocator, allocates ring buffer memory.
-/** Allocates given segment of memory, and maps additional same sized segment immediatly after it in virtual memory,
+/** Allocates given segment of memory, and maps additional same sized segment immediatley after it in virtual memory,
  ** which is mapped to the same allocated segment. In the allocated segment `seg`, `seg[i]` and `seg[i+n]` always
  ** map to the same data. The segment length `n` must be a multiple of the system page size. */
 class raw_ring_allocator {

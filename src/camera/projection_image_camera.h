@@ -28,12 +28,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 /// Pin-hole camera with mapping onto image pixel coordinates.
-template<typename Depth>
-class projection_image_camera : public projection_camera, public depth_image_camera<Depth> {
-	using depth_image_camera_base = depth_image_camera<Depth>;
+template<typename Depth_mapping>
+class projection_image_camera : public projection_camera, public depth_image_camera<Depth_mapping> {
+	using depth_image_camera_base = depth_image_camera<Depth_mapping>;
+	using depth_mapping_type = typename depth_image_camera_base::depth_mapping_type;
+
 
 public:
-	projection_image_camera(const projection_camera& cam, ndsize<2> image_size);
+	projection_image_camera(const projection_camera&, const ndsize<2>&, const depth_mapping_type& = depth_mapping_type());
 	projection_image_camera(const projection_image_camera&) = default;
 	projection_image_camera& operator=(const projection_image_camera&) = default;
 	

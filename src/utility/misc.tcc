@@ -20,7 +20,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 #include "../common.h"
+
 
 namespace mf {
 
@@ -41,15 +43,13 @@ bool is_aligned(T* ptr, std::size_t alignment_requirement) {
 
 template<typename T>
 inline T clamp(T value, T minimum, T maximum) {
-	if(value > maximum) value = maximum;
-	else if(value < minimum) value = minimum;
-	return value;
+	return std::min(std::max(value, minimum), maximum);
 }
 
 
 template<typename T>
 T gcd(T a, T b) {
-	Expects_crit(a > 0 && b > 0);
+	Assert_crit(a > 0 && b > 0);
 	if(a < b) std::swap(a, b);
 	while(b > 0) {
 		T c = a % b;

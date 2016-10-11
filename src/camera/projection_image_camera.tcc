@@ -20,18 +20,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-template<typename Depth>
-projection_image_camera<Depth>::projection_image_camera(const projection_camera& cam, ndsize<2> image_size) :
+template<typename Depth_mapping>
+projection_image_camera<Depth_mapping>::projection_image_camera
+(const projection_camera& cam, const ndsize<2>& image_size, const depth_mapping_type& mapping) :
 	projection_camera(cam),
-	depth_image_camera_base(
-		image_size,
-		cam.depth_parameters().d_near,
-		cam.depth_parameters().d_far - cam.depth_parameters().d_near
-	) { }
+	depth_image_camera_base(image_size, mapping) { }
 
 
-template<typename Depth>
-void projection_image_camera<Depth>::scale(real factor) {
+template<typename Depth_mapping>
+void projection_image_camera<Depth_mapping>::scale(real factor) {
 	const ndsize<2>& image_size = depth_image_camera_base::image_size();
 	ndsize<2> scaled_image_size = make_ndsize(factor * image_size[0], factor * image_size[1]);
 
@@ -40,8 +37,8 @@ void projection_image_camera<Depth>::scale(real factor) {
 }
 
 
-template<typename Depth>
-void projection_image_camera<Depth>::set_image_width(std::size_t imw) {
+template<typename Depth_mapping>
+void projection_image_camera<Depth_mapping>::set_image_width(std::size_t imw) {
 	const ndsize<2>& image_size = depth_image_camera_base::image_size();
 	real factor = static_cast<real>(imw) / image_size[0];
 	ndsize<2> scaled_image_size = image_camera::scaled_image_size(image_size, factor);
@@ -52,8 +49,8 @@ void projection_image_camera<Depth>::set_image_width(std::size_t imw) {
 }
 
 
-template<typename Depth>
-void projection_image_camera<Depth>::set_image_height(std::size_t imh) {
+template<typename Depth_mapping>
+void projection_image_camera<Depth_mapping>::set_image_height(std::size_t imh) {
 	const ndsize<2>& image_size = depth_image_camera_base::image_size();
 	real factor = static_cast<real>(imh) / image_size[1];
 	ndsize<2> scaled_image_size = image_camera::scaled_image_size(image_size, factor);
