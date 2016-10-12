@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/processing/processing_node.h"
 #include "../flow/processing/processing_node_job.h"
 #include "../queue/frame.h"
+#include "../flow/timing/stream_timing.h"
 #include "filter_edge.h"
 #include <vector>
 #include <memory>
@@ -43,7 +44,7 @@ class filter_handler;
 class node_graph;
 class processing_node;
 class multiplex_node;
-
+class gate_node;
 
 /// Filter which performs concrete processing.
 class filter : public processing_node_handler {			
@@ -54,6 +55,7 @@ public:
 
 	struct filter_node_group {
 		processing_node* processing = nullptr;
+		gate_node* gate = nullptr;
 		multiplex_node* multiplex = nullptr;
 	};
 
@@ -83,14 +85,16 @@ private:
 	time_unit prefetch_duration_ = 5;
 	//int parallelization_factor_ = 1; // TODO
 	
-	bool has_own_stream_timing_ = false;
-	stream_timing own_stream_timing_;
+	bool has_own_timing_ = false;
+	stream_timing own_timing_;
 	
 	bool was_setup_ = false;
 	
 	bool needs_multiplex_node_() const;
 	//bool is_parallelization_join_point_() const;
 	//bool is_parallelization_split_point_() const;
+	
+	bool install_gate_node_if_needed_(processing_node&, installation_guide&);
 
 	void setup_();
 	void install_(installation_guide&);
@@ -138,10 +142,12 @@ public:
 	void set_prefetch_duration(time_unit);
 	time_unit prefetch_duration() const;
 	
-	bool has_own_stream_timing() const;
-	void set_own_stream_timing(const stream_timing&);
-	void unset_own_stream_timing();
-	const stream_timing& own_stream_timing() const;
+	bool has_own_timing() const;
+	void set_own_timing(const stream_timing&);
+	void unset_own_timing();
+	const stream_timing& timing() const;
+	bool has_common_input_timing() const;
+	const stream_timing& common_input_timing() const;
 	
 	//int parallelization_factor() const { return parallelization_factor_; } 
 	

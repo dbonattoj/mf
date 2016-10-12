@@ -27,7 +27,7 @@ buffer in unused output? (none, null, temp)
 
 GENERAL
 - better debugging/output
-
+- noexcept ?
 
 
 

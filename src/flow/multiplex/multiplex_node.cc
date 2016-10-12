@@ -181,7 +181,13 @@ bool multiplex_node::outputs_on_different_threads_() const {
 }
 
 
-void multiplex_node::setup() { }
+void multiplex_node::setup() {
+	const stream_timing& tm = input().connected_node().output_stream_timing();
+	define_output_stream_timing(tm);
+	
+	for(std::ptrdiff_t i = 0; i < outputs_count(); ++i)
+		output_at(i).setup();
+}
 
 
 multiplex_node_output& multiplex_node::add_output(std::ptrdiff_t input_channel_index) {
@@ -240,5 +246,13 @@ void multiplex_node_output::end_read(time_unit duration) {
 }
 
 
+void multiplex_node_output::setup() {
+	node_frame_format input_format = this_node().input().frame_format();
+	frame_format_ = node_selected_channel_frame_format(input_format, input_channel_index_);
+}
+
+const node_frame_format& multiplex_node_output::frame_format() const {
+	return frame_format_;
+}
 
 }}

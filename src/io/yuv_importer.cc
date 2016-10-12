@@ -23,6 +23,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+int yuv_importer::Animation_frame = 0;
+
 yuv_importer::yuv_importer(const std::string& filename, const ndsize<2>& frame_shape, int sampling) :
 	base(frame_shape),
 	file_(filename, std::ios_base::in | std::ios_base::binary),
@@ -58,7 +60,10 @@ yuv_importer::yuv_importer(const std::string& filename, const ndsize<2>& frame_s
 }
 
 
-void yuv_importer::read_frame(const ndarray_view<2, ycbcr_color>& out) { seek(10);
+void yuv_importer::read_frame(const ndarray_view<2, ycbcr_color>& out) {
+			seek(Animation_frame);
+			
+			
 	const ndsize<2>& shape = base::frame_shape();
 	
 	if(out.shape() != shape) throw std::invalid_argument("output view has wrong shape");

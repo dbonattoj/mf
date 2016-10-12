@@ -33,6 +33,7 @@ class multiplex_node;
 class multiplex_node_output final : public node_output {
 private:
 	const std::ptrdiff_t input_channel_index_;
+	node_selected_channel_frame_format frame_format_;
 	
 	multiplex_node& this_node() noexcept;
 	const multiplex_node& this_node() const noexcept;
@@ -40,8 +41,11 @@ private:
 public:
 	multiplex_node_output(node& nd, std::ptrdiff_t input_channel_index);
 	
+	void setup();
+	
 	std::size_t channels_count() const noexcept override;
 	std::string channel_name_at(std::ptrdiff_t index) const override;
+	const node_frame_format& frame_format() const override;
 	
 	void pre_pull(const time_span&) override;
 	node::pull_result pull(time_span& span) override;

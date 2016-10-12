@@ -37,6 +37,8 @@ protected:
 	node_frame_window_view output_begin_read_(time_unit duration) override { throw 0; }
 	void output_end_read_(time_unit duration) override { throw 0; }
 
+	const node_frame_format& output_frame_format_() const override { throw 0; }
+
 public:	
 	explicit sink_node(node_graph&);
 	

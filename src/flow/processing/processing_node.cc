@@ -41,10 +41,14 @@ std::string processing_node_output::channel_name_at(std::ptrdiff_t i) const {
 }
 
 
+const node_frame_format& processing_node_output::frame_format() const {
+	return this_node().output_frame_format_();
+}
+
+
 void processing_node_output::pre_pull(const time_span& span) {
 	return this_node().output_pre_pull_(span);
 }
-
 
 
 node::pull_result processing_node_output::pull(time_span& span) {
@@ -66,7 +70,7 @@ void processing_node_output::end_read(time_unit duration) {
 
 
 processing_node_input::processing_node_input(processing_node& nd, std::ptrdiff_t index) :
-	node_input(nd), index_(index) {}
+	node_input(nd), index_(index) { }
 
 
 ///////////////
@@ -183,14 +187,18 @@ const processing_node_output_channel& processing_node::output_channel_at(std::pt
 }
 
 
-node_frame_format processing_node::output_frame_format_() const {
-	node_frame_format frm;
+void processing_node::setup_output_frame_format_() {
+	frame_format_ = node_frame_format();
 	for(auto&& chan : output_channels_) {
 		const ndarray_format& channel_frame_format = chan->frame_format();
 		Assert(channel_frame_format.is_defined());
-		frm.add_part(channel_frame_format);
+		frame_format_.add_part(channel_frame_format);
 	}
-	return frm;
+}
+
+
+const node_frame_format& processing_node::output_frame_format_() const {
+	return frame_format_;
 }
 
 

@@ -101,6 +101,7 @@ private:
 	std::ptrdiff_t selected_channel_;
 
 public:
+	node_selected_channel_frame_format() : base(), selected_channel_(-1) { }
 	node_selected_channel_frame_format(const base& frm, std::ptrdiff_t sel_channel);
 	
 	bool has_parts() const override { return false; }

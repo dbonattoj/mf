@@ -42,7 +42,9 @@ thread_index async_node::processing_thread_index() const {
 }
 
 
-void async_node::setup() {		
+void async_node::setup() {
+	setup_output_frame_format_();
+		
 	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
 	
@@ -281,6 +283,7 @@ node_frame_window_view async_node::output_begin_read_(time_unit duration) {
 	Assert(ring_->readable_duration() >= duration);
 	return ring_->begin_read(duration);
 }
+
 
 void async_node::output_end_read_(time_unit duration) {
 	ring_->end_read(duration);

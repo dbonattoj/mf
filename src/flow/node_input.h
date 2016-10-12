@@ -70,6 +70,7 @@ public:
 
 	std::size_t channels_count() const { return connected_output().channels_count(); }
 	std::string channel_name_at(std::ptrdiff_t i) const { return connected_output().channel_name_at(i); }
+	const node_frame_format& frame_format() const { return connected_output().frame_format(); }
 
 	bool is_activated() const noexcept { return activated_; }
 	void set_activated(bool);

@@ -85,7 +85,7 @@ public:
 	
 	std::size_t channels_count() const noexcept override;
 	std::string channel_name_at(std::ptrdiff_t i) const override;
-	
+	const node_frame_format& frame_format() const override;
 	void pre_pull(const time_span& span) override;
 	node::pull_result pull(time_span& span) override;
 	node_frame_window_view begin_read(time_unit duration) override;
@@ -130,6 +130,8 @@ private:
 
 	void compute_propagated_parameters_guide_() const;
 
+	node_frame_format frame_format_;
+
 protected:
 	/// Result state of handler processing or pre-processing of frame.
 	enum class handler_result {
@@ -142,14 +144,15 @@ protected:
 
 	handler_result handler_pre_process_(processing_node_job&);
 	handler_result handler_process_(processing_node_job&);
-		
+	
+	void setup_output_frame_format_();
+	virtual const node_frame_format& output_frame_format_() const;
+	
 	virtual void output_pre_pull_(const time_span&) = 0;
 	virtual node::pull_result output_pull_(time_span& span) = 0;
 	virtual node_frame_window_view output_begin_read_(time_unit duration) = 0;
 	virtual void output_end_read_(time_unit duration) = 0;
-
-	node_frame_format output_frame_format_() const;
-
+	
 public:
 	processing_node(node_graph&, bool with_output);
 	~processing_node() override;

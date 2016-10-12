@@ -48,9 +48,11 @@ thread_index sync_node::processing_thread_index() const {
 
 
 void sync_node::setup() {		
+	setup_output_frame_format_();
+	
 	node& connected_node = output().connected_node();
 	time_unit required_capacity = 1 + maximal_offset_to(connected_node) - minimal_offset_to(connected_node);
-		
+	
 	auto buffer_frame_format = output_frame_format_();
 	ring_.reset(new timed_ring(buffer_frame_format, required_capacity));
 }
@@ -168,5 +170,6 @@ node_frame_window_view sync_node::output_begin_read_(time_unit duration) {
 void sync_node::output_end_read_(time_unit duration) {
 	ring_->end_read(duration);
 }
+
 
 }}

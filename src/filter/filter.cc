@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/node_graph.h"
 #include "../flow/node.h"
 #include "../flow/multiplex/multiplex_node.h"
+#include "../flow/timing/realtime_gate_node.h"
 #include "../flow/processing/sink_node.h"
 #include "../flow/processing/sync_node.h"
 #include "../flow/processing/async_node.h"
@@ -211,25 +212,85 @@ bool filter::is_parallelization_split_point_() const {
 }
 */
 
-bool filter::has_own_stream_timing() const {
-	return has_own_stream_timing_;
+
+bool filter::install_gate_node_if_needed_(processing_node& installed_node, installation_guide& guide) {	
+	filter_node_group& node_group = guide.local_filter_nodes.at(this);
+	Assert(node_group.multiplex == nullptr, "gate must be installed before multiplex");
+	
+	const stream_timing& this_timing = timing();
+	
+	const stream_timing* successor_timing = nullptr;
+	auto successors = direct_successors_();
+	if(successors.size() == 0) return false;
+	for(auto&& succ : successors) {
+		const stream_timing& tm = succ->timing();
+		if(successor_timing == nullptr) successor_timing = &tm;
+		else if(tm != *successor_timing) throw std::logic_error("filter outputs having different timings unsupported");
+	}
+	
+	if(this_timing == *successor_timing) {
+		return false;
+	} else if(!this_timing.is_real_time() && successor_timing->is_real_time()) {
+		realtime_gate_node& gate = guide.node_gr.add_node<realtime_gate_node>();
+		gate.input().connect(installed_node.output());
+		gate.set_name("rt gate");
+		node_group.gate = &gate;
+		return true;
+	} else {
+		throw std::logic_error("no gate available");
+	}
 }
 
 
-void filter::set_own_stream_timing(const stream_timing& timing) {
-	has_own_stream_timing_ = true;
-	own_stream_timing_ = timing;
+bool filter::has_own_timing() const {
+	return has_own_timing_;
 }
 
 
-void filter::unset_own_stream_timing() {
-	has_own_stream_timing_ = false;
+void filter::set_own_timing(const stream_timing& tm) {
+	own_timing_ = tm;
+	has_own_timing_ = true;
 }
 
 
-const stream_timing& filter::own_stream_timing() const {
-	Assert(has_own_stream_timing_);
-	return own_stream_timing_;
+void filter::unset_own_timing() {
+	has_own_timing_ = false;
+}
+
+
+const stream_timing& filter::timing() const {
+	if(has_own_timing()) return own_timing_;
+	else if(has_common_input_timing()) return common_input_timing();
+	else throw std::logic_error("timing not defined");
+}
+
+
+bool filter::has_common_input_timing() const {
+	const stream_timing* first_connected_input_timing = nullptr;
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		const filter_input_base& in = input_at(i);
+		if(! in.is_connected()) continue;
+		if(first_connected_input_timing == nullptr)
+			first_connected_input_timing = &in.connected_filter().timing();
+		else if(in.connected_filter().timing() != *first_connected_input_timing)
+			return false;
+	}
+	return (first_connected_input_timing != nullptr);
+}
+
+
+const stream_timing& filter::common_input_timing() const {
+	const stream_timing* first_connected_input_timing = nullptr;
+	for(std::ptrdiff_t i = 0; i < inputs_count(); ++i) {
+		const filter_input_base& in = input_at(i);
+		if(! in.is_connected()) continue;
+		if(first_connected_input_timing == nullptr)
+			first_connected_input_timing = &in.connected_filter().timing();
+		else if(in.connected_filter().timing() != *first_connected_input_timing)
+			throw std::logic_error("no common input timing (different input timings)");
+	}
+	if(first_connected_input_timing != nullptr) return *first_connected_input_timing;
+	else throw std::logic_error("no common input timing (no connected inputs)");
 }
 
 
@@ -289,13 +350,16 @@ void filter::install_input_(filter_input_base& in, processing_node& installed_no
 	// Get local node group for connected filter
 	const filter_node_group& connected_node_group = guide.local_filter_nodes.at(&connected_filter);
 	
-	// Connect to connected filter's node (multiplex or processing)
+	// Connect to connected filter's node output (processing, gate or multiplex)
 	// Install through edge
 	node_output* connected_node_out = nullptr;
 	if(connected_node_group.multiplex != nullptr) {
 		connected_node_out = &connected_node_group.multiplex->add_output(connected_output_channel_index);
 		in.install_edge(*connected_node_out, 0, node_in);
 		connected_node_out->set_name(node_in.name());
+	} else if(connected_node_group.gate != nullptr) {
+		connected_node_out = &connected_node_group.gate->output();
+		in.install_edge(*connected_node_out, connected_output_channel_index, node_in);
 	} else {
 		connected_node_out = &connected_node_group.processing->output();
 		in.install_edge(*connected_node_out, connected_output_channel_index, node_in);
@@ -307,6 +371,8 @@ void filter::install_(installation_guide& guide) {
 	// install is called in source-to-sink order
 	// predecessors of this filter have already been installed
 	
+	filter_node_group& node_group = guide.local_filter_nodes[this];
+
 	// Create processing node for this filter
 	processing_node* installed_node = nullptr;
 	if(is_sink()) {
@@ -322,24 +388,30 @@ void filter::install_(installation_guide& guide) {
 		installed_node = &nd;
 		nd.output().set_name("out");
 	}
+	installed_node->define_output_stream_timing(timing());
 	installed_node->set_name(name_.empty() ? default_filter_name : name_);
 	
 	installed_node->set_handler(*this);
 		
-			if(is_source()) installed_node->define_source_stream_timing(node_stream_timing_);
-
-	guide.local_filter_nodes[this].processing = installed_node;
+	node_group.processing = installed_node;
 	
 	// Add node inputs for each connected filter input
 	// and connect them to predecessor outputs (which have already been installed)
 	for(filter_input_base* in : inputs_)
 		install_input_(*in, *installed_node, guide);
+		
+	// Add gate node if necessary
+	// connects directly to the processing node output
+	install_gate_node_if_needed_(*installed_node, guide);
 	
-	// Add multiplex node if necessary 
+	// Add multiplex node if necessary
+	// connects either directly to processing node output, or to gate output
 	if(needs_multiplex_node_()) {
 		multiplex_node& multiplex = guide.node_gr.add_node<multiplex_node>();
-		multiplex.input().connect(installed_node->output());
-		guide.local_filter_nodes[this].multiplex = &multiplex;
+		node_group.multiplex = &multiplex;
+
+		if(node_group.gate != nullptr) multiplex.input().connect(node_group.gate->output());
+		else multiplex.input().connect(installed_node->output());
 
 		multiplex.set_name("multiplex");
 		multiplex.input().set_name("in");

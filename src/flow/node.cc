@@ -102,30 +102,6 @@ const node& node::first_successor() const {
 }
 
 
-stream_timing node::deduce_output_stream_timing_() const {
-	// default implementation:
-	// input nodes must have same stream timings; set this node's stream timing to same
-	// overriden by gate nodes
-	
-	Assert(stage_ == stage::was_pre_setup);
-	Assert(! is_source());
-
-	const stream_timing& first_input_timing = input_at(0).connected_node().output_stream_timing();
-	for(std::ptrdiff_t i = 1; i < inputs_count(); ++i)
-		Assert(input_at(i).connected_node().output_stream_timing() == first_input_timing);
-	
-	stream_timing timing;
-	if(first_input_timing.is_real_time()) {
-		timing.set_real_time(true);
-	} else {
-		timing.set_real_time(false);
-		timing.set_frame_clock_duration(first_input_timing.frame_clock_duration());
-	}
-	return timing;
-}
-
-
-
 void node::propagate_pre_setup_() {
 	// do nothing if this node was already pre_setup
 	if(stage_ == stage::was_pre_setup) return;
@@ -161,23 +137,12 @@ void node::propagate_setup_() {
 
 	// setup this node
 	Assert(stage_ == stage::was_pre_setup);
-	if(! is_source())
-		output_stream_timing_ = this->deduce_output_stream_timing_();
 	this->setup();
 	
 	deduce_propagated_parameters_();
 	deduce_sent_parameters_relay_();
 	
 	stage_ = stage::was_setup;
-}
-
-
-
-void node::define_source_stream_timing(const stream_timing& tm) {
-	Assert(stage_ == stage::construction);
-	Assert(is_source());
-	
-	output_stream_timing_ = tm;
 }
 
 

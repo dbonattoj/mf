@@ -52,6 +52,8 @@ private:
 	std::size_t chroma_scale_x_;
 	
 public:
+	static int Animation_frame;
+
 	yuv_importer(const std::string& filename, const ndsize<2>& frame_shape, int sampling);
 		
 	void read_frame(const ndarray_view<2, ycbcr_color>&) override;

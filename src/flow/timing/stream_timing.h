@@ -40,7 +40,9 @@ private:
 	bool real_time_ = false;
 	clock_duration frame_clock_duration_ = clock_duration();
 
-public:	
+public:
+	static stream_timing real_time();
+	
 	bool is_real_time() const { return real_time_; }
 	void set_real_time(bool rt) { real_time_ = rt; }
 	
@@ -51,11 +53,10 @@ public:
 	
 	// TODO offset
 	// TODO policies (realtime, animation, still)
+
+	friend bool operator==(const stream_timing&, const stream_timing&);
+	friend bool operator!=(const stream_timing&, const stream_timing&);
 };
-
-
-bool operator==(const stream_timing&, const stream_timing&);
-bool operator!=(const stream_timing&, const stream_timing&);
 
 }}
 

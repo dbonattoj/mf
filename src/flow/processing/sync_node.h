@@ -55,7 +55,8 @@ public:
 	time_unit maximal_offset_to(const node&) const override;
 	
 	void setup() final override;
-			
+
+protected:		
 	void output_pre_pull_(const time_span&) override;
 	pull_result output_pull_(time_span&) override;
 	node_frame_window_view output_begin_read_(time_unit duration) override;

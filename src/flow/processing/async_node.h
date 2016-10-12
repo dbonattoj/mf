@@ -59,7 +59,6 @@ private:
 	request_id_type failed_request_id_ = -1;
 	process_result failed_request_process_result_ = process_result::undefined;
 	
-	
 	void pause_();
 	process_result process_frame_();
 	void thread_main_();
@@ -68,7 +67,7 @@ private:
 	pull_result output_pull_(time_span&) override;
 	node_frame_window_view output_begin_read_(time_unit duration) override;
 	void output_end_read_(time_unit duration) override;
-
+	
 public:
 	async_node(node_graph&);
 	~async_node() override;

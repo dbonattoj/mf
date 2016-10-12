@@ -29,7 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "parameter/node_parameter_value.h"
 #include "parameter/node_parameter_valuation.h"
 #include "parameter/node_parameter_relay.h"
-#include "timing/node_stream_timing.h"
+#include "timing/stream_timing.h"
 
 #include <vector>
 #include <map>
@@ -111,9 +111,7 @@ private:
 	/** Must be called on sink node. Calls setup() once on each node in graph, in an order such that when one node
 	 ** is setup, its predecessors have already been setup */
 	void propagate_setup_();
-
-	virtual stream_timing deduce_output_stream_timing_() const;
-
+	
 
 	void deduce_propagated_parameters_();
 	
@@ -220,8 +218,7 @@ public:
 	///@}
 	
 	
-	void define_source_stream_timing(const stream_timing&);
-		
+	void define_output_stream_timing(const stream_timing& tm) { output_stream_timing_ = tm; }
 	const stream_timing& output_stream_timing() const { return output_stream_timing_; }
 	
 	const std::string& name() const { return name_; }
