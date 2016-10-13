@@ -37,7 +37,20 @@ void gate_node_output::end_read(time_unit duration) {
 gate_node::gate_node(node_graph& gr, const stream_timing& output_timing) : base(gr) {
 	add_input_(*this);
 	add_output_(*this);
-	define_output_stream_timing(output_timing);
+	define_output_timing(output_timing);
 }
+
+
+time_unit gate_node::minimal_offset_to(const node& nd) const {
+	if(&nd == this) return 0;
+	else throw std::logic_error("requested node time offset through gate");
+}
+
+
+time_unit gate_node::maximal_offset_to(const node& nd) const {
+	if(&nd == this) return 0;
+	else throw std::logic_error("requested node time offset through gate");	
+}
+
 
 }}

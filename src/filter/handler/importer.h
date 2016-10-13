@@ -49,7 +49,12 @@ public:
 	explicit importer_filter(filter& filt, Args&&... args) :
 		filter_handler(filt),
 		importer_(std::forward<Args>(args)...),
-		output(filt) { }
+		output(filt)
+	{
+		stream_timing tm;
+		tm.set_frame_clock_duration(std::chrono::milliseconds(100000));
+		this_filter().set_own_timing(tm);	
+	}
 	
 	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());
@@ -86,7 +91,13 @@ public:
 	explicit importer_filter(filter& filt, Args&&... args) :
 		filter_handler(filt),
 		importer_(std::forward<Args>(args)...),
-		output(filt) { }
+		output(filt)
+	{
+		stream_timing tm;
+		tm.set_frame_clock_duration(std::chrono::milliseconds(500));
+		this_filter().set_own_timing(tm);		
+	}
+	
 	
 	void setup() override {
 		output.define_frame_shape(importer_.frame_shape());

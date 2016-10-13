@@ -182,8 +182,8 @@ bool multiplex_node::outputs_on_different_threads_() const {
 
 
 void multiplex_node::setup() {
-	const stream_timing& tm = input().connected_node().output_stream_timing();
-	define_output_stream_timing(tm);
+	const stream_timing& tm = input().connected_node().output_timing();
+	define_output_timing(tm);
 	
 	for(std::ptrdiff_t i = 0; i < outputs_count(); ++i)
 		output_at(i).setup();

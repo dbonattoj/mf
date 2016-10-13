@@ -3,6 +3,10 @@
 
 #include "gate_node.h"
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
 
 namespace mf { namespace flow {
 
@@ -14,23 +18,19 @@ class realtime_gate_node : public gate_node {
 
 private:
 	using frame_buffer_type = ndarray_opaque<1>;
-	struct buffers {
-		frame_buffer_type loaded_frame;
-		frame_buffer_type outputted_frame;
-		
-		buffers(const node_frame_format& frm) :
-			loaded_frame(make_ndsize(1), frm),
-			outputted_frame(make_ndsize(1), frm) { }
-	};
 	
 	std::thread thread_;
+	std::unique_ptr<frame_buffer_type> loaded_frame_;
+	std::unique_ptr<frame_buffer_type> outputted_frame_;
 	std::mutex mutex_;
-	std::unique_ptr<buffers> buffers_;
+	std::atomic_flag output_up_to_date_ = ATOMIC_FLAG_INIT;
 	
 	clock_time_point launch_clock_time_;
 		
 	void thread_main_();
 	void load_new_frame_();
+	
+	time_unit current_output_time_;
 
 	// constantly reads 1 frame on separate thread
 	// any copies it into retained_frame_ (mutex-protected)
@@ -53,6 +53,11 @@ public:
 	node_frame_window_view output_begin_read_(time_unit duration) override;
 	void output_end_read_(time_unit duration) override;
 };
+
+
+inline bool is_realtime_gate_node(const node& nd) {
+	return (dynamic_cast<const realtime_gate_node*>(&nd) != nullptr);
+}
 
 
 }}

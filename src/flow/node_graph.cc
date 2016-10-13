@@ -32,7 +32,7 @@ using namespace std::chrono_literals;
 node::pull_result node_graph::pull_next_frame_() {
 	Assert(launched_);
 
-			//export_node_graph_visualization(*this, "gr.gv");
+			export_node_graph_visualization(*this, "gr.gv");
 
 	node::pull_result res = sink_->pull_next_frame();	
 	if(callback_function) callback_function(sink_->current_time());
@@ -55,6 +55,7 @@ void node_graph::setup() {
 	for(const auto& nd : nodes_) Assert(nd->was_setup());
 	
 	was_setup_ = true;
+	export_node_graph_visualization(*this, "gr.gv");
 }
 
 

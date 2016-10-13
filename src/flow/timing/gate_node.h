@@ -43,13 +43,15 @@ class gate_node : public node_derived<gate_node_input, gate_node_output> {
 public:
 	gate_node(node_graph&, const stream_timing& output_timing);
 
-	time_unit minimal_offset_to(const node&) const override { throw 1; }
-	time_unit maximal_offset_to(const node&) const override { throw 1; }
+	time_unit minimal_offset_to(const node&) const override;
+	time_unit maximal_offset_to(const node&) const override;
 	
 	input_type& input() { return input_at(0); }
 	const input_type& input() const { return input_at(0); }
 	output_type& output() { return output_at(0); }
 	const output_type& output() const { return output_at(0); }
+	
+	const stream_timing& input_timing() const { return input().connected_node().output_timing(); }
 
 	virtual void output_pre_pull_(const time_span&) = 0;
 	virtual node::pull_result output_pull_(time_span& span) = 0;
@@ -64,6 +66,11 @@ inline gate_node& gate_node_output::this_node() {
 
 inline const gate_node& gate_node_output::this_node() const {
 	return static_cast<const gate_node&>(node_output::this_node());
+}
+
+
+inline bool is_gate_node(const node& nd) {
+	return (dynamic_cast<const gate_node*>(&nd) != nullptr);
 }
 
 }}

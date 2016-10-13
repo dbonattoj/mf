@@ -71,6 +71,8 @@ protected:
 public:
 	node_frame_format();
 	
+	bool compare(const opaque_format& frm) const override;
+		
 	///@{
 	/// Get \ref node_frame_satellite object associated to the \a frame.
 	node_frame_satellite& frame_satellite(frame_ptr frame) const;
@@ -104,6 +106,8 @@ public:
 	node_selected_channel_frame_format() : base(), selected_channel_(-1) { }
 	node_selected_channel_frame_format(const base& frm, std::ptrdiff_t sel_channel);
 	
+	bool compare(const opaque_format& frm) const override;
+
 	bool has_parts() const override { return false; }
 	std::size_t parts_count() const override { throw std::logic_error("not implemented");; }
 	extracted_part extract_part(std::ptrdiff_t index) const override { throw std::logic_error("not implemented"); }

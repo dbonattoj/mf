@@ -25,6 +25,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <ostream>
 #include <fstream>
 #include <string>
+#include <chrono>
 
 namespace mf { namespace flow {
 
@@ -65,6 +66,26 @@ void filter_graph_visualization::generate_filter_(const filter& filt) {
 	html << R"(<BR/><FONT POINT-SIZE="10">&nbsp;)";
 	if(filt.is_asynchonous()) html << "prefetch = " << filt.prefetch_duration();
 	html << R"(</FONT>)";
+	
+	
+	if(with_timing_) {
+		using namespace std::chrono;
+		html << R"(<BR/><FONT POINT-SIZE="10">&#x0231A;)";
+		const stream_timing& tm = filt.timing();
+		if(filt.has_own_timing()) html << "own:";
+		else html << "in:";
+		if(tm.is_real_time()) {
+			html << " real-time";
+		} else {
+			html << " animation";
+			if(tm.has_frame_clock_duration()) {
+				real fps = 1000.0 / duration_cast<milliseconds>(tm.frame_clock_duration()).count();
+				fps = std::floor(100.0 * fps) / 100.0;
+				html << " (" << fps << " FPS)";
+			}
+		}
+		html << R"(</FONT>)";
+	}
 	
 
 	if(with_parameters_ && filt.parameters_count() > 0) {

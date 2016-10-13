@@ -36,6 +36,8 @@ class node_input;
 class node_output;
 class processing_node;
 class multiplex_node;
+class gate_node;
+class realtime_gate_node;
 
 class node_graph_visualization {
 private:	
@@ -47,16 +49,21 @@ private:
 	bool thread_index_colors_ = false;
 	bool with_state_ = true;
 	bool with_parameters_ = true;
+	bool with_timing_ = true;
 	
 	template<typename T> std::string uid_(const T& object, const std::string& prefix);
+	
+	std::string print_timing_(const stream_timing&) const;
 	
 	void generate_node_dispatch_(const node&);
 	void generate_processing_node_(const processing_node&, bool async, bool sink);
 	void generate_multiplex_node_(const multiplex_node&);
+	void generate_gate_node_(const gate_node&);
 	void generate_node_input_connections_(const node&);
 	void generate_ranks_();
 
 	std::string thread_index_color_(thread_index) const;
+	static const std::string& name_(const std::string&);
 
 public:
 	node_graph_visualization(const node_graph&, std::ostream&);

@@ -124,6 +124,8 @@ processing_node::handler_result processing_node::handler_process_(processing_nod
 		handler_->handler_process(*this, job);
 		handler_succeeded = true;
 	} catch(...) {
+		std::cerr << "HANDLER ERROR IN " << name() << std::endl;
+		throw;
 		handler_succeeded = false;
 	}
 

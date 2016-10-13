@@ -72,7 +72,7 @@ private:
 	
 	/// Timing of the frames pulled out of this node.
 	/** Defines correspondence of frame index (called "time") and real clock time.  */
-	stream_timing output_stream_timing_;
+	stream_timing output_timing_;
 	
 	/// Parameters owned by this node.
 	/** Values are stored in `parameter_valuation_`. */
@@ -218,8 +218,8 @@ public:
 	///@}
 	
 	
-	void define_output_stream_timing(const stream_timing& tm) { output_stream_timing_ = tm; }
-	const stream_timing& output_stream_timing() const { return output_stream_timing_; }
+	void define_output_timing(const stream_timing& tm) { output_timing_ = tm; }
+	const stream_timing& output_timing() const { return output_timing_; }
 	
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }

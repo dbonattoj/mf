@@ -42,6 +42,14 @@ node_frame_format::node_frame_format() :
 }
 
 
+bool node_frame_format::compare(const opaque_format& frm) const {
+	if(typeid(node_frame_format) == typeid(frm))
+		return (static_cast<const node_frame_format&>(frm) == *this);
+	else
+		return false;
+}
+
+
 node_frame_satellite* node_frame_format::frame_satellite_ptr(frame_ptr frame) const {
 	auto raw_ptr = advance_raw_ptr(frame, satellite_offset_);
 	return reinterpret_cast<node_frame_satellite*>(raw_ptr);
@@ -150,6 +158,14 @@ std::ptrdiff_t node_frame_format::array_offset() const {
 node_selected_channel_frame_format::node_selected_channel_frame_format(const base& frm, std::ptrdiff_t sel_channel) :
 	base(frm),
 	selected_channel_(sel_channel) { }
+
+
+bool node_selected_channel_frame_format::compare(const opaque_format& frm) const {
+	if(typeid(node_selected_channel_frame_format) == typeid(frm))
+		return (static_cast<const node_selected_channel_frame_format&>(frm) == *this);
+	else
+		return false;
+}
 
 	
 bool node_selected_channel_frame_format::has_array_format() const {

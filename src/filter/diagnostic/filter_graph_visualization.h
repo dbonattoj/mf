@@ -38,9 +38,10 @@ private:
 	uid_pool uid_pool_;
 
 	bool with_parameters_ = true;
+	bool with_timing_ = true;
 	
 	template<typename T> std::string uid_(const T& object, const std::string& prefix);
-	
+		
 	void generate_filter_(const filter&);
 	void generate_filter_input_connections_(const filter&);
 	void generate_ranks_();

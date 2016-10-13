@@ -232,6 +232,8 @@ bool filter::install_gate_node_if_needed_(processing_node& installed_node, insta
 		return false;
 	} else if(!this_timing.is_real_time() && successor_timing->is_real_time()) {
 		realtime_gate_node& gate = guide.node_gr.add_node<realtime_gate_node>();
+		gate.input().set_name("in");
+		gate.output().set_name("out");
 		gate.input().connect(installed_node.output());
 		gate.set_name("rt gate");
 		node_group.gate = &gate;
@@ -388,7 +390,7 @@ void filter::install_(installation_guide& guide) {
 		installed_node = &nd;
 		nd.output().set_name("out");
 	}
-	installed_node->define_output_stream_timing(timing());
+	installed_node->define_output_timing(timing());
 	installed_node->set_name(name_.empty() ? default_filter_name : name_);
 	
 	installed_node->set_handler(*this);

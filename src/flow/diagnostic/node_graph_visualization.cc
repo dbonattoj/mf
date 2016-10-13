@@ -30,6 +30,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../processing/async_node.h"
 #include "../processing/sink_node.h"
 #include "../multiplex/multiplex_node.h"
+#include "../timing/gate_node.h"
+#include "../timing/realtime_gate_node.h"
 
 namespace mf { namespace flow {
 
@@ -66,17 +68,45 @@ std::string node_graph_visualization::thread_index_color_(thread_index tid) cons
 }
 
 
+const std::string& node_graph_visualization::name_(const std::string& name) {
+	const static std::string empty = "&nbsp;&nbsp;&nbsp;&nbsp;";
+	if(name.empty()) return empty;
+	else return name;
+}
+
+
+
 void node_graph_visualization::generate_node_dispatch_(const node& nd) {	
-	if(typeid(nd) == typeid(sync_node))
+	if(is_sync_node(nd))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, false);
-	else if(typeid(nd) == typeid(async_node))
+	else if(is_async_node(nd))
 		generate_processing_node_(static_cast<const processing_node&>(nd), true, false);
-	else if(typeid(nd) == typeid(sink_node))
+	else if(is_sink_node(nd))
 		generate_processing_node_(static_cast<const processing_node&>(nd), false, true);
-	else if(typeid(nd) == typeid(multiplex_node))
+	else if(is_multiplex_node(nd))
 		generate_multiplex_node_(static_cast<const multiplex_node&>(nd));
+	else if(is_gate_node(nd))
+		generate_gate_node_(static_cast<const gate_node&>(nd));
 	else
 		throw std::logic_error("unknown node type for visualization");
+}
+
+
+std::string node_graph_visualization::print_timing_(const stream_timing& tm) const {
+	std::ostringstream html;
+	using namespace std::chrono;
+	html << "&#x0231A; ";
+	if(tm.is_real_time()) {
+		html << "real-time";
+	} else {
+		html << "animation";
+		if(tm.has_frame_clock_duration()) {
+			real fps = 1000.0 / duration_cast<milliseconds>(tm.frame_clock_duration()).count();
+			fps = std::floor(100.0 * fps) / 100.0;
+			html << " (" << fps << " FPS)";
+		}
+	}
+	return html.str();
 }
 
 
@@ -95,7 +125,7 @@ void node_graph_visualization::generate_processing_node_(const processing_node& 
 			std::string input_name = "in";
 			std::string input_id = uid_(in, "in");
 			html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(" COLOR=")" << in_col << R"(">)";
-			html << R"(<FONT POINT-SIZE="10">)" << nd.input_at(i).name() << R"(</FONT>)";
+			html << R"(<FONT POINT-SIZE="10">)" << name_(nd.input_at(i).name()) << R"(</FONT>)";
 			html << R"(</TD>)";
 			html << R"(<TD WIDTH="20"></TD>)";
 		}
@@ -117,6 +147,12 @@ void node_graph_visualization::generate_processing_node_(const processing_node& 
 	}
 	html << R"(</FONT>)";
 	
+	if(with_timing_) {
+		html << R"(<BR/><FONT POINT-SIZE="10">)";
+		html << print_timing_(nd.output_timing());
+		html << R"(</FONT>)";
+	}
+		
 	if(with_parameters_ && nd.parameters_count() + nd.input_parameters_count() + nd.sent_parameters_count() > 0) {
 		html << R"(<BR/><BR/>)";
 		for(std::ptrdiff_t i = 0; i < nd.parameters_count(); ++i)
@@ -153,7 +189,7 @@ void node_graph_visualization::generate_processing_node_(const processing_node& 
 			const std::string& chan_name = nd.output_channel_at(i).name();
 			if(i > 0) html << R"(<TD WIDTH="5"></TD>)";
 			html << R"(<TD BORDER="1" CELLPADDING="1">)";
-			html << R"(<FONT POINT-SIZE="10">)" << chan_name << R"(</FONT>)";
+			html << R"(<FONT POINT-SIZE="10">)" << name_(chan_name) << R"(</FONT>)";
 			html << R"(</TD>)";
 		}
 		html << R"(</TR>)";
@@ -184,7 +220,7 @@ void node_graph_visualization::generate_multiplex_node_(const multiplex_node& nd
 	html << R"(<TR>)";
 	html << R"(<TD WIDTH="20"></TD>)";
 	html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(" COLOR=")" << in_col << R"(">)";
-	html << R"(<FONT POINT-SIZE="10">)" << nd.input().name() << R"(</FONT>)";
+	html << R"(<FONT POINT-SIZE="10">)" << name_(nd.input().name()) << R"(</FONT>)";
 	html << R"(</TD>)";
 	html << R"(<TD WIDTH="20"></TD>)";
 	html << R"(</TR>)";
@@ -195,6 +231,12 @@ void node_graph_visualization::generate_multiplex_node_(const multiplex_node& nd
 	html << nd.name();
 	if(nd.is_async()) html << " (async)";
 	else html << " (sync)";
+	
+	if(with_timing_) {
+		html << R"(<BR/><FONT POINT-SIZE="10">)";
+		html << print_timing_(nd.output_timing());
+		html << R"(</FONT>)";
+	}
 	
 	html << R"(<BR/><BR/><FONT POINT-SIZE="10">)";
 	time_unit t = nd.current_time();
@@ -224,7 +266,7 @@ void node_graph_visualization::generate_multiplex_node_(const multiplex_node& nd
 		html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
 		html << R"(<TR CELLPADDING="1">)";
 		html << R"(<TD BORDER="1" CELLPADDING="1">)";
-		html << R"(<FONT POINT-SIZE="10">)" << nd.output_at(i).name() << R"(</FONT>)";
+		html << R"(<FONT POINT-SIZE="10">)" << name_(nd.output_at(i).name()) << R"(</FONT>)";
 		html << R"(</TD>)";
 		html << R"(</TR>)";
 		html << R"(</TABLE>)";
@@ -242,6 +284,139 @@ void node_graph_visualization::generate_multiplex_node_(const multiplex_node& nd
 	
 	output_ << '\t' << node_id << " [shape=plaintext label=<\n" << html.str() << "\n>];\n";
 }
+
+
+void node_graph_visualization::generate_gate_node_(const gate_node& nd) {	
+	std::string node_id = uid_(nd, "node");
+	
+	std::ostringstream html;
+	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
+	
+	std::string input_id = uid_(nd.input(), "in");
+	std::string in_col = thread_index_color_(0);
+	html << R"(<TR>)";
+	html << R"(<TD WIDTH="20"></TD>)";
+	html << R"(<TD BORDER="1" CELLPADDING="1" PORT=")" << input_id << R"(" COLOR=")" << in_col << R"(">)";
+	html << R"(<FONT POINT-SIZE="10">)" << name_(nd.input().name()) << R"(</FONT>)";
+	html << R"(</TD>)";
+	html << R"(<TD WIDTH="20"></TD>)";
+	html << R"(</TR>)";
+	
+	std::string col = thread_index_color_(0);
+	html << R"(<TR>)";
+	html << R"(<TD COLSPAN="3" BORDER="1" STYLE="ROUNDED" CELLPADDING="0" COLOR=")" << col << R"(">)";
+	
+	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4">)";
+	html << R"(<TR><TD>)";
+	
+	html << R"(gate)";
+	html << R"(<BR/><BR/>)";
+		
+	if(with_timing_) {
+		html << R"(<FONT POINT-SIZE="10">)";
+		html << "in: " << print_timing_(nd.input_timing());
+		html << R"(</FONT>)";
+	}
+		
+	html << R"(<BR/><FONT POINT-SIZE="10">)";
+	time_unit t = nd.current_time();
+	html << "in t = " << nd.current_time();
+	html << R"(</FONT>)";
+	
+
+	html << R"(</TD></TR>)";
+	html << R"(<HR/>)";
+	html << R"(<TR><TD>)";
+
+
+		
+	if(with_timing_) {
+		html << R"(<FONT POINT-SIZE="10">)";
+		html << "out: " << print_timing_(nd.output_timing());
+		html << R"(</FONT>)";
+	}
+	
+	html << R"(<BR/><FONT POINT-SIZE="10">)";
+	html << "out t = " << "...";
+	html << R"(</FONT>)";
+
+	
+	html << R"(</TD></TR>)";
+	html << R"(</TABLE>)";
+	
+	
+	html << R"(</TD>)";
+
+	
+	html << R"(</TR>)";
+	
+	html << R"(<TR>)";
+	html << R"(<TD COLSPAN="3" BORDER="0">)";
+	html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
+
+	html << R"(<TR>)";
+	html << R"(<TD WIDTH="20"></TD>)";
+	
+	std::string output_id = uid_(nd.output(), "out");
+	std::string output_col = thread_index_color_(nd.output().reader_thread_index());
+	html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")" << output_id << R"(" COLOR=")" << output_col << R"(">)";
+	html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
+	html << R"(<TR CELLPADDING="1">)";
+	
+	for(std::ptrdiff_t i = 0; i < nd.output().channels_count(); ++i) {
+		const std::string& chan_name = nd.output().channel_name_at(i);
+		if(i > 0) html << R"(<TD WIDTH="5"></TD>)";
+		html << R"(<TD BORDER="1" CELLPADDING="1">)";
+		html << R"(<FONT POINT-SIZE="10">)" << name_(chan_name) << R"(</FONT>)";
+		html << R"(</TD>)";
+	}	
+	
+	html << R"(</TR>)";
+	html << R"(</TABLE>)";
+	html << R"(</TD>)";
+	html << R"(<TD WIDTH="20"></TD>)";
+	
+	html << R"(</TR>)";
+	html << R"(</TABLE>)";
+	html << R"(</TD>)";
+	html << R"(</TR>)";
+	
+	html << R"(</TABLE>)";
+	
+	output_ << '\t' << node_id << " [shape=plaintext label=<\n" << html.str() << "\n>];\n";
+}
+
+
+/*
+	if(! sink) {
+		std::string output_col = thread_index_color_(nd.output().reader_thread_index());
+		html << R"(<TR>)";
+		html << R"(<TD COLSPAN=")" << colspan << R"(" BORDER="0">)";
+		html << R"(<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0">)";
+		if(async) html << R"(<TR><TD></TD><TD BORDER="1" HEIGHT="3" COLOR=")" << col << R"("></TD><TD></TD></TR>)";
+		html << R"(<TR>)";
+		html << R"(<TD WIDTH="20"></TD>)";
+		html << R"(<TD BORDER="1" CELLPADDING="3" PORT=")"
+			<< uid_(nd.output(), "out") << R"(" COLOR=")" << output_col << R"(">)";
+		html << R"(<TABLE BORDER="0" CELLSPACING="2">)";
+		html << R"(<TR CELLPADDING="1">)";
+		for(std::ptrdiff_t i = 0; i < nd.output_channels_count(); ++i) {
+			const std::string& chan_name = nd.output_channel_at(i).name();
+			if(i > 0) html << R"(<TD WIDTH="5"></TD>)";
+			html << R"(<TD BORDER="1" CELLPADDING="1">)";
+			html << R"(<FONT POINT-SIZE="10">)" << name_(chan_name) << R"(</FONT>)";
+			html << R"(</TD>)";
+		}
+		html << R"(</TR>)";
+		html << R"(</TABLE>)";
+		html << R"(</TD>)";
+		html << R"(<TD WIDTH="20"></TD>)";
+		html << R"(</TR>)";
+		html << R"(</TABLE>)";
+		html << R"(</TD>)";
+		html << R"(</TR>)";
+	}
+*/
 
 
 void node_graph_visualization::generate_node_input_connections_(const node& nd) {
