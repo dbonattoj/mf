@@ -23,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <iosfwd>
 #include <cmath>
+#include "../common.h"
 #include "math_constants.h"
 
 namespace mf {
@@ -31,25 +32,25 @@ namespace mf {
 /** Defines I/O in degrees, and conversion. Provides unambiguity in what angles mean. */
 struct angle {
 private:
-	float radiants_;
+	real radiants_;
 
 public:
-	static angle degrees(float d) { return d * radiant_per_degree; }
-	static angle radiants(float r) { return r; }	
+	static angle degrees(real d) { return d * radiant_per_degree; }
+	static angle radiants(real r) { return r; }
 
 	angle() = default;
-	angle(float r) : radiants_(r) { }
+	angle(real r) : radiants_(r) { }
 	angle(const angle&) = default;
 	
-	const float& get_radiants() const { return radiants_; }
-	float get_degrees() const { return radiants_ * degree_per_radiant; }
-	void set_radiants(float r) { radiants_ = r; }
-	void set_degrees(float d) { radiants_ = d * radiant_per_degree; }
+	const real& get_radiants() const { return radiants_; }
+	real get_degrees() const { return radiants_ * degree_per_radiant; }
+	void set_radiants(real r) { radiants_ = r; }
+	void set_degrees(real d) { radiants_ = d * radiant_per_degree; }
 	
-	operator float& () { return radiants_; }
-	operator const float& () const { return radiants_; }
+	operator real& () { return radiants_; }
+	operator const real& () const { return radiants_; }
 	
-	angle& operator=(float r) { radiants_ = r; return *this; }
+	angle& operator=(real r) { radiants_ = r; return *this; }
 	angle& operator=(const angle&) = default;
 	
 	bool operator==(angle a) const { return radiants_ == a.radiants_; }
@@ -59,11 +60,11 @@ public:
 };
 
 inline angle operator"" _deg(long double deg) {
-	return angle::degrees(deg);
+	return angle::degrees(static_cast<real>(deg));
 }
 
 inline angle operator"" _rad(long double rad) {
-	return angle::radiants(rad);
+	return angle::radiants(static_cast<real>(rad));
 }
 
 std::ostream& operator<<(std::ostream&, angle);

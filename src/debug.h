@@ -69,7 +69,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <set>
 #include <string>
-#include <unistd.h>
 #include <cstdlib>
 #include <limits>
 

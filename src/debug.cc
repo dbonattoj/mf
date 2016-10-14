@@ -155,8 +155,8 @@ void random_sleep() {
 	int r = randint<int>(0, std::numeric_limits<int>::max());
 	int r1 = r % 10;	
 	if(r1 < 4) return;
-	else if(r1 < 6) ::usleep(r % 50);
-	else ::usleep(1000 + r%200);
+	else if(r1 < 6) sleep_us(r % 50);
+	else sleep_us(1000 + r%200);
 }
 
 

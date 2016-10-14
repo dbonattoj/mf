@@ -74,7 +74,7 @@ public:
 		return flipped_ ? image_coordinates_type(y, x) : image_coordinates_type(x, y);
 	}
 	
-	pixel_coordinates_type to_pixel(image_coordinates_type im) const {
+	pixel_coordinates_type to_pixel(const image_coordinates_type& im) const {
 		auto x = static_cast<std::ptrdiff_t>(im[0] - 0.5);
 		auto y = static_cast<std::ptrdiff_t>(im[1] - 0.5);
 		return flipped_ ? pixel_coordinates_type{y, x} : pixel_coordinates_type{x, y};

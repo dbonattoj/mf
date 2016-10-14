@@ -125,13 +125,13 @@ void flip_endianness(byte* data, std::size_t sz) {
 }
 
 
-std::size_t file_size(const std::string& filename) {
+std::streamoff file_size(const std::string& filename) {
 	std::ifstream stream(filename, std::ifstream::ate | std::ifstream::binary);
 	return stream.tellg();
 }
 
 
-std::size_t file_size(std::ifstream& stream) {
+std::streamoff file_size(std::ifstream& stream) {
 	auto pos = stream.tellg();
 	stream.seekg(0, std::ifstream::end);
 	auto size = stream.tellg();

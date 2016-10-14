@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <string>
 #include <sstream>
 #include <cstdio>
+#include <cctype>
 
 namespace mf {
 

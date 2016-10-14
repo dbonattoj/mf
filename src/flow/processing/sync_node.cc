@@ -20,7 +20,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "sync_node.h"
 #include "../node_graph.h"
-#include <unistd.h>
 
 namespace mf { namespace flow {
 

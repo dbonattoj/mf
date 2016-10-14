@@ -50,8 +50,8 @@ template<typename T> void flip_endianness(T& t) {
 	flip_endianness(reinterpret_cast<byte*>(&t), sizeof(T));
 }
 
-std::size_t file_size(const std::string&);
-std::size_t file_size(std::ifstream&);
+std::streamoff file_size(const std::string&);
+std::streamoff file_size(std::ifstream&);
 
 }
 

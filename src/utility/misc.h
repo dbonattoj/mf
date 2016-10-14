@@ -80,6 +80,7 @@ bool is_even(T x) { return (x % 2) == 0; }
 
 std::default_random_engine& random_engine();
 
+
 template<typename T>
 T randint(T a, T b) {
 	std::default_random_engine& engine = random_engine();
@@ -107,12 +108,10 @@ auto forward_make_shared_const(T&& t) {
 }
 
 
-static constexpr std::size_t pointer_size = sizeof(void*);
-static constexpr std::size_t pointer_alignment_requirement = alignof(void*);
+void sleep(unsigned int seconds);
+void sleep_ms(unsigned int milliseconds);
+void sleep_us(unsigned int microseconds);
 
-
-/*
-*/
 
 }
 

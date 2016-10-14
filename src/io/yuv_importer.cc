@@ -92,7 +92,7 @@ time_unit yuv_importer::current_time() const {
 
 
 time_unit yuv_importer::total_duration() const {
-	return file_size_ / frame_size_;
+	return static_cast<time_unit>(file_size_) / frame_size_;
 }
 	
 

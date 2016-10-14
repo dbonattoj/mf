@@ -1,4 +1,5 @@
 #include "realtime_gate_node.h"
+#include "../../utility/misc.h"
 
 namespace mf { namespace flow {
 

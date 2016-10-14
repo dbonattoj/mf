@@ -23,6 +23,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include "memory.h"
 #include <windows.h>
+#include <malloc.h>
+#include "../utility/misc.h"
 
 namespace mf {
 
@@ -40,6 +42,104 @@ void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv
 	// Not available on Windows
 	return;
 }
+
+
+
+void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
+	// for _aligned_malloc, alignment must be power of 2
+	std::size_t actual_align = 1;
+	while(actual_align < align) actual_align *= 2;
+
+	// for _aligned_malloc, alignment must be power of 2
+	void* ptr = ::_aligned_malloc(size, actual_align);
+	Assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
+
+	return ptr;
+}
+
+
+void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
+	::_aligned_free(ptr);
+}
+
+
+
+void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
+	HANDLE double_mapping = ::CreateFileMapping(
+		INVALID_HANDLE_VALUE,
+		nullptr,
+		PAGE_READWRITE,
+		0, 2 * size,
+		NULL
+	);
+	if(double_mapping == nullptr) std::runtime_error("CreateFileMapping failed"); // TODO windows system error exception
+
+	LPVOID base = ::VirtualAlloc(
+		nullptr,
+		2 * size,
+		MEM_RESERVE,
+		PAGE_READWRITE
+	);
+	if(base == nullptr) std::runtime_error("VirtualAlloc failed");
+
+	/*
+	LPVOID base = ::MapViewOfFile(
+		double_mapping,
+		FILE_MAP_WRITE,
+		0, 0,
+		2 * size
+	);
+	if(base == nullptr) std::runtime_error("MapViewOfFile (first) failed");
+
+	UnmapViewOfFile(base);
+
+	// assuming that the memory range [base, base + 2*size[ remains safe between these calls
+	// TODO retry if not
+	*/
+
+
+	LPVOID actual_base = ::MapViewOfFileEx(
+		double_mapping,
+		FILE_MAP_WRITE,
+		0, 0,
+		size,
+		base
+	);
+	if(actual_base == nullptr) std::runtime_error("MapViewOfFile (base) failed");
+	Assert(actual_base == base);
+
+	LPVOID actual_mirror = ::MapViewOfFileEx(
+		double_mapping,
+		FILE_MAP_WRITE,
+		0, 0,
+		size,
+		advance_raw_ptr(base, size)
+	);
+	if(actual_mirror == nullptr) std::runtime_error("MapViewOfFile (mirror) failed");
+
+	::CloseHandle(double_mapping);
+	// if will close only when the views get unmapped, which is done in raw_deallocate()
+
+	return static_cast<void*>(base);
+}
+
+
+void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
+	::UnmapViewOfFile(base);
+	::UnmapViewOfFile(advance_raw_ptr(base, size));
+	::VirtualFree(base, 2 * size, MEM_RELEASE);
+}
+
+
+void* raw_null_allocator::raw_allocate(std::size_t size, std::size_t align) {
+	return ::malloc(size);
+}
+
+
+void raw_null_allocator::raw_deallocate(void* base, std::size_t size) {
+	::free(base);
+}
+
 
 }
 
