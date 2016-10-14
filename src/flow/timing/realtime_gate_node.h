@@ -20,10 +20,9 @@ private:
 	using frame_buffer_type = ndarray_opaque<1>;
 	
 	std::thread thread_;
-	std::unique_ptr<frame_buffer_type> loaded_frame_;
-	std::unique_ptr<frame_buffer_type> outputted_frame_;
+	std::unique_ptr<frame_buffer_type> back_buffer_;
+	std::unique_ptr<frame_buffer_type> front_buffer_;
 	std::mutex mutex_;
-	std::atomic_flag output_up_to_date_ = ATOMIC_FLAG_INIT;
 	
 	clock_time_point launch_clock_time_;
 		
@@ -39,7 +38,7 @@ private:
 	//   calculated from pull clock times
 	//   --> expected next clock time --> frame time to pull
 
-public:
+public:	
 	explicit realtime_gate_node(node_graph&);
 
 	void launch() override;
