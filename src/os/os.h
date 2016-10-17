@@ -26,9 +26,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 	#define MF_OS_DARWIN
 #elif defined(_WIN32)
 	#define MF_OS_WINDOWS
-	#if defined(_WIN64)
-		#define MF_OS_WINDOWS64
-	#endif
+#elif defined(__CYGWIN__)
+	#define MF_OS_WINDOWS
+	#define MF_OS_CYGWIN
 #elif defined(__linux__)
 	#define MF_OS_LINUX
 #endif

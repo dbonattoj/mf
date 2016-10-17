@@ -27,6 +27,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+
 bool file_exists(const std::string& filepath) {
 	auto handle = std::fopen(filepath.c_str(), "r");
 	if(handle) {
@@ -38,8 +39,10 @@ bool file_exists(const std::string& filepath) {
 }
 
 
-std::default_random_engine& random_engine() {
-	static thread_local std::default_random_engine engine {std::default_random_engine(std::random_device{}())};
+default_random_engine& random_engine() {
+	static default_random_engine engine = default_random_engine(
+		std::chrono::system_clock::now().time_since_epoch().count()
+	);
 	return engine;
 }
 

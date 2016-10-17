@@ -29,6 +29,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 	
+using default_random_engine = std::mt19937;
+	
 template<typename...> using void_t = void;
 
 /// Check if a file at `filename` exists.
@@ -78,12 +80,13 @@ bool is_odd(T x) { return (x % 2) != 0; }
 template<typename T>
 bool is_even(T x) { return (x % 2) == 0; }
 
-std::default_random_engine& random_engine();
+
+default_random_engine& random_engine();
 
 
 template<typename T>
 T randint(T a, T b) {
-	std::default_random_engine& engine = random_engine();
+	default_random_engine& engine = random_engine();
 	std::uniform_int_distribution<T> dist(a, b);
 	return dist(engine);
 }

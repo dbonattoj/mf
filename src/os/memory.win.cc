@@ -24,18 +24,30 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "memory.h"
 #include <windows.h>
 #include <malloc.h>
+#include <cstdlib>
 #include "../utility/misc.h"
 
+#include <iostream>
+
 namespace mf {
+	
+namespace {
+
+const ::SYSTEM_INFO& system_info_() {
+	static ::SYSTEM_INFO info;
+	static bool loaded = false;
+	if(! loaded) {
+		::GetSystemInfo(&info);
+		loaded = true;
+	}
+	return info;
+}
+
+}
 
 std::size_t system_page_size() {
-	static std::size_t page_size = 0;
-		if(page_size == 0) {
-		SYSTEM_INFO si;
-		GetSystemInfo(&si);
-		page_size = si.dwPageSize;
-	}
-	return page_size;
+	//return system_info_().dwPageSize;
+	return system_info_().dwAllocationGranularity;
 }
 
 void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv) {
@@ -51,7 +63,8 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	while(actual_align < align) actual_align *= 2;
 
 	// for _aligned_malloc, alignment must be power of 2
-	void* ptr = ::_aligned_malloc(size, actual_align);
+	//void* ptr = ::_aligned_malloc(size, actual_align);
+	void* ptr = aligned_alloc(actual_align, size);
 	Assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
 
 	return ptr;
@@ -59,12 +72,22 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 
 
 void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
-	::_aligned_free(ptr);
+	//::_aligned_free(ptr);
+	free(ptr);
 }
 
 
 
 void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
+	std::size_t alloc_granularity = system_info_().dwAllocationGranularity;
+	
+	std::cerr << "alloc gran: " << alloc_granularity << std::endl;
+	
+	if(size % alloc_granularity != 0)
+		throw std::invalid_argument("size must be multiple of allocation granularity");
+	if(alloc_granularity % align != 0)
+		throw std::invalid_argument("requested alignment must be divisor of allocation granularity"); 
+
 	HANDLE double_mapping = ::CreateFileMapping(
 		INVALID_HANDLE_VALUE,
 		nullptr,
