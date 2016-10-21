@@ -19,10 +19,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/filter/filter_graph.h>
-#include <mf/filter/filter.h>
-#include <mf/filter/filter_parameter.h>
-#include <mf/utility/misc.h>
+#include "../../src/filter/filter_graph.h"
+#include "../../src/filter/filter.h"
+#include "../../src/filter/filter_parameter.h"
+#include "../../src/utility/misc.h"
 #include <string>
 #include "../support/flow_parameter.h"
 
@@ -31,7 +31,7 @@ using namespace mf::test;
 
 
 
-TEST_CASE("flow graph with parameters", "[flow][parameter]") {
+TEST_CASE("flow_parameter", "[flow][parameter]") {
 	flow::filter_graph gr;
 	auto shp = make_ndsize(10, 10);
 

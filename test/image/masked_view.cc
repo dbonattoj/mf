@@ -19,9 +19,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/image/masked_image_view.h>
-#include <mf/nd/ndarray.h>
-#include <mf/color.h>
+#include "../../src/image/masked_image_view.h"
+#include "../../src/nd/ndarray.h"
+#include "../../src/color.h"
 
 using namespace mf;
 

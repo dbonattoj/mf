@@ -1,7 +1,7 @@
 #ifndef MF_TEST_FLOW_ACTIVATION_H_
 #define MF_TEST_FLOW_ACTIVATION_H_
 
-#include <mf/common.h>
+#include "../../src/common.h"
 #include <valarray>
 
 namespace mf { namespace test {

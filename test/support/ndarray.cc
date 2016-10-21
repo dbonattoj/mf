@@ -19,7 +19,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include "ndarray.h"
-#include <mf/debug.h>
+#include "../../src/debug.h"
 #include <random>
 
 namespace mf { namespace test {

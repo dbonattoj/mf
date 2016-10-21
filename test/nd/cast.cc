@@ -20,8 +20,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #include <catch.hpp>
 #include <array>
-#include <mf/nd/ndarray_view.h>
-#include <mf/nd/ndarray_view_cast.h>
+#include "../../src/nd/ndarray_view.h"
+#include "../../src/nd/ndarray_view_cast.h"
 #include "../support/ndarray.h"
 #include <cstdint>
 
@@ -29,7 +29,7 @@ using namespace mf;
 using namespace mf::test;
 
 
-TEST_CASE("ndarray_view cast", "[nd][ndarray_view_cast]") {
+TEST_CASE("ndarray_view_cast", "[nd][ndarray_view_cast]") {
 	constexpr std::size_t len = 3 * 4 * 4;
 	auto shp = make_ndsize(3, 4, 4);
 

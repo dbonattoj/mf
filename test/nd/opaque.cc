@@ -19,12 +19,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/nd/opaque/ndarray_view_opaque.h>
-#include <mf/nd/opaque/ndarray_timed_view_opaque.h>
-#include <mf/nd/opaque/ndarray_opaque.h>
-#include <mf/nd/opaque_format/opaque_multi_ndarray_format.h>
-#include <mf/nd/opaque_format/opaque_ndarray_format.h>
-#include <mf/os/memory.h>
+#include "../../src/nd/opaque/ndarray_view_opaque.h"
+#include "../../src/nd/opaque/ndarray_timed_view_opaque.h"
+#include "../../src/nd/opaque/ndarray_opaque.h"
+#include "../../src/nd/opaque_format/opaque_multi_ndarray_format.h"
+#include "../../src/nd/opaque_format/opaque_ndarray_format.h"
+#include "../../src/os/memory.h"
 #include "../support/ndarray_opaque.h"
 
 using namespace mf;
@@ -161,7 +161,7 @@ TEST_CASE("ndarray_view_opaque", "[nd][ndarray_view_opaque]") {
 }
 
 
-TEST_CASE("ndarray_view <--> ndarray_view_opaque", "[nd][ndarray_view_opaque]") {
+TEST_CASE("ndarray_view_opaque_cast", "[nd][ndarray_view_opaque]") {
 	constexpr std::size_t pad = sizeof(int);
 	constexpr std::size_t len = 3 * 4 * 4;
 	std::vector<int> raw(2 * len);

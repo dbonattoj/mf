@@ -1,0 +1,136 @@
+# toolset
+CXX := x86_64-w64-
+CXXFLAGS := -std=c++14 -fcolor-diagnostics -Qunused-arguments -Wno-deprecated-declarations
+CXXFLAGS_SHARED := -fPIC
+LDFLAGS := 
+LDFLAGS_SHARED := -shared
+LDLIBS := -lpthread -lm
+
+# debug/deploy build settings
+ifeq ($(DEBUG), 1)
+	CXXFLAGS += -g -pedantic
+	LDFLAGS += -Wl,--export-dynamic
+else
+	CXXFLAGS += -O3 -DNDEBUG 
+endif
+
+# included external dependencies
+CXXFLAGS += -I./external/include -I./dist/include
+
+# external dependencies on system
+PACKAGES := opencv eigen3
+CXXFLAGS += $(shell pkg-config --cflags $(PACKAGES))
+LDFLAGS += $(shell pkg-config --libs-only-L $(PACKAGES))
+LDLIBS += $(shell pkg-config --libs-only-l --libs-only-other $(PACKAGES))
+
+
+# === shared library mf ======
+ifeq ($(DEBUG), 1)
+	LIB := $(DIST_DIR)/libmf_debug.so
+else
+	LIB := $(DIST_DIR)/libmf.so
+endif
+LIB_SRC := $(shell find src -name '*.cc')
+LIB_OBJ := $(patsubst src/%.cc,$(BUILD_DIR)/src/%.o,$(LIB_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(LIB_SRC))
+
+
+# === tests ======
+TEST := $(DIST_DIR)/mf_test
+TEST_SRC := $(shell find test -name '*.cc')
+TEST_OBJ := $(patsubst test/%.cc,$(BUILD_DIR)/test/%.o,$(TEST_SRC))
+# test support
+TEST_SUPPORT_SRC := $(shell find test/support/. -name '*.cc')
+TEST_SUPPORT_OBJ := $(patsubst test/support/%.cc,$(BUILD_DIR)/test/support/%.o,$(TEST_SUPPORT_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(TEST_SRC) $(TEST_SUPPORT_SRC))
+
+
+# === programs ======
+# one executable per directory in prog/*.
+PROG_DIR := $(shell find prog -mindepth 1 -maxdepth 1 -type d ! -name "support")
+PROG := $(patsubst prog/%,$(DIST_DIR)/prog/%,$(PROG_DIR))
+PROG_SRC := $(shell find prog -maxdepth 1 -name '*.cc')
+PROG_SUPPORT_OBJ := $(patsubst prog/%.cc,$(BUILD_DIR)/prog/%.o,$(PROG_SUPPORT_SRC))
+DEP += $(patsubst %.cc,$(BUILD_DIR)/%.d,$(PROG_SRC) $(PROG_SUPPORT_SRC)) 
+
+
+# === default targets ======
+all : library
+	
+
+library : $(LIB)
+	
+
+build_test : $(TEST)
+	
+
+test : build_test
+	$(TEST)
+
+prog : $(PROG)
+	
+
+clean :
+	rm -rf ./build/ ./dist/
+
+
+
+# === internal targets ======
+
+# = library ===
+
+# shared library mf: build objects for src/../*.cc, and then link into shared library target
+# also create symlink dist/include/mf --> src/ , so that test+prog can #include <mf/...>
+# TODO improve
+$(LIB) : $(LIB_OBJ)
+	@echo linking $@ && \
+	mkdir -p $(dir $@) && \
+	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS) $(LDFLAGS_SHARED) -o $@ $(LIB_OBJ) $(LDLIBS) && \
+	mkdir -p dist/include && ln -fs ../../src dist/include/mf
+	
+
+# .cc compilation in src/: compile for shared library
+$(BUILD_DIR)/src/%.o : src/%.cc
+	@echo compiling $@ && \
+	mkdir -p $(dir $@) && \
+	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) -c -o $@ $< -MMD
+
+
+
+# = test ===
+
+# test executable:  build mf, obj for test/../*.cc, test/support/*.cc, and link into test executable 
+$(TEST) : $(LIB) $(TEST_OBJ) $(TEST_SUPPORT_OBJ)
+	@echo linking $@ && \
+	mkdir -p $(dir $@) && \
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(TEST_OBJ) $(LIB_OBJ) $(LDLIBS)
+
+# .cc compilation in test/: compile for test executable
+$(BUILD_DIR)/test/%.o : test/%.cc
+	@echo compiling $@ && \
+	mkdir -p $(dir $@) && \
+	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
+	
+
+# = programs ===
+
+# program executable: 
+$(DIST_DIR)/prog/% : prog/%/*.cc $(PROG_SUPPORT_OBJ) $(LIB)
+	@echo building program $@ && \
+	mkdir -p $(dir $@) && \
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+
+# .cc compilation in prog/: compile for program executable
+$(BUILD_DIR)/prog/%.o : prog/%.cc
+	@echo compiling $@ && \
+	mkdir -p $(dir $@) && \
+	$(CXX) $(CXXFLAGS) -c -o $@ $< -MMD
+
+
+
+.PHONY: clean library build_test test prog
+
+
+# included dependencies extracted from headers, if available
+-include $(DEP)

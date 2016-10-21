@@ -19,15 +19,15 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/image/image.h>
-#include <mf/image/image_view.h>
-#include <mf/nd/ndarray.h>
-#include <mf/color.h>
+#include "../../src/image/image.h"
+#include "../../src/image/image_view.h"
+#include "../../src/nd/ndarray.h"
+#include "../../src/color.h"
 
 using namespace mf;
 
 
-TEST_CASE("image (container)", "[image]") {
+TEST_CASE("image", "[image]") {
 	rgb_color c1(1, 2, 3), c2(4, 5, 6), c3(7, 8, 9), c4(10, 11, 12);
 
 	auto shp = make_ndsize(10, 20);

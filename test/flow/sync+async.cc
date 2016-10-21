@@ -19,9 +19,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/filter/filter_graph.h>
-#include <mf/filter/filter.h>
-#include <mf/utility/misc.h>
+#include "../../src/filter/filter_graph.h"
+#include "../../src/filter/filter.h"
+#include "../../src/utility/misc.h"
 #include "../support/ndarray.h"
 #include "../support/flow.h"
 #include "../support/flow_activation.h"
@@ -29,7 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 using namespace mf;
 using namespace mf::test;
 
-TEST_CASE("flow graph test: mixed", "[flow][sync+async]") {
+TEST_CASE("flow_sync+async", "[flow][sync+async]") {
 	constexpr bool async1 = false;
 	constexpr bool async2 = true;
 	
@@ -39,7 +39,7 @@ TEST_CASE("flow graph test: mixed", "[flow][sync+async]") {
 }
 
 
-TEST_CASE("flow graph test: mixed alt.", "[flow][async+sync]") {
+TEST_CASE("flow_async+sync", "[flow][async+sync]") {
 	constexpr bool async1 = true;
 	constexpr bool async2 = false;
 

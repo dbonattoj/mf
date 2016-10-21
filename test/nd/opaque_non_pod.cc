@@ -19,9 +19,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/nd/opaque/ndarray_opaque.h>
-#include <mf/nd/opaque_format/opaque_format.h>
-#include <mf/nd/opaque_format/opaque_object_format.h>
+#include "../../src/nd/opaque/ndarray_opaque.h"
+#include "../../src/nd/opaque_format/opaque_format.h"
+#include "../../src/nd/opaque_format/opaque_object_format.h"
 #include <cstdint>
 
 using namespace mf;
@@ -105,7 +105,7 @@ public:
 	}
 };
 
-TEST_CASE("non-pod frames", "[nd][ndarray_opaque]") {
+TEST_CASE("opaque_non_pod", "[nd][ndarray_opaque]") {
 	SECTION("custom_frame_format") {
 		custom_frame_format frm, frm_;
 		ndsize<2> shape{3, 4};

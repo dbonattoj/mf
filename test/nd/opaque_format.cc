@@ -22,9 +22,9 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <cstdint>
 #include <array>
 #include <string>
-#include <mf/nd/opaque_format/opaque_multi_ndarray_format.h>
-#include <mf/nd/opaque_format/opaque_ndarray_format.h>
-#include <mf/nd/opaque_format/opaque_object_format.h>
+#include "../../src/nd/opaque_format/opaque_multi_ndarray_format.h"
+#include "../../src/nd/opaque_format/opaque_ndarray_format.h"
+#include "../../src/nd/opaque_format/opaque_object_format.h"
 
 using namespace mf;
 

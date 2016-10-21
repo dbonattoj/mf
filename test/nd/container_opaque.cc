@@ -19,8 +19,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 */
 
 #include <catch.hpp>
-#include <mf/nd/opaque/ndarray_view_opaque.h>
-#include <mf/nd/opaque/ndarray_opaque.h>
+#include "../../src/nd/opaque/ndarray_view_opaque.h"
+#include "../../src/nd/opaque/ndarray_opaque.h"
 #include "../support/ndarray_opaque.h"
 
 using namespace mf;

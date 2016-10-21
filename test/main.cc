@@ -20,7 +20,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 #define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
-#include <mf/debug.h>
+#include "../src/debug.h"
 
 using namespace mf;
 

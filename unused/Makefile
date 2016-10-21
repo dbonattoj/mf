@@ -17,22 +17,16 @@ else
     BUILD_DIR := build/deploy
 endif
 
-# detect operating system
-ifeq ($(shell echo $$OSTYPE), cygwin)
-    UNAME := Cygwin
-else
-    UNAME := $(shell uname -s)
-endif
+# detect host operating system
+HOST := $(shell uname -s)
 
 
 # include platform-specific Makefile
 export
-ifeq ($(UNAME), Darwin)
+ifeq ($(HOST), Darwin)
     include Makefile.darwin
-else ifeq ($(UNAME), Linux)
+else ifeq ($(HOST), Linux)
     include Makefile.linux
-else ifeq ($(UNAME), Cygwin)
-    include Makefile.cygwin
 else
-    $(error Unknown platform)
+    $(error Unknown host platform)
 endif
