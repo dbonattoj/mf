@@ -50,7 +50,7 @@ public:
 	>;
 
 private:
-	using typename base::const_view;
+	using const_view = typename base::const_view;
 	using const_masked_view = masked_image_view<std::add_const_t<pixel_type>, Mask>;
 
 	mutable cv_mask_mat_type mask_mat_;

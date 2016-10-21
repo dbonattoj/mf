@@ -32,7 +32,7 @@ namespace mf {
  ** ax + by + cz = d. When normalized, representations are unique and distance is from origin to plane. */
 struct plane {
 	Eigen_vec3 normal = Eigen_vec3::Zero();
-	float distance = 0;
+	Eigen_scalar distance = 0;
 	
 	plane() = default;
 	plane(const plane&) = default;

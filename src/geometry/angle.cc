@@ -31,14 +31,14 @@ std::ostream& operator<<(std::ostream& str, angle a) {
 }
 
 std::istream& operator>>(std::istream& str, angle& a) {
-	float deg;
+	real deg;
 	str >> deg;
 	a.set_degrees(deg);
 	return str;
 }
 
 angle angle::smallest_between(angle a, angle b) {
-	float diff = b - a;
+	real diff = b - a;
 	while(diff < -pi) diff += pi;
 	while(diff > +pi) diff -= pi;
 	return diff;

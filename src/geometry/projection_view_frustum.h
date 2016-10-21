@@ -29,7 +29,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 	
-class depth_projection_parameters;
+struct depth_projection_parameters;
 
 /// View frustum of a perspective camera, without pose.
 /** Frustum apex is at camera center, axis-aligned, and pointing in +Z or -Z direction.

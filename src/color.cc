@@ -78,9 +78,9 @@ rgb_color color_blend(const rgb_color& a, real a_weight, const rgb_color& b, rea
 	real b_sum = a_weight * static_cast<sum_type>(a.b) + b_weight * static_cast<sum_type>(b.b);
 	real weight_sum = a_weight + b_weight;
 	rgb_color result;
-	result.r = clamp(r_sum / weight_sum, 0.0, 255.0);
-	result.g = clamp(g_sum / weight_sum, 0.0, 255.0);
-	result.b = clamp(b_sum / weight_sum, 0.0, 255.0);
+	result.r = static_cast<std::uint8_t>(clamp(r_sum / weight_sum, 0.0, 255.0));
+	result.g = static_cast<std::uint8_t>(clamp(g_sum / weight_sum, 0.0, 255.0));
+	result.b = static_cast<std::uint8_t>(clamp(b_sum / weight_sum, 0.0, 255.0));
 	return result;
 }
 
