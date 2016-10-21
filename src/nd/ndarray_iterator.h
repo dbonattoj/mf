@@ -79,9 +79,9 @@ public:
 	ndarray_iterator& operator+=(std::ptrdiff_t);
 	ndarray_iterator& operator-=(std::ptrdiff_t);
 	
-	reference operator*() const noexcept { return *pointer_; }
-	pointer operator->() const noexcept { return pointer_; }
-	pointer ptr() const noexcept { return pointer_; }
+	reference operator*() const { return *pointer_; }
+	pointer operator->() const { return pointer_; }
+	pointer ptr() const { return pointer_; }
 	
 	reference operator[](std::ptrdiff_t n) const { return *(*this + n); }
 	
@@ -107,8 +107,8 @@ public:
 	friend std::ptrdiff_t operator-(const ndarray_iterator& a, const ndarray_iterator& b)
 		{ return a.index() - b.index(); }
 	
-	index_type index() const noexcept { return index_; }
-	coordinates_type coordinates() const noexcept { return view_.index_to_coordinates(index_); }
+	index_type index() const { return index_; }
+	coordinates_type coordinates() const { return view_.index_to_coordinates(index_); }
 };
 
 

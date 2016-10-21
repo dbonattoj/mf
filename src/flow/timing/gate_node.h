@@ -17,7 +17,7 @@ private:
 public:
 	explicit gate_node_output(node& nd) : node_output(nd) { }
 	
-	std::size_t channels_count() const noexcept override;
+	std::size_t channels_count() const override;
 	std::string channel_name_at(std::ptrdiff_t i) const override;
 	const node_frame_format& frame_format() const override;
 	void pre_pull(const time_span&) override;

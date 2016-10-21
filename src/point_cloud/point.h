@@ -43,7 +43,7 @@ struct point_xyz {
 	auto position() { return homogeneous_coordinates.head<3>(); }
 	auto position() const { return homogeneous_coordinates.head<3>(); }
 		
-	bool is_null() const noexcept { return (homogeneous_coordinates[3] != 1.0); }
+	bool is_null() const { return (homogeneous_coordinates[3] != 1.0); }
 };
 
 

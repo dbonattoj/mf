@@ -131,15 +131,15 @@ public:
 		ndarray_view(arr.start(), arr.shape(), arr.strides()) { }
 	
 	static ndarray_view null() { return ndarray_view(); }
-	bool is_null() const noexcept { return (start_ == nullptr); }
-	explicit operator bool () const noexcept { return ! is_null(); }
+	bool is_null() const { return (start_ == nullptr); }
+	explicit operator bool () const { return ! is_null(); }
 
 	template<typename... Args> void reset(const Args&... args) {
 		reset(ndarray_view(args...));
 	}
-	void reset(const ndarray_view& other) noexcept;
+	void reset(const ndarray_view& other) ;
 		
-	friend bool same(const ndarray_view& a, const ndarray_view& b) noexcept {
+	friend bool same(const ndarray_view& a, const ndarray_view& b) {
 		if(a.is_null() && b.is_null()) return true;
 		else return (a.start_ == b.start_) && (a.shape_ == b.shape_) && (a.strides_ == b.strides_);
 	}
@@ -150,12 +150,12 @@ public:
 	/// \name Attributes 
 	///@{
 	/// Number of elements, i.e. product of shape components.	
-	pointer start() const noexcept { return start_; }
-	const shape_type& shape() const noexcept { return shape_; }
-	const strides_type& strides() const noexcept { return strides_; }
+	pointer start() const { return start_; }
+	const shape_type& shape() const { return shape_; }
+	const strides_type& strides() const { return strides_; }
 	
 	std::size_t size() const { return shape().product(); }
-	span_type full_span() const noexcept { return span_type(0, shape_); }
+	span_type full_span() const { return span_type(0, shape_); }
 		
 	/// Default strides which correspond to row-major order for specified shape.
 	/** Optionally with \a padding between elements. */
@@ -164,7 +164,7 @@ public:
 	/// Check if view has default strides.
 	/** If \a minimal_dimension is specified, checks if view has default strides in dimensions from `Dim - 1` down to
 	 ** \a minimal_dimension. Strides from `minimal_dimension - 1` down to `0` may be non-default. */
-	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const ;
 	
 	/// Returns padding of the view which has default strides.
 	/** If view does not have default strides, throws exception.
@@ -173,7 +173,7 @@ public:
 	
 	/// Check if view has default strides without padding.
 	/** \param minimal_dimension Like in has_default_strides(). */
-	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const ;
 	///@}	
 
 
@@ -205,7 +205,7 @@ public:
 	
 	/// \name Iteration
 	///@{
-	std::ptrdiff_t contiguous_length() const noexcept { return contiguous_length_; }
+	std::ptrdiff_t contiguous_length() const { return contiguous_length_; }
 
 	coordinates_type index_to_coordinates(index_type) const;
 	index_type coordinates_to_index(const coordinates_type&) const;

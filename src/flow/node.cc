@@ -157,7 +157,7 @@ void node::setup_sink() {
 }
 
 
-void node::set_current_time_(time_unit t) noexcept {
+void node::set_current_time_(time_unit t) {
 	time_unit old_t = current_time_;
 	current_time_ = t;
 }

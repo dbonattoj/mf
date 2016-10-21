@@ -28,10 +28,10 @@ namespace mf {
 /// Generate formatted string with call stack backtrace.
 /** Used for debugging. Format of returned string is implementation-defined and depends on OS. Contains backtrace up
  ** to the call to this function. Only works in debug build. */
-std::string stack_backtrace_string() noexcept;
+std::string stack_backtrace_string() ;
 
 #ifdef NDEBUG
-inline std::string stack_backtrace_string() noexcept {
+inline std::string stack_backtrace_string() {
 	return "backtrace available only for debug build";
 }
 #endif

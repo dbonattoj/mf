@@ -78,12 +78,12 @@ public:
 constexpr nullelem_t nullelem { 0 };
 
 
-template<typename Elem> inline bool operator==(const Elem& elem, nullelem_t) noexcept { return is_null(elem); }
-template<typename Elem> inline bool operator==(nullelem_t, const Elem& elem) noexcept { return is_null(elem); }
-template<typename Elem> inline bool operator==(nullelem_t, nullelem_t) noexcept { return true; }
-template<typename Elem> inline bool operator!=(const Elem& elem, nullelem_t) noexcept { return not is_null(elem); }
-template<typename Elem> inline bool operator!=(nullelem_t, const Elem& elem) noexcept { return not is_null(elem); }
-template<typename Elem> inline bool operator!=(nullelem_t, nullelem_t) noexcept { return false; }
+template<typename Elem> inline bool operator==(const Elem& elem, nullelem_t) { return is_null(elem); }
+template<typename Elem> inline bool operator==(nullelem_t, const Elem& elem) { return is_null(elem); }
+template<typename Elem> inline bool operator==(nullelem_t, nullelem_t) { return true; }
+template<typename Elem> inline bool operator!=(const Elem& elem, nullelem_t) { return not is_null(elem); }
+template<typename Elem> inline bool operator!=(nullelem_t, const Elem& elem) { return not is_null(elem); }
+template<typename Elem> inline bool operator!=(nullelem_t, nullelem_t) { return false; }
 
 
 /// Test if elem is null.

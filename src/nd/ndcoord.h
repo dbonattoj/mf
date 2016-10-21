@@ -53,7 +53,7 @@ public:
 	using size_type = std::size_t;
 	using difference_type = std::ptrdiff_t;
 	
-	ndcoord(T value = 0) noexcept { components_.fill(value); }
+	ndcoord(T value = 0) { components_.fill(value); }
 	
 	template<typename It>
 	ndcoord(It begin, It end) {
@@ -61,7 +61,7 @@ public:
 		for(auto in = begin; in != end; ++in, ++out) *out = static_cast<T>(*in);
 	}
 		
-	ndcoord(std::initializer_list<T> l) noexcept :
+	ndcoord(std::initializer_list<T> l) :
 		ndcoord(l.begin(), l.end()) { }
 			
 	ndcoord(const ndcoord&) = default;
@@ -70,22 +70,22 @@ public:
 	ndcoord(const ndcoord<Dim, T2>& coord) :
 		ndcoord(coord.begin(), coord.end()) { }
 	
-	T& operator[](std::ptrdiff_t i) noexcept {
+	T& operator[](std::ptrdiff_t i) {
 		Assert(i >= 0 && i < Dim);
 		return components_[i];
 	}
-	const T& operator[](std::ptrdiff_t i) const noexcept {
+	const T& operator[](std::ptrdiff_t i) const {
 		Assert(i >= 0 && i < Dim);
 		return components_[i];
 	}
 	
-	iterator begin() noexcept { return components_.begin(); }
-	const_iterator begin() const noexcept { return components_.cbegin(); }
-	const_iterator cbegin() const noexcept { return components_.cbegin(); }
-	iterator end() noexcept { return components_.end(); }
-	const_iterator end() const noexcept { return components_.cend(); }
-	const_iterator cend() const noexcept { return components_.cend(); }
-	size_type size() const noexcept { return Dim; }
+	iterator begin() { return components_.begin(); }
+	const_iterator begin() const { return components_.cbegin(); }
+	const_iterator cbegin() const { return components_.cbegin(); }
+	iterator end() { return components_.end(); }
+	const_iterator end() const { return components_.cend(); }
+	const_iterator cend() const { return components_.cend(); }
+	size_type size() const { return Dim; }
 	
 	template<typename Unary>
 	ndcoord& transform_inplace(Unary fct) {
@@ -100,16 +100,16 @@ public:
 		return *this;
 	}
 	
-	ndcoord& operator+=(const ndcoord& c) noexcept { return transform_inplace(c, std::plus<T>()); }
-	ndcoord& operator-=(const ndcoord& c) noexcept { return transform_inplace(c, std::minus<T>()); }
-	ndcoord& operator*=(const ndcoord& c) noexcept { return transform_inplace(c, std::multiplies<T>()); }
-	ndcoord& operator/=(const ndcoord& c) noexcept { return transform_inplace(c, std::divides<T>()); }
+	ndcoord& operator+=(const ndcoord& c) { return transform_inplace(c, std::plus<T>()); }
+	ndcoord& operator-=(const ndcoord& c) { return transform_inplace(c, std::minus<T>()); }
+	ndcoord& operator*=(const ndcoord& c) { return transform_inplace(c, std::multiplies<T>()); }
+	ndcoord& operator/=(const ndcoord& c) { return transform_inplace(c, std::divides<T>()); }
 
-	ndcoord& operator*=(T val) noexcept { return operator*=(ndcoord(val)); };
-	ndcoord& operator/=(T val) noexcept { return operator/=(ndcoord(val)); };
+	ndcoord& operator*=(T val) { return operator*=(ndcoord(val)); };
+	ndcoord& operator/=(T val) { return operator/=(ndcoord(val)); };
 
-	ndcoord operator+() noexcept { return *this; }
-	ndcoord operator-() noexcept { return transform_inplace(std::negate<T>()); }
+	ndcoord operator+() { return *this; }
+	ndcoord operator-() { return transform_inplace(std::negate<T>()); }
 
 	friend ndcoord operator+(const ndcoord& a, const ndcoord& b) noexcept
 		{ return transform(a, b, std::plus<T>()); }
@@ -130,30 +130,30 @@ public:
 	friend bool operator!=(const ndcoord& a, const ndcoord& b) noexcept
 		{ return a.components_ != b.components_; }
 	
-	T product() const noexcept {
+	T product() const {
 		T prod = 1;
 		for(T c : components_) prod *= c;
 		return prod;
 	}
 	
-	const T& front() const noexcept { return components_.front(); }
-	T& front() noexcept { return components_.front(); }
-	const T& back() const noexcept { return components_.back(); }
-	T& back() noexcept { return components_.back(); }	
+	const T& front() const { return components_.front(); }
+	T& front() { return components_.front(); }
+	const T& back() const { return components_.back(); }
+	T& back() { return components_.back(); }	
 	
 	template<std::size_t Section_dim = Dim - 1>
-	auto tail() const noexcept {
+	auto tail() const {
 		ndcoord<Section_dim, T> c(begin() + (Dim - Section_dim), end());
 		return c;
 	}
 
 	template<std::size_t Section_dim = Dim - 1>
-	auto head() const noexcept {
+	auto head() const {
 		ndcoord<Section_dim, T> c(begin(), end() - (Dim - Section_dim));
 		return c;
 	}
 		
-	ndcoord<Dim - 1, T> erase(std::ptrdiff_t i) const noexcept {
+	ndcoord<Dim - 1, T> erase(std::ptrdiff_t i) const {
 		ndcoord<Dim - 1, T> result;
 		for(std::ptrdiff_t j = 0; j < i; ++j) result[j] = components_[j];
 		for(std::ptrdiff_t j = i + 1; j < Dim; ++j) result[j - 1] = components_[j];
@@ -262,13 +262,13 @@ ndcoord<2, T> flip(const ndcoord<2, T>& coord) {
 
 
 template<std::size_t Section_dim, std::size_t Dim, typename T>
-auto tail(const ndcoord<Dim, T>& coord) noexcept {
+auto tail(const ndcoord<Dim, T>& coord) {
 	ndcoord<Section_dim, T> c(coord.begin() + (Dim - Section_dim), coord.end());
 	return c;
 }
 
 template<std::size_t Section_dim, std::size_t Dim, typename T>
-auto head(const ndcoord<Dim, T>& coord) noexcept {
+auto head(const ndcoord<Dim, T>& coord) {
 	ndcoord<Section_dim, T> c(coord.begin(), coord.end() - (Dim - Section_dim));
 	return c;
 }

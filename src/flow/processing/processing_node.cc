@@ -31,7 +31,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf { namespace flow {
 
 
-std::size_t processing_node_output::channels_count() const noexcept {
+std::size_t processing_node_output::channels_count() const {
 	return this_node().output_channels_.size();
 }
 

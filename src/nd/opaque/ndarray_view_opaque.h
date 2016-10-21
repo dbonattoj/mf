@@ -96,13 +96,13 @@ public:
 		ndarray_view_opaque(start, shp, str, forward_make_shared_const(frm)) { }
 
 	static ndarray_view_opaque null() { return ndarray_view_opaque(); }
-	bool is_null() const noexcept { return base::is_null(); }
-	explicit operator bool () const noexcept { return ! is_null(); }
+	bool is_null() const { return base::is_null(); }
+	explicit operator bool () const { return ! is_null(); }
 
 	template<typename... Args> void reset(const Args&... args) {
 		reset(ndarray_view_opaque(args...));
 	}
-	void reset(const ndarray_view_opaque& other) noexcept {
+	void reset(const ndarray_view_opaque& other) {
 		base::reset(other.base_view());
 		frame_format_ = other.frame_format_;
 	}
@@ -119,15 +119,15 @@ public:
 	strides_type strides() const { return head<Dim>(base::strides()); }
 
 	std::size_t size() const { return shape().product(); }
-	span_type full_span() const noexcept { return span_type(0, shape()); }
+	span_type full_span() const { return span_type(0, shape()); }
 		
 	static strides_type default_strides(const shape_type&, const format_base_type&, std::size_t frame_pad = 0);	
-	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	bool has_default_strides(std::ptrdiff_t minimal_dimension = 0) const ;
 	std::size_t default_strides_padding(std::ptrdiff_t minimal_dimension = 0) const;
-	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const noexcept;
+	bool has_default_strides_without_padding(std::ptrdiff_t minimal_dimension = 0) const ;
 
-	const format_ptr& frame_format_ptr() const noexcept { return frame_format_; }
-	const format_base_type& frame_format() const noexcept { Assert(frame_format_); return *frame_format_; }
+	const format_ptr& frame_format_ptr() const { return frame_format_; }
+	const format_base_type& frame_format() const { Assert(frame_format_); return *frame_format_; }
 	///@}
 
 	

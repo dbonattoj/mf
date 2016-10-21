@@ -33,13 +33,13 @@ bool ndspan<Dim, T>::invariant_() const {
 
 
 template<std::size_t Dim, typename T>
-auto ndspan<Dim, T>::begin() const noexcept -> iterator {
+auto ndspan<Dim, T>::begin() const -> iterator {
 	return iterator(*this, start_);
 }
 
 
 template<std::size_t Dim, typename T>
-auto ndspan<Dim, T>::end() const noexcept -> iterator {
+auto ndspan<Dim, T>::end() const -> iterator {
 	coordinates_type iterator_end_coord = start_;
 	iterator_end_coord.front() = end_.front();
 	return iterator(*this, iterator_end_coord);

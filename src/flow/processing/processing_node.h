@@ -68,7 +68,7 @@ public:
 	std::ptrdiff_t index() const { return index_; }
 	
 	void define_frame_format(const ndarray_format& frm) { frame_format_ = frm; }
-	const ndarray_format& frame_format() const noexcept { return frame_format_; }
+	const ndarray_format& frame_format() const { return frame_format_; }
 };
 
 
@@ -83,7 +83,7 @@ private:
 public:
 	using node_output::node_output;
 	
-	std::size_t channels_count() const noexcept override;
+	std::size_t channels_count() const override;
 	std::string channel_name_at(std::ptrdiff_t i) const override;
 	const node_frame_format& frame_format() const override;
 	void pre_pull(const time_span& span) override;

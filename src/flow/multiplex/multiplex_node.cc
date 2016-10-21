@@ -202,7 +202,7 @@ multiplex_node_output::multiplex_node_output(node& nd, std::ptrdiff_t input_chan
 	input_channel_index_(input_channel_index) { }
 
 
-std::size_t multiplex_node_output::channels_count() const noexcept {
+std::size_t multiplex_node_output::channels_count() const {
 	// multiplex node outputs always have 1 channel.
 	// (but different outputs can be created for the different input channels)
 	return 1;

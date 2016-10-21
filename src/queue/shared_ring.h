@@ -84,7 +84,7 @@ public:
 	void break_writer();
 	
 	
-	const format_base_type& frame_format() const noexcept { return ring_.frame_format(); }
+	const format_base_type& frame_format() const { return ring_.frame_format(); }
 
 	/// Capacity of buffer.
 	time_unit capacity() const { return ring_.capacity(); }

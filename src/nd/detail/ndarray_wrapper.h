@@ -115,8 +115,8 @@ public:
 	const_view_type view() const { return cview(); }
 	const_view_type cview() const { return const_view_type(view_);  }
 	
-	operator view_type () noexcept { return view(); }
-	operator const_view_type () const noexcept { return cview(); }
+	operator view_type () { return view(); }
+	operator const_view_type () const { return cview(); }
 	
 	const auto& base_view() const { return ; }
 	///@}
@@ -131,7 +131,7 @@ public:
 	WRAP_VIEW_FUNCTION(strides);
 	WRAP_VIEW_FUNCTION(full_span);
 	
-	std::size_t allocated_size() const noexcept { return allocated_size_; }
+	std::size_t allocated_size() const { return allocated_size_; }
 	///@}
 	
 	
@@ -147,12 +147,12 @@ public:
 	
 	/// \name Iteration
 	///@{
-	auto begin() noexcept { return view().begin(); }
-	auto begin() const noexcept { return cview().begin(); }	
-	auto cbegin() const noexcept { return cview().begin(); }	
-	auto end() noexcept { return view().end(); }
-	auto end() const noexcept { return cview().end(); }	
-	auto cend() const noexcept { return cview().end(); }	
+	auto begin() { return view().begin(); }
+	auto begin() const { return cview().begin(); }	
+	auto cbegin() const { return cview().begin(); }	
+	auto end() { return view().end(); }
+	auto end() const { return cview().end(); }	
+	auto cend() const { return cview().end(); }	
 	///@}
 	
 	

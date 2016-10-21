@@ -47,11 +47,11 @@ public:
 	ndarray_opaque_iterator(const ndarray_opaque_iterator&) = default;
 	ndarray_opaque_iterator& operator=(const ndarray_opaque_iterator&) = default;
 	
-	pointer ptr() const noexcept { return base::ptr(); }
-	coordinates_type coordinates() const noexcept { return head(base::coordinates()); }
+	pointer ptr() const { return base::ptr(); }
+	coordinates_type coordinates() const { return head(base::coordinates()); }
 
-	typename base::reference operator*() const noexcept = delete;
-	pointer operator->() const noexcept = delete;
+	typename base::reference operator*() const = delete;
+	pointer operator->() const = delete;
 	typename base::reference operator[](std::ptrdiff_t n) const = delete;
 };
 

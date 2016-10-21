@@ -56,7 +56,7 @@ auto ndarray_view_opaque<Dim, Mutable>::default_strides
 
 
 template<std::size_t Dim, bool Mutable>
-bool ndarray_view_opaque<Dim, Mutable>::has_default_strides(std::ptrdiff_t minimal_dimension) const noexcept {
+bool ndarray_view_opaque<Dim, Mutable>::has_default_strides(std::ptrdiff_t minimal_dimension) const {
 	if(Dim == 0) return true;
 	if(strides().back() < frame_format().frame_size()) return false;
 	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
@@ -69,7 +69,7 @@ bool ndarray_view_opaque<Dim, Mutable>::has_default_strides(std::ptrdiff_t minim
 
 template<std::size_t Dim, bool Mutable>
 bool ndarray_view_opaque<Dim, Mutable>::has_default_strides_without_padding
-(std::ptrdiff_t minimal_dimension) const noexcept {
+(std::ptrdiff_t minimal_dimension) const {
 	if(Dim == 0) return true;
 	else if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
 	else return false;

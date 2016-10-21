@@ -106,7 +106,7 @@ bool processing_node_job::is_input_activated(input_index_type index) {
 
 
 
-bool processing_node_job::has_input_view(input_index_type index) const noexcept {
+bool processing_node_job::has_input_view(input_index_type index) const {
 	return ! input_views_.at(index).is_null();
 }
 
@@ -117,7 +117,7 @@ const node_frame_window_view& processing_node_job::input_view(input_index_type i
 }
 
 
-bool processing_node_job::has_output_view() const noexcept {
+bool processing_node_job::has_output_view() const {
 	return ! output_view_.is_null();
 }
 

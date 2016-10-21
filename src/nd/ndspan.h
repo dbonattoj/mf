@@ -53,17 +53,17 @@ public:
 	ndspan(const coordinates_type& start, const coordinates_type& end) :
 		start_(start), end_(end) { Assert_crit(invariant_()); }
 		
-	ndspan& operator=(const ndspan&) noexcept = default;
+	ndspan& operator=(const ndspan&) = default;
 	
-	const coordinates_type& start_pos() const noexcept { return start_; }
-	const coordinates_type& end_pos() const noexcept { return end_; }
+	const coordinates_type& start_pos() const { return start_; }
+	const coordinates_type& end_pos() const { return end_; }
 	void set_start_pos(const coordinates_type& pos) { start_ = pos; Assert_crit(invariant_()); }
 	void set_end_pos(const coordinates_type& pos) { end_ = pos; Assert_crit(invariant_()); }
 
-	friend bool operator==(const ndspan& a, const ndspan& b) noexcept {
+	friend bool operator==(const ndspan& a, const ndspan& b) {
 		return (a.start_ == b.start_) && (a.end_ == b.end_);
 	}
-	friend bool operator!=(const ndspan& a, const ndspan& b) noexcept {
+	friend bool operator!=(const ndspan& a, const ndspan& b) {
 		return (a.start_ != b.start_) || (a.end_ != b.end_);
 	}
 	
@@ -75,8 +75,8 @@ public:
 	shape_type shape() const { return end_ - start_; }
 	std::size_t size() const { return shape().product(); }
 
-	iterator begin() const noexcept;
-	iterator end() const noexcept;
+	iterator begin() const ;
+	iterator end() const ;
 };
 
 

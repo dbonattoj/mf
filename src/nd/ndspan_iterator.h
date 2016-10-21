@@ -58,8 +58,8 @@ public:
 		return copy;
 	}
 	
-	coordinates_type operator*() const noexcept { return coordinates_; }
-	const coordinates_type* operator->() const noexcept { return &coordinates_; }
+	coordinates_type operator*() const { return coordinates_; }
+	const coordinates_type* operator->() const { return &coordinates_; }
 	
 	friend bool operator==(const ndspan_iterator& a, const ndspan_iterator& b) noexcept
 		{ return *a == *b; }

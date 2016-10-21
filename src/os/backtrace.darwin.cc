@@ -28,7 +28,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-std::string stack_backtrace_string() noexcept {
+std::string stack_backtrace_string() {
 	constexpr std::size_t max_size = 64;
 	
 	void* trace[max_size];

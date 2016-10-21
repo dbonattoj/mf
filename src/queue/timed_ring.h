@@ -55,7 +55,7 @@ public:
 	time_unit read_start_time() const;
 	time_unit write_start_time() const;
 
-	time_unit capacity() const noexcept { return ring::capacity(); }
+	time_unit capacity() const { return ring::capacity(); }
 	time_unit readable_duration() const;
 	time_unit writable_duration() const;
 	

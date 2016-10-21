@@ -65,7 +65,7 @@ public:
 	
 	constexpr static std::size_t size() { return 1 + sizeof...(Other_elems); }
 	
-	bool is_null() const noexcept { return is_null(first_) || is_null(others_); }
+	bool is_null() const { return is_null(first_) || is_null(others_); }
 };
 
 
@@ -104,7 +104,7 @@ public:
 	
 	constexpr static std::size_t size() { return 1; }
 	
-	bool is_null() const noexcept { return is_null(first_); }
+	bool is_null() const { return is_null(first_); }
 };
 
 

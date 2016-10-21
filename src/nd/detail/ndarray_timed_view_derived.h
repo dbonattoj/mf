@@ -60,11 +60,11 @@ public:
 
 	static ndarray_timed_view_derived null() { return ndarray_timed_view_derived(); }
 	
-	friend bool same(const ndarray_timed_view_derived& a, const ndarray_timed_view_derived& b) noexcept {
+	friend bool same(const ndarray_timed_view_derived& a, const ndarray_timed_view_derived& b) {
 		return (a.start_time() == b.start_time()) && same(a.non_timed(), b.non_timed());
 	}
 	
-	const base& non_timed() const noexcept { return *this; }
+	const base& non_timed() const { return *this; }
 	///@}
 	
 	

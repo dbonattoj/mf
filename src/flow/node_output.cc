@@ -66,7 +66,7 @@ void node_output::input_has_disconnected() {
 }
 
 
-node& node_output::connected_node() const noexcept {
+node& node_output::connected_node() const {
 	return connected_input_->this_node();
 }
 

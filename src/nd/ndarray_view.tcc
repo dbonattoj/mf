@@ -45,7 +45,7 @@ auto ndarray_view<Dim, T>::default_strides(const shape_type& shape, std::size_t 
 
 
 template<std::size_t Dim, typename T>
-bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension) const noexcept {
+bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension) const {
 	if(Dim == 0) return true;
 	if(strides_.back() < sizeof(T)) return false;
 	for(std::ptrdiff_t i = Dim - 2; i >= minimal_dimension; --i) {
@@ -57,7 +57,7 @@ bool ndarray_view<Dim, T>::has_default_strides(std::ptrdiff_t minimal_dimension)
 
 
 template<std::size_t Dim, typename T>
-bool ndarray_view<Dim, T>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const noexcept {
+bool ndarray_view<Dim, T>::has_default_strides_without_padding(std::ptrdiff_t minimal_dimension) const {
 	if(Dim == 0) return true;
 	else if(has_default_strides(minimal_dimension)) return (default_strides_padding(minimal_dimension) == 0);
 	else return false;
@@ -134,7 +134,7 @@ auto ndarray_view<Dim, T>::coordinates_to_index(const coordinates_type& coord) c
 
 
 template<std::size_t Dim, typename T>
-void ndarray_view<Dim, T>::reset(const ndarray_view& other) noexcept {
+void ndarray_view<Dim, T>::reset(const ndarray_view& other) {
 	start_ = other.start_;
 	shape_ = other.shape_;
 	strides_ = other.strides_;

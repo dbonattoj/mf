@@ -81,9 +81,9 @@ public:
 	ring(const ring&) = delete;
 	ring& operator=(const ring&) = delete;
 		
-	const format_base_type& frame_format() const noexcept { return base::frame_format(); }
+	const format_base_type& frame_format() const { return base::frame_format(); }
 	
-	time_unit capacity() const noexcept { return base::shape().front(); }
+	time_unit capacity() const { return base::shape().front(); }
 	
 	time_unit writable_duration() const;
 	time_unit readable_duration() const;

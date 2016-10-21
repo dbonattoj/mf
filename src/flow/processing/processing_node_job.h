@@ -77,18 +77,18 @@ public:
 	bool end_of_stream_was_marked() const { return end_of_stream_; }
 	///@}
 	
-	time_unit time() const noexcept { return node_.current_time(); }
+	time_unit time() const { return node_.current_time(); }
 	void mark_end_of_stream() { end_of_stream_ = true; }
 	
 	/// Access to input frame views.
 	///@{
-	bool has_input_view(input_index_type) const noexcept;
+	bool has_input_view(input_index_type) const ;
 	const node_frame_window_view& input_view(input_index_type) const;
 	///@}
 	
 	/// Access to output frame view.
 	///@{
-	bool has_output_view() const noexcept;
+	bool has_output_view() const ;
 	const node_frame_view& output_view() const;
 	///@}
 	

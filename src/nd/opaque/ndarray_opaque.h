@@ -109,8 +109,8 @@ public:
 	
 	/// \name Attributes
 	///@{
-	const format_ptr& frame_format_ptr() const noexcept { return base::get_view_().frame_format_ptr(); }
-	const format_base_type& frame_format() const noexcept { return base::get_view_().frame_format(); }
+	const format_ptr& frame_format_ptr() const { return base::get_view_().frame_format_ptr(); }
+	const format_base_type& frame_format() const { return base::get_view_().frame_format(); }
 	///@}
 	
 	

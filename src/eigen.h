@@ -21,14 +21,18 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #ifndef MF_EIGEN_H_
 #define MF_EIGEN_H_
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-register"
-// Eigen uses C++14 deprecated 'register' keyword
+#if defined(MF_COMPILER_CLANG) || defined(MF_COMPILER_GCC)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wdeprecated-register"
+	// Eigen uses C++14 deprecated 'register' keyword
+#endif
 
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
 
-#pragma GCC diagnostic pop
+#if defined(MF_COMPILER_CLANG) || defined(MF_COMPILER_GCC)
+	#pragma GCC diagnostic pop
+#endif
 
 #include "common.h"
 #include "elem/elem.h"

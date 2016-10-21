@@ -63,8 +63,7 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	while(actual_align < align) actual_align *= 2;
 
 	// for _aligned_malloc, alignment must be power of 2
-	//void* ptr = ::_aligned_malloc(size, actual_align);
-	void* ptr = aligned_alloc(actual_align, size);
+	void* ptr = ::_aligned_malloc(size, actual_align);
 	Assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
 
 	return ptr;
@@ -72,8 +71,7 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 
 
 void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
-	//::_aligned_free(ptr);
-	free(ptr);
+	::_aligned_free(ptr);
 }
 
 

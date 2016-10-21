@@ -41,7 +41,7 @@ template<typename Numeric> Numeric sq(Numeric n) { return n * n; }
 
 /// Advance a pointer `ptr` of any type by `diff` bytes.
 /** Pointer may be `void*` or any other pointer type. Does not verify alignment. */
-template<typename T> T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) noexcept;
+template<typename T> T* advance_raw_ptr(T* ptr, std::ptrdiff_t diff) ;
 
 template<typename T> bool is_aligned(T* ptr, std::size_t alignment_requirement);
 

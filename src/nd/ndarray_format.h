@@ -53,18 +53,18 @@ public:
 
 	bool is_defined() const { return (elem_size_ != 0); }
 
-	std::size_t frame_size() const noexcept { return length_ * stride_; }
-	std::size_t frame_alignment_requirement() const noexcept { return elem_alignment_; }
+	std::size_t frame_size() const { return length_ * stride_; }
+	std::size_t frame_alignment_requirement() const { return elem_alignment_; }
 
-	std::size_t length() const noexcept { return length_; }
-	std::size_t stride() const noexcept { return stride_; }
+	std::size_t length() const { return length_; }
+	std::size_t stride() const { return stride_; }
 	
-	std::size_t elem_size() const noexcept { return elem_size_; }
-	std::size_t elem_alignment() const noexcept { return elem_alignment_; }
+	std::size_t elem_size() const { return elem_size_; }
+	std::size_t elem_alignment() const { return elem_alignment_; }
 
-	std::size_t elem_padding() const noexcept { return stride() - elem_size(); }
+	std::size_t elem_padding() const { return stride() - elem_size(); }
 	
-	bool is_contiguous() const noexcept { return (elem_padding() == 0); }
+	bool is_contiguous() const { return (elem_padding() == 0); }
 };
 
 

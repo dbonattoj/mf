@@ -134,7 +134,7 @@ protected:
 		outputs_.push_back(std::move(out));
 	}
 		
-	void set_current_time_(time_unit t) noexcept;
+	void set_current_time_(time_unit t) ;
 	void mark_end_();
 	
 	void update_parameter_(parameter_id, const node_parameter_value&);
@@ -146,23 +146,23 @@ protected:
 public:
 	virtual ~node();
 
-	const node_graph& graph() const noexcept { return graph_; }
-	node_graph& graph() noexcept { return graph_; }
+	const node_graph& graph() const { return graph_; }
+	node_graph& graph() { return graph_; }
 	
 	bool was_setup() const { return (stage_ == stage::was_setup); }
 
-	const auto& inputs() const noexcept { return inputs_; }
-	const auto& outputs() const noexcept { return outputs_; }
+	const auto& inputs() const { return inputs_; }
+	const auto& outputs() const { return outputs_; }
 
-	std::size_t inputs_count() const noexcept { return inputs_.size(); }
+	std::size_t inputs_count() const { return inputs_.size(); }
 	node_input& input_at(std::ptrdiff_t index) { return *inputs_.at(index); }
 	const node_input& input_at(std::ptrdiff_t index) const { return *inputs_.at(index); }
-	std::size_t outputs_count() const noexcept { return outputs_.size(); }
+	std::size_t outputs_count() const { return outputs_.size(); }
 	node_output& output_at(std::ptrdiff_t index) { return *outputs_.at(index); }
 	const node_output& output_at(std::ptrdiff_t index) const { return *outputs_.at(index); }
 	
-	bool is_source() const noexcept { return inputs_.empty(); }
-	bool is_sink() const noexcept { return outputs_.empty(); }
+	bool is_source() const { return inputs_.empty(); }
+	bool is_sink() const { return outputs_.empty(); }
 	
 	
 	/// Owned parameters.
@@ -226,7 +226,7 @@ public:
 	
 	void setup_sink();
 
-	time_unit current_time() const noexcept { return current_time_; }
+	time_unit current_time() const { return current_time_; }
 };
 
 

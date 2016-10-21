@@ -2,7 +2,7 @@
 
 namespace mf { namespace flow {
 
-std::size_t gate_node_output::channels_count() const noexcept {
+std::size_t gate_node_output::channels_count() const {
 	return this_node().input().channels_count();
 }
 

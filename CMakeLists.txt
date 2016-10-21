@@ -32,7 +32,7 @@ macro(add_catch_tests target)
 			string(REGEX REPLACE "TEST_CASE\\\(\"\([\^\"]+\)\", *\"\([\^\"]+\)\"" "\\1" testName ${hit})
 			string(REGEX REPLACE "TEST_CASE\\\(\"\([\^\"]+\)\", *\"\([\^\"]+\)\"" "\\2" testCatchLabelString ${hit})
 			
-			add_test(NAME ${testName} COMMAND ${target} """${testName}""")
+			add_test(NAME ${testName} COMMAND ${target} "\"${testName}\"")
 			
 			string(REGEX MATCHALL "\\[\([a-z_]+\)\\]" testCatchLabels ${testCatchLabelString})			
 			set(testLabels "")

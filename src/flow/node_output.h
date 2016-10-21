@@ -52,7 +52,7 @@ public:
 	explicit node_output(node& nd);
 	virtual ~node_output() = default;
 
-	node& this_node() const noexcept { return node_; }
+	node& this_node() const { return node_; }
 	
 	bool add_propagated_parameter_if_needed(parameter_id);
 	bool add_relayed_parameter_if_needed(parameter_id, const node_parameter_relay& preceding_relay);
@@ -66,14 +66,14 @@ public:
 	const std::string& name() const { return name_; }
 	void set_name(const std::string& nm) { name_ = nm; }
 
-	bool is_connected() const noexcept { return (connected_input_ != nullptr); }
-	node_input& connected_input() const noexcept { Assert(is_connected()); return *connected_input_; }
-	node& connected_node() const noexcept;
+	bool is_connected() const { return (connected_input_ != nullptr); }
+	node_input& connected_input() const { Assert(is_connected()); return *connected_input_; }
+	node& connected_node() const ;
 	
 	void input_has_connected(node_input&);
 	void input_has_disconnected();
 	
-	virtual std::size_t channels_count() const noexcept = 0;
+	virtual std::size_t channels_count() const = 0;
 	virtual std::string channel_name_at(std::ptrdiff_t i) const = 0;
 	
 	virtual const node_frame_format& frame_format() const = 0;
