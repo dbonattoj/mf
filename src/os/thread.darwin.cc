@@ -18,31 +18,23 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_OS_H_
-#define MF_OS_H_
+#include "os.h"
+#ifdef MF_OS_DARWIN
 
-// macros for operating system
-#if defined(__APPLE__)
-	#define MF_OS_DARWIN
-#elif defined(_WIN32)
-	#define MF_OS_WINDOWS
-#elif defined(__linux__)
-	#define MF_OS_LINUX
-#else
-	#error Unknown operating system
-#endif
+#include "thread.h"
+#include <pthread.h>
 
-// macros for compiler
-#if defined(__clang__)
-	#define MF_COMPILER_CLANG
-#elif defined(__GNUC__)
-	#define MF_COMPILER_GCC
-#elif defined(_MSC_VER)
-	#define MF_COMPILER_MSVC
-#endif
+namespace mf {
 
+void set_thread_name(std::thread& thread, const std::string& name) {
+	return;
+}
+
+
+std::string get_thread_name(std::thread& thread) {
+	return "";
+}
+
+}
 
 #endif
-
-
-

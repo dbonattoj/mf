@@ -3,35 +3,35 @@
 
 #include "console.h"
 #include <windows.h>
+#include <iostream>
+#include <map>
 
 namespace mf {
 
-void set_console_text_color(console_color col) {
-	HANDLE stdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
-	if(stdout == nullptr) return;
+void set_console_style(std::ostream& str, console_color text_color, bool bold) {
+	HANDLE stdout = nullptr;
+	if(&str == &std::cout) stdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	else if(&str == &std::cerr) stdout = ::GetStdHandle(STD_ERROR_HANDLE);
+	else return;
+	
+	const static std::map<console_color, WORD> color_attr = {
+		{ console_color::default_color, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE },
+		{ console_color::black, 0 },
+		{ console_color::white, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE },
+		{ console_color::blue, FOREGROUND_BLUE },
+		{ console_color::red, FOREGROUND_RED },
+		{ console_color::green, FOREGROUND_GREEN },
+		{ console_color::magenta, FOREGROUND_RED | FOREGROUND_BLUE },
+		{ console_color::cyan, FOREGROUND_GREEN | FOREGROUND_BLUE },
+		{ console_color::yellow, FOREGROUND_RED | FOREGROUND_GREEN }
+	};
 
-	WORD color_attr = 0;
-	switch(col) {
-		case console_color::black: color_attr = 0;
-		case console_color::blue: color_attr = FOREGROUND_BLUE;
-		case console_color::red: color_attr = FOREGROUND_RED;
-		case console_color::green: color_attr = FOREGROUND_GREEN;
-		case console_color::magenta: color_attr = FOREGROUND_RED | FOREGROUND_BLUE;
-		case console_color::cyan: color_attr = FOREGROUND_GREEN | FOREGROUND_BLUE;
-		case console_color::yellow: color_attr = FOREGROUND_RED | FOREGROUND_GREEN;
-	}
-
-	::SetConsoleTextAttribute(stdout, color_attr);
+	::SetConsoleTextAttribute(stdout, color_attr.at(text_color));
 }
 
 
-void set_console_text_style(bool bold, bool underline) {
-	return;
-}
-
-
-void reset_console() {
-	set_console_text_color(console_color::black);
+void reset_console(std::ostream& str) {
+	set_console_text_color(str, console_color::default_color, false);
 }
 
 }

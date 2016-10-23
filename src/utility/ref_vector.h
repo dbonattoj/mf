@@ -6,6 +6,10 @@
 
 namespace mf {
 
+/// Array holding references to items.
+/** Interface similar to `std::vector`, except that items are not copied and instead references are taken.
+ ** Cannot default-construct items, they must always point to an existing object.
+ ** Replaces `std::vector<T*>` or `std::vector<std:reference_wrapper<T>>`. Iteration using `indirect_iterator`. */
 template<typename T, typename Allocator = std::allocator<T>>
 class ref_vector {
 public:
@@ -71,7 +75,6 @@ public:
 	const_reverse_iterator rend() const { return iterator(vector_.rend()); }
 	const_reverse_iterator crend() const { return iterator(vector_.rend()); }
 
-	
 	bool empty() const { return vector_.empty(); }
 	size_type size() const { return vector_.size(); }
 	size_type max_size() const { return vector_.max_size(); }
