@@ -35,11 +35,22 @@ namespace {
 }
 
 #if defined(MF_COMPILER_CLANG) || defined(MF_COMPILER_GCC)
-static void init() __attribute__((constructor));
 
-void init() {
-	initialize_mf_();
-}
+	static void init() __attribute__((constructor));
+
+	void init() {
+		initialize_mf_();
+	}
+	
+#elif defined(MF_COMPILER_MSVC)
+	
+	#include <windows.h>
+	
+	BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
+		if(reason == DLL_PROCESS_ATTACH) initialize_mf_();
+		return TRUE;
+	}
+	
 #endif
 
 
