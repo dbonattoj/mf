@@ -5,6 +5,7 @@ include(GenerateExportHeader)
 
 if(UNIX)
 	add_compile_options(-std=c++14)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lpthread")
 	
 	find_program(CCACHE_FOUND ccache)
 	if(CCACHE_FOUND)

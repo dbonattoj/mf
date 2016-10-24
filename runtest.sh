@@ -1,4 +1,10 @@
 #!/bin/sh
-make build_test &&
-./dist/mf_test -s $1
-#./dist/mf_test $1 2>&1 | c++filt
+
+mkdir -p build &&
+cd build &&
+cmake \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_INSTALL_PREFIX=../dist .. \
+	-DCMAKE_VERBOSE_MAKEFILE=ON &&
+make mf_test
+./mf_test $1
