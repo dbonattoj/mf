@@ -25,8 +25,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 using namespace mf;
 
 int main(int argc, const char* argv[]) {
-	set_debug_mode(debug_mode::inactive);
-	set_debug_filter({"node", "mpx", "seek"});
+	set_debug_mode(debug_mode::cerr);
+	//set_debug_filter({"node", "mpx", "seek"});
 	set_random_sleep_enabled(false);
 
 	return Catch::Session().run(argc, argv);
