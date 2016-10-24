@@ -34,7 +34,7 @@ std::size_t system_page_size();
 /// Round `n` up so that `T[n]` has a size that is a multiple of the system page size.
 template<typename T>
 std::size_t round_up_to_fit_system_page_size(std::size_t n) {
-	Expects(system_page_size() % sizeof(T) == 0);
+	Assert(system_page_size() % sizeof(T) == 0);
 	std::size_t page_capacity = system_page_size() / sizeof(T);
 	std::size_t remaining = page_capacity - (n % page_capacity);
 	return n + remaining;

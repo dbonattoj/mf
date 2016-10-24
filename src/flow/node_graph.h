@@ -66,7 +66,7 @@ public:
 	template<typename Node, typename... Args>
 	Node& add_node(Args&&... args) {
 		static_assert(std::is_base_of<node, Node>::value, "node must be derived class from `node`");
-		Expects(! was_setup_);
+		Assert(! was_setup_);
 		Node* nd = new Node(*this, std::forward<Args>(args)...);
 		nodes_.emplace_back(nd);
 		return *nd;
@@ -75,7 +75,7 @@ public:
 	template<typename Node, typename... Args>
 	Node& add_sink(Args&&... args) {
 		static_assert(std::is_base_of<sink_node, Node>::value, "sink node must be derived class from `sink_node`");
-		Expects(! was_setup_);
+		Assert(! was_setup_);
 		Node& sink = add_node<Node>(std::forward<Args>(args)...);
 		sink_ = &sink;
 		return sink;

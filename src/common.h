@@ -27,6 +27,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <stdexcept>
 #include "debug.h"
 #include "exceptions.h"
+#include "config.h"
 
 #define MF_VERIFY_ASSERTIONS 1
 
@@ -58,32 +59,14 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #endif
 
 
-//#define MF_MACRO_DEPRECATED _Pragma("GCC warning \"macro is deprecated\"");
-#define MF_MACRO_DEPRECATED
-
 #define MF_ASSERT_(__condition__) MF_ASSERT_MSG_(__condition__, "`" #__condition__ "`")
 #define MF_ASSERT_CRIT_(__condition__) MF_ASSERT_CRIT_MSG_(__condition__, "`" #__condition__ "`")
 
 #define MF_ASSERT(...) MF_GET_NARG_MACRO_2(__VA_ARGS__, MF_ASSERT_MSG_, MF_ASSERT_, IGNORE)(__VA_ARGS__)
 #define MF_ASSERT_CRIT(...) MF_GET_NARG_MACRO_2(__VA_ARGS__, MF_ASSERT_CRIT_MSG_, MF_ASSERT_CRIT_, IGNORE)(__VA_ARGS__)
 
-#define MF_EXPECTS MF_MACRO_DEPRECATED MF_ASSERT
-#define MF_ENSURES MF_MACRO_DEPRECATED MF_ASSERT
-
-#define MF_EXPECTS_CRIT MF_MACRO_DEPRECATED MF_ASSERT_CRIT
-#define MF_ENSURES_CRIT MF_MACRO_DEPRECATED MF_ASSERT_CRIT
-
-
 #define Assert MF_ASSERT
-#define Expects MF_EXPECTS
-#define Ensures MF_ENSURES
 #define Assert_crit MF_ASSERT_CRIT
-#define Expects_crit MF_EXPECTS_CRIT
-#define Ensures_crit MF_ENSURES_CRIT
-
-#define MF_ASSERT_MSG MF_ASSERT
-#define MF_EXPECTS_MSG MF_EXPECTS
-#define MF_ENSURES_MSG MF_ENSURES
 
 
 namespace mf {

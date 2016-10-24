@@ -147,13 +147,13 @@ void node::propagate_setup_() {
 
 
 void node::setup_sink() {
-	Expects(stage_ == stage::construction);
-	Expects(is_sink());
+	Assert(stage_ == stage::construction);
+	Assert(is_sink());
 	
 	propagate_pre_setup_();
 	propagate_setup_();
 
-	Ensures(stage_ == stage::was_setup);
+	Assert(stage_ == stage::was_setup);
 }
 
 

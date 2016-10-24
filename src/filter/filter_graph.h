@@ -52,7 +52,7 @@ public:
 	template<typename Handler, typename... Args>
 	filter_derived<Handler>& add_filter(Args&&... args) {
 		static_assert(std::is_base_of<filter_handler, Handler>::value, "Handler must be derived from filter_handler");
-		Expects(! was_setup());
+		Assert(! was_setup());
 		
 		using filter_type = filter_derived<Handler>;
 		filter_type* filt = new filter_type(std::forward<Args>(args)...);

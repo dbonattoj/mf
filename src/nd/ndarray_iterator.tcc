@@ -26,7 +26,7 @@ namespace mf {
 
 template<std::size_t Dim, typename Elem>
 inline void ndarray_iterator<Dim, Elem>::forward_(std::ptrdiff_t d) {
-	Expects_crit(d >= 0);
+	Assert_crit(d >= 0);
 	std::ptrdiff_t contiguous_limit = contiguous_length_ - (index_ % contiguous_length_);
 	index_ += d;
 	if(d < contiguous_limit) {
@@ -40,7 +40,7 @@ inline void ndarray_iterator<Dim, Elem>::forward_(std::ptrdiff_t d) {
 
 template<std::size_t Dim, typename Elem>
 inline void ndarray_iterator<Dim, Elem>::backward_(std::ptrdiff_t d) {
-	Expects_crit(d >= 0);
+	Assert_crit(d >= 0);
 	std::ptrdiff_t contiguous_limit = index_ % contiguous_length_;
 	index_ -= d;
 	if(d <= contiguous_limit) {
