@@ -65,7 +65,7 @@ public:
 	/// Get total duration.
 	/** Cannot be called while stopwatch is running. */
 	duration_type total_duration() const {
-		MF_ASSERT(! running_);
+		Assert(! running_);
 		return total_duration_;
 	}
 };

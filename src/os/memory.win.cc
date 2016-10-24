@@ -100,17 +100,19 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 		0, 2 * size,
 		NULL
 	);
-	if(double_mapping == nullptr) std::runtime_error("CreateFileMapping failed"); // TODO windows system error exception
+	if(double_mapping == nullptr) throw std::runtime_error("CreateFileMapping failed"); // TODO windows system error exception
 
+	/**
 	LPVOID base = ::VirtualAlloc(
 		nullptr,
 		2 * size,
 		MEM_RESERVE,
 		PAGE_READWRITE
 	);
-	if(base == nullptr) std::runtime_error("VirtualAlloc failed");
+	if(base == nullptr) throw std::runtime_error("VirtualAlloc failed");
+	*/
 
-	/*
+	
 	LPVOID base = ::MapViewOfFile(
 		double_mapping,
 		FILE_MAP_WRITE,
@@ -123,7 +125,7 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 
 	// assuming that the memory range [base, base + 2*size[ remains safe between these calls
 	// TODO retry if not
-	*/
+	
 
 
 	LPVOID actual_base = ::MapViewOfFileEx(
@@ -133,7 +135,7 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 		size,
 		base
 	);
-	if(actual_base == nullptr) std::runtime_error("MapViewOfFile (base) failed");
+	if(actual_base == nullptr) throw std::runtime_error("MapViewOfFile (base) failed");
 	Assert(actual_base == base);
 
 	LPVOID actual_mirror = ::MapViewOfFileEx(
@@ -143,7 +145,7 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 		size,
 		advance_raw_ptr(base, size)
 	);
-	if(actual_mirror == nullptr) std::runtime_error("MapViewOfFile (mirror) failed");
+	if(actual_mirror == nullptr) throw std::runtime_error("MapViewOfFile (mirror) failed");
 
 	::CloseHandle(double_mapping);
 	// if will close only when the views get unmapped, which is done in raw_deallocate()

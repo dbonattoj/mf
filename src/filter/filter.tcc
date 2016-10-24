@@ -132,7 +132,7 @@ template<std::size_t Input_dim, typename Input_elem>
 auto filter_input<Input_dim, Input_elem>::get_input_view
 (const timed_frame_array_view& generic_view) -> full_view_type {
 	// `generic_view` must come from input of (node that is associated to this filter)
-	Expects(edge_ != nullptr);
+	Assert(edge_ != nullptr);
 	return edge_->cast_node_output_full_view(generic_view);
 }
 

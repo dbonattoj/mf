@@ -292,7 +292,7 @@ ndarray_view<1, T> flatten(const ndarray_view<Dim, T>&);
 
 template<std::size_t Tail_dim, std::size_t Dim, typename Elem>
 ndarray_format tail_format(const ndarray_view<Dim, Elem>& vw) {
-	Expects(vw.has_default_strides(Dim - Tail_dim));
+	Assert(vw.has_default_strides(Dim - Tail_dim));
 	std::size_t count = tail<Tail_dim>(vw.shape()).product();
 	std::size_t stride = vw.strides().back();
 	return make_ndarray_format<Elem>(count, stride);

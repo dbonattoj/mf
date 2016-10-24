@@ -112,7 +112,7 @@ bool processing_node_job::has_input_view(input_index_type index) const {
 
 
 const node_frame_window_view& processing_node_job::input_view(input_index_type index) const {
-	Expects(has_input_view(index));
+	Assert(has_input_view(index));
 	return input_views_.at(index);
 }
 
@@ -123,7 +123,7 @@ bool processing_node_job::has_output_view() const {
 
 
 const node_frame_view& processing_node_job::output_view() const {
-	Expects(has_output_view());
+	Assert(has_output_view());
 	return output_view_;
 }
 
