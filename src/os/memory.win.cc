@@ -32,22 +32,19 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 	
 namespace {
-
-const ::SYSTEM_INFO& system_info_() {
-	static ::SYSTEM_INFO info;
-	static bool loaded = false;
-	if(! loaded) {
-		::GetSystemInfo(&info);
-		loaded = true;
+	const ::SYSTEM_INFO& system_info_() {
+		static ::SYSTEM_INFO info;
+		static bool loaded = false;
+		if(! loaded) {
+			::GetSystemInfo(&info);
+			loaded = true;
+		}
+		return info;
 	}
-	return info;
-}
-
 }
 
 std::size_t system_page_size() {
-	//return system_info_().dwPageSize;
-	return system_info_().dwAllocationGranularity;
+	return system_info_().dwPageSize;
 }
 
 void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv) {
@@ -55,6 +52,8 @@ void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv
 	return;
 }
 
+
+///////////////
 
 
 void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
@@ -75,15 +74,23 @@ void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
 }
 
 
+///////////////
+
+
+std::size_t raw_ring_allocator::size_granularity() {
+	return system_info_().dwAllocationGranularity;
+}
+
+
 
 void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
 	std::size_t alloc_granularity = system_info_().dwAllocationGranularity;
 	
 	std::cerr << "alloc gran: " << alloc_granularity << std::endl;
 	
-	if(size % alloc_granularity != 0)
+	if(size % size_granularity() != 0)
 		throw std::invalid_argument("size must be multiple of allocation granularity");
-	if(alloc_granularity % align != 0)
+	if(size_granularity() % align != 0)
 		throw std::invalid_argument("requested alignment must be divisor of allocation granularity"); 
 
 	HANDLE double_mapping = ::CreateFileMapping(
@@ -150,6 +157,9 @@ void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
 	::UnmapViewOfFile(advance_raw_ptr(base, size));
 	::VirtualFree(base, 2 * size, MEM_RELEASE);
 }
+
+
+///////////////
 
 
 void* raw_null_allocator::raw_allocate(std::size_t size, std::size_t align) {

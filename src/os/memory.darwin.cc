@@ -39,23 +39,26 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 namespace mf {
 
 std::size_t system_page_size() {
-	return sysconf(_SC_PAGESIZE);
+	return ::sysconf(_SC_PAGESIZE);
 }
 
 void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv) {
 	switch(adv) {
 	case memory_usage_advice::normal:
-		madvise(buf, len, MADV_NORMAL);
+		::madvise(buf, len, MADV_NORMAL);
 		break;
 	case memory_usage_advice::sequential:
-		madvise(buf, len, MADV_SEQUENTIAL);
+		::madvise(buf, len, MADV_SEQUENTIAL);
 		break;
 	case memory_usage_advice::random:
-		madvise(buf, len, MADV_RANDOM);
+		::madvise(buf, len, MADV_RANDOM);
 		break;
 	return;	
 	}
 }
+
+
+///////////////
 
 
 void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
@@ -66,7 +69,7 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	void* ptr = nullptr;
 	int err = ::posix_memalign(&ptr, actual_align, size);
 	if(err != 0) throw std::bad_alloc();
-	assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
+	Assert(reinterpret_cast<std::uintptr_t>(ptr) % align == 0);
 	return ptr;
 }
 
@@ -74,7 +77,14 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
 	::free(ptr);
 }
-	
+
+
+///////////////
+
+
+std::size_t raw_ring_allocator::size_granularity() {
+	return ::sysconf(_SC_PAGESIZE);;
+}
 
 
 void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
@@ -96,7 +106,7 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	if(status != 0)
 		throw std::system_error(errno, std::system_category(), "ring allocator ftruncate failed");
 		
-	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0); // ...aligns to page size
+	void* base = ::mmap(nullptr, size * 2, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0); // ...aligns to page size
 	if(base == MAP_FAILED)
 		throw std::system_error(errno, std::system_category(), "ring allocator mmap failed (whole region)");
 		
@@ -121,6 +131,9 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
 	::munmap(base, size * 2);
 }
+
+
+///////////////
 
 
 void* raw_null_allocator::raw_allocate(std::size_t size, std::size_t align) {

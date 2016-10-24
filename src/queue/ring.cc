@@ -21,25 +21,20 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "ring.h"
 #include <stdexcept>
 #include <cmath>
+#include <limits>
 #include "../utility/misc.h"
 #include "../os/memory.h"
 
 namespace mf {
-		
-
-ring::ring(const format_ptr& frm, std::size_t capacity) :
-	base(make_ndsize(capacity), frm, adjust_padding_(*frm, capacity)) { }
-
-
-std::size_t ring::adjust_padding_(const format_base_type& frm, std::size_t capacity) {
-	std::size_t array_length = capacity; // array length, = number of frames
+	
+ring::allocation_parameters ring::allocation_parameters_for_capacity(const format_base_type& frm, std::size_t capacity) {
 	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
-	std::size_t page_size = system_page_size(); // system page size, in bytes
 
-	std::size_t a = frm.frame_alignment_requirement(); // a = alignment of elements
+	std::size_t granularity = raw_ring_allocator::size_granularity(); // G = allocated size must be multiple of G
+	std::size_t a = frm.frame_alignment_requirement(); // a = alignment of frames
 
 	// will compute minimal padding frame_padding (bytes to insert between frames)
-	// such that array_length * (frame_size + frame_padding) is a multiple of page_size
+	// such that capacity * (frame_size + frame_padding) is a multiple of granularity
 	//       and (frame_size + frame_padding) is a multiple of a
 	
 	// frame_size and page_size are necessarily multiples of a, because:
@@ -50,26 +45,57 @@ std::size_t ring::adjust_padding_(const format_base_type& frm, std::size_t capac
 	// --> count in units a
 	
 	Assert(is_nonzero_multiple_of(frame_size, a), "frame size must be multiple of frame alignment");
-	Assert(is_nonzero_multiple_of(page_size, a), "system page size must be multiple of frame alignment");
+	Assert(is_nonzero_multiple_of(granularity, a), "system page size must be multiple of frame alignment");
 	
 	std::size_t frame_size_a = frame_size / a;
-	std::size_t page_size_a = page_size / a;
-	// duration * (frame_size_a + frame_padding_a) must be multiple of page_size_a
+	std::size_t granularity_a = granularity / a;
+	// capacity * (frame_size_a + frame_padding_a) must be multiple of page_size_a
 	
-	std::size_t d = page_size_a / gcd(page_size_a, array_length);	
+	std::size_t d = granularity_a / gcd(granularity_a, capacity);	
 	// --> (frame_size_a + frame_padding_a) must be multiple of d
 	// d is a power of 2
-	// d = factors 2 that are missing in array_length for it to be multiple of page_size_a
+	// d = factors 2 that are missing in array_length for it to be multiple of granularity_a
 	
 	// if frame_size_a is already multiple of d, no padding is needed
 	std::size_t r = frame_size_a % d;
 	std::size_t frame_padding = 0;
 	if(r != 0) frame_padding = (d - r) * a;
 	
-	Assert(is_nonzero_multiple_of(array_length * (frame_size + frame_padding), page_size));
+	Assert(is_nonzero_multiple_of(capacity * (frame_size + frame_padding), granularity));
 	Assert(is_nonzero_multiple_of(frame_size + frame_padding, a));
-	return frame_padding;
+	
+	return allocation_parameters {
+		frame_padding,
+		capacity,
+		capacity * (frame_size + frame_padding),
+		capacity * frame_padding
+	};
 }
+
+
+ring::allocation_parameters ring::select_allocation_parameters_
+(const format_base_type& frm, std::size_t min_capacity, std::size_t max_capacity) {
+	allocation_parameters best_param = allocation_parameters_for_capacity(frm, min_capacity);
+
+	for(std::size_t cap = min_capacity + 1; max_capacity == 0 || cap <= max_capacity; ++cap) {
+		allocation_parameters param = allocation_parameters_for_capacity(frm, cap);
+		if(param.frame_padding < best_param.frame_padding) best_param = param;
+		else max_capacity = min_capacity+100; // TODO improve
+	}
+	
+	std::cout << "chose cap=" << best_param.capacity << " (min=" << min_capacity << "), padding=" << best_param.frame_padding << std::endl;
+	
+	return best_param;
+}
+
+
+ring::base ring::make_base_(const format_ptr& frm, allocation_parameters param) {
+	return base(make_ndsize(param.capacity), frm, param.frame_padding);
+}
+	
+
+ring::ring(const format_ptr& frm, std::size_t min_capacity, std::size_t max_capacity) :
+	base(make_base_(frm, select_allocation_parameters_(*frm, min_capacity, max_capacity))) { }
 
 
 auto ring::section_(time_unit start, time_unit duration) -> section_view_type {

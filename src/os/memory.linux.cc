@@ -58,6 +58,9 @@ void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv
 }
 
 
+///////////////
+
+
 void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 	// for posix_memalign, alignment must be multiple of sizeof(void*) AND power of 2
 	std::size_t actual_align = sizeof(void*);
@@ -74,7 +77,14 @@ void* raw_allocator::raw_allocate(std::size_t size, std::size_t align) {
 void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
 	::free(ptr);
 }
-	
+
+
+///////////////
+
+
+std::size_t raw_ring_allocator::size_granularity() {
+	return ::sysconf(_SC_PAGESIZE);;
+}
 
 
 void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
@@ -121,6 +131,9 @@ void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {
 void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
 	::munmap(base, size * 2);
 }
+
+
+///////////////
 
 
 void* raw_null_allocator::raw_allocate(std::size_t size, std::size_t align) {

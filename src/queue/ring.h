@@ -67,16 +67,27 @@ private:
 	time_unit read_position_ = 0;
 	time_unit write_position_ = 0;
 	bool full_ = false;
-		
-	static std::size_t adjust_padding_(const format_base_type&, std::size_t capacity); 
+			
+	struct allocation_parameters {
+		std::size_t frame_padding;
+		std::size_t capacity;
+		std::size_t allocated_size;
+		std::size_t wasted_size;
+	};
+			
+	static allocation_parameters allocation_parameters_for_capacity(const format_base_type&, std::size_t capacity);
+	static allocation_parameters select_allocation_parameters_
+		(const format_base_type&, std::size_t min_capacity, std::size_t max_capacity);
+	static base make_base_(const format_ptr&, allocation_parameters);
+	
 	section_view_type section_(time_unit start, time_unit duration);
 
 public:
 	template<typename Format, typename = enable_if_derived_from_opaque_format<Format>>
-	ring(Format&& frm, std::size_t capacity) :
-		ring(forward_make_shared_const(frm), capacity) { }
+	ring(Format&& frm, std::size_t min_capacity, std::size_t max_capacity = 0) :
+		ring(forward_make_shared_const(frm), min_capacity, max_capacity) { }
 	
-	ring(const format_ptr&, std::size_t capacity);
+	ring(const format_ptr&, std::size_t min_capacity, std::size_t max_capacity = 0);
 	
 	ring(const ring&) = delete;
 	ring& operator=(const ring&) = delete;

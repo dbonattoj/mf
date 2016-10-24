@@ -58,6 +58,7 @@ void set_memory_usage_advice(void* ptr, std::size_t, memory_usage_advice);
 /// Raw allocator, allocates given number of bytes.
 class raw_allocator {
 public:
+	static std::size_t size_granularity() { return 1; }
 	void* raw_allocate(std::size_t size, std::size_t align = 1);	
 	void raw_deallocate(void* ptr, std::size_t size);
 };
@@ -69,6 +70,7 @@ public:
  ** map to the same data. The segment length `n` must be a multiple of the system page size. */
 class raw_ring_allocator {
 public:
+	static std::size_t size_granularity();
 	void* raw_allocate(std::size_t size, std::size_t align = 1);
 	void raw_deallocate(void* ptr, std::size_t size);
 };
@@ -80,6 +82,7 @@ public:
  ** virtual memory pages without allocating physical memory pages, when possible. */
 class raw_null_allocator {
 public:
+	static std::size_t size_granularity() { return 1; }
 	void* raw_allocate(std::size_t size, std::size_t align = 1);
 	void raw_deallocate(void* ptr, std::size_t size);
 };
