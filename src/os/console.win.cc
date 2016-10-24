@@ -9,9 +9,9 @@
 namespace mf {
 
 void set_console_style(std::ostream& str, console_color text_color, bool bold) {
-	HANDLE stdout = nullptr;
-	if(&str == &std::cout) stdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
-	else if(&str == &std::cerr) stdout = ::GetStdHandle(STD_ERROR_HANDLE);
+	HANDLE console_handle = nullptr;
+	if(&str == &std::cout) console_handle = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	else if(&str == &std::cerr) console_handle = ::GetStdHandle(STD_ERROR_HANDLE);
 	else return;
 	
 	const static std::map<console_color, WORD> color_attr = {
@@ -26,12 +26,12 @@ void set_console_style(std::ostream& str, console_color text_color, bool bold) {
 		{ console_color::yellow, FOREGROUND_RED | FOREGROUND_GREEN }
 	};
 
-	::SetConsoleTextAttribute(stdout, color_attr.at(text_color));
+	::SetConsoleTextAttribute(console_handle, color_attr.at(text_color));
 }
 
 
 void reset_console(std::ostream& str) {
-	set_console_text_color(str, console_color::default_color, false);
+	set_console_style(str, console_color::default_color, false);
 }
 
 }

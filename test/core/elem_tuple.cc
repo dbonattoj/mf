@@ -23,6 +23,8 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../../src/elem/elem_tuple.h"
 #include "../../src/utility/misc.h"
 
+#include <iostream>
+
 using namespace mf;
 
 TEST_CASE("elem_tuple", "[elem_tuple]") {
@@ -80,13 +82,15 @@ TEST_CASE("elem_tuple", "[elem_tuple]") {
 	}
 	
 	SECTION("offset") {
-		REQUIRE( (elem_tuple_offset<0, tuple_type>) == 0);
-		REQUIRE( (elem_tuple_offset<1, tuple_type>) == sizeof(float));
-		REQUIRE( (elem_tuple_offset<2, tuple_type>) == sizeof(float) + sizeof(int));
+		std::cout << detail::elem_tuple_accessor<0, tuple_type>::offset() << std::endl;
+		std::cout << elem_tuple_offset<0, tuple_type>() << std::endl;
+		REQUIRE( (elem_tuple_offset<0, tuple_type>()) == 0);
+		REQUIRE( (elem_tuple_offset<1, tuple_type>()) == sizeof(float));
+		REQUIRE( (elem_tuple_offset<2, tuple_type>()) == sizeof(float) + sizeof(int));
 		
-		*reinterpret_cast<float*>(advance_raw_ptr(&tup, elem_tuple_offset<0, tuple_type>)) = 123.0f;
-		*reinterpret_cast<int*>(advance_raw_ptr(&tup, elem_tuple_offset<1, tuple_type>)) = 456;
-		*reinterpret_cast<char*>(advance_raw_ptr(&tup, elem_tuple_offset<2, tuple_type>)) = 'b';
+		*reinterpret_cast<float*>(advance_raw_ptr(&tup, elem_tuple_offset<0, tuple_type>())) = 123.0f;
+		*reinterpret_cast<int*>(advance_raw_ptr(&tup, elem_tuple_offset<1, tuple_type>())) = 456;
+		*reinterpret_cast<char*>(advance_raw_ptr(&tup, elem_tuple_offset<2, tuple_type>())) = 'b';
 		
 		REQUIRE(get<0>(tup) == 123.0f);
 		REQUIRE(get<1>(tup) == 456);

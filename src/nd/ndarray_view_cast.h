@@ -51,7 +51,7 @@ namespace detail {
 						
 		output_view_type operator()(const input_view_type& arr) const {
 			constexpr std::ptrdiff_t index = elem_tuple_index<Output_elem, input_tuple_type>;
-			constexpr std::ptrdiff_t offset = elem_tuple_offset<index, input_tuple_type>;
+			constexpr std::ptrdiff_t offset = elem_tuple_offset<index, input_tuple_type>();
 
 			auto* start = reinterpret_cast<Output_elem*>(
 				advance_raw_ptr(arr.start(), offset)

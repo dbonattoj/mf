@@ -1,6 +1,8 @@
 project(mf CXX)
 cmake_minimum_required(VERSION 3.1)
 
+include(GenerateExportHeader)
+
 if(UNIX)
 	add_compile_options(-std=c++14)
 	
@@ -9,6 +11,8 @@ if(UNIX)
 		set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 		set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 	endif()
+elseif(WIN32)
+	add_compile_options(/wd4018)
 endif()
 
 enable_testing()
@@ -17,13 +21,21 @@ include_directories(SYSTEM external/include)
 
 find_package(OpenCV REQUIRED)
 
+# library
 file(GLOB_RECURSE LIB_SRC "src/*.cc")
-add_library(mf SHARED ${LIB_SRC})
+add_library(mf STATIC ${LIB_SRC})
 target_link_libraries(mf ${OpenCV_LIBS})
+generate_export_header(mf
+	BASE_NAME mf
+	EXPORT_MACRO_NAME MF_EXPORTS
+	EXPORT_FILE_NAME "${CMAKE_SOURCE_DIR}/src/mf_exports.h"
+	STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC
+)
 
 install(TARGETS mf DESTINATION ./lib)
 install(DIRECTORY src/ DESTINATION ./include/mf FILES_MATCHING PATTERN "*.h" PATTERN "*.tcc")
 
+# tests
 macro(add_catch_tests target)
 	foreach(source ${ARGN})
 		file(READ ${source} contents)

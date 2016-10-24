@@ -194,12 +194,11 @@ auto& get(elem_tuple<First_elem, Other_elems...>& tup) {
 
 
 /// Offset in bytes of element at index `Index` in \ref elem_tuple type `Tuple`.
-template<std::size_t Index, typename Tuple>
-constexpr std::ptrdiff_t elem_tuple_offset = -1;
-
-template<std::size_t Index, typename First_elem, typename... Other_elems>
-constexpr std::ptrdiff_t elem_tuple_offset<Index, elem_tuple<First_elem, Other_elems...>> =
-	detail::elem_tuple_accessor<Index, elem_tuple<First_elem, Other_elems...>>::offset();
+template<std::ptrdiff_t Index, typename Tuple>
+constexpr std::ptrdiff_t elem_tuple_offset() {
+	return detail::elem_tuple_accessor<Index, Tuple>::offset();
+}
+// definition as template variable causes internal error C1001 in MSVC
 
 
 /// Make \ref elem_tuple with elements \a elems.
