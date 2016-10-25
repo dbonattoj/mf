@@ -26,66 +26,68 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../os/memory.h"
 
 namespace mf {
-	
-ring::allocation_parameters ring::allocation_parameters_for_capacity(const format_base_type& frm, std::size_t capacity) {
-	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
-
-	std::size_t granularity = raw_ring_allocator::size_granularity(); // G = allocated size must be multiple of G
-	std::size_t a = frm.frame_alignment_requirement(); // a = alignment of frames
-
-	// will compute minimal padding frame_padding (bytes to insert between frames)
-	// such that capacity * (frame_size + frame_padding) is a multiple of granularity
-	//       and (frame_size + frame_padding) is a multiple of a
-	
-	// frame_size and page_size are necessarily multiples of a, because:
-	//    a and page_size are both powers of 2,
-	//    page_size >>> a,
-	//    frame_size is required to be multiple of a
-	// need to make frame_padding also multiple of a
-	// --> count in units a
-	
-	Assert(is_nonzero_multiple_of(frame_size, a), "frame size must be multiple of frame alignment");
-	Assert(is_nonzero_multiple_of(granularity, a), "system page size must be multiple of frame alignment");
-	
-	std::size_t frame_size_a = frame_size / a;
-	std::size_t granularity_a = granularity / a;
-	// capacity * (frame_size_a + frame_padding_a) must be multiple of page_size_a
-	
-	std::size_t d = granularity_a / gcd(granularity_a, capacity);	
-	// --> (frame_size_a + frame_padding_a) must be multiple of d
-	// d is a power of 2
-	// d = factors 2 that are missing in array_length for it to be multiple of granularity_a
-	
-	// if frame_size_a is already multiple of d, no padding is needed
-	std::size_t r = frame_size_a % d;
-	std::size_t frame_padding = 0;
-	if(r != 0) frame_padding = (d - r) * a;
-	
-	Assert(is_nonzero_multiple_of(capacity * (frame_size + frame_padding), granularity));
-	Assert(is_nonzero_multiple_of(frame_size + frame_padding, a));
-	
-	return allocation_parameters {
-		frame_padding,
-		capacity,
-		capacity * (frame_size + frame_padding),
-		capacity * frame_padding
-	};
-}
 
 
 ring::allocation_parameters ring::select_allocation_parameters_
 (const format_base_type& frm, std::size_t min_capacity, std::size_t max_capacity) {
-	allocation_parameters best_param = allocation_parameters_for_capacity(frm, min_capacity);
+	std::size_t frame_size = frm.frame_size(); // frame size, in bytes
+	std::size_t granularity = raw_ring_allocator::size_granularity(); // G = allocated size must be multiple of G
+	std::size_t a = frm.frame_alignment_requirement(); // a = alignment of frames
 
-	for(std::size_t cap = min_capacity + 1; max_capacity == 0 || cap <= max_capacity; ++cap) {
-		allocation_parameters param = allocation_parameters_for_capacity(frm, cap);
-		if(param.frame_padding < best_param.frame_padding) best_param = param;
-		else max_capacity = min_capacity+100; // TODO improve
+	Assert(is_power_of_two(granularity));
+	Assert(is_power_of_two(a));
+	Assert(granularity > a);
+	Assert(is_nonzero_multiple_of(frame_size, a));
+
+	allocation_parameters param;
+
+	if(is_multiple_of(frame_size, granularity)) {
+		std::cerr << "framesize mult of gran" << std::endl;
+		
+		param.frame_padding = 0;
+		param.capacity = min_capacity;
+		param.allocated_size = min_capacity * frame_size;
+				
+	} else if(is_multiple_of(granularity, frame_size)) {
+		std::cerr << "gran mult of framesize" << std::endl;
+		std::size_t frames_per_chunk = granularity / frame_size;
+		
+		std::size_t capacity;
+		if(is_multiple_of(min_capacity * frame_size, granularity)) capacity = min_capacity;
+		else capacity = granularity - ((min_capacity * frame_size) % granularity);
+		
+		param.frame_padding = 0;
+		param.capacity = capacity;
+		param.allocated_size = capacity * frame_size;
+		
+	} else {
+		std::cerr << "gen" << std::endl;
+		std::size_t frame_size_a = frame_size / a;
+		std::size_t granularity_a = granularity / a;
+				
+		min_capacity = std::max(min_capacity, granularity_a / (2*frame_size_a - 1));
+		if(max_capacity == 0) max_capacity = 2 * min_capacity;
+		
+		std::size_t best_padding_a = frame_size_a;
+		std::size_t best_capacity = 0;
+		for(std::size_t capacity = min_capacity; capacity <= max_capacity; ++capacity) {
+			std::size_t d = granularity_a / gcd(granularity_a, capacity);	
+			std::size_t r = frame_size_a % d;
+			std::size_t padding_a  = d - r;
+			std::cerr << "| cap=" << capacity << ", pad=" << padding_a << std::endl;
+			if(padding_a < best_padding_a) {
+				best_padding_a = padding_a;
+				best_capacity = capacity;
+			}
+			if(best_padding_a == 1) break;
+		}
+
+		param.frame_padding = best_padding_a * a;
+		param.capacity = best_capacity;
+		param.allocated_size = best_capacity * frame_size;
 	}
 	
-	std::cout << "chose cap=" << best_param.capacity << " (min=" << min_capacity << "), padding=" << best_param.frame_padding << std::endl;
-	
-	return best_param;
+	return param;
 }
 
 

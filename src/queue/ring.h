@@ -72,10 +72,8 @@ private:
 		std::size_t frame_padding;
 		std::size_t capacity;
 		std::size_t allocated_size;
-		std::size_t wasted_size;
 	};
 			
-	static allocation_parameters allocation_parameters_for_capacity(const format_base_type&, std::size_t capacity);
 	static allocation_parameters select_allocation_parameters_
 		(const format_base_type&, std::size_t min_capacity, std::size_t max_capacity);
 	static base make_base_(const format_ptr&, allocation_parameters);
