@@ -85,7 +85,7 @@ std::size_t raw_ring_allocator::size_granularity() {
 
 
 void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
-	std::size_t page_size = system_page_size();
+	std::size_t page_size = ::sysconf(_SC_PAGESIZE);
 	
 	if(size % page_size != 0) throw std::invalid_argument("size must be multiple of page size");
 	if(page_size % align != 0) throw std::invalid_argument("requested alignment must be divisor of page size"); 

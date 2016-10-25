@@ -12,7 +12,8 @@ void realtime_gate_node::thread_main_() {
 		clock_time_point now = clock_type::now();
 		
 		time_unit next_t = (now - launch_clock_time_).count() / input_timing.frame_clock_duration().count();
-		set_current_time_(current_time()+1);
+		set_current_time_(next_t);
+		//set_current_time_(current_time()+1);
 		
 		input().pre_pull();
 		pull_result pull_res = input().pull();

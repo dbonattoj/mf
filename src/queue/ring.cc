@@ -80,8 +80,6 @@ ring::allocation_parameters ring::select_allocation_parameters_
 		param.frame_padding = best_padding_a * a;
 		param.capacity = best_capacity;
 		param.allocated_size = best_capacity * frame_size;
-
-		std::cerr << "---> chose cap=" << param.capacity << ", pad=" << param.frame_padding << std::endl;
 	}
 	
 	return param;

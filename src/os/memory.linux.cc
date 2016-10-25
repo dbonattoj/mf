@@ -80,12 +80,12 @@ void raw_allocator::raw_deallocate(void* ptr, std::size_t size) {
 
 
 std::size_t raw_ring_allocator::size_granularity() {
-	return ::sysconf(_SC_PAGESIZE);;
+	return ::sysconf(_SC_PAGESIZE);
 }
 
 
 void* raw_ring_allocator::raw_allocate(std::size_t size, std::size_t align) {	
-	std::size_t page_size = system_page_size();
+	std::size_t page_size = ::sysconf(_SC_PAGESIZE);
 	
 	if(size % page_size != 0) throw std::invalid_argument("size must be multiple of page size");
 	if(page_size % align != 0) throw std::invalid_argument("requested alignment must be divisor of page size"); 
@@ -134,13 +134,21 @@ void raw_ring_allocator::raw_deallocate(void* base, std::size_t size) {
 
 
 void* raw_null_allocator::raw_allocate(std::size_t size, std::size_t align) {
-	if(system_page_size() % align != 0) throw std::invalid_argument("requested alignment must be divisor of page size");
-	std::size_t rounded_size = raw_round_up_to_fit_system_page_size(size);
-	return ::mmap(nullptr, rounded_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	std::size_t page_size = ::sysconf(_SC_PAGESIZE);
+	if(page_size % align != 0) throw std::invalid_argument("requested alignment must be divisor of page size");
+	
+	std::size_t rem = size % page_size;
+	if(rem != 0) size += (page_size - rem);
+	
+	return ::mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
 
 void raw_null_allocator::raw_deallocate(void* base, std::size_t size) {
+	std::size_t page_size = ::sysconf(_SC_PAGESIZE);
+	std::size_t rem = size % page_size;
+	if(rem != 0) size += (page_size - rem);
+
 	::munmap(base, size);
 }
 
