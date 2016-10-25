@@ -22,7 +22,7 @@
 #endif
 
 #ifndef MF_DEPRECATED
-#  define MF_DEPRECATED __attribute__ ((__deprecated__))
+#  define MF_DEPRECATED __declspec(deprecated)
 #endif
 
 #ifndef MF_DEPRECATED_EXPORT
@@ -33,9 +33,10 @@
 #  define MF_DEPRECATED_NO_EXPORT MF_NO_EXPORT MF_DEPRECATED
 #endif
 
-#define DEFINE_NO_DEPRECATED 0
-#if DEFINE_NO_DEPRECATED
-# define MF_NO_DEPRECATED
+#if 0 /* DEFINE_NO_DEPRECATED */
+#  ifndef MF_NO_DEPRECATED
+#    define MF_NO_DEPRECATED
+#  endif
 #endif
 
 #endif
