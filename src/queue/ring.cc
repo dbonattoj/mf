@@ -42,14 +42,11 @@ ring::allocation_parameters ring::select_allocation_parameters_
 	allocation_parameters param;
 
 	if(is_multiple_of(frame_size, granularity)) {
-		std::cerr << "framesize mult of gran" << std::endl;
-		
 		param.frame_padding = 0;
 		param.capacity = min_capacity;
 		param.allocated_size = min_capacity * frame_size;
 				
 	} else if(is_multiple_of(granularity, frame_size)) {
-		std::cerr << "gran mult of framesize" << std::endl;
 		std::size_t frames_per_chunk = granularity / frame_size;
 		
 		std::size_t capacity;
@@ -61,7 +58,6 @@ ring::allocation_parameters ring::select_allocation_parameters_
 		param.allocated_size = capacity * frame_size;
 		
 	} else {
-		std::cerr << "gen" << std::endl;
 		std::size_t frame_size_a = frame_size / a;
 		std::size_t granularity_a = granularity / a;
 				
@@ -74,7 +70,6 @@ ring::allocation_parameters ring::select_allocation_parameters_
 			std::size_t d = granularity_a / gcd(granularity_a, capacity);	
 			std::size_t r = frame_size_a % d;
 			std::size_t padding_a  = d - r;
-			std::cerr << "| cap=" << capacity << ", pad=" << padding_a << std::endl;
 			if(padding_a < best_padding_a) {
 				best_padding_a = padding_a;
 				best_capacity = capacity;
