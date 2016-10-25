@@ -27,23 +27,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-/// Get page size of operating system, in bytes.
-std::size_t system_page_size();
-
-
-/// Round `n` up so that `T[n]` has a size that is a multiple of the system page size.
-template<typename T>
-std::size_t round_up_to_fit_system_page_size(std::size_t n) {
-	Assert(system_page_size() % sizeof(T) == 0);
-	std::size_t page_capacity = system_page_size() / sizeof(T);
-	std::size_t remaining = page_capacity - (n % page_capacity);
-	return n + remaining;
-}
-
-/// Round number of bytes `len` up to a multiple of the system page size.
-inline std::size_t raw_round_up_to_fit_system_page_size(std::size_t len) {
-	return round_up_to_fit_system_page_size<byte>(len);
-}
 
 enum class memory_usage_advice {
 	normal,

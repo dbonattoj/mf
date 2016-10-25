@@ -28,7 +28,7 @@ using namespace mf;
 
 TEST_CASE("ring_allocator", "[ring_allocator]") {
 	raw_ring_allocator allocator;
-	std::size_t n = raw_round_up_to_fit_system_page_size(100);
+	std::size_t n = allocator.size_granularity() * 30;
 	
 	// allocate
 	void* buf_raw = allocator.raw_allocate(n);

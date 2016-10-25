@@ -43,9 +43,6 @@ namespace {
 	}
 }
 
-std::size_t system_page_size() {
-	return system_info_().dwPageSize;
-}
 
 void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv) {
 	// Not available on Windows

@@ -38,9 +38,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
-std::size_t system_page_size() {
-	return ::sysconf(_SC_PAGESIZE);
-}
 
 void set_memory_usage_advice(void* buf, std::size_t len, memory_usage_advice adv) {
 	switch(adv) {

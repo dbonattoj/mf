@@ -62,7 +62,7 @@ ring::allocation_parameters ring::select_allocation_parameters_
 		std::size_t granularity_a = granularity / a;
 				
 		min_capacity = std::max(min_capacity, granularity_a / (2*frame_size_a - 1));
-		if(max_capacity == 0) max_capacity = 2 * min_capacity;
+		if(max_capacity == 0) max_capacity = 3 * min_capacity;
 		
 		std::size_t best_padding_a = frame_size_a;
 		std::size_t best_capacity = 0;
@@ -80,6 +80,8 @@ ring::allocation_parameters ring::select_allocation_parameters_
 		param.frame_padding = best_padding_a * a;
 		param.capacity = best_capacity;
 		param.allocated_size = best_capacity * frame_size;
+
+		std::cerr << "---> chose cap=" << param.capacity << ", pad=" << param.frame_padding << std::endl;
 	}
 	
 	return param;
