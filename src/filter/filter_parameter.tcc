@@ -69,6 +69,28 @@ void filter_parameter<Value>::set_dynamic(const Value& initial_value) {
 
 
 template<typename Value>
+void filter_parameter<Value>::set_shared_dynamic(filter_parameter& base) {
+	Assert(base.kind() == dynamic || base.kind() == shared_dynamic);
+
+	set_undefined_();
+	
+	kind_ = shared_dynamic;
+	if(base.kind_ == dynamic) base.kind_ = shared_dynamic;
+	
+	if(base.shared_dynamic_base_ == nullptr) {
+		shared_dynamic_base_ = &base;
+	} else {
+		Assert(base.shared_dynamic_dependents_.empty());
+		shared_dynamic_base_ = base.shared_dynamic_base_;
+	}
+
+	shared_dynamic_base_.shared_dynamic_dependents_.push_back(this);
+	
+	// TODO handle deletion of dependent/base shared dynamic par
+}
+
+
+template<typename Value>
 void filter_parameter<Value>::set_reference(const filter_parameter& ref_param, bool input, bool sent) {
 	Assert(ref_param.this_filter().precedes_strict(this_filter()));
 	set_undefined_();
@@ -121,6 +143,14 @@ void filter_parameter<Value>::install(filter_graph& fg, node& nd) {
 		id_ = fg.new_parameter_id();
 		node_parameter& par = nd.add_parameter(id_, dynamic_initial_value());
 		par.set_name(name_);
+		
+	} else if(kind() == shared_dynamic) {
+		if(shared_dynamic_base_ == nullptr) {
+			
+		} else {
+			
+		}
+		
 	} else if(kind() == reference) {
 		if(referenced_parameter().kind() == dynamic) {
 			parameter_id id = referenced_parameter().id();

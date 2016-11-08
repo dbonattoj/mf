@@ -67,7 +67,7 @@ sync_node::process_result sync_node::process_next_frame_() {
 	set_current_time_(t);
 	
 	// Create job
-	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
+	processing_node_job job(*this, std::move(current_parameter_valuation())); // reads current time of node
 	job.attach_output(out_vw[0], nullptr);
 	
 	// Let handler pre-process frame
@@ -116,7 +116,7 @@ sync_node::process_result sync_node::process_next_frame_() {
 	output_write_handle.end(1);
 	
 	// Finish the job
-	update_parameters_(job.parameters()); // TODO move instead of copy
+	connect_parameter_node().update_parameters(job.parameters()); // TODO move instead of copy
 		
 	// Processing the frame succeeded
 	return process_result::success;

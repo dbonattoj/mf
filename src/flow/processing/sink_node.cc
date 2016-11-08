@@ -46,7 +46,7 @@ void sink_node::setup() {
 node::pull_result sink_node::pull(time_unit t) {
 	// Set time and create job
 	set_current_time_(t);
-	processing_node_job job(*this, std::move(current_parameter_valuation_())); // reads current time of node
+	processing_node_job job(*this, std::move(current_parameter_valuation())); // reads current time of node
 
 	// Let handler pre-process frame
 	handler_result handler_res = handler_pre_process_(job);
@@ -87,7 +87,7 @@ node::pull_result sink_node::pull(time_unit t) {
 	job.end_inputs();
 
 	// Finish the job
-	update_parameters_(job.parameters()); // TODO move instead of copy
+	connect_parameter_node().update_parameters(job.parameters()); // TODO move instead of copy
 
 	return pull_result::success;
 }

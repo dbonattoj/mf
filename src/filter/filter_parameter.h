@@ -36,7 +36,7 @@ class node;
 /// Parameter attached to a filter, abstract base class.
 class filter_parameter_base {
 public:
-	enum kind_type { undefined, deterministic, dynamic, reference };
+	enum kind_type { undefined, deterministic, dynamic, shared_dynamic, reference };
 	
 	virtual ~filter_parameter_base() = default;
 	virtual const filter& this_filter() const = 0;
@@ -82,9 +82,15 @@ private:
 	kind_type kind_ = undefined;
 	bool input_reference_;
 	bool sent_reference_;
+	
 	deterministic_value_function deterministic_value_function_;
-	std::unique_ptr<Value> dynamic_initial_value_;
+
 	const filter_parameter* referenced_parameter_ = nullptr;
+
+	std::unique_ptr<Value> dynamic_initial_value_;
+	filter_parameter* shared_dynamic_base_;
+	std::vector<filter_parameter*> shared_dynamic_dependents_;
+
 	std::string name_;
 
 	parameter_id id_ = undefined_parameter_id;
@@ -106,9 +112,10 @@ public:
 	void set_constant_value(const Value&);
 	void set_value_function(deterministic_value_function);
 	void set_dynamic(const Value& initial_value = Value());
+	void set_shared_dynamic(filter_parameter&);
 	void set_reference(const filter_parameter&, bool input = true, bool sent = false);
 	void set_sent_reference(const filter_parameter& par) { set_reference(par, false, true); }
-		
+	
 	const Value& dynamic_initial_value() const;
 	Value deterministic_value(time_unit t) const;
 	const filter_parameter& referenced_parameter() const override;

@@ -163,21 +163,6 @@ void node::set_current_time_(time_unit t) {
 }
 
 
-
-void node::deduce_propagated_parameters_() {
-	for(const node_parameter& param : parameters_)
-		add_propagated_parameter_if_needed(param.id());
-}
-
-
-void node::deduce_sent_parameters_relay_() {
-	node_parameter_relay null_relay;
-	for(const node_parameter& param : parameters_)
-		add_relayed_parameter_if_needed(param.id(), null_relay);
-	Assert(null_relay.handlers_count() == 0);
-}
-
-
 bool node::add_propagated_parameter_if_needed(parameter_id id) {	
 	bool needed = false;
 	for(auto&& out : outputs_) {
@@ -190,44 +175,34 @@ bool node::add_propagated_parameter_if_needed(parameter_id id) {
 
 
 
-bool node::add_relayed_parameter_if_needed(parameter_id id, const node_parameter_relay& preceding_relay) {
+bool node::add_relayed_parameter_if_needed(parameter_id id, const sent_parameter_relay_type& preceding_relay) {
+	const sent_parameter_relay_type& default_relay = preceding_relay.handler(id);
+	relayed_parameter_handler_type relay = this->custom_sent_parameter_relay_(id, default_relay);
+
 	bool needed = false;
 	for(auto&& out : outputs_) {
-		bool needed_by_output = out->add_relayed_parameter_if_needed(id, sent_parameters_relay_);
+		relay = this->custom_sent_parameter_relay_(id, relay);		
+		bool needed_by_output = out->add_relayed_parameter_if_needed(id, relay);
 		if(needed_by_output) needed = true;
 	}
-	if(has_sent_parameter(id)) needed = true;
-	
-	if(has_parameter(id)) {
+	if(has_sent_parameter(id)) {
 		needed = true;
-		sent_parameters_relay_.set_handler(
-			id,
-			[id, this](const node_parameter_value& val) { update_parameter_(id, val); }
-		);
-	
-	} else if(needed) {
-		sent_parameters_relay_.set_handler(
-			id,
-			[id, &preceding_relay](const node_parameter_value& val) { preceding_relay.send_parameter(id, val); }
-		);
+		send_parameter_relays_.emplace(id, relay);
 	}
-	
 	return needed;
 }
 
 
-
-node_parameter& node::add_parameter(parameter_id id, const node_parameter_value& initial_value) {
-	parameters_.emplace_back(id, initial_value);
-	parameter_valuation_.set(id, initial_value);
-	return parameters_.back();
+node::sent_parameter_relay_type node::custom_sent_parameter_relay_
+(parameter_id, const sent_parameter_relay_type& default_relay) {
+	return default_relay;
 }
 
 
-bool node::has_parameter(parameter_id id) const {
-	return std::any_of(parameters_.cbegin(), parameters_.cend(), [id](const node_parameter& param) {
-		return (param.id() == id);
-	});
+sent_parameter_relay_type node::sent_parameter_relay(parameter_id id) const {
+	auto it = sent_parameter_relays_.find(id);
+	if(it != sent_parameter_relays_.end()) return it->second;
+	else throw std::logic_error("relay for the sent parameter was not installed");
 }
 
 
@@ -248,36 +223,6 @@ void node::add_sent_parameter(parameter_id id) {
 
 bool node::has_sent_parameter(parameter_id id) const {
 	return std::find(sent_parameters_.cbegin(), sent_parameters_.cend(), id) != sent_parameters_.cend();
-}
-
-
-void node::update_parameter_(parameter_id id, const node_parameter_value& val) {
-	std::lock_guard<std::mutex> lock(parameters_mutex_);
-	parameter_valuation_.set(id, val);
-}
-
-
-void node::update_parameter_(parameter_id id, node_parameter_value&& val) {
-	std::lock_guard<std::mutex> lock(parameters_mutex_);
-	parameter_valuation_.set(id, std::move(val));
-}
-
-
-void node::update_parameters_(const node_parameter_valuation& val) {
-	std::lock_guard<std::mutex> lock(parameters_mutex_);
-	parameter_valuation_.set_all(val);
-}
-
-
-void node::update_parameters_(node_parameter_valuation&& val) {
-	std::lock_guard<std::mutex> lock(parameters_mutex_);
-	parameter_valuation_.set_all(std::move(val));
-}
-
-
-node_parameter_valuation node::current_parameter_valuation_() const {
-	std::lock_guard<std::mutex> lock(parameters_mutex_);
-	return parameter_valuation_;
 }
 
 

@@ -59,6 +59,8 @@ MF_DEFINE_EXCEPTION(failed_assertion, std::runtime_error);
 MF_DEFINE_EXCEPTION(sequencing_error, std::runtime_error);
 MF_DEFINE_EXCEPTION(ply_importer_error, std::runtime_error);
 
+MF_DEFINE_EXCEPTION(not_implemented, std::logic_error);
+
 }
 
 #endif

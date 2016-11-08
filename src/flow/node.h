@@ -63,6 +63,7 @@ public:
 
 private:
 	enum class stage { construction, was_pre_setup, was_setup };
+	using sent_parameter_relay_type = std::function<void(parameter_id, const node_parameter_value&)>;
 	
 	stage stage_ = stage::construction;
 
@@ -73,11 +74,7 @@ private:
 	/// Timing of the frames pulled out of this node.
 	/** Defines correspondence of frame index (called "time") and real clock time.  */
 	stream_timing output_timing_;
-	
-	/// Parameters owned by this node.
-	/** Values are stored in `parameter_valuation_`. */
-	std::vector<node_parameter> parameters_;
-	
+		
 	/// Parameters of preceding nodes whose values this node receives with input frames.
 	/** Propagated parameters on node outputs are set up such that the node receives these parameters. */
 	std::vector<parameter_id> input_parameters_;
@@ -85,9 +82,7 @@ private:
 	/// Parameters of preceding nodes to which this node can send a new value.
 	/** Parameter relays between owning node and this node are set up to transfer the new value to the owning node. */
 	std::vector<parameter_id> sent_parameters_;
-	
-	/// Relay for sent parameter values from suceeding node to this or preceding node.
-	node_parameter_relay sent_parameters_relay_;
+	std::map<parameter_id, sent_parameter_relay_type> sent_parameter_relays_;
 	
 	std::string name_ = "node";
 
@@ -95,11 +90,7 @@ private:
 	/// Dynamic state (varies during execution).
 	///@{
 	std::atomic<time_unit> current_time_ {-1};
-
-	node_parameter_valuation parameter_valuation_; ///< Current valuation of node parameters.
-	mutable std::mutex parameters_mutex_; ///< Mutex to protect parameter_valuation_ during concurrent access.
 	///@}
-
 
 	
 	/// Recursively pre-setup nodes in sink-to-source order.
@@ -111,13 +102,7 @@ private:
 	/** Must be called on sink node. Calls setup() once on each node in graph, in an order such that when one node
 	 ** is setup, its predecessors have already been setup */
 	void propagate_setup_();
-	
-
-	void deduce_propagated_parameters_();
-	
-	
-	void deduce_sent_parameters_relay_();
-	
+		
 
 protected:
 	explicit node(node_graph& gr) : graph_(gr) { }
@@ -136,13 +121,7 @@ protected:
 		
 	void set_current_time_(time_unit t) ;
 	void mark_end_();
-	
-	void update_parameter_(parameter_id, const node_parameter_value&);
-	void update_parameter_(parameter_id, node_parameter_value&&);
-	void update_parameters_(const node_parameter_valuation&);
-	void update_parameters_(node_parameter_valuation&&);
-	node_parameter_valuation current_parameter_valuation_() const;
-	
+		
 public:
 	virtual ~node();
 
@@ -163,25 +142,16 @@ public:
 	
 	bool is_source() const { return inputs_.empty(); }
 	bool is_sink() const { return outputs_.empty(); }
-	
-	
-	/// Owned parameters.
-	///@{
-	node_parameter& add_parameter(parameter_id, const node_parameter_value& initial_value);
-	bool has_parameter(parameter_id) const;
-	std::size_t parameters_count() const { return parameters_.size(); }
-	const node_parameter& parameter_at(std::ptrdiff_t i) const { return parameters_.at(i); }
-	
-	bool add_propagated_parameter_if_needed(parameter_id);
-	///@}
-	
-	
+
+
 	/// Input parameters.
 	///@{
 	void add_input_parameter(parameter_id);
 	bool has_input_parameter(parameter_id) const;
 	std::size_t input_parameters_count() const { return input_parameters_.size(); }
 	parameter_id input_parameter_at(std::ptrdiff_t i) const { return input_parameters_.at(i); }
+	
+	bool add_propagated_parameter_if_needed(parameter_id);
 	///@}
 	
 	
@@ -191,9 +161,10 @@ public:
 	bool has_sent_parameter(parameter_id) const;
 	std::size_t sent_parameters_count() const { return sent_parameters_.size(); }
 	parameter_id sent_parameter_at(std::ptrdiff_t i) const { return sent_parameters_.at(i); }
-	
-	bool add_relayed_parameter_if_needed(parameter_id, const node_parameter_relay& preceding_relay);
-	const node_parameter_relay& sent_parameters_relay() const { return sent_parameters_relay_; }
+		
+	bool add_relayed_parameter_if_needed(parameter_id, const sent_parameter_relay_type& preceding_relay);
+	sent_parameter_relay_type sent_parameter_relay(parameter_id) const;
+	virtual sent_parameter_relay_type custom_sent_parameter_relay_(parameter_id, const sent_parameter_relay_type& def);
 	///@}
 	
 	

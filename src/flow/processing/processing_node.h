@@ -35,6 +35,7 @@ namespace mf { namespace flow {
 class graph;
 class processing_node;
 class processing_node_job;
+class parameter_node;
 
 
 /// Delegate which processes frames of a \ref processing_node, interface.
@@ -131,6 +132,8 @@ private:
 	void compute_propagated_parameters_guide_() const;
 
 	node_frame_format frame_format_;
+	
+	parameter_node* connected_parameter_node_ = nullptr;
 
 protected:
 	/// Result state of handler processing or pre-processing of frame.
@@ -173,6 +176,11 @@ public:
 	const output_channel_type& output_channel_at(std::ptrdiff_t index) const;
 	
 	std::vector<input_index_type> propagated_parameters_inputs(parameter_id) const;
+	
+	void connect_parameter_node(parameter_node&);
+	bool has_connected_parameter_node() const;
+	parameter_node& connected_parameter_node() const;
+	node_parameter_valuation current_parameter_valuation() const;
 };
 
 

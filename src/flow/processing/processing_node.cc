@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "processing_node_job.h"
 #include "../multiplex/multiplex_node.h"
 #include "../node_graph.h"
+#include "parameter/parameter_node.h"
 #include <utility>
 
 #include "../diagnostic/node_graph_visualization.h"
@@ -214,6 +215,31 @@ auto processing_node::propagated_parameters_inputs(parameter_id id) const -> std
 		indices.push_back(it->second);
 	return indices;
 }
+
+
+void processing_node::connect_parameter_node(parameter_node& par_nd) {
+	Assert(! has_connected_parameter_node());
+	processing_node_input& in = add_input();
+	in.connect(par_nd.add_output());
+	connected_parameter_node_ = &par_nd;
+}
+
+
+bool processing_node::has_connected_parameter_node() const {
+	return (connected_parameter_node_ != nullptr);
+}
+
+
+parameter_node& processing_node::connected_parameter_node() const {
+	Assert(has_connected_parameter_node());
+	return *connected_parameter_node_;
+}
+
+
+node_parameter_valuation processing_node::current_parameter_valuation() const {
+	return connected_parameter_node().current_parameter_valuation();
+}
+
 
 
 

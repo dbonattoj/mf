@@ -29,12 +29,6 @@ processing_node_job::processing_node_job(processing_node& nd, const node_paramet
 	input_views_(nd.inputs_count()) { }
 
 
-processing_node_job::processing_node_job(processing_node& nd, node_parameter_valuation&& params) :
-	node_(nd),
-	node_parameters_(std::move(params)),
-	input_views_(nd.inputs_count()) { }
-
-
 processing_node_job::~processing_node_job() {
 	cancel_inputs();
 	cancel_output();
@@ -185,7 +179,8 @@ bool processing_node_job::has_sent_parameter(parameter_id id) const {
 
 
 void processing_node_job::send_parameter(parameter_id id, const node_parameter_value& new_value) {
-	node_.sent_parameters_relay().send_parameter(id, new_value);
+	node::sent_parameter_relay_type relay = node_.sent_parameter_relay(id);
+	relay(id, new_value);
 }
 
 
