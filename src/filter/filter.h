@@ -44,6 +44,7 @@ class filter_handler;
 class node_graph;
 class processing_node;
 class multiplex_node;
+class parameter_node;
 class gate_node;
 
 /// Filter which performs concrete processing.
@@ -58,18 +59,22 @@ public:
 		gate_node* gate = nullptr;
 		multiplex_node* multiplex = nullptr;
 	};
+	
+	struct local_installation_guide {
+		std::map<const filter*, filter_node_group> filter_nodes;
+		std::map<filter_parameter_base*, parameter_node*> shared_parameter_nodes;
+
+		bool has_filter(const filter&) const;
+		bool has_filter_successors(const filter&) const;
+		bool has_filter_predecessors(const filter&) const;
+	};
 
 	struct installation_guide {
 		filter_graph& filter_gr;
 		node_graph& node_gr;
-		std::map<const filter*, filter_node_group> local_filter_nodes;
-				
+						
 		installation_guide(filter_graph& fg, node_graph& ng) :
 			filter_gr(fg), node_gr(ng) { }
-		
-		bool has_filter(const filter&) const;
-		bool has_filter_successors(const filter&) const;
-		bool has_filter_predecessors(const filter&) const;
 	};
 
 private:
@@ -94,11 +99,11 @@ private:
 	//bool is_parallelization_join_point_() const;
 	//bool is_parallelization_split_point_() const;
 	
-	bool install_gate_node_if_needed_(processing_node&, installation_guide&);
+	bool install_gate_node_if_needed_(processing_node&, local_installation_guide&);
 
 	void setup_();
-	void install_(installation_guide&);
-	void install_input_(filter_input_base&, processing_node&, const installation_guide&);
+	void install_(installation_guide&, local_installation_guide);
+	void install_input_(filter_input_base&, processing_node&, const local_installation_guide&);
 
 	using filter_reference_set = std::set<filter*>;
 	using const_filter_reference_set = std::set<const filter*>;
@@ -152,7 +157,7 @@ public:
 	//int parallelization_factor() const { return parallelization_factor_; } 
 	
 	void propagate_setup();
-	void propagate_install(installation_guide&);
+	void propagate_install(installation_guide&, local_installation_guide&);
 	
 	void handler_pre_process(processing_node&, processing_node_job&) final override;
 	void handler_process(processing_node&, processing_node_job&) final override;

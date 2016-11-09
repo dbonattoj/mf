@@ -29,18 +29,19 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include "../flow/processing/sink_node.h"
 #include "../flow/processing/sync_node.h"
 #include "../flow/processing/async_node.h"
+#include "../flow/parameter/parameter_node.h"
 #include <set>
 #include <algorithm>
 
 namespace mf { namespace flow {
 
 
-bool filter::installation_guide::has_filter(const filter& filt) const {
+bool filter::local_installation_guide::has_filter(const filter& filt) const {
 	return (local_filter_nodes.find(&filt) != local_filter_nodes.end());
 }
 
 
-bool filter::installation_guide::has_filter_successors(const filter& filt) const {
+bool filter::local_installation_guide::has_filter_successors(const filter& filt) const {
 	auto direct_suc = filt.direct_successors_();
 	return std::all_of(direct_suc.begin(), direct_suc.end(), [this](const filter* suc_filt) {
 		return has_filter(*suc_filt);
@@ -48,7 +49,7 @@ bool filter::installation_guide::has_filter_successors(const filter& filt) const
 }
 
 
-bool filter::installation_guide::has_filter_predecessors(const filter& filt) const {
+bool filter::local_installation_guide::has_filter_predecessors(const filter& filt) const {
 	auto direct_pre = filt.direct_predecessors_();
 	return std::all_of(direct_pre.begin(), direct_pre.end(), [this](const filter* pre_filt) {
 		return has_filter(*pre_filt);
@@ -213,7 +214,7 @@ bool filter::is_parallelization_split_point_() const {
 */
 
 
-bool filter::install_gate_node_if_needed_(processing_node& installed_node, installation_guide& guide) {	
+bool filter::install_gate_node_if_needed_(processing_node& installed_node, local_installation_guide& local_guide) {	
 	filter_node_group& node_group = guide.local_filter_nodes.at(this);
 	Assert(node_group.multiplex == nullptr, "gate must be installed before multiplex");
 	
@@ -332,7 +333,8 @@ void filter::setup_() {
 }
 
 
-void filter::install_input_(filter_input_base& in, processing_node& installed_node, const installation_guide& guide) {
+void filter::install_input_
+(filter_input_base& in, processing_node& installed_node, const local_installation_guide& local_guide) {
 	if(! in.is_connected()) return;
 	
 	// Add input to installed node
@@ -347,10 +349,10 @@ void filter::install_input_(filter_input_base& in, processing_node& installed_no
 	const filter_output_base& connected_output = in.connected_output();
 	std::ptrdiff_t connected_output_channel_index  = connected_output.index();
 	const filter& connected_filter = in.connected_filter();
-	Assert(guide.has_filter(connected_filter));
+	Assert(local_guide.has_filter(connected_filter));
 
 	// Get local node group for connected filter
-	const filter_node_group& connected_node_group = guide.local_filter_nodes.at(&connected_filter);
+	const filter_node_group& connected_node_group = local_guide.filter_nodes.at(&connected_filter);
 	
 	// Connect to connected filter's node output (processing, gate or multiplex)
 	// Install through edge
@@ -369,11 +371,11 @@ void filter::install_input_(filter_input_base& in, processing_node& installed_no
 }
 
 
-void filter::install_(installation_guide& guide) {
+void filter::install_(installation_guide& guide, local_installation_guide& local_guide) {
 	// install is called in source-to-sink order
 	// predecessors of this filter have already been installed
 	
-	filter_node_group& node_group = guide.local_filter_nodes[this];
+	filter_node_group& node_group = local_guide.filter_nodes[this];
 
 	// Create processing node for this filter
 	processing_node* installed_node = nullptr;
@@ -400,11 +402,15 @@ void filter::install_(installation_guide& guide) {
 	// Add node inputs for each connected filter input
 	// and connect them to predecessor outputs (which have already been installed)
 	for(filter_input_base* in : inputs_)
-		install_input_(*in, *installed_node, guide);
+		install_input_(*in, *installed_node, local_guide);
 		
+	// Add parameter node if needed
+	// TODO .................
+		
+	
 	// Add gate node if necessary
 	// connects directly to the processing node output
-	install_gate_node_if_needed_(*installed_node, guide);
+	install_gate_node_if_needed_(*installed_node, local_guide);
 	
 	// Add multiplex node if necessary
 	// connects either directly to processing node output, or to gate output
@@ -427,10 +433,6 @@ void filter::install_(installation_guide& guide) {
 		out_ch.define_frame_format(out->frame_format());
 		out_ch.set_name(out->name().empty() ? default_filter_output_name : out->name());
 	}
-	
-	// Add node parameters for dynamic filter parameters
-	for(filter_parameter_base* param : parameters_)
-		param->install(guide.filter_gr, *installed_node);
 }
 
 

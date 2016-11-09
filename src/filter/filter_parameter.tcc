@@ -136,6 +136,49 @@ bool filter_parameter<Value>::is_sent_reference() const {
 }
 
 
+template<typename Value>
+void filter_parameter<Value>::install(filter::local_installation_guide& local_guide) {
+	filter_node_group& node_group = local_guide.filter_nodes.at(&filter_);
+	
+	if(kind() == dynamic) {
+		id_ = fg.new_parameter_id();
+		if(node_group.parameter == nullptr) {
+			parameter_node& param_nd = guide.node_gr.add_sink<parameter_node>();
+			node_group.parameter = &param_nd;
+			node_group.processing->connect_parameter_node(*node_group.processing);
+		}
+		node_group.parameter->add_parameter(id, dynamic_initial_value());
+		
+	} else if(kind() == shared_dynamic && shared_dynamic_base_ == nullptr) {
+
+		// TODO: parameter_node = 1 parameter only
+		//       special node frame format carrying one parameter value
+		
+	} else if(kind() == reference) {
+		if(referenced_parameter().kind() == dynamic) {
+			parameter_id id = referenced_parameter().id();
+			if(input_reference_) nd.add_input_parameter(id);
+			if(sent_reference_) nd.add_sent_parameter(id);
+		} else if(referenced_parameter().kind() == deterministic) {
+			if(sent_reference_) throw invalid_filter_graph("sent filter parameter reference to deterministic invalid");
+		} else {
+			throw invalid_filter_graph("filter parameter reference must be to dynamic or deterministic parameter");
+		}
+	}
+}
+
+/*
+		id_ = fg.new_parameter_id();
+		node_parameter& par = nd.add_parameter(id_, dynamic_initial_value());
+		par.set_name(name_);
+		
+	} else if(kind() == shared_dynamic) {
+		if(shared_dynamic_base_ == nullptr) {
+			
+		} else {
+			
+		}
+*/
 
 template<typename Value>
 void filter_parameter<Value>::install(filter_graph& fg, node& nd) {	

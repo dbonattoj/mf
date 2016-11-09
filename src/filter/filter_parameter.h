@@ -46,7 +46,7 @@ public:
 	virtual bool is_input_reference() const = 0;
 	virtual bool is_sent_reference() const = 0;
 
-	virtual void install(filter_graph&, node&) = 0;
+	virtual void install(filter::installation_guide&) = 0;
 };
 
 
@@ -124,7 +124,7 @@ public:
 	
 	parameter_id id() const { return id_; }
 	
-	void install(filter_graph&, node&) override;
+	void install(filter::local_installation_guide&) override;
 };
 
 }}
