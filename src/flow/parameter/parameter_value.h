@@ -59,32 +59,12 @@ public:
 
 
 using shared_parameter_value_ptr = std::shared_ptr<const parameter_value_base>;
-using unique_parameter_value_ptr = std::unique_ptr<parameter_value_base>;
 
 template<typename Value>
 shared_parameter_value_ptr make_shared_parameter_value_ptr(Value&& val) {
 	using value_type = std::decay_t<Value>;
 	using parameter_value_type = parameter_value<value_type>;
 	return std::make_shared<const parameter_value_type>(std::forward<Value>(val));
-}
-
-template<typename Ptr>
-shared_parameter_value_ptr clone_shared_parameter_value_ptr(const Ptr& ptr) {
-	parameter_value_base* clone = ptr->clone();
-	return std::shared_ptr<const parameter_value_base>(clone);
-}
-
-template<typename Value>
-unique_parameter_value_ptr make_unique_parameter_value_ptr(Value&& val) {
-	using value_type = std::decay_t<Value>;
-	using parameter_value_type = parameter_value<value_type>;
-	return std::make_unique<parameter_value_type>(std::forward<Value>(val));
-}
-
-template<typename Ptr>
-unique_parameter_value_ptr clone_unique_parameter_value_ptr(const Ptr& ptr) {
-	parameter_value_base* clone = ptr->clone();
-	return std::unique_ptr<parameter_value_base>(clone);
 }
 
 
