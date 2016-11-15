@@ -26,11 +26,22 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 
 namespace mf {
 
+class opaque_object_format_base : public opaque_format {
+public:
+	using object_base_ptr = void*;
+	using object_base_const_ptr = const void*;
+	
+	static object_base_ptr obj_ptr(frame_ptr);
+	static object_base_const_ptr obj_ptr(const_frame_ptr);
+	
+	opaque_object_format_base(std::size_t size, std::size_t alignment_requirement, bool is_pod);
+};
+
 /// Format of \ref ndarray_view_opaque frame containing object instance of type \a Object.
 /** \a Object can be non-POD type, and it is constructed and destructed with frame.
  ** \a Object must have public default constructor, destructor, copy assignment operator and comparison operator. */
 template<typename Object>
-class opaque_object_format : public opaque_format {
+class opaque_object_format : public opaque_object_format_base {
 public:	
 	using object_type = Object;
 

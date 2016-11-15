@@ -2,6 +2,7 @@
 #define MF_FLOW_PARAMETER_NODE_H_
 
 #include "node_derived.h"
+#include "../../nd/opaque_format/opaque_object_format.h"
 #include <mutex>
 
 namespace mf { namespace flow {
@@ -26,7 +27,6 @@ public:
 };
 
 
-template<typename Value>
 class parameter_node : public node_derived<node_input, parameter_node_output> {
 	using base = node_derived<node_input, parameter_node_output>;
 	friend class parameter_node_output;
@@ -36,22 +36,20 @@ public:
 	using value_array_frame_view_type = ndarray_view_opaque<1>;
 	
 private:
-
-	value_type current_value_;
+	unique_parameter_value_ptr current_value_;
 	std::unique_ptr<timed_ring> pulled_values_; 
 	
-	std::shared_timed_mutex mutex_;
-	
-	value_array_frame_view_type get_settled_values_(time_span);
+	mutable std::shared_timed_mutex mutex_;
 	
 	
+	ndarray_opaque<1> get_settled_values_(time_span);
 	
-
-	std::vector<node_parameter> parameters_;
-	node_parameter_valuation parameter_valuation_;
-	mutable std::mutex parameters_mutex_;
 	
-	node_frame_format frame_format_;
+	
+	node_frame_format output_frame_format_;
+	std::unique_ptr<opaque_object_format_base> parameter_frame_format_;
+	
+	
 
 	void update_parameter(parameter_id, const node_parameter_value&);
 	void update_parameter(parameter_id, node_parameter_value&&);

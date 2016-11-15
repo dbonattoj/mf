@@ -18,10 +18,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER I
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MF_FLOW_NODE_PARAMETER_H_
-#define MF_FLOW_NODE_PARAMETER_H_
+#ifndef MF_FLOW_PARAMETER_H_
+#define MF_FLOW_PARAMETER_H_
 
-#include "node_parameter_value.h"
+#include "parameter_value.h"
 #include "../types.h"
 #include <string>
 
@@ -29,16 +29,18 @@ namespace mf { namespace flow {
 
 /// Information about parameter belonging to node.
 /** The current value of the parameter is stored separately, using a \ref node_parameter_valuation in the \ref node. */
-class node_parameter {
+class parameter {
 private:
 	parameter_id id_;
-	node_parameter_value initial_value_;
+	unique_parameter_value_ptr initial_value_;
 	std::string name_;
 	
 public:
-	node_parameter(parameter_id id, const node_parameter_value& initial_value) :
-		id_(id), initial_value_(initial_value) { }
-	
+	template<typename Value>
+	node_parameter(parameter_id id, const Value& initial_value) :
+		id_(id),
+		initial_value_(make_unique_parameter_value_ptr(initial_value)) { }
+		
 	parameter_id id() const { return id_; }
 	const node_parameter_value& initial_value() const { return initial_value_; }
 

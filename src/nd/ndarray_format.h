@@ -84,6 +84,16 @@ ndarray_format make_ndarray_format(std::size_t length, std::size_t stride = size
 	return ndarray_format(sizeof(Elem), alignof(Elem), length, stride);
 }
 
+inline ndarray_format make_raw_ndarray_format
+(std::size_t elem_size, std::size_t alignment = 1, std::size_t length = 1) {
+	return ndarray_format(elem_size, alignment, length, elem_size);
+}
+
+inline ndarray_format make_raw_ndarray_format
+(std::size_t elem_size, std::size_t alignment, std::size_t length, std::size_t stride) {
+	return ndarray_format(elem_size, alignment, length, stride);
+}
+
 
 }
 

@@ -55,13 +55,15 @@ opaque_multi_ndarray_format::opaque_multi_ndarray_format() {
 
 
 auto opaque_multi_ndarray_format::add_part(const ndarray_format& new_part_format) -> const part& {
-	part new_part { new_part_format, 0 };
+	part new_part;
+	new_part.format = std::make_shared<opaque_ndarray_format>(new_part_format);
+	new_part.offset = 0;
 	bool has_padding = false;
 	
 	if(parts_.size() > 0) {
 		const part& previous_part = parts_.back();
-		std::ptrdiff_t min_offset = previous_part.offset + previous_part.format.frame_size();
-		std::ptrdiff_t alignment_requirement = new_part_format.frame_alignment_requirement();
+		std::ptrdiff_t min_offset = previous_part.offset + previous_part.format->frame_size();
+		std::ptrdiff_t alignment_requirement = new_part_format->frame_alignment_requirement();
 				
 		if(is_multiple_of(min_offset, alignment_requirement)) {
 			new_part.offset = min_offset;
@@ -88,10 +90,10 @@ void opaque_multi_ndarray_format::readjust_for_added_part_(const part& new_part,
 	std::size_t old_frame_alignment_requirement = frame_alignment_requirement();
 	set_frame_alignment_requirement_(lcm(
 		old_frame_alignment_requirement,
-		new_part.format.frame_alignment_requirement())
+		new_part.format->frame_alignment_requirement())
 	);
 
-	std::size_t frame_size_without_end_padding = new_part.offset + new_part.format.frame_size();
+	std::size_t frame_size_without_end_padding = new_part.offset + new_part.format->frame_size();
 	std::size_t frame_size_with_end_padding = frame_size_with_end_padding_(frame_size_without_end_padding);
 	set_frame_size_(frame_size_with_end_padding);
 }
@@ -99,10 +101,7 @@ void opaque_multi_ndarray_format::readjust_for_added_part_(const part& new_part,
 	
 auto opaque_multi_ndarray_format::extract_part(std::ptrdiff_t index) const -> extracted_part {
 	const auto& prt = part_at(index);	
-	return extracted_part {
-		std::make_shared<opaque_ndarray_format>(prt.format),
-		prt.offset
-	};
+	return extracted_part { prt.format, prt.offset };
 }
 
 
@@ -115,7 +114,7 @@ void opaque_multi_ndarray_format::copy_frame(frame_ptr destination, const_frame_
 			ndarray_data_copy(
 				advance_raw_ptr(destination, pt.offset),
 				advance_raw_ptr(origin, pt.offset),
-				pt.format
+				*pt.format
 			);
 		}
 	}
@@ -131,7 +130,7 @@ bool opaque_multi_ndarray_format::compare_frame(const_frame_ptr a, const_frame_p
 			bool part_equal = ndarray_data_compare(
 				advance_raw_ptr(a, pt.offset),
 				advance_raw_ptr(b, pt.offset),
-				pt.format
+				*pt.format
 			);
 			if(!part_equal) return false;
 		}

@@ -22,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #define MF_FLOW_TYPES_H_
 
 #include "../common.h"
+#include "../nd/opaque_format/opaque_format.h"
 #include <chrono>
 
 namespace mf { namespace flow {
@@ -37,6 +38,10 @@ using clock_duration = std::chrono::high_resolution_clock::duration;
 using clock_time_point = std::chrono::high_resolution_clock::time_point;
 
 static constexpr time_unit undefined_time = -1;
+
+using channel_array_view_type = opaque_format::part_array_view_type;
+using channel_const_array_view_type = opaque_format::part_const_array_view_type;
+
 
 }}
 

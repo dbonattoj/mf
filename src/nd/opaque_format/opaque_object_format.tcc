@@ -21,6 +21,27 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #include <iostream>
 namespace mf {
 
+opaque_object_format_base::opaque_object_format_base(std::size_t size, std::size_t alignment_requirement, bool is_pod) {
+	set_frame_size_(size);
+	set_frame_alignment_requirement_(alignment_requirement);
+	set_pod_(is_pod);
+	set_contiguous_(true);
+}
+
+
+object_base_ptr opaque_object_format_base::obj_ptr(frame_ptr frame) {
+	return static_cast<object_base_ptr>(frame);
+}
+
+
+object_base_const_ptr opaque_object_format_base::obj_ptr(const_frame_ptr frame) {
+	return static_cast<object_base_const_ptr>(frame);
+}
+
+
+///////////////
+
+
 template<typename Object>
 inline auto opaque_object_format<Object>::obj(frame_ptr frame) -> object_type& {
 	return *reinterpret_cast<object_type*>(frame);
@@ -34,12 +55,12 @@ inline auto opaque_object_format<Object>::obj(const_frame_ptr frame) -> const ob
 
 
 template<typename Object>
-opaque_object_format<Object>::opaque_object_format() {
-	set_frame_size_(sizeof(Object));
-	set_frame_alignment_requirement_(alignof(Object));
-	set_pod_(std::is_pod<Object>::value);
-	set_contiguous_(true);
-}
+opaque_object_format<Object>::opaque_object_format() :
+	opaque_object_format_base(
+		sizeof(Object),
+		alignof(Object),
+		std::is_pod<Object>::value
+	) { }
 
 
 template<typename Object>

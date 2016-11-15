@@ -32,9 +32,12 @@ class opaque_format {
 public:
 	using frame_ptr = void*;
 	using const_frame_ptr = const void*;
-	
+
+	using part_array_view_type = ndarray_view_opaque<1, true>;
+	using part_const_array_view_type = ndarray_view_opaque<1, false>;
+
 	struct extracted_part {
-		std::shared_ptr<const opaque_format> format;
+		shared_opaque_format_ptr format;
 		std::size_t offset;
 	};
 
@@ -74,7 +77,13 @@ public:
 	virtual bool has_parts() const { return false; }
 	virtual std::size_t parts_count() const { throw std::logic_error("not implemented"); }
 	virtual extracted_part extract_part(std::ptrdiff_t index) const { throw std::logic_error("not implemented"); }
+
+	part_array_view_type part_array_view(std::ptrdiff_t index, frame_ptr) const;
+	part_const_array_view_type part_array_view(std::ptrdiff_t index, const_frame_ptr) const;
 };
+
+
+using shared_opaque_format_ptr = std::shared_ptr<const opaque_format>;
 
 
 template<typename Format>

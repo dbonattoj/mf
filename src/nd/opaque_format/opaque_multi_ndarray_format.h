@@ -34,15 +34,15 @@ namespace mf {
 class opaque_multi_ndarray_format : public opaque_format {
 public:
 	struct part {
-		ndarray_format format;
+		shared_opaque_format_ptr format;
 		std::size_t offset;
 	};
-	
+		
 	friend bool operator==(const part& a, const part& b) { return (a.offset == b.offset) && (a.format == b.format); }
 	friend bool operator!=(const part& a, const part& b) { return (a.offset != b.offset) || (a.format != b.format); }
 
 private:
-	std::vector<part> parts_;		
+	std::vector<part> parts_;
 
 protected:
 	virtual void readjust_for_added_part_(const part& new_part, bool has_padding);
