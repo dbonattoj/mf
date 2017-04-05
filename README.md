@@ -1,5 +1,7 @@
 # mf Media Framework
 
+## Being moved to https://github.com/timlenertz/tff
+
 C++ framework for multi-stream video and 3D processing.
 
 Flow graph system with support for inter-node parallelism, past and future time windows on multiple inputs,
